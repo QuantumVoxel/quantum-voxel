@@ -1,217 +1,217 @@
 {
-  "display.language": "LOLCAT (Kingdom of Cats)",
-  "quantum.block.sand.name": "Peww",
-  "quantum.block.grass_block.name": "Floral",
-  "quantum.block.dirt.name": "Dirt",
-  "quantum.block.stone.name": "Grawst",
-  "quantum.block.cobblestone.name": "Cobblestone",
-  "quantum.block.water.name": "Wata",
-  "quantum.block.air.name": "Air",
-  "quantum.item.wooden_pickaxe.name": "Woodpekax",
-  "quantum.item.wooden_shovel.name": "Woodpewow",
-  "quantum.item.air.name": "Air",
-  "quantum.ui.backToGame": "Meoww back to da game",
-  "quantum.ui.back": "Back",
-  "quantum.ui.cancel": "Meaww",
-  "quantum.ui.confirm": "Purr-firm",
-  "quantum.ui.proceed": "Wawwww",
-  "quantum.ui.accept": "Accapt",
-  "quantum.ui.deny": "Deny",
-  "quantum.ui.ok": "Okaw",
-  "quantum.ui.yes": "Yass",
-  "quantum.ui.no": "Naw",
-  "quantum.ui.okay": "Okaw",
-  "quantum.ui.toggle": "Toggwl",
-  "quantum.ui.enable": "Enabw",
-  "quantum.ui.disable": "Disabw",
-  "quantum.ui.toggle_all": "Toggwl All",
-  "quantum.ui.enable_all": "Enabw All",
-  "quantum.ui.disable_all": "Disabw All",
-  "quantum.screen.world_load.loading_world": "Woofloading Woorld",
-  "quantum.screen.language": "Woanguage",
-  "quantum.screen.message.saving_world": "Siwing Woorld...",
-  "quantum.screen.message.joining_server": "Pawwing Supawerd",
-  "quantum.screen.mod_list": "Mod Wist",
-  "quantum.screen.mod_list.config": "Config",
-  "quantum.screen.death.respawn": "Respawnew",
-  "quantum.screen.death.title": "You Wewd",
-  "quantum.screen.pause.back_to_game": "Back to the game",
-  "quantum.screen.pause.exit_world": "Exit Woorld",
-  "quantum.screen.world_load": "Woorld Loading",
-  "quantum.screen.world_delete_confirm.title": "Meoww you suawwy want to dewete dis woorld?",
-  "quantum.screen.world_delete_confirm.message1": "If you continue, you will fowget dis woorld fow evaw!",
-  "quantum.screen.world_delete_confirm.message2": "Gone, fowgweted fwom existance, wost to time in dawe of deweted woiwds.",
-  "quantum.screen.world_delete_confirm.delete": "Dewete",
-  "quantum.screen.world_selection.title": "Pwease select a woorld",
-  "quantum.screen.world_selection.delete": "Dewete Woorld",
-  "quantum.screen.world_selection.create": "Cweate New Woorld",
-  "quantum.screen.world_selection.play": "Pway Woorld",
-  "quantum.screen.world_creation.title": "Cweate a New Woorld",
-  "quantum.screen.world_creation.name": "Woorld Name",
-  "quantum.screen.world_creation.create": "Cweate",
-  "quantum.screen.title": "Titwe Scween",
-  "quantum.screen.title.singleplayer": "Singwplayer",
-  "quantum.screen.title.reset_world": "Reset Woiwd",
-  "quantum.screen.title.options": "Optiowes...",
-  "quantum.screen.title.quit": "MEOWW QUIT",
-  "quantum.screen.multiplayer": "Mewtipway",
-  "quantum.screen.multiplayer.server_ip": "Sewva IP",
-  "quantum.screen.multiplayer.join": "Pway",
-  "quantum.block.gravel.name": "Gwayvul",
-  "quantum.block.log.name": "Wog",
-  "quantum.block.leaves.name": "Leefs",
-  "quantum.block.planks.name": "Blok of Pwand",
-  "quantum.block.crate.name": "Kwate",
-  "quantum.block.blast_furnace.name": "Blast Fwunny",
-  "quantum.item.wooden_axe.name": "Wooden Twack-twack-twacker",
-  "quantum.item.stone_pickaxe.name": "Ston-y-pwat-tack-tack-er",
-  "quantum.item.stone_shovel.name": "Ston-y-scoop-a-scoop-er",
-  "quantum.item.stone_axe.name": "Ston-y-hack-hack-hacker",
-  "quantum.item.iron_pickaxe.name": "Iron-y-pwat-tack-tack-er",
-  "quantum.item.iron_shovel.name": "Iron-y-scoop-a-scoop-er",
-  "quantum.item.iron_axe.name": "Iron-y-hack-hack-hacker",
-  "quantum.item.plank.name": "Pwand-y-plank",
-  "quantum.item.stick.name": "Stick-y-stick",
-  "quantum.ui.exitWorld": "Meoww Wowwd",
-  "quantum.ui.gamePaused": "Game Pawsed",
-  "quantum.ui.back.arrow": "< Pawse",
-  "quantum.ui.done": "Done",
-  "quantum.ui.error": "Ewwow!",
-  "quantum.ui.enabled": "Enabwowed",
-  "quantum.ui.disabled": "Disabwowed",
-  "quantum.ui.hidden": "Hidden",
-  "quantum.ui.visible": "Visibwe",
-  "quantum.dialog.delete_world.title": "Fwag teh wowwd?",
-  "quantum.dialog.delete_world.message": "Awe you shuwew you wanna\ndewete dis wowwd?\nDis cawwion cwass winsta fowdawd.",
-  "quantum.screen.worlds.edit": "Edit Wowwd",
-  "quantum.screen.worlds.edit.too_old": "Dis wowwd is too owd to edit.",
-  "quantum.screen.credits.title": "Fwaggabowties",
-  "quantum.screen.credits.tab.assets": "Wemmibowges",
-  "quantum.screen.credits.tab.code": "Cwowd",
-  "quantum.screen.credits.tab.downloads": "Wextewnaw Downwoads",
-  "quantum.screen.credits.tab.translations": "Wanwowans",
-  "quantum.screen.credits.tab.testing": "Wewwowing",
-  "quantum.screen.credits.tab.docs": "Dokuwentation",
-  "quantum.screen.credits.tab.external_libs": "Wextewnaw Wibwowies",
-  "quantum.screen.credits.tab.extra": "Wex-ta",
-  "quantum.screen.credits.tab.sound_effects": "Sownd Fwack-fwock-fwockies",
-  "quantum.screen.credits.detail.url": "UWW",
-  "quantum.screen.credits.detail.license": "Wicense",
-  "quantum.screen.credits.detail.roles": "Pwowject Wowles",
-  "quantum.screen.credits.detail.for": "Has made",
-  "quantum.screen.credits.detail.uses": "Wowwed",
-  "quantum.screen.credits.detail.links": "Winks",
-  "quantum.screen.mod_list.import_xeox": "Impowt Xeox Mod",
-  "quantum.screen.options": "Owptions...",
-  "quantum.screen.settings.configs": "Configs",
-  "quantum.screen.settings.title": "Settwings",
-  "quantum.screen.options.video": "Videow Settings...",
-  "quantum.screen.options.video.title": "Videow Settings",
-  "quantum.screen.options.video.fov": "FOV",
-  "quantum.screen.options.video.guiScale": "GUI Scale",
-  "quantum.screen.options.video.fullscreen": "Fuwwscreen",
-  "quantum.screen.options.video.frameRate": "Fwame Rate",
-  "quantum.screen.options.video.vSync": "V-Sync",
-  "quantum.screen.options.video.renderDistance": "Wendew Distance",
-  "quantum.screen.options.privacy": "Pwivacy Settwings...",
-  "quantum.screen.options.privacy.title": "Pwivacy Settwings",
-  "quantum.screen.options.privacy.hideActiveServer": "Active Sewva",
-  "quantum.screen.options.privacy.hideRpc": "Wich Pwesence",
-  "quantum.screen.options.privacy.hidePlayerSkin": "Pwayewa Skin",
-  "quantum.screen.options.privacy.hidePlayerName": "Pwayewa Name",
-  "quantum.screen.options.accessibility": "Fwiendwinesse...",
-  "quantum.screen.options.accessibility.title": "Fwiendwinesse",
-  "quantum.screen.options.accessibility.hideFirstPersonPlayer": "Fwiest Pewson Pwayewa",
-  "quantum.screen.options.accessibility.hideHotbarWhenThirdPerson": "Thiwd Pewson Wotbaw",
-  "quantum.screen.options.accessibility.vibration": "Vibwation",
-  "quantum.screen.options.personalisation": "Pewsowisation...",
-  "quantum.screen.options.personalisation.title": "Pewsowisation",
-  "quantum.screen.options.personalisation.diagonalFontShadow": "Diaqwuaw Fwont Shaw",
-  "quantum.screen.options.personalisation.enforceUnicode": "Fwowce Unicode",
-  "quantum.screen.options.personalisation.blurRadius": "Bluw Stwength in Pixews",
-  "quantum.screen.options.personalisation.blurRadius.text": "Stwength",
-  "quantum.screen.options.language": "Wowwewanguage...",
-  "quantum.screen.options.language.title": "Wowwewanguage",
-  "quantum.screen.out_of_memory": "Mewow wowwew",
-  "quantum.screen.out_of_memory.message": "Quantum Voxewan ran out of mewow.\nTry westawtwing the game.\nYou can also wowweta to the titwet scween to fwee up mewow.",
-  "quantum.screen.dev": "Dewopment Buiwd",
-  "quantum.screen.dev.message": "This is a dewopment buiwd of quawntum.\nDon't epxect it to wowk compwetewy.\nIf you epxewienc any isseus, pwease wemit them on the GitHub page.\n\nThank you! ♥ !(icon_success)",
-  "quantum.screen.dev.close": "Cwose",
-  "quantum.screen.crash": "Quawntum Voxewan Cwashed",
-  "quantum.screen.crash.message": "Check if you awe using any mods befoewe wowping a bug.\nIf you awe using mods, wowp the cwash to the mod/modpack authow instead.",
-  "quantum.dimension.overworld": "Pwainte Ewth",
-  "quantum.container.inventory.title": "Invwentowy",
-  "quantum.container.crate.title": "Cwate",
-  "quantum.recipe.craftable": "CwAftabwe",
-  "quantum.recipe.uncraftable": "Uncwaftabwe",
-  "quantum.recipe.ingredients": "IngwedenciaW:",
-  "quantum.screen.message.disconnected": "Yew have been kewyeed.",
-  "quantum.commands.player.dumpData.success": "Dumped pwayew data: ",
-  "quantum.damageSource.kill": "%s waz kewyed",
-  "quantum.damageSource.kill.by": "%1$s waz kewyed by %2$s",
-  "quantum.damageSource.kill.item": "%1$s waz kewyed by %2$s usin %3$s",
-  "quantum.damageSource.falling": "%s faww fwom a high pwace",
-  "quantum.damageSource.falling.by": "%1$s got puwshed off a high pwace by %2$s",
-  "quantum.damageSource.void": "%s got conswumed by the void",
-  "quantum.damageSource.void.by": "%1$s waz conswumed by the void due to %2$s",
-  "quantum.damageSource.none": "%s juz died out of thin awe",
-  "quantum.damageSource.none.by": "%1$s juz died out of thin awe due to %2$s",
-  "quantum.ui.auto": "Mewtic",
-  "quantum.ui.manual": "Mewnsk",
-  "quantum.hud.memory_usage": "Mewmow Usage",
-  "quantum.hud.memory_usage.jvm_free": "VM Fwi: %1$s",
-  "quantum.hud.memory_usage.used": "Wowwed: %1$s/PWANK %2$s",
-  "quantum.misc.bits.16": "16 wuwsts",
-  "quantum.misc.bits.24": "24 wuwsts",
-  "quantum.misc.bits.32": "32 wuwsts",
-  "quantum.misc.bits.64": "64 wuwsts",
-  "quantum.misc.digit.1": "1",
-  "quantum.misc.digit.2": "2",
-  "quantum.misc.digit.3": "3",
-  "quantum.misc.digit.4": "4",
-  "quantum.misc.digit.5": "5",
-  "quantum.misc.digit.6": "6",
-  "quantum.misc.digit.7": "7",
-  "quantum.misc.digit.8": "8",
-  "quantum.misc.digit.9": "9",
-  "quantum.misc.digit.0": "0",
-  "quantum.misc.lang.single_object": "da %s",
-  "quantum.misc.lang.single_object_plural": "na %s",
-  "quantum.misc.lang.multiple_objects": "%1$s %2$ses",
-  "quantum.misc.lang.multiple_objects_plural": "%1$s %2$ses",
-  "quantum.misc.lang.multiple_objects_and": "%1$s nd %2$s",
-  "quantum.misc.lang.multiple_objects_and_plural": "%1$s nd %2$s",
-  "quantum.misc.lang.multiple_objects_or": "%1$s or %2$s",
-  "quantum.misc.lang.multiple_objects_or_plural": "%1$s or %2$s",
-  "quantum.misc.lang.multiple_objects_and_more": "%1$s, nd %2$s",
-  "quantum.misc.lang.multiple_objects_and_more_plural": "%1$s, nd %2$s",
-  "quantum.misc.lang.multiple_objects_or_more": "%1$s, or %2$s",
-  "quantum.misc.lang.multiple_objects_or_more_plural": "%1$s, or %2$s",
-  "quantum.misc.lang.multiple_objects_more": "%1$s, %2$s",
-  "quantum.misc.lang.multiple_objects_more_plural": "%1$s, %2$s",
-  "quantum.misc.lang.by": "wun by %s",
-  "quantum.misc.lang.of": "%1$s of %2$s",
-  "quantum.misc.time.nanoseconds": "nankaseconds",
-  "quantum.misc.time.microseconds": "microsecons",
-  "quantum.misc.time.milliseconds": "milisecons",
-  "quantum.misc.time.seconds": "secons",
-  "quantum.misc.time.minutes": "minutes",
-  "quantum.misc.time.hours": "hows",
-  "quantum.misc.time.days": "days",
-  "quantum.misc.time.weeks": "weeks",
-  "quantum.misc.time.months": "mons",
-  "quantum.misc.time.years": "yaws",
-  "quantum.misc.bytes": " wumms",
-  "quantum.misc.kilobytes": " kumms",
-  "quantum.misc.megabytes": " mumms",
-  "quantum.misc.gigabytes": " gumms",
-  "quantum.misc.terabytes": " tumms",
-  "quantum.misc.petabytes": " pumms",
-  "quantum.misc.kibibytes": " kumms (binary)",
-  "quantum.misc.mebibytes": " mumms (binary)",
-  "quantum.misc.gibibytes": " gumms (binary)",
-  "quantum.misc.tebibytes": " tumms (binary)",
-  "quantum.misc.pebibytes": " pumms (binary)",
-  "quantum.screen.credits.detail.mentions": "Mewnsions",
-  "quantum.damageSource.hunger": "%1$s was pwovided witty fowding"
+  display.language: LOLCAT (Kingdom of Cats)
+  quantum.block.sand.name: Peww
+  quantum.block.grass_block.name: Floral
+  quantum.block.dirt.name: Dirt
+  quantum.block.stone.name: Grawst
+  quantum.block.cobblestone.name: Cobblestone
+  quantum.block.water.name: Wata
+  quantum.block.air.name: Air
+  quantum.item.wooden_pickaxe.name: Woodpekax
+  quantum.item.wooden_shovel.name: Woodpewow
+  quantum.item.air.name: Air
+  quantum.ui.backToGame: Meoww back to da game
+  quantum.ui.back: Back
+  quantum.ui.cancel: Meaww
+  quantum.ui.confirm: Purr-firm
+  quantum.ui.proceed: Wawwww
+  quantum.ui.accept: Accapt
+  quantum.ui.deny: Deny
+  quantum.ui.ok: Okaw
+  quantum.ui.yes: Yass
+  quantum.ui.no: Naw
+  quantum.ui.okay: Okaw
+  quantum.ui.toggle: Toggwl
+  quantum.ui.enable: Enabw
+  quantum.ui.disable: Disabw
+  quantum.ui.toggle_all: Toggwl All
+  quantum.ui.enable_all: Enabw All
+  quantum.ui.disable_all: Disabw All
+  quantum.screen.world_load.loading_world: Woofloading Woorld
+  quantum.screen.language: Woanguage
+  quantum.screen.message.saving_world: "Siwing Woorld..."
+  quantum.screen.message.joining_server: Pawwing Supawerd
+  quantum.screen.mod_list: Mod Wist
+  quantum.screen.mod_list.config: Config
+  quantum.screen.death.respawn: Respawnew
+  quantum.screen.death.title: You Wewd
+  quantum.screen.pause.back_to_game: Back to the game
+  quantum.screen.pause.exit_world: Exit Woorld
+  quantum.screen.world_load: Woorld Loading
+  quantum.screen.world_delete_confirm.title: Meoww you suawwy want to dewete dis woorld?
+  quantum.screen.world_delete_confirm.message1: "If you continue, you will fowget dis woorld fow evaw!"
+  quantum.screen.world_delete_confirm.message2: "Gone, fowgweted fwom existance, wost to time in dawe of deweted woiwds."
+  quantum.screen.world_delete_confirm.delete: Dewete
+  quantum.screen.world_selection.title: Pwease select a woorld
+  quantum.screen.world_selection.delete: Dewete Woorld
+  quantum.screen.world_selection.create: Cweate New Woorld
+  quantum.screen.world_selection.play: Pway Woorld
+  quantum.screen.world_creation.title: Cweate a New Woorld
+  quantum.screen.world_creation.name: Woorld Name
+  quantum.screen.world_creation.create: Cweate
+  quantum.screen.title: Titwe Scween
+  quantum.screen.title.singleplayer: Singwplayer
+  quantum.screen.title.reset_world: Reset Woiwd
+  quantum.screen.title.options: "Optiowes..."
+  quantum.screen.title.quit: MEOWW QUIT
+  quantum.screen.multiplayer: Mewtipway
+  quantum.screen.multiplayer.server_ip: Sewva IP
+  quantum.screen.multiplayer.join: Pway
+  quantum.block.gravel.name: Gwayvul
+  quantum.block.log.name: Wog
+  quantum.block.leaves.name: Leefs
+  quantum.block.planks.name: Blok of Pwand
+  quantum.block.crate.name: Kwate
+  quantum.block.blast_furnace.name: Blast Fwunny
+  quantum.item.wooden_axe.name: Wooden Twack-twack-twacker
+  quantum.item.stone_pickaxe.name: Ston-y-pwat-tack-tack-er
+  quantum.item.stone_shovel.name: Ston-y-scoop-a-scoop-er
+  quantum.item.stone_axe.name: Ston-y-hack-hack-hacker
+  quantum.item.iron_pickaxe.name: Iron-y-pwat-tack-tack-er
+  quantum.item.iron_shovel.name: Iron-y-scoop-a-scoop-er
+  quantum.item.iron_axe.name: Iron-y-hack-hack-hacker
+  quantum.item.plank.name: Pwand-y-plank
+  quantum.item.stick.name: Stick-y-stick
+  quantum.ui.exitWorld: Meoww Wowwd
+  quantum.ui.gamePaused: Game Pawsed
+  quantum.ui.back.arrow: < Pawse
+  quantum.ui.done: Done
+  quantum.ui.error: Ewwow!
+  quantum.ui.enabled: Enabwowed
+  quantum.ui.disabled: Disabwowed
+  quantum.ui.hidden: Hidden
+  quantum.ui.visible: Visibwe
+  quantum.dialog.delete_world.title: Fwag teh wowwd?
+  quantum.dialog.delete_world.message: "Awe you shuwew you wanna\ndewete dis wowwd?\nDis cawwion cwass winsta fowdawd."
+  quantum.screen.worlds.edit: Edit Wowwd
+  quantum.screen.worlds.edit.too_old: "Dis wowwd is too owd to edit."
+  quantum.screen.credits.title: Fwaggabowties
+  quantum.screen.credits.tab.assets: Wemmibowges
+  quantum.screen.credits.tab.code: Cwowd
+  quantum.screen.credits.tab.downloads: Wextewnaw Downwoads
+  quantum.screen.credits.tab.translations: Wanwowans
+  quantum.screen.credits.tab.testing: Wewwowing
+  quantum.screen.credits.tab.docs: Dokuwentation
+  quantum.screen.credits.tab.external_libs: Wextewnaw Wibwowies
+  quantum.screen.credits.tab.extra: Wex-ta
+  quantum.screen.credits.tab.sound_effects: Sownd Fwack-fwock-fwockies
+  quantum.screen.credits.detail.url: UWW
+  quantum.screen.credits.detail.license: Wicense
+  quantum.screen.credits.detail.roles: Pwowject Wowles
+  quantum.screen.credits.detail.for: Has made
+  quantum.screen.credits.detail.uses: Wowwed
+  quantum.screen.credits.detail.links: Winks
+  quantum.screen.mod_list.import_xeox: Impowt Xeox Mod
+  quantum.screen.options: "Owptions..."
+  quantum.screen.settings.configs: Configs
+  quantum.screen.settings.title: Settwings
+  quantum.screen.options.video: "Videow Settings..."
+  quantum.screen.options.video.title: Videow Settings
+  quantum.screen.options.video.fov: FOV
+  quantum.screen.options.video.guiScale: GUI Scale
+  quantum.screen.options.video.fullscreen: Fuwwscreen
+  quantum.screen.options.video.frameRate: Fwame Rate
+  quantum.screen.options.video.vSync: V-Sync
+  quantum.screen.options.video.renderDistance: Wendew Distance
+  quantum.screen.options.privacy: "Pwivacy Settwings..."
+  quantum.screen.options.privacy.title: Pwivacy Settwings
+  quantum.screen.options.privacy.hideActiveServer: Active Sewva
+  quantum.screen.options.privacy.hideRpc: Wich Pwesence
+  quantum.screen.options.privacy.hidePlayerSkin: Pwayewa Skin
+  quantum.screen.options.privacy.hidePlayerName: Pwayewa Name
+  quantum.screen.options.accessibility: "Fwiendwinesse..."
+  quantum.screen.options.accessibility.title: Fwiendwinesse
+  quantum.screen.options.accessibility.hideFirstPersonPlayer: Fwiest Pewson Pwayewa
+  quantum.screen.options.accessibility.hideHotbarWhenThirdPerson: Thiwd Pewson Wotbaw
+  quantum.screen.options.accessibility.vibration: Vibwation
+  quantum.screen.options.personalisation: "Pewsowisation..."
+  quantum.screen.options.personalisation.title: Pewsowisation
+  quantum.screen.options.personalisation.diagonalFontShadow: Diaqwuaw Fwont Shaw
+  quantum.screen.options.personalisation.enforceUnicode: Fwowce Unicode
+  quantum.screen.options.personalisation.blurRadius: Bluw Stwength in Pixews
+  quantum.screen.options.personalisation.blurRadius.text: Stwength
+  quantum.screen.options.language: "Wowwewanguage..."
+  quantum.screen.options.language.title: Wowwewanguage
+  quantum.screen.out_of_memory: Mewow wowwew
+  quantum.screen.out_of_memory.message: "Quantum Voxewan ran out of mewow.\nTry westawtwing the game.\nYou can also wowweta to the titwet scween to fwee up mewow."
+  quantum.screen.dev: Dewopment Buiwd
+  quantum.screen.dev.message: "This is a dewopment buiwd of quawntum.\nDon't epxect it to wowk compwetewy.\nIf you epxewienc any isseus, pwease wemit them on the GitHub page.\n\nThank you! ♥ !(icon_success)"
+  quantum.screen.dev.close: Cwose
+  quantum.screen.crash: Quawntum Voxewan Cwashed
+  quantum.screen.crash.message: "Check if you awe using any mods befoewe wowping a bug.\nIf you awe using mods, wowp the cwash to the mod/modpack authow instead."
+  quantum.dimension.overworld: Pwainte Ewth
+  quantum.container.inventory.title: Invwentowy
+  quantum.container.crate.title: Cwate
+  quantum.recipe.craftable: CwAftabwe
+  quantum.recipe.uncraftable: Uncwaftabwe
+  quantum.recipe.ingredients: IngwedenciaW:
+  quantum.screen.message.disconnected: "Yew have been kewyeed."
+  quantum.commands.player.dumpData.success: Dumped pwayew data:
+  quantum.damageSource.kill: %s waz kewyed
+  quantum.damageSource.kill.by: %1$s waz kewyed by %2$s
+  quantum.damageSource.kill.item: %1$s waz kewyed by %2$s usin %3$s
+  quantum.damageSource.falling: %s faww fwom a high pwace
+  quantum.damageSource.falling.by: %1$s got puwshed off a high pwace by %2$s
+  quantum.damageSource.void: %s got conswumed by the void
+  quantum.damageSource.void.by: %1$s waz conswumed by the void due to %2$s
+  quantum.damageSource.none: %s juz died out of thin awe
+  quantum.damageSource.none.by: %1$s juz died out of thin awe due to %2$s
+  quantum.ui.auto: Mewtic
+  quantum.ui.manual: Mewnsk
+  quantum.hud.memory_usage: Mewmow Usage
+  quantum.hud.memory_usage.jvm_free: VM Fwi: %1$s
+  quantum.hud.memory_usage.used: Wowwed: %1$s/PWANK %2$s
+  quantum.misc.bits.16: 16 wuwsts
+  quantum.misc.bits.24: 24 wuwsts
+  quantum.misc.bits.32: 32 wuwsts
+  quantum.misc.bits.64: 64 wuwsts
+  quantum.misc.digit.1: "1"
+  quantum.misc.digit.2: "2"
+  quantum.misc.digit.3: "3"
+  quantum.misc.digit.4: "4"
+  quantum.misc.digit.5: "5"
+  quantum.misc.digit.6: "6"
+  quantum.misc.digit.7: "7"
+  quantum.misc.digit.8: "8"
+  quantum.misc.digit.9: "9"
+  quantum.misc.digit.0: "0"
+  quantum.misc.lang.single_object: da %s
+  quantum.misc.lang.single_object_plural: na %s
+  quantum.misc.lang.multiple_objects: %1$s %2$ses
+  quantum.misc.lang.multiple_objects_plural: %1$s %2$ses
+  quantum.misc.lang.multiple_objects_and: %1$s nd %2$s
+  quantum.misc.lang.multiple_objects_and_plural: %1$s nd %2$s
+  quantum.misc.lang.multiple_objects_or: %1$s or %2$s
+  quantum.misc.lang.multiple_objects_or_plural: %1$s or %2$s
+  quantum.misc.lang.multiple_objects_and_more: "%1$s, nd %2$s"
+  quantum.misc.lang.multiple_objects_and_more_plural: "%1$s, nd %2$s"
+  quantum.misc.lang.multiple_objects_or_more: "%1$s, or %2$s"
+  quantum.misc.lang.multiple_objects_or_more_plural: "%1$s, or %2$s"
+  quantum.misc.lang.multiple_objects_more: "%1$s, %2$s"
+  quantum.misc.lang.multiple_objects_more_plural: "%1$s, %2$s"
+  quantum.misc.lang.by: wun by %s
+  quantum.misc.lang.of: %1$s of %2$s
+  quantum.misc.time.nanoseconds: nankaseconds
+  quantum.misc.time.microseconds: microsecons
+  quantum.misc.time.milliseconds: milisecons
+  quantum.misc.time.seconds: secons
+  quantum.misc.time.minutes: minutes
+  quantum.misc.time.hours: hows
+  quantum.misc.time.days: days
+  quantum.misc.time.weeks: weeks
+  quantum.misc.time.months: mons
+  quantum.misc.time.years: yaws
+  quantum.misc.bytes: " wumms"
+  quantum.misc.kilobytes: " kumms"
+  quantum.misc.megabytes: " mumms"
+  quantum.misc.gigabytes: " gumms"
+  quantum.misc.terabytes: " tumms"
+  quantum.misc.petabytes: " pumms"
+  quantum.misc.kibibytes: " kimiumms"
+  quantum.misc.mebibytes: " memiumms"
+  quantum.misc.gibibytes: " gimiumms"
+  quantum.misc.tebibytes: " temiumms"
+  quantum.misc.pebibytes: " pemiumms"
+  quantum.screen.credits.detail.mentions: Mewnsions
+  quantum.damageSource.hunger: %1$s was pwovided witty fowding
 }

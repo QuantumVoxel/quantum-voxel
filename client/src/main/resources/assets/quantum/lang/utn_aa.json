@@ -1,220 +1,220 @@
 {
-  "display.language": "Utanïanī (Utanïa)",
-  "quantum.block.sand.name": "Güan",
-  "quantum.block.grass_block.name": "Gämbā",
-  "quantum.block.dirt.name": "Sólï",
-  "quantum.block.stone.name": "Rökkō",
-  "quantum.block.gravel.name": "ViMalï",
-  "quantum.block.log.name": "Tuqnā",
-  "quantum.block.leaves.name": "Leqē",
-  "quantum.block.planks.name": "Binàrk",
-  "quantum.block.cobblestone.name": "Hiquï",
-  "quantum.block.crate.name": "Crätø",
-  "quantum.block.blast_furnace.name": "Läsī Bürñalī",
-  "quantum.block.water.name": "Quê",
-  "quantum.block.air.name": "Lï",
-  "quantum.item.wooden_pickaxe.name": "Tuqná-vi'rili",
-  "quantum.item.wooden_shovel.name": "Tuqná-vi'kunni",
-  "quantum.item.wooden_axe.name": "Tuqná-vi'aqi",
-  "quantum.item.stone_pickaxe.name": "Rökkó-vi'rili",
-  "quantum.item.stone_shovel.name": "Rökkó-vi'kunni",
-  "quantum.item.stone_axe.name": "Rökkó-vi'aqi",
-  "quantum.item.iron_pickaxe.name": "Quná-vi'rili",
-  "quantum.item.iron_shovel.name": "Quná-vi'kunni",
-  "quantum.item.iron_axe.name": "Quná-vi'aqi",
-  "quantum.item.plank.name": "Binàrk süqi",
-  "quantum.item.stick.name": "Enïq",
-  "quantum.item.air.name": "Lï",
-  "quantum.ui.exitWorld": "Quïn Worlïq",
-  "quantum.ui.gamePaused": "Worlïq Nāvë",
-  "quantum.ui.backToGame": "EnyI'lë Worlïq",
-  "quantum.ui.back": "EnyI'le",
-  "quantum.ui.back.arrow": "< EnyI'le",
-  "quantum.ui.cancel": "Cancé",
-  "quantum.ui.confirm": "Qi",
-  "quantum.ui.proceed": "Cotuï",
-  "quantum.ui.accept": "Ceq",
-  "quantum.ui.deny": "Denï",
-  "quantum.ui.ok": "Ig'",
-  "quantum.ui.done": "Zuï",
-  "quantum.ui.yes": "I",
-  "quantum.ui.error": "Erquï!",
-  "quantum.ui.no": "Na",
-  "quantum.ui.okay": "Ig'",
-  "quantum.ui.toggle": "Tin",
-  "quantum.ui.enable": "Entin",
-  "quantum.ui.disable": "Dītin",
-  "quantum.ui.enabled": "Entinï",
-  "quantum.ui.disabled": "Ditinï",
-  "quantum.ui.hidden": "Qanzïla",
-  "quantum.ui.visible": "DiQuazïla",
-  "quantum.ui.toggle_all": "Iqüi Tin",
-  "quantum.ui.enable_all": "Iqüi Entin",
-  "quantum.ui.disable_all": "Iqüi Dītin",
-  "quantum.dialog.delete_world.title": "Delê Worlïq?",
-  "quantum.dialog.delete_world.message": "In worlïq eq delê? Di worlïq goni fi infīnitē.",
-  "quantum.screen.worlds.edit": "Enqi'le Worlïq",
-  "quantum.screen.worlds.edit.too_old": "Di worlïq enqi'le, ti audā.",
-  "quantum.screen.world_load.loading_world": "Prōglê Worlïq",
-  "quantum.screen.language": "Lingūä",
-  "quantum.screen.message.saving_world": "Sëqi'vi Worlïq...",
-  "quantum.screen.message.joining_server": "EnyI'eq survûr...",
-  "quantum.screen.mod_list": "Mōdīfï listë",
-  "quantum.screen.mod_list.import_xeox": "Imqüi Xeox Mòdīfï",
-  "quantum.screen.mod_list.config": "Confīq",
-  "quantum.screen.death.respawn": "Resqînu",
-  "quantum.screen.death.title": "Iq daëdrī",
-  "quantum.screen.options": "Optin...",
-  "quantum.screen.settings.configs": "Confīq",
-  "quantum.screen.settings.title": "Insètīnqi",
-  "quantum.screen.options.video": "Video'insètīnqi",
-  "quantum.screen.options.video.title": "Video'insètīnqi",
-  "quantum.screen.options.video.fov": "Viqi'O-vi'fù",
-  "quantum.screen.options.video.guiScale": "GUI'inlagiq",
-  "quantum.screen.options.video.fullscreen": "Viqō'inlagiq",
-  "quantum.screen.options.video.frameRate": "Fürniqe råtī",
-  "quantum.screen.options.video.vSync": "V-Sync",
-  "quantum.screen.options.video.renderDistance": "Draqî åvstaqï",
-  "quantum.screen.options.privacy": "Prïviqe insètīnqi...",
-  "quantum.screen.options.privacy.title": "Prïviqe insètīnqi",
-  "quantum.screen.options.privacy.hideActiveServer": "Quanzï aquïvi survûr",
-  "quantum.screen.options.privacy.hideRpc": "Quanzï aquïvi RPC",
-  "quantum.screen.options.privacy.hidePlayerSkin": "Quanzï aquïvi råni tyèlma",
-  "quantum.screen.options.privacy.hidePlayerName": "Quanzï aquïvi råni ên'ïqe",
-  "quantum.screen.options.accessibility": "Aq'cibiqe insètīnqi...",
-  "quantum.screen.options.accessibility.title": "Aq'cibiqe insètīnqi",
-  "quantum.screen.options.accessibility.hideFirstPersonPlayer": "Quanzï fir∂e råni persïq",
-  "quantum.screen.options.accessibility.hideHotbarWhenThirdPerson": "Quanzï trïq råni hotbar",
-  "quantum.screen.options.accessibility.vibration": "Vibriqië",
-  "quantum.screen.options.personalisation": "Persïviqe insètīnqi...",
-  "quantum.screen.options.personalisation.title": "Persïviqe insètīnqi",
-  "quantum.screen.options.personalisation.diagonalFontShadow": "Diaquöre fūntë",
-  "quantum.screen.options.personalisation.enforceUnicode": "Enqås Unicode",
-  "quantum.screen.options.personalisation.blurRadius": "Waziqï råtī",
-  "quantum.screen.options.personalisation.blurRadius.text": "Råtī",
-  "quantum.screen.options.language": "Lingūä...",
-  "quantum.screen.options.language.title": "Lingūä",
-  "quantum.screen.pause.back_to_game": "EnyI'le Worlïq",
-  "quantum.screen.pause.exit_world": "Quïn Worlïq",
-  "quantum.screen.world_load": "Pròglê Worlïq",
-  "quantum.screen.world_delete_confirm.title": "Delê Worlïq?",
-  "quantum.screen.world_delete_confirm.message1": "In worlïq eq delê?",
-  "quantum.screen.world_delete_confirm.message2": "Di worlïq goni fi infīnitë.",
-  "quantum.screen.world_delete_confirm.delete": "Delê",
-  "quantum.screen.world_selection.title": "SeleQi Worlïq",
-  "quantum.screen.world_selection.delete": "Delê Worlïq",
-  "quantum.screen.world_selection.create": "Crë Worlïq",
-  "quantum.screen.world_selection.play": "EnyI'le Worlïq",
-  "quantum.screen.world_creation.title": "Crë Worlïq",
-  "quantum.screen.world_creation.name": "Worlïq Essë",
-  "quantum.screen.world_creation.create": "Crë",
-  "quantum.screen.title": "Höma Päg",
-  "quantum.screen.title.singleplayer": "EnyI'le Fir∂",
-  "quantum.screen.title.reset_world": "Reqït Worlïq",
-  "quantum.screen.title.quit": "Quïn",
-  "quantum.screen.multiplayer": "Düi wï råni",
-  "quantum.screen.multiplayer.server_ip": "Survûr IP",
-  "quantum.screen.multiplayer.join": "EnyI'eq",
-  "quantum.screen.out_of_memory": "Memöriq ü rïq",
-  "quantum.screen.out_of_memory.message": "Quantum Voxel rïq memöriq. Ti reqït ïq äplitā. Iq enyI'le höma päg.",
-  "quantum.screen.dev": "Dëv vërsī",
-  "quantum.screen.dev.message": "Di eq Quantum dëv vërsī. Nidrï eq wërq komplīté. Asli experiq iq pröblemïq, rëpōrtī GitHub päg.\n\nGi'jaQi! ♥ !(icon_success)",
-  "quantum.screen.dev.close": "Closï",
-  "quantum.screen.crash": "Quantum Voxel errïta",
-  "quantum.screen.crash.message": "Contrölå ïn iq modifíqā bi rëpōrtī pröblemïq.\nAsli cöntïq modifíqā, rëpōrtī atli et modifíqā/modifíqāpãquët.",
-  "quantum.screen.crash.quit": "Quïn",
-  "quantum.screen.feedback": "???",
-  "quantum.screen.feedback.title": "???",
-  "quantum.screen.feedback.message": "???",
-  "quantum.ui.auto": "Automá",
-  "quantum.ui.manual": "Macil",
-  "quantum.hud.memory_usage": "Memòriq",
-  "quantum.hud.memory_usage.jvm_free": "VM frī: %1$s",
-  "quantum.hud.memory_usage.used": "Úqa: %1$s/%2$s",
-  "quantum.misc.bits.16": "16 Åq",
-  "quantum.misc.bits.24": "24 Åq",
-  "quantum.misc.bits.32": "32 Åq",
-  "quantum.misc.bits.64": "64 Åq",
-  "quantum.misc.digit.1": "1",
-  "quantum.misc.digit.2": "2",
-  "quantum.misc.digit.3": "3",
-  "quantum.misc.digit.4": "4",
-  "quantum.misc.digit.5": "5",
-  "quantum.misc.digit.6": "6",
-  "quantum.misc.digit.7": "7",
-  "quantum.misc.digit.8": "8",
-  "quantum.misc.digit.9": "9",
-  "quantum.misc.digit.0": "0",
-  "quantum.misc.lang.single_object": "1 %s",
-  "quantum.misc.lang.single_object_plural": "1 %s",
-  "quantum.misc.lang.multiple_objects": "%1$s %2$s",
-  "quantum.misc.lang.multiple_objects_plural": "%1$s %2$s",
-  "quantum.misc.lang.multiple_objects_and": "%1$s wí %2$s",
-  "quantum.misc.lang.multiple_objects_and_plural": "%1$s wí %2$s",
-  "quantum.misc.lang.multiple_objects_or": "%1$s yï %2$s",
-  "quantum.misc.lang.multiple_objects_or_plural": "%1$s yï %2$s",
-  "quantum.misc.lang.multiple_objects_and_more": "%1$s wí %2$s",
-  "quantum.misc.lang.multiple_objects_and_more_plural": "%1$s wí %2$s",
-  "quantum.misc.lang.multiple_objects_or_more": "%1$s yï %2$s",
-  "quantum.misc.lang.multiple_objects_or_more_plural": "%1$s yï %2$s",
-  "quantum.misc.lang.multiple_objects_more": "%1$s, %2$s",
-  "quantum.misc.lang.multiple_objects_more_plural": "%1$s, %2$s",
-  "quantum.misc.lang.by": "Zä %s",
-  "quantum.misc.lang.of": "%1$s qä %2$s",
-  "quantum.misc.time.nanoseconds": "Náranqö",
-  "quantum.misc.time.microseconds": "Mïcrōqö",
-  "quantum.misc.time.milliseconds": "Millenòqö",
-  "quantum.misc.time.seconds": "Inqö",
-  "quantum.misc.time.minutes": "Minïtō",
-  "quantum.misc.time.hours": "Ūri",
-  "quantum.misc.time.days": "Däna",
-  "quantum.misc.time.weeks": "Wēq",
-  "quantum.misc.time.months": "Yëqni",
-  "quantum.misc.time.years": "Xïna",
-  "quantum.misc.bytes": " byëtō",
-  "quantum.misc.kilobytes": " Kïlaïbyëtō",
-  "quantum.misc.megabytes": " Mëgiaïbyëtò",
-  "quantum.misc.gigabytes": " Gígaïbyëtò",
-  "quantum.misc.terabytes": " Tériàbyëtò",
-  "quantum.misc.petabytes": " Pètaïbyëtò",
-  "quantum.misc.kibibytes": " Kïlibïbyëtò",
-  "quantum.misc.mebibytes": " Mëbibïbyëtò",
-  "quantum.misc.gibibytes": " Gíbibïbyëtò",
-  "quantum.misc.tebibytes": " Tèbibïbyëtò",
-  "quantum.misc.pebibytes": " Pèbibïbyëtò",
-  "quantum.screen.credits.title": "Credits",
-  "quantum.screen.credits.tab.assets": "Assets",
-  "quantum.screen.credits.tab.code": "Code",
-  "quantum.screen.credits.tab.downloads": "External Downloads",
-  "quantum.screen.credits.tab.translations": "Translations",
-  "quantum.screen.credits.tab.testing": "Testing",
-  "quantum.screen.credits.tab.docs": "Documentation",
-  "quantum.screen.credits.tab.external_libs": "External Libraries",
-  "quantum.screen.credits.tab.extra": "Extra",
-  "quantum.screen.credits.tab.sound_effects": "Sound Effects",
-  "quantum.screen.credits.detail.url": "URL",
-  "quantum.screen.credits.detail.license": "License",
-  "quantum.screen.credits.detail.roles": "Project Roles",
-  "quantum.screen.credits.detail.for": "Has made",
-  "quantum.screen.credits.detail.uses": "Uses",
-  "quantum.screen.credits.detail.links": "Links",
-  "quantum.screen.credits.detail.mentions": "Mentions",
-  "quantum.dimension.overworld": "Planet Earth",
-  "quantum.container.inventory.title": "Inventory",
-  "quantum.container.crate.title": "Crate",
-  "quantum.recipe.craftable": "Craftable",
-  "quantum.recipe.uncraftable": "Uncraftable",
-  "quantum.recipe.ingredients": "Ingredients:",
-  "quantum.screen.message.disconnected": "You have been disconnected.",
-  "quantum.commands.player.dumpData.success": "Dumped player data: ",
-  "quantum.damageSource.kill": "%s was killed",
-  "quantum.damageSource.kill.by": "%1$s was killed by %2$s",
-  "quantum.damageSource.kill.item": "%1$s was killed by %2$s using %3$s",
-  "quantum.damageSource.falling": "%s fell from a high place",
-  "quantum.damageSource.falling.by": "%1$s got pushed off a high place by %2$s",
-  "quantum.damageSource.void": "%s got consumed by the void",
-  "quantum.damageSource.void.by": "%1$s was consumed by the void due to %2$s",
-  "quantum.damageSource.none": "%s just died out of thin air",
-  "quantum.damageSource.none.by": "%1$s just died out of thin air due to %2$s",
-  "quantum.damageSource.hunger": "%1$s was starved to death"
+  display.language: Utanïanī (Utanïa)
+  quantum.block.sand.name: Güan
+  quantum.block.grass_block.name: Gämbā
+  quantum.block.dirt.name: Sólï
+  quantum.block.stone.name: Rökkō
+  quantum.block.gravel.name: ViMalï
+  quantum.block.log.name: Tuqnā
+  quantum.block.leaves.name: Leqē
+  quantum.block.planks.name: Binàrk
+  quantum.block.cobblestone.name: Hiquï
+  quantum.block.crate.name: Crätø
+  quantum.block.blast_furnace.name: Läsī Bürñalī
+  quantum.block.water.name: Quê
+  quantum.block.air.name: Lï
+  quantum.item.wooden_pickaxe.name: Tuqná-vi'rili
+  quantum.item.wooden_shovel.name: Tuqná-vi'kunni
+  quantum.item.wooden_axe.name: Tuqná-vi'aqi
+  quantum.item.stone_pickaxe.name: Rökkó-vi'rili
+  quantum.item.stone_shovel.name: Rökkó-vi'kunni
+  quantum.item.stone_axe.name: Rökkó-vi'aqi
+  quantum.item.iron_pickaxe.name: Quná-vi'rili
+  quantum.item.iron_shovel.name: Quná-vi'kunni
+  quantum.item.iron_axe.name: Quná-vi'aqi
+  quantum.item.plank.name: Binàrk süqi
+  quantum.item.stick.name: Enïq
+  quantum.item.air.name: Lï
+  quantum.ui.exitWorld: Quïn Worlïq
+  quantum.ui.gamePaused: Worlïq Nāvë
+  quantum.ui.backToGame: EnyI'lë Worlïq
+  quantum.ui.back: EnyI'le
+  quantum.ui.back.arrow: < EnyI'le
+  quantum.ui.cancel: Cancé
+  quantum.ui.confirm: Qi
+  quantum.ui.proceed: Cotuï
+  quantum.ui.accept: Ceq
+  quantum.ui.deny: Denï
+  quantum.ui.ok: Ig'
+  quantum.ui.done: Zuï
+  quantum.ui.yes: I
+  quantum.ui.error: Erquï!
+  quantum.ui.no: Na
+  quantum.ui.okay: Ig'
+  quantum.ui.toggle: Tin
+  quantum.ui.enable: Entin
+  quantum.ui.disable: Dītin
+  quantum.ui.enabled: Entinï
+  quantum.ui.disabled: Ditinï
+  quantum.ui.hidden: Qanzïla
+  quantum.ui.visible: DiQuazïla
+  quantum.ui.toggle_all: Iqüi Tin
+  quantum.ui.enable_all: Iqüi Entin
+  quantum.ui.disable_all: Iqüi Dītin
+  quantum.dialog.delete_world.title: Delê Worlïq?
+  quantum.dialog.delete_world.message: "In worlïq eq delê? Di worlïq goni fi infīnitē."
+  quantum.screen.worlds.edit: Enqi'le Worlïq
+  quantum.screen.worlds.edit.too_old: "Di worlïq enqi'le, ti audā."
+  quantum.screen.world_load.loading_world: Prōglê Worlïq
+  quantum.screen.language: Lingūä
+  quantum.screen.message.saving_world: "Sëqi'vi Worlïq..."
+  quantum.screen.message.joining_server: "EnyI'eq survûr..."
+  quantum.screen.mod_list: Mōdīfï listë
+  quantum.screen.mod_list.import_xeox: Imqüi Xeox Mòdīfï
+  quantum.screen.mod_list.config: Confīq
+  quantum.screen.death.respawn: Resqînu
+  quantum.screen.death.title: Iq daëdrī
+  quantum.screen.options: "Optin..."
+  quantum.screen.settings.configs: Confīq
+  quantum.screen.settings.title: Insètīnqi
+  quantum.screen.options.video: Video'insètīnqi
+  quantum.screen.options.video.title: Video'insètīnqi
+  quantum.screen.options.video.fov: Viqi'O-vi'fù
+  quantum.screen.options.video.guiScale: GUI'inlagiq
+  quantum.screen.options.video.fullscreen: Viqō'inlagiq
+  quantum.screen.options.video.frameRate: Fürniqe råtī
+  quantum.screen.options.video.vSync: V-Sync
+  quantum.screen.options.video.renderDistance: Draqî åvstaqï
+  quantum.screen.options.privacy: "Prïviqe insètīnqi..."
+  quantum.screen.options.privacy.title: Prïviqe insètīnqi
+  quantum.screen.options.privacy.hideActiveServer: Quanzï aquïvi survûr
+  quantum.screen.options.privacy.hideRpc: Quanzï aquïvi RPC
+  quantum.screen.options.privacy.hidePlayerSkin: Quanzï aquïvi råni tyèlma
+  quantum.screen.options.privacy.hidePlayerName: Quanzï aquïvi råni ên'ïqe
+  quantum.screen.options.accessibility: "Aq'cibiqe insètīnqi..."
+  quantum.screen.options.accessibility.title: Aq'cibiqe insètīnqi
+  quantum.screen.options.accessibility.hideFirstPersonPlayer: Quanzï fir∂e råni persïq
+  quantum.screen.options.accessibility.hideHotbarWhenThirdPerson: Quanzï trïq råni hotbar
+  quantum.screen.options.accessibility.vibration: Vibriqië
+  quantum.screen.options.personalisation: "Persïviqe insètīnqi..."
+  quantum.screen.options.personalisation.title: Persïviqe insètīnqi
+  quantum.screen.options.personalisation.diagonalFontShadow: Diaquöre fūntë
+  quantum.screen.options.personalisation.enforceUnicode: Enqås Unicode
+  quantum.screen.options.personalisation.blurRadius: Waziqï råtī
+  quantum.screen.options.personalisation.blurRadius.text: Råtī
+  quantum.screen.options.language: "Lingūä..."
+  quantum.screen.options.language.title: Lingūä
+  quantum.screen.pause.back_to_game: EnyI'le Worlïq
+  quantum.screen.pause.exit_world: Quïn Worlïq
+  quantum.screen.world_load: Pròglê Worlïq
+  quantum.screen.world_delete_confirm.title: Delê Worlïq?
+  quantum.screen.world_delete_confirm.message1: In worlïq eq delê?
+  quantum.screen.world_delete_confirm.message2: "Di worlïq goni fi infīnitë."
+  quantum.screen.world_delete_confirm.delete: Delê
+  quantum.screen.world_selection.title: SeleQi Worlïq
+  quantum.screen.world_selection.delete: Delê Worlïq
+  quantum.screen.world_selection.create: Crë Worlïq
+  quantum.screen.world_selection.play: EnyI'le Worlïq
+  quantum.screen.world_creation.title: Crë Worlïq
+  quantum.screen.world_creation.name: Worlïq Essë
+  quantum.screen.world_creation.create: Crë
+  quantum.screen.title: Höma Päg
+  quantum.screen.title.singleplayer: EnyI'le Fir∂
+  quantum.screen.title.reset_world: Reqït Worlïq
+  quantum.screen.title.quit: Quïn
+  quantum.screen.multiplayer: Düi wï råni
+  quantum.screen.multiplayer.server_ip: Survûr IP
+  quantum.screen.multiplayer.join: EnyI'eq
+  quantum.screen.out_of_memory: Memöriq ü rïq
+  quantum.screen.out_of_memory.message: "Quantum Voxel rïq memöriq. Ti reqït ïq äplitā. Iq enyI'le höma päg."
+  quantum.screen.dev: Dëv vërsī
+  quantum.screen.dev.message: "Di eq Quantum dëv vërsī. Nidrï eq wërq komplīté. Asli experiq iq pröblemïq, rëpōrtī GitHub päg.\n\nGi'jaQi! ♥ !(icon_success)"
+  quantum.screen.dev.close: Closï
+  quantum.screen.crash: Quantum Voxel errïta
+  quantum.screen.crash.message: "Contrölå ïn iq modifíqā bi rëpōrtī pröblemïq.\nAsli cöntïq modifíqā, rëpōrtī atli et modifíqā/modifíqāpãquët."
+  quantum.screen.crash.quit: Quïn
+  quantum.screen.feedback: ???
+  quantum.screen.feedback.title: ???
+  quantum.screen.feedback.message: ???
+  quantum.ui.auto: Automá
+  quantum.ui.manual: Macil
+  quantum.hud.memory_usage: Memòriq
+  quantum.hud.memory_usage.jvm_free: VM frī: %1$s
+  quantum.hud.memory_usage.used: Úqa: %1$s/%2$s
+  quantum.misc.bits.16: 16 Åq
+  quantum.misc.bits.24: 24 Åq
+  quantum.misc.bits.32: 32 Åq
+  quantum.misc.bits.64: 64 Åq
+  quantum.misc.digit.1: "1"
+  quantum.misc.digit.2: "2"
+  quantum.misc.digit.3: "3"
+  quantum.misc.digit.4: "4"
+  quantum.misc.digit.5: "5"
+  quantum.misc.digit.6: "6"
+  quantum.misc.digit.7: "7"
+  quantum.misc.digit.8: "8"
+  quantum.misc.digit.9: "9"
+  quantum.misc.digit.0: "0"
+  quantum.misc.lang.single_object: 1 %s
+  quantum.misc.lang.single_object_plural: 1 %s
+  quantum.misc.lang.multiple_objects: %1$s %2$s
+  quantum.misc.lang.multiple_objects_plural: %1$s %2$s
+  quantum.misc.lang.multiple_objects_and: %1$s wí %2$s
+  quantum.misc.lang.multiple_objects_and_plural: %1$s wí %2$s
+  quantum.misc.lang.multiple_objects_or: %1$s yï %2$s
+  quantum.misc.lang.multiple_objects_or_plural: %1$s yï %2$s
+  quantum.misc.lang.multiple_objects_and_more: %1$s wí %2$s
+  quantum.misc.lang.multiple_objects_and_more_plural: %1$s wí %2$s
+  quantum.misc.lang.multiple_objects_or_more: %1$s yï %2$s
+  quantum.misc.lang.multiple_objects_or_more_plural: %1$s yï %2$s
+  quantum.misc.lang.multiple_objects_more: "%1$s, %2$s"
+  quantum.misc.lang.multiple_objects_more_plural: "%1$s, %2$s"
+  quantum.misc.lang.by: Zä %s
+  quantum.misc.lang.of: %1$s qä %2$s
+  quantum.misc.time.nanoseconds: Náranqö
+  quantum.misc.time.microseconds: Mïcrōqö
+  quantum.misc.time.milliseconds: Millenòqö
+  quantum.misc.time.seconds: Inqö
+  quantum.misc.time.minutes: Minïtō
+  quantum.misc.time.hours: Ūri
+  quantum.misc.time.days: Däna
+  quantum.misc.time.weeks: Wēq
+  quantum.misc.time.months: Yëqni
+  quantum.misc.time.years: Xïna
+  quantum.misc.bytes: " byëtō"
+  quantum.misc.kilobytes: " Kïlaïbyëtō"
+  quantum.misc.megabytes: " Mëgiaïbyëtò"
+  quantum.misc.gigabytes: " Gígaïbyëtò"
+  quantum.misc.terabytes: " Tériàbyëtò"
+  quantum.misc.petabytes: " Pètaïbyëtò"
+  quantum.misc.kibibytes: " Kïlibïbyëtò"
+  quantum.misc.mebibytes: " Mëbibïbyëtò"
+  quantum.misc.gibibytes: " Gíbibïbyëtò"
+  quantum.misc.tebibytes: " Tèbibïbyëtò"
+  quantum.misc.pebibytes: " Pèbibïbyëtò"
+  quantum.screen.credits.title: Credits
+  quantum.screen.credits.tab.assets: Assets
+  quantum.screen.credits.tab.code: Code
+  quantum.screen.credits.tab.downloads: External Downloads
+  quantum.screen.credits.tab.translations: Translations
+  quantum.screen.credits.tab.testing: Testing
+  quantum.screen.credits.tab.docs: Documentation
+  quantum.screen.credits.tab.external_libs: External Libraries
+  quantum.screen.credits.tab.extra: Extra
+  quantum.screen.credits.tab.sound_effects: Sound Effects
+  quantum.screen.credits.detail.url: URL
+  quantum.screen.credits.detail.license: License
+  quantum.screen.credits.detail.roles: Project Roles
+  quantum.screen.credits.detail.for: Has made
+  quantum.screen.credits.detail.uses: Uses
+  quantum.screen.credits.detail.links: Links
+  quantum.screen.credits.detail.mentions: Mentions
+  quantum.dimension.overworld: Planet Earth
+  quantum.container.inventory.title: Inventory
+  quantum.container.crate.title: Crate
+  quantum.recipe.craftable: Craftable
+  quantum.recipe.uncraftable: Uncraftable
+  quantum.recipe.ingredients: Ingredients:
+  quantum.screen.message.disconnected: "You have been disconnected."
+  quantum.commands.player.dumpData.success: Dumped player data:
+  quantum.damageSource.kill: %s was killed
+  quantum.damageSource.kill.by: %1$s was killed by %2$s
+  quantum.damageSource.kill.item: %1$s was killed by %2$s using %3$s
+  quantum.damageSource.falling: %s fell from a high place
+  quantum.damageSource.falling.by: %1$s got pushed off a high place by %2$s
+  quantum.damageSource.void: %s got consumed by the void
+  quantum.damageSource.void.by: %1$s was consumed by the void due to %2$s
+  quantum.damageSource.none: %s just died out of thin air
+  quantum.damageSource.none.by: %1$s just died out of thin air due to %2$s
+  quantum.damageSource.hunger: %1$s was starved to death
 }

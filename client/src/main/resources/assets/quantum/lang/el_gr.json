@@ -1,230 +1,230 @@
 {
-  "display.language": "Ελληνικά (GR)",
-  "quantum.block.sand.name": "Άμμος",
-  "quantum.block.grass_block.name": "Χορτάρι",
-  "quantum.block.dirt.name": "Γη",
-  "quantum.block.stone.name": "Πέτρα",
-  "quantum.block.gravel.name": "Χαλίκι",
-  "quantum.block.log.name": "Κούτσουρο",
-  "quantum.block.leaves.name": "Φύλλα",
-  "quantum.block.planks.name": "Μπλοκ από Σανίδες",
-  "quantum.block.cobblestone.name": "Λαξευτή Πέτρα",
-  "quantum.block.crate.name": "Κιβώτιο",
-  "quantum.block.blast_furnace.name": "Υψικάμινος",
-  "quantum.block.water.name": "Νερό",
-  "quantum.block.air.name": "Αέρας",
-  "quantum.item.wooden_pickaxe.name": "Ξύλινη Τσάπα",
-  "quantum.item.wooden_shovel.name": "Ξύλινο Φτυάρι",
-  "quantum.item.wooden_axe.name": "Ξύλινο Τσεκούρι",
-  "quantum.item.stone_pickaxe.name": "Πέτρινη Τσάπα",
-  "quantum.item.stone_shovel.name": "Πέτρινο Φτυάρι",
-  "quantum.item.stone_axe.name": "Πέτρινο Τσεκούρι",
-  "quantum.item.iron_pickaxe.name": "Σιδερένια Τσάπα",
-  "quantum.item.iron_shovel.name": "Σιδερένιο Φτυάρι",
-  "quantum.item.iron_axe.name": "Σιδερένιο Τσεκούρι",
-  "quantum.item.plank.name": "Σανίδα",
-  "quantum.item.stick.name": "Ραβδί",
-  "quantum.item.air.name": "Αέρας",
-  "quantum.ui.exitWorld": "Έξοδος από τον Κόσμο",
-  "quantum.ui.gamePaused": "Το Παιχνίδι Παύτηκε",
-  "quantum.ui.backToGame": "Επιστροφή στο Παιχνίδι",
-  "quantum.ui.back": "Πίσω",
-  "quantum.ui.back.arrow": "< Πίσω",
-  "quantum.ui.cancel": "Ακύρωση",
-  "quantum.ui.confirm": "Επιβεβαίωση",
-  "quantum.ui.proceed": "Συνέχεια",
-  "quantum.ui.accept": "Αποδοχή",
-  "quantum.ui.deny": "Άρνηση",
-  "quantum.ui.ok": "ΟΚ",
-  "quantum.ui.done": "Τέλος",
-  "quantum.ui.yes": "Ναι",
-  "quantum.ui.error": "Σφάλμα!",
-  "quantum.ui.no": "Όχι",
-  "quantum.ui.okay": "Εντάξει",
-  "quantum.ui.toggle": "Εναλλαγή",
-  "quantum.ui.enable": "Ενεργοποίηση",
-  "quantum.ui.disable": "Απενεργοποίηση",
-  "quantum.ui.enabled": "Ενεργοποιημένο",
-  "quantum.ui.disabled": "Απενεργοποιημένο",
-  "quantum.ui.hidden": "Κρυφό",
-  "quantum.ui.visible": "Ορατό",
-  "quantum.ui.toggle_all": "Εναλλαγή Όλων",
-  "quantum.ui.enable_all": "Ενεργοποίηση Όλων",
-  "quantum.ui.disable_all": "Απενεργοποίηση Όλων",
-  "quantum.dialog.delete_world.title": "Διαγραφή Κόσμου;",
-  "quantum.dialog.delete_world.message": "Είστε σίγουροι ότι θέλετε να\nδιαγράψετε αυτόν τον κόσμο;\nΑυτό δεν μπορεί να αναιρεθεί.",
-  "quantum.screen.worlds.edit": "Επεξεργασία Κόσμου",
-  "quantum.screen.worlds.edit.too_old": "Αυτός ο κόσμος είναι πολύ παλιός για επεξεργασία.",
-  "quantum.screen.world_load.loading_world": "Φόρτωση Κόσμου",
-  "quantum.screen.language": "Γλώσσα",
-  "quantum.screen.message.saving_world": "Αποθήκευση Κόσμου...",
-  "quantum.screen.message.joining_server": "Σύνδεση με Διακομιστή...",
-  "quantum.screen.mod_list": "Λίστα Μοντέλων",
-  "quantum.screen.mod_list.import_xeox": "Εισαγωγή Μοντέλου Xeox",
-  "quantum.screen.mod_list.config": "Ρύθμιση",
-  "quantum.screen.death.respawn": "Αναγέννηση",
-  "quantum.screen.death.title": "Πεθάνατε",
-  "quantum.screen.options": "Επιλογές...",
-  "quantum.screen.settings.configs": "Ρυθμίσεις",
-  "quantum.screen.settings.title": "Ρυθμίσεις",
-  "quantum.screen.options.video": "Ρυθμίσεις Βίντεο...",
-  "quantum.screen.options.video.title": "Ρυθμίσεις Βίντεο",
-  "quantum.screen.options.video.fov": "FOV",
-  "quantum.screen.options.video.guiScale": "Κλίμακα GUI",
-  "quantum.screen.options.video.fullscreen": "Πλήρης Οθόνη",
-  "quantum.screen.options.video.frameRate": "Ρυθμός Καρέ",
-  "quantum.screen.options.video.vSync": "V-Sync",
-  "quantum.screen.options.video.renderDistance": "Απόσταση Απόδοσης",
-  "quantum.screen.options.privacy": "Ρυθμίσεις Απορρήτου...",
-  "quantum.screen.options.privacy.title": "Ρυθμίσεις Απορρήτου",
-  "quantum.screen.options.privacy.hideActiveServer": "Ενεργός Διακομιστής",
-  "quantum.screen.options.privacy.hideRpc": "Πλούσια Παρουσία",
-  "quantum.screen.options.privacy.hidePlayerSkin": "Δέρμα Παίκτη",
-  "quantum.screen.options.privacy.hidePlayerName": "Όνομα Παίκτη",
-  "quantum.screen.options.accessibility": "Προσβασιμότητα...",
-  "quantum.screen.options.accessibility.title": "Προσβασιμότητα",
-  "quantum.screen.options.accessibility.hideFirstPersonPlayer": "Παίκτης Πρώτου Προσώπου",
-  "quantum.screen.options.accessibility.hideHotbarWhenThirdPerson": "Γραμμή Εργαλείων σε Τρίτο Πρόσωπο",
-  "quantum.screen.options.accessibility.vibration": "Δόνηση",
-  "quantum.screen.options.personalisation": "Εξατομίκευση...",
-  "quantum.screen.options.personalisation.title": "Εξατομίκευση",
-  "quantum.screen.options.personalisation.diagonalFontShadow": "Διαγώνια Σκίαση Γραμματοσειράς",
-  "quantum.screen.options.personalisation.enforceUnicode": "Επιβολή Unicode",
-  "quantum.screen.options.personalisation.blurRadius": "Δύναμη Θολώματος σε Εικονοστοιχεία",
-  "quantum.screen.options.personalisation.blurRadius.text": "Δύναμη",
-  "quantum.screen.options.language": "Γλώσσα...",
-  "quantum.screen.options.language.title": "Γλώσσα",
-  "quantum.screen.pause.back_to_game": "Επιστροφή στο Παιχνίδι",
-  "quantum.screen.pause.exit_world": "Έξοδος από τον Κόσμο",
-  "quantum.screen.world_load": "Φόρτωση Κόσμου",
-  "quantum.screen.world_delete_confirm.title": "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτόν τον κόσμο;",
-  "quantum.screen.world_delete_confirm.message1": "Η συνέχεια θα διαγράψει τον κόσμο '%s' από την ύπαρξη.",
-  "quantum.screen.world_delete_confirm.message2": "Χάθηκε, διαγράφηκε από την ύπαρξη, χαμένο στον χρόνο στον κόσμο των διαγραμμένων κόσμων.",
-  "quantum.screen.world_delete_confirm.delete": "Διαγραφή",
-  "quantum.screen.world_selection.title": "Επιλογή Κόσμου",
-  "quantum.screen.world_selection.delete": "Διαγραφή Κόσμου",
-  "quantum.screen.world_selection.create": "Δημιουργία Νέου Κόσμου",
-  "quantum.screen.world_selection.play": "Παίξε Κόσμο",
-  "quantum.screen.world_creation.title": "Δημιουργία Νέου Κόσμου",
-  "quantum.screen.world_creation.name": "Όνομα Κόσμου",
-  "quantum.screen.world_creation.create": "Δημιουργία",
-  "quantum.screen.title": "Οθόνη Τίτλου",
-  "quantum.misc.saving_world": "Αποθήκευση Κόσμου...",
-  "quantum.screen.home.play": "Παίξε",
-  "quantum.screen.home.settings": "Ρυθμίσεις",
-  "quantum.screen.home.mods": "Μοντέλα",
-  "quantum.screen.home.options": "Επιλογές",
-  "quantum.screen.home.language": "Γλώσσα",
+  display.language: Ελληνικά (GR)
+  quantum.block.sand.name: Άμμος
+  quantum.block.grass_block.name: Χορτάρι
+  quantum.block.dirt.name: Γη
+  quantum.block.stone.name: Πέτρα
+  quantum.block.gravel.name: Χαλίκι
+  quantum.block.log.name: Κούτσουρο
+  quantum.block.leaves.name: Φύλλα
+  quantum.block.planks.name: Μπλοκ από Σανίδες
+  quantum.block.cobblestone.name: Λαξευτή Πέτρα
+  quantum.block.crate.name: Κιβώτιο
+  quantum.block.blast_furnace.name: Υψικάμινος
+  quantum.block.water.name: Νερό
+  quantum.block.air.name: Αέρας
+  quantum.item.wooden_pickaxe.name: Ξύλινη Τσάπα
+  quantum.item.wooden_shovel.name: Ξύλινο Φτυάρι
+  quantum.item.wooden_axe.name: Ξύλινο Τσεκούρι
+  quantum.item.stone_pickaxe.name: Πέτρινη Τσάπα
+  quantum.item.stone_shovel.name: Πέτρινο Φτυάρι
+  quantum.item.stone_axe.name: Πέτρινο Τσεκούρι
+  quantum.item.iron_pickaxe.name: Σιδερένια Τσάπα
+  quantum.item.iron_shovel.name: Σιδερένιο Φτυάρι
+  quantum.item.iron_axe.name: Σιδερένιο Τσεκούρι
+  quantum.item.plank.name: Σανίδα
+  quantum.item.stick.name: Ραβδί
+  quantum.item.air.name: Αέρας
+  quantum.ui.exitWorld: Έξοδος από τον Κόσμο
+  quantum.ui.gamePaused: Το Παιχνίδι Παύτηκε
+  quantum.ui.backToGame: Επιστροφή στο Παιχνίδι
+  quantum.ui.back: Πίσω
+  quantum.ui.back.arrow: < Πίσω
+  quantum.ui.cancel: Ακύρωση
+  quantum.ui.confirm: Επιβεβαίωση
+  quantum.ui.proceed: Συνέχεια
+  quantum.ui.accept: Αποδοχή
+  quantum.ui.deny: Άρνηση
+  quantum.ui.ok: ΟΚ
+  quantum.ui.done: Τέλος
+  quantum.ui.yes: Ναι
+  quantum.ui.error: Σφάλμα!
+  quantum.ui.no: Όχι
+  quantum.ui.okay: Εντάξει
+  quantum.ui.toggle: Εναλλαγή
+  quantum.ui.enable: Ενεργοποίηση
+  quantum.ui.disable: Απενεργοποίηση
+  quantum.ui.enabled: Ενεργοποιημένο
+  quantum.ui.disabled: Απενεργοποιημένο
+  quantum.ui.hidden: Κρυφό
+  quantum.ui.visible: Ορατό
+  quantum.ui.toggle_all: Εναλλαγή Όλων
+  quantum.ui.enable_all: Ενεργοποίηση Όλων
+  quantum.ui.disable_all: Απενεργοποίηση Όλων
+  quantum.dialog.delete_world.title: Διαγραφή Κόσμου;
+  quantum.dialog.delete_world.message: "Είστε σίγουροι ότι θέλετε να\nδιαγράψετε αυτόν τον κόσμο;\nΑυτό δεν μπορεί να αναιρεθεί."
+  quantum.screen.worlds.edit: Επεξεργασία Κόσμου
+  quantum.screen.worlds.edit.too_old: "Αυτός ο κόσμος είναι πολύ παλιός για επεξεργασία."
+  quantum.screen.world_load.loading_world: Φόρτωση Κόσμου
+  quantum.screen.language: Γλώσσα
+  quantum.screen.message.saving_world: "Αποθήκευση Κόσμου..."
+  quantum.screen.message.joining_server: "Σύνδεση με Διακομιστή..."
+  quantum.screen.mod_list: Λίστα Μοντέλων
+  quantum.screen.mod_list.import_xeox: Εισαγωγή Μοντέλου Xeox
+  quantum.screen.mod_list.config: Ρύθμιση
+  quantum.screen.death.respawn: Αναγέννηση
+  quantum.screen.death.title: Πεθάνατε
+  quantum.screen.options: "Επιλογές..."
+  quantum.screen.settings.configs: Ρυθμίσεις
+  quantum.screen.settings.title: Ρυθμίσεις
+  quantum.screen.options.video: "Ρυθμίσεις Βίντεο..."
+  quantum.screen.options.video.title: Ρυθμίσεις Βίντεο
+  quantum.screen.options.video.fov: FOV
+  quantum.screen.options.video.guiScale: Κλίμακα GUI
+  quantum.screen.options.video.fullscreen: Πλήρης Οθόνη
+  quantum.screen.options.video.frameRate: Ρυθμός Καρέ
+  quantum.screen.options.video.vSync: V-Sync
+  quantum.screen.options.video.renderDistance: Απόσταση Απόδοσης
+  quantum.screen.options.privacy: "Ρυθμίσεις Απορρήτου..."
+  quantum.screen.options.privacy.title: Ρυθμίσεις Απορρήτου
+  quantum.screen.options.privacy.hideActiveServer: Ενεργός Διακομιστής
+  quantum.screen.options.privacy.hideRpc: Πλούσια Παρουσία
+  quantum.screen.options.privacy.hidePlayerSkin: Δέρμα Παίκτη
+  quantum.screen.options.privacy.hidePlayerName: Όνομα Παίκτη
+  quantum.screen.options.accessibility: "Προσβασιμότητα..."
+  quantum.screen.options.accessibility.title: Προσβασιμότητα
+  quantum.screen.options.accessibility.hideFirstPersonPlayer: Παίκτης Πρώτου Προσώπου
+  quantum.screen.options.accessibility.hideHotbarWhenThirdPerson: Γραμμή Εργαλείων σε Τρίτο Πρόσωπο
+  quantum.screen.options.accessibility.vibration: Δόνηση
+  quantum.screen.options.personalisation: "Εξατομίκευση..."
+  quantum.screen.options.personalisation.title: Εξατομίκευση
+  quantum.screen.options.personalisation.diagonalFontShadow: Διαγώνια Σκίαση Γραμματοσειράς
+  quantum.screen.options.personalisation.enforceUnicode: Επιβολή Unicode
+  quantum.screen.options.personalisation.blurRadius: Δύναμη Θολώματος σε Εικονοστοιχεία
+  quantum.screen.options.personalisation.blurRadius.text: Δύναμη
+  quantum.screen.options.language: "Γλώσσα..."
+  quantum.screen.options.language.title: Γλώσσα
+  quantum.screen.pause.back_to_game: Επιστροφή στο Παιχνίδι
+  quantum.screen.pause.exit_world: Έξοδος από τον Κόσμο
+  quantum.screen.world_load: Φόρτωση Κόσμου
+  quantum.screen.world_delete_confirm.title: Είστε σίγουροι ότι θέλετε να διαγράψετε αυτόν τον κόσμο;
+  quantum.screen.world_delete_confirm.message1: "Η συνέχεια θα διαγράψει τον κόσμο '%s' από την ύπαρξη."
+  quantum.screen.world_delete_confirm.message2: "Χάθηκε, διαγράφηκε από την ύπαρξη, χαμένο στον χρόνο στον κόσμο των διαγραμμένων κόσμων."
+  quantum.screen.world_delete_confirm.delete: Διαγραφή
+  quantum.screen.world_selection.title: Επιλογή Κόσμου
+  quantum.screen.world_selection.delete: Διαγραφή Κόσμου
+  quantum.screen.world_selection.create: Δημιουργία Νέου Κόσμου
+  quantum.screen.world_selection.play: Παίξε Κόσμο
+  quantum.screen.world_creation.title: Δημιουργία Νέου Κόσμου
+  quantum.screen.world_creation.name: Όνομα Κόσμου
+  quantum.screen.world_creation.create: Δημιουργία
+  quantum.screen.title: Οθόνη Τίτλου
+  quantum.misc.saving_world: "Αποθήκευση Κόσμου..."
+  quantum.screen.home.play: Παίξε
+  quantum.screen.home.settings: Ρυθμίσεις
+  quantum.screen.home.mods: Μοντέλα
+  quantum.screen.home.options: Επιλογές
+  quantum.screen.home.language: Γλώσσα
 
-  "quantum.ui.auto": "Αυτόματο",
-  "quantum.ui.manual": "Χειροκίνητο",
+  quantum.ui.auto: Αυτόματο
+  quantum.ui.manual: Χειροκίνητο
 
-  "quantum.hud.memory_usage": "Χρήση Μνήμης",
-  "quantum.hud.memory_usage.jvm_free": "Ελεύθερη VM: %1$s",
-  "quantum.hud.memory_usage.used": "Χρησιμοποιημένο: %1$s/%2$s",
+  quantum.hud.memory_usage: Χρήση Μνήμης
+  quantum.hud.memory_usage.jvm_free: Ελεύθερη VM: %1$s
+  quantum.hud.memory_usage.used: Χρησιμοποιημένο: %1$s/%2$s
 
-  "quantum.misc.bits.16": "16 bits",
-  "quantum.misc.bits.24": "24 bits",
-  "quantum.misc.bits.32": "32 bits",
-  "quantum.misc.bits.64": "64 bits",
+  quantum.misc.bits.16: 16 bits
+  quantum.misc.bits.24: 24 bits
+  quantum.misc.bits.32: 32 bits
+  quantum.misc.bits.64: 64 bits
 
-  "quantum.misc.digit.1": "1",
-  "quantum.misc.digit.2": "2",
-  "quantum.misc.digit.3": "3",
-  "quantum.misc.digit.4": "4",
-  "quantum.misc.digit.5": "5",
-  "quantum.misc.digit.6": "6",
-  "quantum.misc.digit.7": "7",
-  "quantum.misc.digit.8": "8",
-  "quantum.misc.digit.9": "9",
-  "quantum.misc.digit.0": "0",
+  quantum.misc.digit.1: "1"
+  quantum.misc.digit.2: "2"
+  quantum.misc.digit.3: "3"
+  quantum.misc.digit.4: "4"
+  quantum.misc.digit.5: "5"
+  quantum.misc.digit.6: "6"
+  quantum.misc.digit.7: "7"
+  quantum.misc.digit.8: "8"
+  quantum.misc.digit.9: "9"
+  quantum.misc.digit.0: "0"
 
-  "quantum.misc.lang.single_object": "ένα %s",
-  "quantum.misc.lang.single_object_plural": "ένα %s",
-  "quantum.misc.lang.multiple_objects": "%1$s %2$s",
-  "quantum.misc.lang.multiple_objects_plural": "%1$s %2$s",
-  "quantum.misc.lang.multiple_objects_and": "%1$s και %2$s",
-  "quantum.misc.lang.multiple_objects_and_plural": "%1$s και %2$s",
-  "quantum.misc.lang.multiple_objects_or": "%1$s ή %2$s",
-  "quantum.misc.lang.multiple_objects_or_plural": "%1$s ή %2$s",
-  "quantum.misc.lang.multiple_objects_and_more": "%1$s, και %2$s",
-  "quantum.misc.lang.multiple_objects_and_more_plural": "%1$s, και %2$s",
-  "quantum.misc.lang.multiple_objects_or_more": "%1$s, ή %2$s",
-  "quantum.misc.lang.multiple_objects_or_more_plural": "%1$s, ή %2$s",
-  "quantum.misc.lang.multiple_objects_more": "%1$s, %2$s",
-  "quantum.misc.lang.multiple_objects_more_plural": "%1$s, %2$s",
-  "quantum.misc.lang.by": "από %s",
-  "quantum.misc.lang.of": "%1$s από %2$s",
+  quantum.misc.lang.single_object: ένα %s
+  quantum.misc.lang.single_object_plural: ένα %s
+  quantum.misc.lang.multiple_objects: %1$s %2$s
+  quantum.misc.lang.multiple_objects_plural: %1$s %2$s
+  quantum.misc.lang.multiple_objects_and: %1$s και %2$s
+  quantum.misc.lang.multiple_objects_and_plural: %1$s και %2$s
+  quantum.misc.lang.multiple_objects_or: %1$s ή %2$s
+  quantum.misc.lang.multiple_objects_or_plural: %1$s ή %2$s
+  quantum.misc.lang.multiple_objects_and_more: "%1$s, και %2$s"
+  quantum.misc.lang.multiple_objects_and_more_plural: "%1$s, και %2$s"
+  quantum.misc.lang.multiple_objects_or_more: "%1$s, ή %2$s"
+  quantum.misc.lang.multiple_objects_or_more_plural: "%1$s, ή %2$s"
+  quantum.misc.lang.multiple_objects_more: "%1$s, %2$s"
+  quantum.misc.lang.multiple_objects_more_plural: "%1$s, %2$s"
+  quantum.misc.lang.by: από %s
+  quantum.misc.lang.of: %1$s από %2$s
 
-  "quantum.misc.time.nanoseconds": "νανοδευτερόλεπτα",
-  "quantum.misc.time.microseconds": "μικροδευτερόλεπτα",
-  "quantum.misc.time.milliseconds": "χιλιοστά του δευτερολέπτου",
+  quantum.misc.time.nanoseconds: νανοδευτερόλεπτα
+  quantum.misc.time.microseconds: μικροδευτερόλεπτα
+  quantum.misc.time.milliseconds: χιλιοστά του δευτερολέπτου
 
-  "quantum.misc.time.seconds": "δευτερόλεπτα",
-  "quantum.misc.time.minutes": "λεπτά",
-  "quantum.misc.time.hours": "ώρες",
-  "quantum.misc.time.days": "ημέρες",
-  "quantum.misc.time.weeks": "εβδομάδες",
-  "quantum.misc.time.months": "μήνες",
-  "quantum.misc.time.years": "έτη",
+  quantum.misc.time.seconds: δευτερόλεπτα
+  quantum.misc.time.minutes: λεπτά
+  quantum.misc.time.hours: ώρες
+  quantum.misc.time.days: ημέρες
+  quantum.misc.time.weeks: εβδομάδες
+  quantum.misc.time.months: μήνες
+  quantum.misc.time.years: έτη
 
-  "quantum.misc.bytes": "bytes",
-  "quantum.misc.kilobytes": "kB",
-  "quantum.misc.megabytes": "MB",
-  "quantum.misc.gigabytes": "GB",
-  "quantum.misc.terabytes": "TB",
-  "quantum.misc.petabytes": "PB",
-  "quantum.misc.kibibytes": "KiB",
-  "quantum.misc.mebibytes": "MiB",
-  "quantum.misc.gibibytes": "GiB",
-  "quantum.misc.tebibytes": "TiB",
-  "quantum.misc.pebibytes": "PiB",
-  "quantum.screen.credits.title": "Πιστώσεις",
-  "quantum.screen.credits.tab.assets": "Πόροι",
-  "quantum.screen.credits.tab.code": "Κώδικας",
-  "quantum.screen.credits.tab.downloads": "Εξωνεσιακές Λήψεις",
-  "quantum.screen.credits.tab.translations": "Μεταφράσεις",
-  "quantum.screen.credits.tab.testing": "Δοκιμές",
-  "quantum.screen.credits.tab.docs": "Τεκμηριώθηκη",
-  "quantum.screen.credits.tab.external_libs": "Εξωνεσιακές Λιβραριοθήκες",
-  "quantum.screen.credits.tab.extra": "Επιπλέον",
-  "quantum.screen.credits.tab.sound_effects": "Ήχοι Επιπέδους",
-  "quantum.screen.credits.detail.url": "URL",
-  "quantum.screen.credits.detail.license": "Άδεια",
-  "quantum.screen.credits.detail.roles": "Ρόλοι Εργασίας",
-  "quantum.screen.credits.detail.for": "Έγινε",
-  "quantum.screen.credits.detail.uses": "Χρησιμοποιείσε",
-  "quantum.screen.credits.detail.links": "Σύνδεσμοι",
-  "quantum.screen.credits.detail.mentions": "Μεταφράσεις",
-  "quantum.screen.title.singleplayer": "Αμετάποδη Παικτής",
-  "quantum.screen.title.reset_world": "Επαναφορά κόσμου",
-  "quantum.screen.title.quit": "Έξοδος",
-  "quantum.screen.multiplayer": "Μολισματική Παιγνία",
-  "quantum.screen.multiplayer.server_ip": "Διεύθυνση Διακομιστή",
-  "quantum.screen.multiplayer.join": "Σύνδεση",
-  "quantum.screen.out_of_memory": "Λίμνηση Μνήμης",
-  "quantum.screen.out_of_memory.message": "Το Βιομ Βοξέλ φτάσει την άποια μνήμη.\nΕκκινήσου ξανά το παιχνίδι για να ελευθερώσεις την μνήμη.\nΜπορείς επίσης να πάσεις στον τίτλο για να ελευθερώσεις την μνήμη.",
-  "quantum.screen.dev": "Μοντέλο Ανάπτυξης",
-  "quantum.screen.dev.message": "Αυτό είναι ένα μοντέλο Ανάπτυξης του Βιομ.\nΜην προσπαθείς να το συνεχίσεις να δουλέβει, διότι δεν θα λειτουργεί σωστά.\nΑν διέρχνεσαι οποιαδήποτε προβλήματα, παρακαλούμε να τους καταφορείς στην σελίδα του GitHub.\n\nΕυχαριστούμε! ♡ !(icon_success)",
-  "quantum.screen.dev.close": "Κλείσιμο",
-  "quantum.screen.crash": "Το Βιομ Βοξέλ κρασάρθηκε",
-  "quantum.screen.crash.message": "Έλεγξε εάν χρησιμοποιείς κάποιο επεκτάσματο πρισκόπωσε πριν να καταφορέσεις ένα βάγμα.\nΑν χρησιμοποιείς κάποιο επεκτάσματο, παρακαλούμε να το καταφορέσεις στον επισκέπτη του/της επεκτάσματος/της επιφύλαξ.",
-  "quantum.dimension.overworld": "Η Γαία της Εαρθείας",
-  "quantum.container.inventory.title": "Επιλογοδοτικό",
-  "quantum.container.crate.title": "Κάθος",
-  "quantum.recipe.craftable": "Επιλέξιμο",
-  "quantum.recipe.uncraftable": "Μη επιλέξιμο",
-  "quantum.recipe.ingredients": "Υλικά:",
-  "quantum.screen.message.disconnected": "Διακόφθηκες προσωρινά από το παιχνίδι",
-  "quantum.commands.player.dumpData.success": "Εξάγει δεδομένα παίκτη: ",
-  "quantum.damageSource.kill": "%s κάτωσε",
-  "quantum.damageSource.kill.by": "%1$s κάτωσε από %2$s",
-  "quantum.damageSource.kill.item": "%1$s κάτωσε από %2$s χρησιμοποιώντας %3$s",
-  "quantum.damageSource.falling": "%s πήγε πάνω σε μεγάλη ύψος",
-  "quantum.damageSource.falling.by": "%1$s πήγε πάνω σε μεγάλη ύψος από %2$s",
-  "quantum.damageSource.void": "%s πήγε στο Κενό",
-  "quantum.damageSource.void.by": "%1$s πήγε στο Κενό λόγω %2$s",
-  "quantum.damageSource.none": "%s πήγε κατάσταση ελεύθερου",
-  "quantum.damageSource.none.by": "%1$s πήγε κατάσταση ελεύθερου λόγω %2$s",
-  "quantum.damageSource.hunger": "%1$s στερεώθηκε"
+  quantum.misc.bytes: bytes
+  quantum.misc.kilobytes: kB
+  quantum.misc.megabytes: MB
+  quantum.misc.gigabytes: GB
+  quantum.misc.terabytes: TB
+  quantum.misc.petabytes: PB
+  quantum.misc.kibibytes: KiB
+  quantum.misc.mebibytes: MiB
+  quantum.misc.gibibytes: GiB
+  quantum.misc.tebibytes: TiB
+  quantum.misc.pebibytes: PiB
+  quantum.screen.credits.title: Πιστώσεις
+  quantum.screen.credits.tab.assets: Πόροι
+  quantum.screen.credits.tab.code: Κώδικας
+  quantum.screen.credits.tab.downloads: Εξωνεσιακές Λήψεις
+  quantum.screen.credits.tab.translations: Μεταφράσεις
+  quantum.screen.credits.tab.testing: Δοκιμές
+  quantum.screen.credits.tab.docs: Τεκμηριώθηκη
+  quantum.screen.credits.tab.external_libs: Εξωνεσιακές Λιβραριοθήκες
+  quantum.screen.credits.tab.extra: Επιπλέον
+  quantum.screen.credits.tab.sound_effects: Ήχοι Επιπέδους
+  quantum.screen.credits.detail.url: URL
+  quantum.screen.credits.detail.license: Άδεια
+  quantum.screen.credits.detail.roles: Ρόλοι Εργασίας
+  quantum.screen.credits.detail.for: Έγινε
+  quantum.screen.credits.detail.uses: Χρησιμοποιείσε
+  quantum.screen.credits.detail.links: Σύνδεσμοι
+  quantum.screen.credits.detail.mentions: Μεταφράσεις
+  quantum.screen.title.singleplayer: Αμετάποδη Παικτής
+  quantum.screen.title.reset_world: Επαναφορά κόσμου
+  quantum.screen.title.quit: Έξοδος
+  quantum.screen.multiplayer: Μολισματική Παιγνία
+  quantum.screen.multiplayer.server_ip: Διεύθυνση Διακομιστή
+  quantum.screen.multiplayer.join: Σύνδεση
+  quantum.screen.out_of_memory: Λίμνηση Μνήμης
+  quantum.screen.out_of_memory.message: "Το Βιομ Βοξέλ φτάσει την άποια μνήμη.\nΕκκινήσου ξανά το παιχνίδι για να ελευθερώσεις την μνήμη.\nΜπορείς επίσης να πάσεις στον τίτλο για να ελευθερώσεις την μνήμη."
+  quantum.screen.dev: Μοντέλο Ανάπτυξης
+  quantum.screen.dev.message: "Αυτό είναι ένα μοντέλο Ανάπτυξης του Βιομ.\nΜην προσπαθείς να το συνεχίσεις να δουλέβει, διότι δεν θα λειτουργεί σωστά.\nΑν διέρχνεσαι οποιαδήποτε προβλήματα, παρακαλούμε να τους καταφορείς στην σελίδα του GitHub.\n\nΕυχαριστούμε! ♡ !(icon_success)"
+  quantum.screen.dev.close: Κλείσιμο
+  quantum.screen.crash: Το Βιομ Βοξέλ κρασάρθηκε
+  quantum.screen.crash.message: "Έλεγξε εάν χρησιμοποιείς κάποιο επεκτάσματο πρισκόπωσε πριν να καταφορέσεις ένα βάγμα.\nΑν χρησιμοποιείς κάποιο επεκτάσματο, παρακαλούμε να το καταφορέσεις στον επισκέπτη του/της επεκτάσματος/της επιφύλαξ."
+  quantum.dimension.overworld: Η Γαία της Εαρθείας
+  quantum.container.inventory.title: Επιλογοδοτικό
+  quantum.container.crate.title: Κάθος
+  quantum.recipe.craftable: Επιλέξιμο
+  quantum.recipe.uncraftable: Μη επιλέξιμο
+  quantum.recipe.ingredients: Υλικά:
+  quantum.screen.message.disconnected: Διακόφθηκες προσωρινά από το παιχνίδι
+  quantum.commands.player.dumpData.success: Εξάγει δεδομένα παίκτη:
+  quantum.damageSource.kill: %s κάτωσε
+  quantum.damageSource.kill.by: %1$s κάτωσε από %2$s
+  quantum.damageSource.kill.item: %1$s κάτωσε από %2$s χρησιμοποιώντας %3$s
+  quantum.damageSource.falling: %s πήγε πάνω σε μεγάλη ύψος
+  quantum.damageSource.falling.by: %1$s πήγε πάνω σε μεγάλη ύψος από %2$s
+  quantum.damageSource.void: %s πήγε στο Κενό
+  quantum.damageSource.void.by: %1$s πήγε στο Κενό λόγω %2$s
+  quantum.damageSource.none: %s πήγε κατάσταση ελεύθερου
+  quantum.damageSource.none.by: %1$s πήγε κατάσταση ελεύθερου λόγω %2$s
+  quantum.damageSource.hunger: %1$s στερεώθηκε
 }

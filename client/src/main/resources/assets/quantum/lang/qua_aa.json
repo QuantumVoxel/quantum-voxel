@@ -1,175 +1,175 @@
 {
-  "display.language": "Quenya (Quenya)",
-  "quantum.block.sand.name": "Lëuca",
-  "quantum.block.grass_block.name": "Salquëhomba",
-  "quantum.block.dirt.name": "Sáma",
-  "quantum.block.stone.name": "Ondo",
-  "quantum.block.gravel.name": "Hresta",
-  "quantum.block.log.name": "Tumna",
-  "quantum.block.leaves.name": "Lassë",
-  "quantum.block.planks.name": "Pangua",
-  "quantum.block.cobblestone.name": "Hilincë",
-  "quantum.block.crate.name": "Corma",
-  "quantum.block.blast_furnace.name": "Urcilë",
-  "quantum.block.water.name": "Nen",
-  "quantum.block.air.name": "Wilma",
-  "quantum.item.wooden_pickaxe.name": "Tumna-carpa",
-  "quantum.item.wooden_shovel.name": "Tumna-páca",
-  "quantum.item.wooden_axe.name": "Tumna-peca",
-  "quantum.item.stone_pickaxe.name": "Ondo-carpa",
-  "quantum.item.stone_shovel.name": "Ondo-páca",
-  "quantum.item.stone_axe.name": "Ondo-peca",
-  "quantum.item.iron_pickaxe.name": "Anga-carpa",
-  "quantum.item.iron_shovel.name": "Anga-páca",
-  "quantum.item.iron_axe.name": "Anga-peca",
-  "quantum.item.plank.name": "Pango",
-  "quantum.item.stick.name": "Tengwë",
-  "quantum.item.air.name": "Wilma",
-  "quantum.ui.exitWorld": "Rácina Cemenna",
-  "quantum.ui.gamePaused": "Tyalë Núvë",
-  "quantum.ui.backToGame": "Enyalë Tyalë",
-  "quantum.ui.back": "Enyalë",
-  "quantum.ui.back.arrow": "< Enyalë",
-  "quantum.ui.cancel": "Pusta",
-  "quantum.ui.confirm": "Tan",
-  "quantum.ui.proceed": "Ámen",
-  "quantum.ui.accept": "Ámara",
-  "quantum.ui.deny": "Avan",
-  "quantum.ui.ok": "Mai",
-  "quantum.ui.done": "Carnë",
-  "quantum.ui.yes": "Nai",
-  "quantum.ui.error": "Anwa!",
-  "quantum.ui.no": "Lau",
-  "quantum.ui.okay": "Mai",
-  "quantum.ui.toggle": "Áturë",
-  "quantum.ui.enable": "Áturë",
-  "quantum.ui.disable": "Áyantë",
-  "quantum.ui.enabled": "Áturë",
-  "quantum.ui.disabled": "Áyantë",
-  "quantum.ui.hidden": "Fáina",
-  "quantum.ui.visible": "Calma",
-  "quantum.ui.toggle_all": "Ilë Áturë",
-  "quantum.ui.enable_all": "Ilë Áturë",
-  "quantum.ui.disable_all": "Ilë Áyantë",
-  "quantum.dialog.delete_world.title": "Narcë Cemenna?",
-  "quantum.dialog.delete_world.message": "An sartanë tan narcë cemenna? Carmëo úuva pusta.",
-  "quantum.screen.worlds.edit": "Envilya Cemenna",
-  "quantum.screen.worlds.edit.too_old": "Sinë cemenya úvan envilya.",
-  "quantum.screen.world_load.loading_world": "Álanë cemenna",
-  "quantum.screen.language": "Lambë",
-  "quantum.screen.message.saving_world": "Árucanë cemenna...",
-  "quantum.screen.message.joining_server": "Ánolë collamëa...",
-  "quantum.screen.mod_list": "Nótië listë",
-  "quantum.screen.mod_list.import_xeox": "Áturë Xeox Nótië",
-  "quantum.screen.mod_list.config": "Tan",
-  "quantum.screen.death.respawn": "Naeë",
-  "quantum.screen.death.title": "Antale",
-  "quantum.screen.options": "Tan...",
-  "quantum.screen.settings.configs": "Tan",
-  "quantum.screen.settings.title": "Tan",
-  "quantum.screen.options.video": "Lendë Tan...",
-  "quantum.screen.options.video.title": "Lendë Tan",
-  "quantum.screen.options.video.fov": "Cénë",
-  "quantum.screen.options.video.guiScale": "GUI Tulë",
-  "quantum.screen.options.video.fullscreen": "Állë Tela",
-  "quantum.screen.options.video.frameRate": "Lendë Tulë",
-  "quantum.screen.options.video.vSync": "Ulya",
-  "quantum.screen.options.video.renderDistance": "Cenen Túca",
-  "quantum.screen.options.privacy": "Vailë Tan...",
-  "quantum.screen.options.privacy.title": "Vailë Tan",
-  "quantum.screen.options.privacy.hideActiveServer": "Faina Colla",
-  "quantum.screen.options.privacy.hideRpc": "Faina Carma",
-  "quantum.screen.options.privacy.hidePlayerSkin": "Faina Tyelma",
-  "quantum.screen.options.privacy.hidePlayerName": "Faina Esse",
-  "quantum.screen.options.accessibility": "Hlátya Tan...",
-  "quantum.screen.options.accessibility.title": "Hlátya Tan",
-  "quantum.screen.options.accessibility.hideFirstPersonPlayer": "Faina Minya Rána",
-  "quantum.screen.options.accessibility.hideHotbarWhenThirdPerson": "Nelya Rána Faina Tulë",
-  "quantum.screen.options.accessibility.vibration": "Vaque",
-  "quantum.screen.options.personalisation": "Endëa Tan...",
-  "quantum.screen.options.personalisation.title": "Endëa Tan",
-  "quantum.screen.options.personalisation.diagonalFontShadow": "Cilme Tintë",
-  "quantum.screen.options.personalisation.enforceUnicode": "Áturë Unicode",
-  "quantum.screen.options.personalisation.blurRadius": "Hlátya Tintë",
-  "quantum.screen.options.personalisation.blurRadius.text": "Tintë",
-  "quantum.screen.options.language": "Lambë...",
-  "quantum.screen.options.language.title": "Lambë",
-  "quantum.screen.pause.back_to_game": "Enyalë Tyalë",
-  "quantum.screen.pause.exit_world": "Rácina Cemenna",
-  "quantum.screen.world_load": "Álanë cemenna",
-  "quantum.screen.world_delete_confirm.title": "An sartanë tan narcë cemenna?",
-  "quantum.screen.world_delete_confirm.message1": "Ámen carë cemenna '%s'.",
-  "quantum.screen.world_delete_confirm.message2": "Narcë, úvë foina, úvë encuiva.",
-  "quantum.screen.world_delete_confirm.delete": "Narcë",
-  "quantum.screen.world_selection.title": "Cemenna Tancarë",
-  "quantum.screen.world_selection.delete": "Narcë Cemenna",
-  "quantum.screen.world_selection.create": "Carë Nelya Cemenna",
-  "quantum.screen.world_selection.play": "Ehtyarë Cemenna",
-  "quantum.screen.world_creation.title": "Carë Nelya Cemenna",
-  "quantum.screen.world_creation.name": "Cemenna Essë",
-  "quantum.screen.world_creation.create": "Carë",
-  "quantum.screen.title": "Tielyë Rána",
-  "quantum.screen.title.singleplayer": "Múra Tyalë",
-  "quantum.screen.title.reset_world": "Tulya Cemenna",
-  "quantum.screen.title.quit": "Rácina",
-  "quantum.screen.multiplayer": "Uyo Tyalë",
-  "quantum.screen.multiplayer.server_ip": "Colla IP",
-  "quantum.screen.multiplayer.join": "Áturë",
-  "quantum.screen.out_of_memory": "Uú Tulca",
-  "quantum.screen.out_of_memory.message": "Quantum Voxel uú tulca. Áyanë nuhtalëo tyalë. Áyanë tielyëa túca enyalë carma.",
-  "quantum.screen.dev": "Carnë Verson",
-  "quantum.screen.dev.message": "Sië ná Quantum carnë versë. Ánalcar ië carma amára. Áyanë ië llúhítë, átoya mahtarië GitHub racina.\n\nHantale!♥ !(icon_success)",
-  "quantum.screen.dev.close": "Hlarë",
-  "quantum.screen.crash": "Quantum Voxel náta",
-  "quantum.screen.crash.message": "Ávalcar carma perta ië nótië. Sië óta carma, áturë racina nótiëma carma/nótiëhóma ië carma.",
-  "quantum.damageSource.none": "%s quorinë",
-  "quantum.damageSource.none.by": "%1$s quorinë an %2$s",
-  "quantum.damageSource.hunger": "%1$s quorinë na málo",
-  "quantum.ui.auto": "Automá",
-  "quantum.ui.manual": "Macil",
-  "quantum.hud.memory_usage": "Áruvala",
-  "quantum.hud.memory_usage.jvm_free": "Nánaúra: %1$s",
-  "quantum.hud.memory_usage.used": "Úya: %1$s/%2$s",
-  "quantum.misc.bits.16": "16 Nár",
-  "quantum.misc.bits.24": "24 Nár",
-  "quantum.misc.bits.32": "32 Nár",
-  "quantum.misc.bits.64": "64 Nár",
-  "quantum.misc.digit.1": "1",
-  "quantum.misc.digit.2": "2",
-  "quantum.misc.digit.3": "3",
-  "quantum.misc.digit.4": "4",
-  "quantum.misc.digit.5": "5",
-  "quantum.misc.digit.6": "6",
-  "quantum.misc.digit.7": "7",
-  "quantum.misc.digit.8": "8",
-  "quantum.misc.digit.9": "9",
-  "quantum.misc.digit.0": "0",
-  "quantum.misc.lang.single_object": "Erë %s",
-  "quantum.misc.lang.single_object_plural": "Erë %s",
-  "quantum.misc.lang.multiple_objects": "%1$s %2$sor",
-  "quantum.misc.lang.multiple_objects_plural": "%1$s %2$sor",
-  "quantum.misc.lang.multiple_objects_and": "%1$s ar %2$s",
-  "quantum.misc.lang.multiple_objects_and_plural": "%1$s ar %2$s",
-  "quantum.misc.lang.multiple_objects_or": "%1$s yë %2$s",
-  "quantum.misc.lang.multiple_objects_or_plural": "%1$s yë %2$s",
-  "quantum.misc.lang.multiple_objects_and_more": "%1$s ar %2$s",
-  "quantum.misc.lang.multiple_objects_and_more_plural": "%1$s ar %2$s",
-  "quantum.misc.lang.multiple_objects_or_more": "%1$s yë %2$s",
-  "quantum.misc.lang.multiple_objects_or_more_plural": "%1$s yë %2$s",
-  "quantum.misc.lang.multiple_objects_more": "%1$s, %2$s",
-  "quantum.misc.lang.multiple_objects_more_plural": "%1$s, %2$s",
-  "quantum.misc.lang.by": "Ná %s",
-  "quantum.misc.lang.of": "%1$s ná %2$s",
-  "quantum.misc.time.nanoseconds": "Náranó",
-  "quantum.misc.time.microseconds": "Micronó",
-  "quantum.misc.time.milliseconds": "Millenó",
-  "quantum.misc.time.seconds": "Cen",
-  "quantum.misc.time.minutes": "Mínet",
-  "quantum.misc.time.hours": "Lúmë",
-  "quantum.misc.time.days": "Rána",
-  "quantum.misc.time.weeks": "Lóte",
-  "quantum.misc.time.months": "Yéni",
-  "quantum.misc.time.years": "Loa",
-  "quantum.misc.bytes": " Aúrelë",
-  "quantum.misc.kilobytes": " Kilaúrelë"
+  display.language: Quenya (Quenya)
+  quantum.block.sand.name: Lëuca
+  quantum.block.grass_block.name: Salquëhomba
+  quantum.block.dirt.name: Sáma
+  quantum.block.stone.name: Ondo
+  quantum.block.gravel.name: Hresta
+  quantum.block.log.name: Tumna
+  quantum.block.leaves.name: Lassë
+  quantum.block.planks.name: Pangua
+  quantum.block.cobblestone.name: Hilincë
+  quantum.block.crate.name: Corma
+  quantum.block.blast_furnace.name: Urcilë
+  quantum.block.water.name: Nen
+  quantum.block.air.name: Wilma
+  quantum.item.wooden_pickaxe.name: Tumna-carpa
+  quantum.item.wooden_shovel.name: Tumna-páca
+  quantum.item.wooden_axe.name: Tumna-peca
+  quantum.item.stone_pickaxe.name: Ondo-carpa
+  quantum.item.stone_shovel.name: Ondo-páca
+  quantum.item.stone_axe.name: Ondo-peca
+  quantum.item.iron_pickaxe.name: Anga-carpa
+  quantum.item.iron_shovel.name: Anga-páca
+  quantum.item.iron_axe.name: Anga-peca
+  quantum.item.plank.name: Pango
+  quantum.item.stick.name: Tengwë
+  quantum.item.air.name: Wilma
+  quantum.ui.exitWorld: Rácina Cemenna
+  quantum.ui.gamePaused: Tyalë Núvë
+  quantum.ui.backToGame: Enyalë Tyalë
+  quantum.ui.back: Enyalë
+  quantum.ui.back.arrow: < Enyalë
+  quantum.ui.cancel: Pusta
+  quantum.ui.confirm: Tan
+  quantum.ui.proceed: Ámen
+  quantum.ui.accept: Ámara
+  quantum.ui.deny: Avan
+  quantum.ui.ok: Mai
+  quantum.ui.done: Carnë
+  quantum.ui.yes: Nai
+  quantum.ui.error: Anwa!
+  quantum.ui.no: Lau
+  quantum.ui.okay: Mai
+  quantum.ui.toggle: Áturë
+  quantum.ui.enable: Áturë
+  quantum.ui.disable: Áyantë
+  quantum.ui.enabled: Áturë
+  quantum.ui.disabled: Áyantë
+  quantum.ui.hidden: Fáina
+  quantum.ui.visible: Calma
+  quantum.ui.toggle_all: Ilë Áturë
+  quantum.ui.enable_all: Ilë Áturë
+  quantum.ui.disable_all: Ilë Áyantë
+  quantum.dialog.delete_world.title: Narcë Cemenna?
+  quantum.dialog.delete_world.message: "An sartanë tan narcë cemenna? Carmëo úuva pusta."
+  quantum.screen.worlds.edit: Envilya Cemenna
+  quantum.screen.worlds.edit.too_old: "Sinë cemenya úvan envilya."
+  quantum.screen.world_load.loading_world: Álanë cemenna
+  quantum.screen.language: Lambë
+  quantum.screen.message.saving_world: "Árucanë cemenna..."
+  quantum.screen.message.joining_server: "Ánolë collamëa..."
+  quantum.screen.mod_list: Nótië listë
+  quantum.screen.mod_list.import_xeox: Áturë Xeox Nótië
+  quantum.screen.mod_list.config: Tan
+  quantum.screen.death.respawn: Naeë
+  quantum.screen.death.title: Antale
+  quantum.screen.options: "Tan..."
+  quantum.screen.settings.configs: Tan
+  quantum.screen.settings.title: Tan
+  quantum.screen.options.video: "Lendë Tan..."
+  quantum.screen.options.video.title: Lendë Tan
+  quantum.screen.options.video.fov: Cénë
+  quantum.screen.options.video.guiScale: GUI Tulë
+  quantum.screen.options.video.fullscreen: Állë Tela
+  quantum.screen.options.video.frameRate: Lendë Tulë
+  quantum.screen.options.video.vSync: Ulya
+  quantum.screen.options.video.renderDistance: Cenen Túca
+  quantum.screen.options.privacy: "Vailë Tan..."
+  quantum.screen.options.privacy.title: Vailë Tan
+  quantum.screen.options.privacy.hideActiveServer: Faina Colla
+  quantum.screen.options.privacy.hideRpc: Faina Carma
+  quantum.screen.options.privacy.hidePlayerSkin: Faina Tyelma
+  quantum.screen.options.privacy.hidePlayerName: Faina Esse
+  quantum.screen.options.accessibility: "Hlátya Tan..."
+  quantum.screen.options.accessibility.title: Hlátya Tan
+  quantum.screen.options.accessibility.hideFirstPersonPlayer: Faina Minya Rána
+  quantum.screen.options.accessibility.hideHotbarWhenThirdPerson: Nelya Rána Faina Tulë
+  quantum.screen.options.accessibility.vibration: Vaque
+  quantum.screen.options.personalisation: "Endëa Tan..."
+  quantum.screen.options.personalisation.title: Endëa Tan
+  quantum.screen.options.personalisation.diagonalFontShadow: Cilme Tintë
+  quantum.screen.options.personalisation.enforceUnicode: Áturë Unicode
+  quantum.screen.options.personalisation.blurRadius: Hlátya Tintë
+  quantum.screen.options.personalisation.blurRadius.text: Tintë
+  quantum.screen.options.language: "Lambë..."
+  quantum.screen.options.language.title: Lambë
+  quantum.screen.pause.back_to_game: Enyalë Tyalë
+  quantum.screen.pause.exit_world: Rácina Cemenna
+  quantum.screen.world_load: Álanë cemenna
+  quantum.screen.world_delete_confirm.title: An sartanë tan narcë cemenna?
+  quantum.screen.world_delete_confirm.message1: "Ámen carë cemenna '%s'."
+  quantum.screen.world_delete_confirm.message2: "Narcë, úvë foina, úvë encuiva."
+  quantum.screen.world_delete_confirm.delete: Narcë
+  quantum.screen.world_selection.title: Cemenna Tancarë
+  quantum.screen.world_selection.delete: Narcë Cemenna
+  quantum.screen.world_selection.create: Carë Nelya Cemenna
+  quantum.screen.world_selection.play: Ehtyarë Cemenna
+  quantum.screen.world_creation.title: Carë Nelya Cemenna
+  quantum.screen.world_creation.name: Cemenna Essë
+  quantum.screen.world_creation.create: Carë
+  quantum.screen.title: Tielyë Rána
+  quantum.screen.title.singleplayer: Múra Tyalë
+  quantum.screen.title.reset_world: Tulya Cemenna
+  quantum.screen.title.quit: Rácina
+  quantum.screen.multiplayer: Uyo Tyalë
+  quantum.screen.multiplayer.server_ip: Colla IP
+  quantum.screen.multiplayer.join: Áturë
+  quantum.screen.out_of_memory: Uú Tulca
+  quantum.screen.out_of_memory.message: "Quantum Voxel uú tulca. Áyanë nuhtalëo tyalë. Áyanë tielyëa túca enyalë carma."
+  quantum.screen.dev: Carnë Verson
+  quantum.screen.dev.message: "Sië ná Quantum carnë versë. Ánalcar ië carma amára. Áyanë ië llúhítë, átoya mahtarië GitHub racina.\n\nHantale!♥ !(icon_success)"
+  quantum.screen.dev.close: Hlarë
+  quantum.screen.crash: Quantum Voxel náta
+  quantum.screen.crash.message: "Ávalcar carma perta ië nótië. Sië óta carma, áturë racina nótiëma carma/nótiëhóma ië carma."
+  quantum.damageSource.none: %s quorinë
+  quantum.damageSource.none.by: %1$s quorinë an %2$s
+  quantum.damageSource.hunger: %1$s quorinë na málo
+  quantum.ui.auto: Automá
+  quantum.ui.manual: Macil
+  quantum.hud.memory_usage: Áruvala
+  quantum.hud.memory_usage.jvm_free: Nánaúra: %1$s
+  quantum.hud.memory_usage.used: Úya: %1$s/%2$s
+  quantum.misc.bits.16: 16 Nár
+  quantum.misc.bits.24: 24 Nár
+  quantum.misc.bits.32: 32 Nár
+  quantum.misc.bits.64: 64 Nár
+  quantum.misc.digit.1: "1"
+  quantum.misc.digit.2: "2"
+  quantum.misc.digit.3: "3"
+  quantum.misc.digit.4: "4"
+  quantum.misc.digit.5: "5"
+  quantum.misc.digit.6: "6"
+  quantum.misc.digit.7: "7"
+  quantum.misc.digit.8: "8"
+  quantum.misc.digit.9: "9"
+  quantum.misc.digit.0: "0"
+  quantum.misc.lang.single_object: Erë %s
+  quantum.misc.lang.single_object_plural: Erë %s
+  quantum.misc.lang.multiple_objects: %1$s %2$sor
+  quantum.misc.lang.multiple_objects_plural: %1$s %2$sor
+  quantum.misc.lang.multiple_objects_and: %1$s ar %2$s
+  quantum.misc.lang.multiple_objects_and_plural: %1$s ar %2$s
+  quantum.misc.lang.multiple_objects_or: %1$s yë %2$s
+  quantum.misc.lang.multiple_objects_or_plural: %1$s yë %2$s
+  quantum.misc.lang.multiple_objects_and_more: %1$s ar %2$s
+  quantum.misc.lang.multiple_objects_and_more_plural: %1$s ar %2$s
+  quantum.misc.lang.multiple_objects_or_more: %1$s yë %2$s
+  quantum.misc.lang.multiple_objects_or_more_plural: %1$s yë %2$s
+  quantum.misc.lang.multiple_objects_more: "%1$s, %2$s"
+  quantum.misc.lang.multiple_objects_more_plural: "%1$s, %2$s"
+  quantum.misc.lang.by: Ná %s
+  quantum.misc.lang.of: %1$s ná %2$s
+  quantum.misc.time.nanoseconds: Náranó
+  quantum.misc.time.microseconds: Micronó
+  quantum.misc.time.milliseconds: Millenó
+  quantum.misc.time.seconds: Cen
+  quantum.misc.time.minutes: Mínet
+  quantum.misc.time.hours: Lúmë
+  quantum.misc.time.days: Rána
+  quantum.misc.time.weeks: Lóte
+  quantum.misc.time.months: Yéni
+  quantum.misc.time.years: Loa
+  quantum.misc.bytes: " Aúrelë"
+  quantum.misc.kilobytes: " Kilaúrelë"
 }

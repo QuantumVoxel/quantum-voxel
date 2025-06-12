@@ -1,222 +1,222 @@
 {
-  "display.language": "Anglice (US)",
-  "quantum.block.sand.name": "Arena",
-  "quantum.block.grass_block.name": "Gramen",
-  "quantum.block.dirt.name": "Humus",
-  "quantum.block.stone.name": "Lapis",
-  "quantum.block.cobblestone.name": "Lapis Caementarius",
-  "quantum.block.water.name": "Aqua",
-  "quantum.block.air.name": "Aer",
-  "quantum.item.wooden_pickaxe.name": "Rastrum Ligneum",
-  "quantum.item.wooden_shovel.name": "Pala Lignea",
-  "quantum.item.air.name": "Aer",
-  "quantum.ui.backToGame": "Redi ad Ludum",
-  "quantum.ui.back": "Retro",
-  "quantum.ui.cancel": "Cancellare",
-  "quantum.ui.confirm": "Confirmare",
-  "quantum.ui.proceed": "Procedere",
-  "quantum.ui.accept": "Accipere",
-  "quantum.ui.deny": "Negare",
-  "quantum.ui.ok": "Bene",
-  "quantum.ui.yes": "Ita",
-  "quantum.ui.no": "Non",
-  "quantum.ui.okay": "Bene",
-  "quantum.ui.toggle": "Commutare",
-  "quantum.ui.enable": "Activare",
-  "quantum.ui.disable": "Deactivare",
-  "quantum.ui.toggle_all": "Omnia Commutare",
-  "quantum.ui.enable_all": "Omnia Activare",
-  "quantum.ui.disable_all": "Omnia Deactivare",
-  "quantum.screen.world_load.loading_world": "Orbem Onere",
-  "quantum.screen.language": "Lingua",
-  "quantum.screen.message.saving_world": "Servans Orbem...",
-  "quantum.screen.message.joining_server": "Coniungens Servo...",
-  "quantum.screen.mod_list": "Modi Elenchus",
-  "quantum.screen.mod_list.config": "Configuratio",
-  "quantum.screen.death.respawn": "Renatus",
-  "quantum.screen.death.title": "Tu Mortuus Es",
-  "quantum.screen.pause.back_to_game": "Redi ad Ludum",
-  "quantum.screen.pause.exit_world": "Exitus Orbis",
-  "quantum.screen.world_load": "Orbem Onere",
-  "quantum.screen.world_delete_confirm.title": "Certus es quod vis hunc orbem delere?",
-  "quantum.screen.world_delete_confirm.message1": "Procedens delet orbem '%s' ex existentia.",
-  "quantum.screen.world_delete_confirm.message2": "Evanuat, deletur ex existentia, perdita tempori in regno orbium deletorum.",
-  "quantum.screen.world_delete_confirm.delete": "Delere",
-  "quantum.screen.world_selection.title": "Selec Orbem",
-  "quantum.screen.world_selection.delete": "Delere Orbem",
-  "quantum.screen.world_selection.create": "Crea Novum Orbem",
-  "quantum.screen.world_selection.play": "Ludere Orbem",
-  "quantum.screen.world_creation.title": "Crea Novum Orbem",
-  "quantum.screen.world_creation.name": "Nomen Orbis",
-  "quantum.screen.world_creation.create": "Crea",
-  "quantum.screen.title": "Titulus Screen",
-  "quantum.screen.title.singleplayer": "Unicus Lusus",
-  "quantum.screen.title.reset_world": "Recreare Orbem",
-  "quantum.screen.title.quit": "Exire",
-  "quantum.screen.multiplayer": "Multiludium",
-  "quantum.screen.multiplayer.server_ip": "IP Servi",
-  "quantum.screen.multiplayer.join": "Coniungere",
-  "quantum.block.gravel.name": "Sabulum",
-  "quantum.block.log.name": "Truncus",
-  "quantum.block.leaves.name": "Folia",
-  "quantum.block.planks.name": "Tabulae",
-  "quantum.block.crate.name": "Sarcina",
-  "quantum.block.blast_furnace.name": "Fornax Exustoria",
-  "quantum.item.wooden_axe.name": "Secespita Lignea",
-  "quantum.item.stone_pickaxe.name": "Rastrum Lapideum",
-  "quantum.item.stone_shovel.name": "Pala Lapidea",
-  "quantum.item.stone_axe.name": "Secespita Lapidea",
-  "quantum.item.iron_pickaxe.name": "Rastrum Ferri",
-  "quantum.item.iron_shovel.name": "Pala Ferri",
-  "quantum.item.iron_axe.name": "Secespita Ferri",
-  "quantum.item.plank.name": "Tabula",
-  "quantum.item.stick.name": "Virga",
-  "quantum.ui.exitWorld": "Exitus Orbis",
-  "quantum.ui.gamePaused": "Ludus Intermissus",
-  "quantum.ui.back.arrow": "< Retro",
-  "quantum.ui.done": "Factum",
-  "quantum.ui.error": "Error!",
-  "quantum.ui.enabled": "Activatum",
-  "quantum.ui.disabled": "Deactivatum",
-  "quantum.ui.hidden": "Absconditum",
-  "quantum.ui.visible": "Visibile",
-  "quantum.dialog.delete_world.title": "Delere Orbem?",
-  "quantum.dialog.delete_world.message": "Certus es quod vis\nhunc orbem delere?\nHoc non retractari potest.",
-  "quantum.screen.worldLoad.enteringWorld": "Intrantes tuum orbem",
-  "quantum.screen.worldLoad.enteringServer": "Intrantes servum",
-  "quantum.screen.worldLoad.loading": "Orbem Onere",
-  "quantum.screen.worldLoad.loadingFromServer": "Onere Orbem e Servo",
-  "quantum.screen.worldLoad.preparingChunks": "Parans ad particulas onerandas",
-  "quantum.screen.worldLoad.chunksLoading": "Particulae %d ex %d onere (%s completum)",
-  "quantum.screen.worlds.edit": "Edere Orbem",
-  "quantum.screen.worlds.edit.too_old": "Hic orbis nimis vetus est ut edatur.",
-  "quantum.screen.credits.title": "Merita",
-  "quantum.screen.credits.tab.assets": "Res",
-  "quantum.screen.credits.tab.code": "Codex",
-  "quantum.screen.credits.tab.downloads": "Externa Downloads",
-  "quantum.screen.credits.tab.translations": "Translationes",
-  "quantum.screen.credits.tab.testing": "Testimonium",
-  "quantum.screen.credits.tab.docs": "Documentatio",
-  "quantum.screen.credits.tab.external_libs": "Bibliothecae Externae",
-  "quantum.screen.credits.tab.extra": "Extra",
-  "quantum.screen.credits.tab.sound_effects": "Effectus Sonitus",
-  "quantum.screen.credits.detail.url": "URL",
-  "quantum.screen.credits.detail.license": "Licentia",
-  "quantum.screen.credits.detail.roles": "Munera Proiecti",
-  "quantum.screen.credits.detail.for": "Confecit",
-  "quantum.screen.credits.detail.uses": "Utitur",
-  "quantum.screen.credits.detail.links": "Nexus",
-  "quantum.screen.credits.detail.mentions": "Memorat",
-  "quantum.screen.mod_list.import_xeox": "Importa Xeox Mod",
-  "quantum.screen.options": "Optiones...",
-  "quantum.screen.settings.configs": "Configurationes",
-  "quantum.screen.settings.title": "Configurationes",
-  "quantum.screen.options.video": "Optiones Video...",
-  "quantum.screen.options.video.title": "Optiones Video",
-  "quantum.screen.options.video.fov": "Angulus Visus",
-  "quantum.screen.options.video.guiScale": "Scala GUI",
-  "quantum.screen.options.video.fullscreen": "Plenam Tabulam",
-  "quantum.screen.options.video.frameRate": "Frequenta Tabulae",
-  "quantum.screen.options.video.vSync": "V-Sync",
-  "quantum.screen.options.video.renderDistance": "Spatium Reddere",
-  "quantum.screen.options.privacy": "Optiones Secretum...",
-  "quantum.screen.options.privacy.title": "Optiones Secretum",
-  "quantum.screen.options.privacy.hideActiveServer": "Servus Activus",
-  "quantum.screen.options.privacy.hideRpc": "Praesentia Dives",
-  "quantum.screen.options.privacy.hidePlayerSkin": "Cutis Lusoris",
-  "quantum.screen.options.privacy.hidePlayerName": "Nomen Lusoris",
-  "quantum.screen.options.accessibility": "Accessibilitas...",
-  "quantum.screen.options.accessibility.title": "Accessibilitas",
-  "quantum.screen.options.accessibility.hideFirstPersonPlayer": "Lusor Prima Persona",
-  "quantum.screen.options.accessibility.hideHotbarWhenThirdPerson": "3rd Persona Hotbar",
-  "quantum.screen.options.accessibility.vibration": "Vibratio",
-  "quantum.screen.options.personalisation": "Personalizatio...",
-  "quantum.screen.options.personalisation.title": "Personalizatio",
-  "quantum.screen.options.personalisation.diagonalFontShadow": "Umbratio Diagonalis Litterarum",
-  "quantum.screen.options.personalisation.enforceUnicode": "Cogere Unicode",
-  "quantum.screen.options.personalisation.blurRadius": "Fortitudo Dissipationis in Pixels",
-  "quantum.screen.options.personalisation.blurRadius.text": "Fortitudo",
-  "quantum.screen.options.language": "Lingua...",
-  "quantum.screen.options.language.title": "Lingua",
-  "quantum.screen.out_of_memory": "Memoria Exhausta",
-  "quantum.screen.out_of_memory.message": "Quantum Voxel memoriam exhaurivit.\nConare ludi iterum initium facere.\nPotes etiam redire ad titulum ad memoriam liberandam.",
-  "quantum.screen.dev": "Progressio Aedificium",
-  "quantum.screen.dev.message": "Hoc est progressio aedificium quantum.\nNon exspecta ut perfecte operetur.\nSi quaestiones experiris, rogo eas in GitHub pagina referas.\n\nGratias tibi ago! ♥ !(icon_success)",
-  "quantum.screen.dev.close": "Claude",
-  "quantum.screen.crash": "Quantum Voxel Collapsus Est",
-  "quantum.screen.crash.message": "Vide si ullos modos uteris antequam errorem referas.\nSi modos uteris, errorem ad mod/modpack auctorem refer.",
-  "quantum.dimension.overworld": "Planeta Terra",
-  "quantum.container.inventory.title": "Inventarium",
-  "quantum.container.crate.title": "Sarcina",
-  "quantum.recipe.craftable": "Fabricabilis",
-  "quantum.recipe.uncraftable": "Non Fabricabilis",
-  "quantum.recipe.ingredients": "Ingredientia:",
-  "quantum.screen.message.disconnected": "Disiunctus es.",
-  "quantum.commands.player.dumpData.success": "Data lusoris dimissa: ",
-  "quantum.damageSource.kill": "%s interfectus est",
-  "quantum.damageSource.kill.by": "%1$s interfectus est a %2$s",
-  "quantum.damageSource.kill.item": "%1$s interfectus est a %2$s utens %3$s",
-  "quantum.damageSource.falling": "%s cecidit ex alto loco",
-  "quantum.damageSource.falling.by": "%1$s depulsus est ex alto loco a %2$s",
-  "quantum.damageSource.void": "%s a vacuo absorptus est",
-  "quantum.damageSource.void.by": "%1$s absorptus est a vacuo propter %2$s",
-  "quantum.damageSource.none": "%s mortuus est ex nihilo",
-  "quantum.damageSource.none.by": "%1$s mortuus est ex nihilo propter %2$s",
-  "quantum.damageSource.hunger": "%1$s fame periit",
-  "quantum.ui.auto": "Automatice",
-  "quantum.ui.manual": "Manualiter",
-  "quantum.hud.memory_usage": "Memoria Usus",
-  "quantum.hud.memory_usage.jvm_free": "VM Libera: %1$s",
-  "quantum.hud.memory_usage.used": "Usus: %1$s/%2$s",
-  "quantum.misc.bits.16": "16 bits",
-  "quantum.misc.bits.24": "24 bits",
-  "quantum.misc.bits.32": "32 bits",
-  "quantum.misc.bits.64": "64 bits",
-  "quantum.misc.digit.1": "1",
-  "quantum.misc.digit.2": "2",
-  "quantum.misc.digit.3": "3",
-  "quantum.misc.digit.4": "4",
-  "quantum.misc.digit.5": "5",
-  "quantum.misc.digit.6": "6",
-  "quantum.misc.digit.7": "7",
-  "quantum.misc.digit.8": "8",
-  "quantum.misc.digit.9": "9",
-  "quantum.misc.digit.0": "0",
-  "quantum.misc.lang.single_object": "unus %s",
-  "quantum.misc.lang.single_object_plural": "unus %s",
-  "quantum.misc.lang.multiple_objects": "%1$s %2$ss",
-  "quantum.misc.lang.multiple_objects_plural": "%1$s %2$ss",
-  "quantum.misc.lang.multiple_objects_and": "%1$s et %2$s",
-  "quantum.misc.lang.multiple_objects_and_plural": "%1$s et %2$s",
-  "quantum.misc.lang.multiple_objects_or": "%1$s vel %2$s",
-  "quantum.misc.lang.multiple_objects_or_plural": "%1$s vel %2$s",
-  "quantum.misc.lang.multiple_objects_and_more": "%1$s, et %2$s",
-  "quantum.misc.lang.multiple_objects_and_more_plural": "%1$s, et %2$s",
-  "quantum.misc.lang.multiple_objects_or_more": "%1$s, vel %2$s",
-  "quantum.misc.lang.multiple_objects_or_more_plural": "%1$s, vel %2$s",
-  "quantum.misc.lang.multiple_objects_more": "%1$s, %2$s",
-  "quantum.misc.lang.multiple_objects_more_plural": "%1$s, %2$s",
-  "quantum.misc.lang.by": "a %s",
-  "quantum.misc.lang.of": "%1$s de %2$s",
-  "quantum.misc.time.nanoseconds": "nanosecundae",
-  "quantum.misc.time.microseconds": "microsecundae",
-  "quantum.misc.time.milliseconds": "millisecundae",
-  "quantum.misc.time.seconds": "secundae",
-  "quantum.misc.time.minutes": "minutae",
-  "quantum.misc.time.hours": "horae",
-  "quantum.misc.time.days": "dies",
-  "quantum.misc.time.weeks": "hebdomadae",
-  "quantum.misc.time.months": "menses",
-  "quantum.misc.time.years": "anni",
-  "quantum.misc.bytes": " bytes",
-  "quantum.misc.kilobytes": " kB",
-  "quantum.misc.megabytes": " MB",
-  "quantum.misc.gigabytes": " GB",
-  "quantum.misc.terabytes": " TB",
-  "quantum.misc.petabytes": " PB",
-  "quantum.misc.kibibytes": " KiB",
-  "quantum.misc.mebibytes": " MiB",
-  "quantum.misc.gibibytes": " GiB",
-  "quantum.misc.tebibytes": " TiB",
-  "quantum.misc.pebibytes": " PiB"
+  display.language: Anglice (US)
+  quantum.block.sand.name: Arena
+  quantum.block.grass_block.name: Gramen
+  quantum.block.dirt.name: Humus
+  quantum.block.stone.name: Lapis
+  quantum.block.cobblestone.name: Lapis Caementarius
+  quantum.block.water.name: Aqua
+  quantum.block.air.name: Aer
+  quantum.item.wooden_pickaxe.name: Rastrum Ligneum
+  quantum.item.wooden_shovel.name: Pala Lignea
+  quantum.item.air.name: Aer
+  quantum.ui.backToGame: Redi ad Ludum
+  quantum.ui.back: Retro
+  quantum.ui.cancel: Cancellare
+  quantum.ui.confirm: Confirmare
+  quantum.ui.proceed: Procedere
+  quantum.ui.accept: Accipere
+  quantum.ui.deny: Negare
+  quantum.ui.ok: Bene
+  quantum.ui.yes: Ita
+  quantum.ui.no: Non
+  quantum.ui.okay: Bene
+  quantum.ui.toggle: Commutare
+  quantum.ui.enable: Activare
+  quantum.ui.disable: Deactivare
+  quantum.ui.toggle_all: Omnia Commutare
+  quantum.ui.enable_all: Omnia Activare
+  quantum.ui.disable_all: Omnia Deactivare
+  quantum.screen.world_load.loading_world: Orbem Onere
+  quantum.screen.language: Lingua
+  quantum.screen.message.saving_world: "Servans Orbem..."
+  quantum.screen.message.joining_server: "Coniungens Servo..."
+  quantum.screen.mod_list: Modi Elenchus
+  quantum.screen.mod_list.config: Configuratio
+  quantum.screen.death.respawn: Renatus
+  quantum.screen.death.title: Tu Mortuus Es
+  quantum.screen.pause.back_to_game: Redi ad Ludum
+  quantum.screen.pause.exit_world: Exitus Orbis
+  quantum.screen.world_load: Orbem Onere
+  quantum.screen.world_delete_confirm.title: Certus es quod vis hunc orbem delere?
+  quantum.screen.world_delete_confirm.message1: "Procedens delet orbem '%s' ex existentia."
+  quantum.screen.world_delete_confirm.message2: "Evanuat, deletur ex existentia, perdita tempori in regno orbium deletorum."
+  quantum.screen.world_delete_confirm.delete: Delere
+  quantum.screen.world_selection.title: Selec Orbem
+  quantum.screen.world_selection.delete: Delere Orbem
+  quantum.screen.world_selection.create: Crea Novum Orbem
+  quantum.screen.world_selection.play: Ludere Orbem
+  quantum.screen.world_creation.title: Crea Novum Orbem
+  quantum.screen.world_creation.name: Nomen Orbis
+  quantum.screen.world_creation.create: Crea
+  quantum.screen.title: Titulus Screen
+  quantum.screen.title.singleplayer: Unicus Lusus
+  quantum.screen.title.reset_world: Recreare Orbem
+  quantum.screen.title.quit: Exire
+  quantum.screen.multiplayer: Multiludium
+  quantum.screen.multiplayer.server_ip: IP Servi
+  quantum.screen.multiplayer.join: Coniungere
+  quantum.block.gravel.name: Sabulum
+  quantum.block.log.name: Truncus
+  quantum.block.leaves.name: Folia
+  quantum.block.planks.name: Tabulae
+  quantum.block.crate.name: Sarcina
+  quantum.block.blast_furnace.name: Fornax Exustoria
+  quantum.item.wooden_axe.name: Secespita Lignea
+  quantum.item.stone_pickaxe.name: Rastrum Lapideum
+  quantum.item.stone_shovel.name: Pala Lapidea
+  quantum.item.stone_axe.name: Secespita Lapidea
+  quantum.item.iron_pickaxe.name: Rastrum Ferri
+  quantum.item.iron_shovel.name: Pala Ferri
+  quantum.item.iron_axe.name: Secespita Ferri
+  quantum.item.plank.name: Tabula
+  quantum.item.stick.name: Virga
+  quantum.ui.exitWorld: Exitus Orbis
+  quantum.ui.gamePaused: Ludus Intermissus
+  quantum.ui.back.arrow: < Retro
+  quantum.ui.done: Factum
+  quantum.ui.error: Error!
+  quantum.ui.enabled: Activatum
+  quantum.ui.disabled: Deactivatum
+  quantum.ui.hidden: Absconditum
+  quantum.ui.visible: Visibile
+  quantum.dialog.delete_world.title: Delere Orbem?
+  quantum.dialog.delete_world.message: "Certus es quod vis\nhunc orbem delere?\nHoc non retractari potest."
+  quantum.screen.worldLoad.enteringWorld: Intrantes tuum orbem
+  quantum.screen.worldLoad.enteringServer: Intrantes servum
+  quantum.screen.worldLoad.loading: Orbem Onere
+  quantum.screen.worldLoad.loadingFromServer: Onere Orbem e Servo
+  quantum.screen.worldLoad.preparingChunks: Parans ad particulas onerandas
+  quantum.screen.worldLoad.chunksLoading: Particulae %d ex %d onere (%s completum)
+  quantum.screen.worlds.edit: Edere Orbem
+  quantum.screen.worlds.edit.too_old: "Hic orbis nimis vetus est ut edatur."
+  quantum.screen.credits.title: Merita
+  quantum.screen.credits.tab.assets: Res
+  quantum.screen.credits.tab.code: Codex
+  quantum.screen.credits.tab.downloads: Externa Downloads
+  quantum.screen.credits.tab.translations: Translationes
+  quantum.screen.credits.tab.testing: Testimonium
+  quantum.screen.credits.tab.docs: Documentatio
+  quantum.screen.credits.tab.external_libs: Bibliothecae Externae
+  quantum.screen.credits.tab.extra: Extra
+  quantum.screen.credits.tab.sound_effects: Effectus Sonitus
+  quantum.screen.credits.detail.url: URL
+  quantum.screen.credits.detail.license: Licentia
+  quantum.screen.credits.detail.roles: Munera Proiecti
+  quantum.screen.credits.detail.for: Confecit
+  quantum.screen.credits.detail.uses: Utitur
+  quantum.screen.credits.detail.links: Nexus
+  quantum.screen.credits.detail.mentions: Memorat
+  quantum.screen.mod_list.import_xeox: Importa Xeox Mod
+  quantum.screen.options: "Optiones..."
+  quantum.screen.settings.configs: Configurationes
+  quantum.screen.settings.title: Configurationes
+  quantum.screen.options.video: "Optiones Video..."
+  quantum.screen.options.video.title: Optiones Video
+  quantum.screen.options.video.fov: Angulus Visus
+  quantum.screen.options.video.guiScale: Scala GUI
+  quantum.screen.options.video.fullscreen: Plenam Tabulam
+  quantum.screen.options.video.frameRate: Frequenta Tabulae
+  quantum.screen.options.video.vSync: V-Sync
+  quantum.screen.options.video.renderDistance: Spatium Reddere
+  quantum.screen.options.privacy: "Optiones Secretum..."
+  quantum.screen.options.privacy.title: Optiones Secretum
+  quantum.screen.options.privacy.hideActiveServer: Servus Activus
+  quantum.screen.options.privacy.hideRpc: Praesentia Dives
+  quantum.screen.options.privacy.hidePlayerSkin: Cutis Lusoris
+  quantum.screen.options.privacy.hidePlayerName: Nomen Lusoris
+  quantum.screen.options.accessibility: "Accessibilitas..."
+  quantum.screen.options.accessibility.title: Accessibilitas
+  quantum.screen.options.accessibility.hideFirstPersonPlayer: Lusor Prima Persona
+  quantum.screen.options.accessibility.hideHotbarWhenThirdPerson: 3rd Persona Hotbar
+  quantum.screen.options.accessibility.vibration: Vibratio
+  quantum.screen.options.personalisation: "Personalizatio..."
+  quantum.screen.options.personalisation.title: Personalizatio
+  quantum.screen.options.personalisation.diagonalFontShadow: Umbratio Diagonalis Litterarum
+  quantum.screen.options.personalisation.enforceUnicode: Cogere Unicode
+  quantum.screen.options.personalisation.blurRadius: Fortitudo Dissipationis in Pixels
+  quantum.screen.options.personalisation.blurRadius.text: Fortitudo
+  quantum.screen.options.language: "Lingua..."
+  quantum.screen.options.language.title: Lingua
+  quantum.screen.out_of_memory: Memoria Exhausta
+  quantum.screen.out_of_memory.message: "Quantum Voxel memoriam exhaurivit.\nConare ludi iterum initium facere.\nPotes etiam redire ad titulum ad memoriam liberandam."
+  quantum.screen.dev: Progressio Aedificium
+  quantum.screen.dev.message: "Hoc est progressio aedificium quantum.\nNon exspecta ut perfecte operetur.\nSi quaestiones experiris, rogo eas in GitHub pagina referas.\n\nGratias tibi ago! ♥ !(icon_success)"
+  quantum.screen.dev.close: Claude
+  quantum.screen.crash: Quantum Voxel Collapsus Est
+  quantum.screen.crash.message: "Vide si ullos modos uteris antequam errorem referas.\nSi modos uteris, errorem ad mod/modpack auctorem refer."
+  quantum.dimension.overworld: Planeta Terra
+  quantum.container.inventory.title: Inventarium
+  quantum.container.crate.title: Sarcina
+  quantum.recipe.craftable: Fabricabilis
+  quantum.recipe.uncraftable: Non Fabricabilis
+  quantum.recipe.ingredients: Ingredientia:
+  quantum.screen.message.disconnected: "Disiunctus es."
+  quantum.commands.player.dumpData.success: Data lusoris dimissa:
+  quantum.damageSource.kill: %s interfectus est
+  quantum.damageSource.kill.by: %1$s interfectus est a %2$s
+  quantum.damageSource.kill.item: %1$s interfectus est a %2$s utens %3$s
+  quantum.damageSource.falling: %s cecidit ex alto loco
+  quantum.damageSource.falling.by: %1$s depulsus est ex alto loco a %2$s
+  quantum.damageSource.void: %s a vacuo absorptus est
+  quantum.damageSource.void.by: %1$s absorptus est a vacuo propter %2$s
+  quantum.damageSource.none: %s mortuus est ex nihilo
+  quantum.damageSource.none.by: %1$s mortuus est ex nihilo propter %2$s
+  quantum.damageSource.hunger: %1$s fame periit
+  quantum.ui.auto: Automatice
+  quantum.ui.manual: Manualiter
+  quantum.hud.memory_usage: Memoria Usus
+  quantum.hud.memory_usage.jvm_free: VM Libera: %1$s
+  quantum.hud.memory_usage.used: Usus: %1$s/%2$s
+  quantum.misc.bits.16: 16 bits
+  quantum.misc.bits.24: 24 bits
+  quantum.misc.bits.32: 32 bits
+  quantum.misc.bits.64: 64 bits
+  quantum.misc.digit.1: "1"
+  quantum.misc.digit.2: "2"
+  quantum.misc.digit.3: "3"
+  quantum.misc.digit.4: "4"
+  quantum.misc.digit.5: "5"
+  quantum.misc.digit.6: "6"
+  quantum.misc.digit.7: "7"
+  quantum.misc.digit.8: "8"
+  quantum.misc.digit.9: "9"
+  quantum.misc.digit.0: "0"
+  quantum.misc.lang.single_object: unus %s
+  quantum.misc.lang.single_object_plural: unus %s
+  quantum.misc.lang.multiple_objects: %1$s %2$ss
+  quantum.misc.lang.multiple_objects_plural: %1$s %2$ss
+  quantum.misc.lang.multiple_objects_and: %1$s et %2$s
+  quantum.misc.lang.multiple_objects_and_plural: %1$s et %2$s
+  quantum.misc.lang.multiple_objects_or: %1$s vel %2$s
+  quantum.misc.lang.multiple_objects_or_plural: %1$s vel %2$s
+  quantum.misc.lang.multiple_objects_and_more: "%1$s, et %2$s"
+  quantum.misc.lang.multiple_objects_and_more_plural: "%1$s, et %2$s"
+  quantum.misc.lang.multiple_objects_or_more: "%1$s, vel %2$s"
+  quantum.misc.lang.multiple_objects_or_more_plural: "%1$s, vel %2$s"
+  quantum.misc.lang.multiple_objects_more: "%1$s, %2$s"
+  quantum.misc.lang.multiple_objects_more_plural: "%1$s, %2$s"
+  quantum.misc.lang.by: a %s
+  quantum.misc.lang.of: %1$s de %2$s
+  quantum.misc.time.nanoseconds: nanosecundae
+  quantum.misc.time.microseconds: microsecundae
+  quantum.misc.time.milliseconds: millisecundae
+  quantum.misc.time.seconds: secundae
+  quantum.misc.time.minutes: minutae
+  quantum.misc.time.hours: horae
+  quantum.misc.time.days: dies
+  quantum.misc.time.weeks: hebdomadae
+  quantum.misc.time.months: menses
+  quantum.misc.time.years: anni
+  quantum.misc.bytes: " bytes"
+  quantum.misc.kilobytes: " kB"
+  quantum.misc.megabytes: " MB"
+  quantum.misc.gigabytes: " GB"
+  quantum.misc.terabytes: " TB"
+  quantum.misc.petabytes: " PB"
+  quantum.misc.kibibytes: " KiB"
+  quantum.misc.mebibytes: " MiB"
+  quantum.misc.gibibytes: " GiB"
+  quantum.misc.tebibytes: " TiB"
+  quantum.misc.pebibytes: " PiB"
 }

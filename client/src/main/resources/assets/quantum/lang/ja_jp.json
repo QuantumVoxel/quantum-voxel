@@ -1,230 +1,229 @@
 {
-  "display.language": "日本語 (JP)",
-  "quantum.block.sand.name": "砂",
-  "quantum.block.grass_block.name": "草",
-  "quantum.block.dirt.name": "土",
-  "quantum.block.stone.name": "石",
-  "quantum.block.gravel.name": "砂利",
-  "quantum.block.log.name": "丸太",
-  "quantum.block.leaves.name": "葉",
-  "quantum.block.planks.name": "木材ブロック",
-  "quantum.block.cobblestone.name": "丸石",
-  "quantum.block.crate.name": "木箱",
-  "quantum.block.blast_furnace.name": "溶鉱炉",
-  "quantum.block.water.name": "水",
-  "quantum.block.air.name": "空気",
-  "quantum.item.wooden_pickaxe.name": "木のツルハシ",
-  "quantum.item.wooden_shovel.name": "木のシャベル",
-  "quantum.item.wooden_axe.name": "木の斧",
-  "quantum.item.stone_pickaxe.name": "石のツルハシ",
-  "quantum.item.stone_shovel.name": "石のシャベル",
-  "quantum.item.stone_axe.name": "石の斧",
-  "quantum.item.iron_pickaxe.name": "鉄のツルハシ",
-  "quantum.item.iron_shovel.name": "鉄のシャベル",
-  "quantum.item.iron_axe.name": "鉄の斧",
-  "quantum.item.plank.name": "板材",
-  "quantum.item.stick.name": "棒",
-  "quantum.item.air.name": "空気",
-  "quantum.ui.exitWorld": "ワールドを終了",
-  "quantum.ui.gamePaused": "ゲーム一時停止",
-  "quantum.ui.backToGame": "ゲームに戻る",
-  "quantum.ui.back": "戻る",
-  "quantum.ui.back.arrow": "< 戻る",
-  "quantum.ui.cancel": "キャンセル",
-  "quantum.ui.confirm": "確認",
-  "quantum.ui.proceed": "進む",
-  "quantum.ui.accept": "承認",
-  "quantum.ui.deny": "拒否",
-  "quantum.ui.ok": "OK",
-  "quantum.ui.done": "完了",
-  "quantum.ui.yes": "はい",
-  "quantum.ui.error": "エラー!",
-  "quantum.ui.no": "いいえ",
-  "quantum.ui.okay": "了解",
-  "quantum.ui.toggle": "切り替え",
-  "quantum.ui.enable": "有効にする",
-  "quantum.ui.disable": "無効にする",
-  "quantum.ui.enabled": "有効",
-  "quantum.ui.disabled": "無効",
-  "quantum.ui.hidden": "非表示",
-  "quantum.ui.visible": "表示",
-  "quantum.ui.toggle_all": "すべて切り替え",
-  "quantum.ui.enable_all": "すべて有効にする",
-  "quantum.ui.disable_all": "すべて無効にする",
-  "quantum.dialog.delete_world.title": "ワールドを削除しますか？",
-  "quantum.dialog.delete_world.message": "本当にこのワールドを\n削除してもよろしいですか？\nこの操作は元に戻せません。",
-  "quantum.screen.worlds.edit": "ワールドを編集",
-  "quantum.screen.worlds.edit.too_old": "このワールドは古すぎて編集できません。",
-  "quantum.screen.world_load.loading_world": "ワールドを読み込み中",
-  "quantum.screen.language": "言語",
-  "quantum.screen.message.saving_world": "ワールドを保存中...",
-  "quantum.screen.message.joining_server": "サーバーに接続中...",
-  "quantum.screen.mod_list": "モッドリスト",
-  "quantum.screen.mod_list.import_xeox": "Xeox モッドをインポート",
-  "quantum.screen.mod_list.config": "設定",
-  "quantum.screen.death.respawn": "リスポーン",
-  "quantum.screen.death.title": "あなたは死にました",
-  "quantum.screen.options": "オプション...",
-  "quantum.screen.settings.configs": "設定",
-  "quantum.screen.settings.title": "設定",
-  "quantum.screen.options.video": "ビデオ設定...",
-  "quantum.screen.options.video.title": "ビデオ設定",
-  "quantum.screen.options.video.fov": "視野角",
-  "quantum.screen.options.video.guiScale": "GUIスケール",
-  "quantum.screen.options.video.fullscreen": "フルスクリーン",
-  "quantum.screen.options.video.frameRate": "フレームレート",
-  "quantum.screen.options.video.vSync": "V-Sync",
-  "quantum.screen.options.video.renderDistance": "描画距離",
-  "quantum.screen.options.privacy": "プライバシー設定...",
-  "quantum.screen.options.privacy.title": "プライバシー設定",
-  "quantum.screen.options.privacy.hideActiveServer": "アクティブサーバー",
-  "quantum.screen.options.privacy.hideRpc": "リッチプレゼンス",
-  "quantum.screen.options.privacy.hidePlayerSkin": "プレイヤースキン",
-  "quantum.screen.options.privacy.hidePlayerName": "プレイヤー名",
-  "quantum.screen.options.accessibility": "アクセシビリティ...",
-  "quantum.screen.options.accessibility.title": "アクセシビリティ",
-  "quantum.screen.options.accessibility.hideFirstPersonPlayer": "一人称視点のプレイヤー",
-  "quantum.screen.options.accessibility.hideHotbarWhenThirdPerson": "三人称視点のホットバー",
-  "quantum.screen.options.accessibility.vibration": "振動",
-  "quantum.screen.options.personalisation": "パーソナライゼーション...",
-  "quantum.screen.options.personalisation.title": "パーソナライゼーション",
-  "quantum.screen.options.personalisation.diagonalFontShadow": "斜めフォントシャドウ",
-  "quantum.screen.options.personalisation.enforceUnicode": "ユニコードの強制",
-  "quantum.screen.options.personalisation.blurRadius": "ピクセルのぼかし強度",
-  "quantum.screen.options.personalisation.blurRadius.text": "強度",
-  "quantum.screen.options.language": "言語...",
-  "quantum.screen.options.language.title": "言語",
-  "quantum.screen.pause.back_to_game": "ゲームに戻る",
-  "quantum.screen.pause.exit_world": "ワールドを終了",
-  "quantum.screen.world_load": "ワールドを読み込み中",
-  "quantum.screen.world_delete_confirm.title": "本当にこのワールドを削除しますか？",
-  "quantum.screen.world_delete_confirm.message1": "続行すると、ワールド '%s' は完全に削除されます。",
-  "quantum.screen.world_delete_confirm.message2": "完全に消滅し、削除されたワールドの世界に失われます。",
-  "quantum.screen.world_delete_confirm.delete": "削除",
-  "quantum.screen.world_selection.title": "ワールドを選択",
-  "quantum.screen.world_selection.delete": "ワールドを削除",
-  "quantum.screen.world_selection.create": "新しいワールドを作成",
-  "quantum.screen.world_selection.play": "ワールドをプレイ",
-  "quantum.screen.world_creation.title": "新しいワールドを作成",
-  "quantum.screen.world_creation.name": "ワールド名",
-  "quantum.screen.world_creation.create": "作成",
-  "quantum.screen.title": "タイトル画面",
-  "quantum.screen.title.singleplayer": "シングルプレイヤー",
-  "quantum.screen.title.reset_world": "ワールドをリセット",
-  "quantum.screen.title.quit": "終了",
-  "quantum.screen.multiplayer": "マルチプレイヤー",
-  "quantum.screen.multiplayer.server_ip": "サーバーIP",
-  "quantum.screen.multiplayer.join": "参加",
-  "quantum.screen.out_of_memory": "メモリ不足",
-  "quantum.screen.out_of_memory.message": "Quantum Voxel はメモリ不足です。\nゲームを再起動してみてください。\nメモリを解放するには、タイトル画面に戻ることもできます。",
-  "quantum.screen.dev": "開発ビルド",
-  "quantum.screen.dev.message": "これは quantum の開発ビルドです。\n完全に動作することは期待しないでください。\n問題が発生した場合は、GitHub ページで報告してください。\n\nありがとうございます！♥ !(icon_success)",
-  "quantum.screen.dev.close": "閉じる",
-  "quantum.screen.crash": "Quantum Voxel がクラッシュしました",
-  "quantum.screen.crash.message": "バグを報告する前に、モッドを使用しているかどうかを確認してください。\nモッドを使用している場合は、クラッシュをモッド/モッドパックの作者に報告してください。",
-  "quantum.dimension.overworld": "地球",
+  display.language: 日本語 (JP)
+  quantum.block.sand.name: 砂
+  quantum.block.grass_block.name: 草
+  quantum.block.dirt.name: 土
+  quantum.block.stone.name: 石
+  quantum.block.gravel.name: 砂利
+  quantum.block.log.name: 丸太
+  quantum.block.leaves.name: 葉
+  quantum.block.planks.name: 木材ブロック
+  quantum.block.cobblestone.name: 丸石
+  quantum.block.crate.name: 木箱
+  quantum.block.blast_furnace.name: 溶鉱炉
+  quantum.block.water.name: 水
+  quantum.block.air.name: 空気
+  quantum.item.wooden_pickaxe.name: 木のツルハシ
+  quantum.item.wooden_shovel.name: 木のシャベル
+  quantum.item.wooden_axe.name: 木の斧
+  quantum.item.stone_pickaxe.name: 石のツルハシ
+  quantum.item.stone_shovel.name: 石のシャベル
+  quantum.item.stone_axe.name: 石の斧
+  quantum.item.iron_pickaxe.name: 鉄のツルハシ
+  quantum.item.iron_shovel.name: 鉄のシャベル
+  quantum.item.iron_axe.name: 鉄の斧
+  quantum.item.plank.name: 板材
+  quantum.item.stick.name: 棒
+  quantum.item.air.name: 空気
+  quantum.ui.exitWorld: ワールドを終了
+  quantum.ui.gamePaused: ゲーム一時停止
+  quantum.ui.backToGame: ゲームに戻る
+  quantum.ui.back: 戻る
+  quantum.ui.back.arrow: < 戻る
+  quantum.ui.cancel: キャンセル
+  quantum.ui.confirm: 確認
+  quantum.ui.proceed: 進む
+  quantum.ui.accept: 承認
+  quantum.ui.deny: 拒否
+  quantum.ui.ok: OK
+  quantum.ui.done: 完了
+  quantum.ui.yes: はい
+  quantum.ui.error: エラー!
+  quantum.ui.no: いいえ
+  quantum.ui.okay: 了解
+  quantum.ui.toggle: 切り替え
+  quantum.ui.enable: 有効にする
+  quantum.ui.disable: 無効にする
+  quantum.ui.enabled: 有効
+  quantum.ui.disabled: 無効
+  quantum.ui.hidden: 非表示
+  quantum.ui.visible: 表示
+  quantum.ui.toggle_all: すべて切り替え
+  quantum.ui.enable_all: すべて有効にする
+  quantum.ui.disable_all: すべて無効にする
+  quantum.dialog.delete_world.title: ワールドを削除しますか？
+  quantum.dialog.delete_world.message: 本当にこのワールドを\n削除してもよろしいですか？\nこの操作は元に戻せません。
+  quantum.screen.worlds.edit: ワールドを編集
+  quantum.screen.worlds.edit.too_old: このワールドは古すぎて編集できません。
+  quantum.screen.world_load.loading_world: ワールドを読み込み中
+  quantum.screen.language: 言語
+  quantum.screen.message.saving_world: "ワールドを保存中..."
+  quantum.screen.message.joining_server: "サーバーに接続中..."
+  quantum.screen.mod_list: モッドリスト
+  quantum.screen.mod_list.import_xeox: Xeox モッドをインポート
+  quantum.screen.mod_list.config: 設定
+  quantum.screen.death.respawn: リスポーン
+  quantum.screen.death.title: あなたは死にました
+  quantum.screen.options: "オプション..."
+  quantum.screen.settings.configs: 設定
+  quantum.screen.settings.title: 設定
+  quantum.screen.options.video: "ビデオ設定..."
+  quantum.screen.options.video.title: ビデオ設定
+  quantum.screen.options.video.fov: 視野角
+  quantum.screen.options.video.guiScale: GUIスケール
+  quantum.screen.options.video.fullscreen: フルスクリーン
+  quantum.screen.options.video.frameRate: フレームレート
+  quantum.screen.options.video.vSync: V-Sync
+  quantum.screen.options.video.renderDistance: 描画距離
+  quantum.screen.options.privacy: "プライバシー設定..."
+  quantum.screen.options.privacy.title: プライバシー設定
+  quantum.screen.options.privacy.hideActiveServer: アクティブサーバー
+  quantum.screen.options.privacy.hideRpc: リッチプレゼンス
+  quantum.screen.options.privacy.hidePlayerSkin: プレイヤースキン
+  quantum.screen.options.privacy.hidePlayerName: プレイヤー名
+  quantum.screen.options.accessibility: "アクセシビリティ..."
+  quantum.screen.options.accessibility.title: アクセシビリティ
+  quantum.screen.options.accessibility.hideFirstPersonPlayer: 一人称視点のプレイヤー
+  quantum.screen.options.accessibility.hideHotbarWhenThirdPerson: 三人称視点のホットバー
+  quantum.screen.options.accessibility.vibration: 振動
+  quantum.screen.options.personalisation: "パーソナライゼーション..."
+  quantum.screen.options.personalisation.title: パーソナライゼーション
+  quantum.screen.options.personalisation.diagonalFontShadow: 斜めフォントシャドウ
+  quantum.screen.options.personalisation.enforceUnicode: ユニコードの強制
+  quantum.screen.options.personalisation.blurRadius: ピクセルのぼかし強度
+  quantum.screen.options.personalisation.blurRadius.text: 強度
+  quantum.screen.options.language: "言語..."
+  quantum.screen.options.language.title: 言語
+  quantum.screen.pause.back_to_game: ゲームに戻る
+  quantum.screen.pause.exit_world: ワールドを終了
+  quantum.screen.world_load: ワールドを読み込み中
+  quantum.screen.world_delete_confirm.title: 本当にこのワールドを削除しますか？
+  quantum.screen.world_delete_confirm.message1: 続行すると、ワールド '%s' は完全に削除されます。
+  quantum.screen.world_delete_confirm.message2: 完全に消滅し、削除されたワールドの世界に失われます。
+  quantum.screen.world_delete_confirm.delete: 削除
+  quantum.screen.world_selection.title: ワールドを選択
+  quantum.screen.world_selection.delete: ワールドを削除
+  quantum.screen.world_selection.create: 新しいワールドを作成
+  quantum.screen.world_selection.play: ワールドをプレイ
+  quantum.screen.world_creation.title: 新しいワールドを作成
+  quantum.screen.world_creation.name: ワールド名
+  quantum.screen.world_creation.create: 作成
+  quantum.screen.title: タイトル画面
+  quantum.screen.title.singleplayer: シングルプレイヤー
+  quantum.screen.title.reset_world: ワールドをリセット
+  quantum.screen.title.quit: 終了
+  quantum.screen.multiplayer: マルチプレイヤー
+  quantum.screen.multiplayer.server_ip: サーバーIP
+  quantum.screen.multiplayer.join: 参加
+  quantum.screen.out_of_memory: メモリ不足
+  quantum.screen.out_of_memory.message: Quantum Voxel はメモリ不足です。\nゲームを再起動してみてください。\nメモリを解放するには、タイトル画面に戻ることもできます。
+  quantum.screen.dev: 開発ビルド
+  quantum.screen.dev.message: これは quantum の開発ビルドです。\n完全に動作することは期待しないでください。\n問題が発生した場合は、GitHub ページで報告してください。\n\nありがとうございます！♥ !(icon_success)
+  quantum.screen.dev.close: 閉じる
+  quantum.screen.crash: Quantum Voxel がクラッシュしました
+  quantum.screen.crash.message: バグを報告する前に、モッドを使用しているかどうかを確認してください。\nモッドを使用している場合は、クラッシュをモッド/モッドパックの作者に報告してください。
+  quantum.dimension.overworld: 地球
 
-  "quantum.container.inventory.title": "インベントリ",
-  "quantum.container.crate.title": "木箱",
+  quantum.container.inventory.title: インベントリ
+  quantum.container.crate.title: 木箱
 
-  "quantum.recipe.craftable": "クラフト可能",
-  "quantum.recipe.uncraftable": "クラフト不可",
-  "quantum.recipe.ingredients": "材料:",
+  quantum.recipe.craftable: クラフト可能
+  quantum.recipe.uncraftable: クラフト不可
+  quantum.recipe.ingredients: 材料:
 
-  "quantum.screen.message.disconnected": "切断されました。",
+  quantum.screen.message.disconnected: 切断されました。
 
-  "quantum.commands.player.dumpData.success": "プレイヤーデータをダンプしました: ",
+  quantum.commands.player.dumpData.success: プレイヤーデータをダンプしました:
 
-  "quantum.damageSource.kill": "%s が殺されました",
-  "quantum.damageSource.kill.by": "%1$s が %2$s に殺されました",
-  "quantum.damageSource.kill.item": "%1$s が %2$s に %3$s を使って殺されました",
-  "quantum.damageSource.falling": "%s が高所から落ちました",
-  "quantum.damageSource.falling.by": "%1$s が %2$s に押されて高所から落ちました",
-  "quantum.damageSource.void": "%s が虚無に飲み込まれました",
-  "quantum.damageSource.void.by": "%1$s は %2$s によって虚無に飲み込まれました",
-  "quantum.damageSource.none": "%s は突然死しました",
-  "quantum.damageSource.none.by": "%1$s は %2$s によって突然死しました",
-  "quantum.damageSource.hunger": "%1$s は餓死しました",
+  quantum.damageSource.kill: %s が殺されました
+  quantum.damageSource.kill.by: %1$s が %2$s に殺されました
+  quantum.damageSource.kill.item: %1$s が %2$s に %3$s を使って殺されました
+  quantum.damageSource.falling: %s が高所から落ちました
+  quantum.damageSource.falling.by: %1$s が %2$s に押されて高所から落ちました
+  quantum.damageSource.void: %s が虚無に飲み込まれました
+  quantum.damageSource.void.by: %1$s は %2$s によって虚無に飲み込まれました
+  quantum.damageSource.none: %s は突然死しました
+  quantum.damageSource.none.by: %1$s は %2$s によって突然死しました
+  quantum.damageSource.hunger: %1$s は餓死しました
 
-  "quantum.ui.auto": "自動",
-  "quantum.ui.manual": "手動",
+  quantum.ui.auto: 自動
+  quantum.ui.manual: 手動
 
-  "quantum.hud.memory_usage": "メモリ使用量",
-  "quantum.hud.memory_usage.jvm_free": "VMの空き容量: %1$s",
-  "quantum.hud.memory_usage.used": "使用済み: %1$s/%2$s",
+  quantum.hud.memory_usage: メモリ使用量
+  quantum.hud.memory_usage.jvm_free: VMの空き容量: %1$s
+  quantum.hud.memory_usage.used: 使用済み: %1$s/%2$s
 
-  "quantum.misc.bits.16": "16ビット",
-  "quantum.misc.bits.24": "24ビット",
-  "quantum.misc.bits.32": "32ビット",
-  "quantum.misc.bits.64": "64ビット",
+  quantum.misc.bits.16: 16ビット
+  quantum.misc.bits.24: 24ビット
+  quantum.misc.bits.32: 32ビット
+  quantum.misc.bits.64: 64ビット
 
-  "quantum.misc.digit.1": "1",
-  "quantum.misc.digit.2": "2",
-  "quantum.misc.digit.3": "3",
-  "quantum.misc.digit.4": "4",
-  "quantum.misc.digit.5": "5",
-  "quantum.misc.digit.6": "6",
-  "quantum.misc.digit.7": "7",
-  "quantum.misc.digit.8": "8",
-  "quantum.misc.digit.9": "9",
-  "quantum.misc.digit.0": "0",
+  quantum.misc.digit.1: "1"
+  quantum.misc.digit.2: "2"
+  quantum.misc.digit.3: "3"
+  quantum.misc.digit.4: "4"
+  quantum.misc.digit.5: "5"
+  quantum.misc.digit.6: "6"
+  quantum.misc.digit.7: "7"
+  quantum.misc.digit.8: "8"
+  quantum.misc.digit.9: "9"
+  quantum.misc.digit.0: "0"
 
-  "quantum.misc.lang.single_object": "%s",
-  "quantum.misc.lang.single_object_plural": "%s",
-  "quantum.misc.lang.multiple_objects": "%1$s %2$s",
-  "quantum.misc.lang.multiple_objects_plural": "%1$s %2$s",
-  "quantum.misc.lang.multiple_objects_and": "%1$sと%2$s",
-  "quantum.misc.lang.multiple_objects_and_plural": "%1$sと%2$s",
-  "quantum.misc.lang.multiple_objects_or": "%1$sまたは%2$s",
-  "quantum.misc.lang.multiple_objects_or_plural": "%1$sまたは%2$s",
-  "quantum.misc.lang.multiple_objects_and_more": "%1$s、%2$s",
-  "quantum.misc.lang.multiple_objects_and_more_plural": "%1$s、%2$s",
-  "quantum.misc.lang.multiple_objects_or_more": "%1$s、%2$s",
-  "quantum.misc.lang.multiple_objects_or_more_plural": "%1$s、%2$s",
-  "quantum.misc.lang.multiple_objects_more": "%1$s、%2$s",
-  "quantum.misc.lang.multiple_objects_more_plural": "%1$s、%2$s",
-  "quantum.misc.lang.by": "%s",
-  "quantum.misc.lang.of": "%1$sの%2$s",
+  quantum.misc.lang.single_object: %s
+  quantum.misc.lang.single_object_plural: %s
+  quantum.misc.lang.multiple_objects: %1$s %2$s
+  quantum.misc.lang.multiple_objects_plural: %1$s %2$s
+  quantum.misc.lang.multiple_objects_and: %1$sと%2$s
+  quantum.misc.lang.multiple_objects_and_plural: %1$sと%2$s
+  quantum.misc.lang.multiple_objects_or: %1$sまたは%2$s
+  quantum.misc.lang.multiple_objects_or_plural: %1$sまたは%2$s
+  quantum.misc.lang.multiple_objects_and_more: %1$s、%2$s
+  quantum.misc.lang.multiple_objects_and_more_plural: %1$s、%2$s
+  quantum.misc.lang.multiple_objects_or_more: %1$s、%2$s
+  quantum.misc.lang.multiple_objects_or_more_plural: %1$s、%2$s
+  quantum.misc.lang.multiple_objects_more: %1$s、%2$s
+  quantum.misc.lang.multiple_objects_more_plural: %1$s、%2$s
+  quantum.misc.lang.by: %s
+  quantum.misc.lang.of: %1$sの%2$s
 
-  "quantum.misc.time.nanoseconds": "ナノ秒",
-  "quantum.misc.time.microseconds": "マイクロ秒",
-  "quantum.misc.time.milliseconds": "ミリ秒",
+  quantum.misc.time.nanoseconds: ナノ秒
+  quantum.misc.time.microseconds: マイクロ秒
+  quantum.misc.time.milliseconds: ミリ秒
 
-  "quantum.misc.time.seconds": "秒",
-  "quantum.misc.time.minutes": "分",
-  "quantum.misc.time.hours": "時間",
-  "quantum.misc.time.days": "日",
-  "quantum.misc.time.weeks": "週",
-  "quantum.misc.time.months": "月",
-  "quantum.misc.time.years": "年",
+  quantum.misc.time.seconds: 秒
+  quantum.misc.time.minutes: 分
+  quantum.misc.time.hours: 時間
+  quantum.misc.time.days: 日
+  quantum.misc.time.weeks: 週
+  quantum.misc.time.months: 月
+  quantum.misc.time.years: 年
 
-  "quantum.misc.bytes": "バイト",
-  "quantum.misc.kilobytes": " kB",
-  "quantum.misc.megabytes": " MB",
-  "quantum.misc.gigabytes": " GB",
-  "quantum.misc.terabytes": " TB",
-  "quantum.misc.petabytes": " PB",
-  "quantum.misc.kibibytes": " KiB",
-  "quantum.misc.mebibytes": " MiB",
-  "quantum.misc.gibibytes": " GiB",
-  "quantum.misc.tebibytes": " TiB",
-  "quantum.misc.pebibytes": " PiB",
-  "quantum.screen.credits.title": "クレジット",
-  "quantum.screen.credits.tab.assets": "アセット",
-  "quantum.screen.credits.tab.code": "コード",
-  "quantum.screen.credits.tab.downloads": "外部ダウンロード",
-  "quantum.screen.credits.tab.translations": "翻訳",
-  "quantum.screen.credits.tab.testing": "テスト",
-  "quantum.screen.credits.tab.docs": "ドキュメント",
-  "quantum.screen.credits.tab.external_libs": "外部ライブラリ",
-  "quantum.screen.credits.tab.extra": "追加",
-  "quantum.screen.credits.tab.sound_effects": "音効果",
-  "quantum.screen.credits.detail.url": "URL",
-  "quantum.screen.credits.detail.license": "ライセンス",
-  "quantum.screen.credits.detail.roles": "プロジェクトの役割",
-  "quantum.screen.credits.detail.for": "に作成されました",
-  "quantum.screen.credits.detail.uses": "使用します",
-  "quantum.screen.credits.detail.links": "リンク",
-  "quantum.screen.credits.detail.mentions": "メンション"
-
+  quantum.misc.bytes: バイト
+  quantum.misc.kilobytes: " kB"
+  quantum.misc.megabytes: " MB"
+  quantum.misc.gigabytes: " GB"
+  quantum.misc.terabytes: " TB"
+  quantum.misc.petabytes: " PB"
+  quantum.misc.kibibytes: " KiB"
+  quantum.misc.mebibytes: " MiB"
+  quantum.misc.gibibytes: " GiB"
+  quantum.misc.tebibytes: " TiB"
+  quantum.misc.pebibytes: " PiB"
+  quantum.screen.credits.title: クレジット
+  quantum.screen.credits.tab.assets: アセット
+  quantum.screen.credits.tab.code: コード
+  quantum.screen.credits.tab.downloads: 外部ダウンロード
+  quantum.screen.credits.tab.translations: 翻訳
+  quantum.screen.credits.tab.testing: テスト
+  quantum.screen.credits.tab.docs: ドキュメント
+  quantum.screen.credits.tab.external_libs: 外部ライブラリ
+  quantum.screen.credits.tab.extra: 追加
+  quantum.screen.credits.tab.sound_effects: 音効果
+  quantum.screen.credits.detail.url: URL
+  quantum.screen.credits.detail.license: ライセンス
+  quantum.screen.credits.detail.roles: プロジェクトの役割
+  quantum.screen.credits.detail.for: に作成されました
+  quantum.screen.credits.detail.uses: 使用します
+  quantum.screen.credits.detail.links: リンク
+  quantum.screen.credits.detail.mentions: メンション
 }
