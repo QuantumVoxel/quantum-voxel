@@ -20,7 +20,7 @@ public interface Mod {
      * @return the mod id
      */
     @NotNull
-    String getName();
+    String getId();
 
     /**
      * Get the name of the mod.
@@ -28,7 +28,7 @@ public interface Mod {
      * @return the mod name
      */
     @NotNull
-    String getDisplayName();
+    String getName();
 
     /**
      * Get the version of the mod.
