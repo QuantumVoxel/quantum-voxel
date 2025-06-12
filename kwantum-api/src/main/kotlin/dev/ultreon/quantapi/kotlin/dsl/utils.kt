@@ -137,17 +137,17 @@ val server: QuantumServer get() = QuantumServer.get()
 val modContext: ModLoadingContext get() = ModLoadingContext.get()
 
 val mod: Mod get() = modContext.mod
-val modName: String get() = mod.name
-val modDisplayName: String get() = mod.displayName
+val modName: String get() = mod.id
+val modDisplayName: String get() = mod.name
 val modVersion: String get() = mod.version
 val modDescription: String? get() = mod.description
 val modAuthors: Collection<String> get() = mod.authors
 
 fun logger(name: String = "???"): Logger = LoggerFactory.getLogger(name)
 
-fun logger(mod: Mod): Logger = logger(mod.name)
+fun logger(mod: Mod): Logger = logger(mod.id)
 
-fun logger(mod: Mod, name: String): Logger = logger("${mod.name}:$name")
+fun logger(mod: Mod, name: String): Logger = logger("${mod.id}:$name")
 
 fun main() {
   println(255.toString(16))

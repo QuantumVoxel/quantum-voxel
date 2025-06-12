@@ -13,12 +13,12 @@ import java.util.List;
 public class TeaVMMod implements Mod {
 
     @Override
-    public @NotNull String getName() {
+    public @NotNull String getId() {
         return "quantum";
     }
 
     @Override
-    public @NotNull String getDisplayName() {
+    public @NotNull String getName() {
         return "Quantum Voxel";
     }
 

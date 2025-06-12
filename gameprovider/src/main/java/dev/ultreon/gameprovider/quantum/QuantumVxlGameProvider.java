@@ -143,22 +143,6 @@ public class QuantumVxlGameProvider implements GameProvider {
                         .addIcon(200, "assets/gdx/icon.png")
                         .setEnvironment(ModEnvironment.UNIVERSAL)
                         .build()),
-                // Creating a BuiltinMod for Quantum Voxel
-                new BuiltinMod(this.gameJars, new BuiltinModMetadata.Builder("ubo", getVersion("ubo"))
-                        .setName("UBO Data API")
-                        .addLicense("Apache-2.0")
-                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.com/Ultreon/ubo", "issues", "https://github.com/Ultreon/ubo/issues")))
-                        .addAuthor("Ultreon Development Studios", Map.of("github", "https://github.com/Ultreon", "gitlab", "https://gitlab.com/ultreon", "email", "contact@ultreon.dev"))
-                        .addContributor("XyperCode", Map.of("github", "https://github.com/XyperCode", "gitlab", "https://gitlab.com/XyperCode", "email", "xypercode@ultreon.dev"))
-                        .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .build()),
-                new BuiltinMod(this.gameJars, new BuiltinModMetadata.Builder("corelibs", getVersion("corelibs"))
-                        .setName("Ultreon Core Libraries")
-                        .setContact(new ContactInformationImpl(Map.of("sources", "https://github.com/Ultreon/corelibs", "issues", "https://github.com/Ultreon/corelibs/issues")))
-                        .addAuthor("Ultreon Development Studios", Map.of("github", "https://github.com/Ultreon", "gitlab", "https://gitlab.com/ultreon", "email", "contact@ultreon.dev"))
-                        .addContributor("XyperCode", Map.of("github", "https://github.com/XyperCode", "gitlab", "https://gitlab.com/XyperCode", "email", "xypercode@ultreon.dev"))
-                        .setEnvironment(ModEnvironment.UNIVERSAL)
-                        .build()),
 
                 // Creating a BuiltinMod for Quantum Voxel
                 new BuiltinMod(this.gameJars, new BuiltinModMetadata.Builder("quantum", "0.2.0")

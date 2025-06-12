@@ -189,7 +189,7 @@ class QuantumClientLoader implements Runnable {
         });
 
         for (var mod : GamePlatform.get().getMods()) {
-            final String id = mod.getName();
+            final String id = mod.getId();
             LoadingContext.withinContext(new LoadingContext(id), () -> {
                 for (Registry<?> registry : SimpleRegistry.getRegistries()) {
                     RegistryEvents.AUTO_REGISTER.factory().onAutoRegister(id, registry);

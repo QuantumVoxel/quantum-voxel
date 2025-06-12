@@ -10,12 +10,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
  * Implements {@link Mod} for {@link ModContainer}
- * 
+ *
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
@@ -39,17 +40,23 @@ public class FabricMod implements Mod {
     }
 
     @Override
-    public @NotNull String getName() {
+    public @NotNull String getId() {
         return id;
     }
 
     @Override
-    public @NotNull String getDisplayName() {
+    public @NotNull String getName() {
+        if (id.equals("java")) {
+            return System.getProperty("java.vm.name") + " " + System.getProperty("java.version");
+        }
         return name;
     }
 
     @Override
     public @NotNull String getVersion() {
+        if (id.equals("java")) {
+            return System.getProperty("java.version");
+        }
         return version;
     }
 
@@ -65,6 +72,9 @@ public class FabricMod implements Mod {
 
     @Override
     public @NotNull Collection<String> getAuthors() {
+        if (id.equals("java")) {
+            return List.of(System.getProperty("java.vendor"));
+        }
         return authors;
     }
 

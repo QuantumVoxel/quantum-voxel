@@ -18,7 +18,6 @@ import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.client.util.Utils;
 import dev.ultreon.quantum.config.crafty.CraftyConfig;
-import dev.ultreon.quantum.text.ColorCode;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -62,7 +61,7 @@ public class ModListScreen extends Screen {
                 .withCallback(this::selectMod)
                 .addEntries(GamePlatform.get().getMods()
                         .stream()
-                        .sorted((a, b) -> a.getDisplayName().compareToIgnoreCase(b.getDisplayName()))
+                        .sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName()))
                         .collect(Collectors.toList())));
 
         this.buttonPlatform = add(Platform.create());
@@ -193,7 +192,7 @@ public class ModListScreen extends Screen {
 
         if (selected) y += 2;
 
-        renderer.textLeft(Formatter.format("[*]" + mod.getDisplayName()), x + 50, y + this.list.getItemHeight() - 34);
+        renderer.textLeft(Formatter.format("[*]" + mod.getName()), x + 50, y + this.list.getItemHeight() - 34);
         renderer.textLeft("Version: " + mod.getVersion(), x + 50, y + this.list.getItemHeight() - 34 + 12, RgbColor.rgb(0xa0a0a0));
 
         this.drawIcon(renderer, mod, x + 7, y + 5, 32, selected);
@@ -202,7 +201,7 @@ public class ModListScreen extends Screen {
     private void drawIcon(Renderer renderer, Mod metadata, int x, int y, int size, boolean higlight) {
         NamespaceID iconId;
         @Nullable String iconPath = metadata.getIconPath(128).orElse(null);
-        NamespaceID overrideId = ModIconOverrideRegistry.get(metadata.getName());
+        NamespaceID overrideId = ModIconOverrideRegistry.get(metadata.getId());
         TextureManager textureManager = this.client.getTextureManager();
         if (overrideId != null) {
             textureManager.registerTexture(overrideId);
@@ -210,14 +209,14 @@ public class ModListScreen extends Screen {
         } else if (iconPath != null) {
             FileHandle iconFileHandle = Gdx.files.internal(iconPath);
             if (!iconFileHandle.exists()) return;
-            if (!ModListScreen.TEXTURES.containsKey(metadata.getName())) {
+            if (!ModListScreen.TEXTURES.containsKey(metadata.getId())) {
                 Texture texture = new Texture(iconFileHandle);
                 texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
                 ModListScreen.TEXTURES.put(iconPath, texture);
             }
-            Texture texture = ModListScreen.TEXTURES.computeIfAbsent(metadata.getName(), s -> new Texture(Gdx.files.classpath(metadata.getIconPath(128).orElse(null))));
-            iconId = QuantumClient.id("generated/mod_icon/" + metadata.getName().replace("-", "_") + ".png");
+            Texture texture = ModListScreen.TEXTURES.computeIfAbsent(metadata.getId(), s -> new Texture(Gdx.files.classpath(metadata.getIconPath(128).orElse(null))));
+            iconId = QuantumClient.id("generated/mod_icon/" + metadata.getId().replace("-", "_") + ".png");
             if (!textureManager.isTextureLoaded(iconId)) textureManager.registerTexture(iconId, texture);
             if (!textureManager.isTextureLoaded(iconId)) iconId = ModListScreen.DEFAULT_MOD_ICON;
         } else {
@@ -307,8 +306,8 @@ public class ModListScreen extends Screen {
 
     private void selectMod(Mod caller) {
         this.descriptionLbl.setText(caller.getDescription() != null ? caller.getDescription() : "[/][gray]No description");
-        this.infoLbl.setText("[*][white]" + caller.getDisplayName() + "\n \n" +
-                "[ ][cyan]ID: [light grey]" + caller.getName() + "\n" +
+        this.infoLbl.setText("[*][white]" + caller.getName() + "\n \n" +
+                "[ ][cyan]ID: [light grey]" + caller.getId() + "\n" +
                 "[ ][cyan]Version: [light grey]" + caller.getVersion() + "\n" +
                 caller.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("[cyan]Made By: [light grey]" + modContributor)).orElse(Formatter.format("[yellow]Made By Anonymous")) + "\n" +
                 "[cyan]License: [light grey]" + caller.getLicense());

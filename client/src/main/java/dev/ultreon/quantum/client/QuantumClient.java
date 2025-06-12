@@ -104,7 +104,6 @@ import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.PlatformOS;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.sound.event.SoundEvents;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.*;
@@ -118,8 +117,6 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.annotation.WillClose;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.Queue;
 import java.util.concurrent.Callable;
@@ -451,14 +448,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final RenderBufferSource renderBuffers = new RenderBufferSource();
     private int cachedWidth;
     private int cachedHeight;
-    {
-        for (int i = 0; i < Gdx.input.getMaxPointers(); i++) {
-            touchPosStartScl[i] = new Vector2();
-            touchPosStart[i] = new Vector2();
-            touchMovedScl[i] = new Vector2();
-            touchMoved[i] = new Vector2();
-        }
-    }
+    private boolean debugOverlayShown = GamePlatform.get().isDevEnvironment();
 
     // Misc
     GameEnvironment gameEnv;
@@ -489,6 +479,13 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         if (QuantumClient.instance != null)
             throw new AssertionError("Double Loading!");
+
+        for (int i = 0; i < Gdx.input.getMaxPointers(); i++) {
+            touchPosStartScl[i] = new Vector2();
+            touchPosStart[i] = new Vector2();
+            touchMovedScl[i] = new Vector2();
+            touchMoved[i] = new Vector2();
+        }
 
         this.mainCat.add("Client", this);
         this.add("Render Buffers", this.renderBuffers);
@@ -845,6 +842,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private void setupMods() {
         // Set mod icon overrides.
         ModIconOverrideRegistry.set("quantum", QuantumClient.id("icon.png"));
+        ModIconOverrideRegistry.set("java", QuantumClient.id("textures/java_icon.png"));
         ModIconOverrideRegistry.set("gdx", new NamespaceID("gdx", "icon.png"));
 
         // Invoke entry points for initialization.
@@ -1552,7 +1550,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Render debug overlay if enabled
         try (var ignored = QuantumClient.PROFILER.start("debug")) {
-            if (this.hideHud || this.isLoading()) return;
+            if (this.hideHud || !debugOverlayShown || this.isLoading()) return;
             renderer.begin();
             renderer.scale(2, 2);
             this.debugGui.render(renderer, 2);
@@ -3301,7 +3299,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return the mod config screen.
      */
     public ConfigScreenFactory getModConfigScreen(Mod caller) {
-        return cfgScreenFactories.get(caller.getName());
+        return cfgScreenFactories.get(caller.getId());
     }
 
     /**
@@ -3311,7 +3309,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param factory the factory to set as the config screen for the mod.
      */
     public void setModConfigScreen(Mod caller, ConfigScreenFactory factory) {
-        cfgScreenFactories.put(caller.getName(), factory);
+        cfgScreenFactories.put(caller.getId(), factory);
     }
 
     /**
@@ -3576,5 +3574,13 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public Screenshots getScreenshots() {
         return screenshots;
+    }
+
+    public void setDebugOverlayShown(boolean debugOverlayShown) {
+        this.debugOverlayShown = debugOverlayShown;
+    }
+
+    public boolean isDebugOverlayShown() {
+        return debugOverlayShown;
     }
 }

@@ -26,12 +26,12 @@ public class BuiltinAndroidMod implements Mod {
     }
 
     @Override
-    public @NotNull String getName() {
+    public @NotNull String getId() {
         return id;
     }
 
     @Override
-    public @NotNull String getDisplayName() {
+    public @NotNull String getName() {
         return name;
     }
 

@@ -45,12 +45,12 @@ public abstract class DesktopPlatform extends GamePlatform {
     private final SafeLoadWrapper safeWrapper;
     private Mod builtin = new Mod() {
         @Override
-        public @NotNull String getName() {
+        public @NotNull String getId() {
             return "quantum";
         }
 
         @Override
-        public @NotNull String getDisplayName() {
+        public @NotNull String getName() {
             return "Quantum Voxel";
         }
 
