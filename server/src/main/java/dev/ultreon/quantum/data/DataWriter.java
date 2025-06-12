@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.data;
 
+import com.badlogic.gdx.utils.JsonValue;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -8,24 +10,26 @@ import java.util.UUID;
 
 @ApiStatus.Experimental
 public interface DataWriter<T> {
-    <D> void write(D data);
+    <D> T write(D data);
 
-    void writeByte(byte value);
-    void writeShort(short value);
-    void writeInt(int value);
-    void writeLong(long value);
-    void writeFloat(float value);
-    void writeDouble(double value);
-    void writeChar(char value);
-    void writeBoolean(boolean value);
+    T writeByte(byte value);
+    T writeShort(short value);
+    T writeInt(int value);
+    T writeLong(long value);
+    T writeFloat(float value);
+    T writeDouble(double value);
+    T writeChar(char value);
+    T writeBoolean(boolean value);
 
-    void writeString(String value);
-    void writeUuid(UUID value);
+    T writeString(String value);
+    T writeUuid(UUID value);
 
-    void writeList(List<T> value);
-    void writeMap(Map<?, ?> value);
+    T unit();
 
-    T writeEnd();
+    void writeMapEntry(T map, String key, T value);
 
-    T writePop();
+    void writeListItem(T list, T value);
+
+    T createMap();
+    T createList();
 }
