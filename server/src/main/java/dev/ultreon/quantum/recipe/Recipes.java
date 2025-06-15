@@ -35,6 +35,10 @@ public class Recipes {
         recipes.register(new NamespaceID("iron_axe"), new CraftingRecipe(
                 List.of(new ItemStack(Items.IRON_INGOT), new ItemStack(Items.STICK)),
                 new ItemStack(Items.IRON_AXE, 2), true));
+
+        recipes.register(new NamespaceID("blast_furnace"), new CraftingRecipe(
+                List.of(new ItemStack(Items.ROCK, 32), new ItemStack(Items.STICK, 4)),
+                new ItemStack(Items.IRON_AXE, 2), true));
     }
 
     private static void crafting(RecipeManager recipes) {

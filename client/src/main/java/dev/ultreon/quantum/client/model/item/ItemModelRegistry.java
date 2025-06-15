@@ -56,7 +56,7 @@ public class ItemModelRegistry implements ContextAwareReloadable {
     }
 
     public void register(Item item, CubeModel model) {
-        this.customRegistry.putIfAbsent(item, () -> JsonModel.cubeOf(model));
+        this.customRegistry.putIfAbsent(item, () -> JsonModel.cubeOf(model, null));
     }
 
     public void registerCustom(Item item, Supplier<ItemModel> model) {
@@ -64,7 +64,7 @@ public class ItemModelRegistry implements ContextAwareReloadable {
     }
 
     public void register(Supplier<Item> item, Supplier<CubeModel> model) {
-        this.customRegistry.put(item.get(), Suppliers.memoize(() -> JsonModel.cubeOf(model.get())));
+        this.customRegistry.put(item.get(), Suppliers.memoize(() -> JsonModel.cubeOf(model.get(), null)));
     }
 
     public TextureAtlas stitch(TextureManager textureManager) {

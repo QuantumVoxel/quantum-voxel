@@ -243,4 +243,8 @@ public final class CubeModel {
     public String pass() {
         return properties.renderPass;
     }
+
+    public NamespaceID buried() {
+        return bottom;
+    }
 }

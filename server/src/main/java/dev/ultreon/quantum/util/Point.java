@@ -38,6 +38,14 @@ public interface Point {
         return new RegionVec(getIntX() / World.CS / World.REGION_SIZE, getIntY() / World.CS / World.REGION_SIZE, getIntZ() / World.CS / World.REGION_SIZE);
     }
 
+    Point add(Point vec);
+
+    Point sub(Point vec);
+
+    Point scl(Point vec);
+
+    Point div(Point vec);
+
     default Point offset(int x, int y, int z) {
         return new Vec(x, y, z);
     }
@@ -55,6 +63,8 @@ public interface Point {
     }
 
     double dst(Point point);
+
+    double dot(Point vec);
 
     default Vec asVec() {
         return new Vec(getX(), getY(), getZ());

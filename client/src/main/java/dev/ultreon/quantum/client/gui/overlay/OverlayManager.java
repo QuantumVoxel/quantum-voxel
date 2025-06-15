@@ -46,10 +46,12 @@ public class OverlayManager {
     }
 
     public static void render(Renderer renderer, float deltaTime) {
+        if (QuantumClient.get().hideHud) return;
+
         synchronized (OverlayManager.REGISTRY) {
             int height = renderer.getHeight();
-            Overlay.leftY = (int) (height / QuantumClient.get().getGuiScale());
-            Overlay.rightY = (int) (height / QuantumClient.get().getGuiScale());
+            Overlay.leftY = height;
+            Overlay.rightY = height;
 
             for (Overlay overlay : OverlayManager.getOverlays()) {
                 overlay.render(renderer, deltaTime);

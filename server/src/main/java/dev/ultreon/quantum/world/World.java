@@ -218,7 +218,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
      * @return the block at the specified coordinates
      */
     @Override
-    public @NotNull BlockState get(BlockVec pos) {
+    public @NotNull BlockState get(Point pos) {
         this.checkThread();
 
         return this.get(pos.getIntX(), pos.getIntY(), pos.getIntZ());

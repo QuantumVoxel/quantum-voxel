@@ -78,7 +78,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel, Item
 
         ModelProperties properties1 = new ModelProperties();
         properties1.renderPass = "opaque";
-        JsonModel bakedCubeModel = JsonModel.cubeOf(CubeModel.of(NamespaceID.of("block/default"), NamespaceID.of("blocks/error"), properties1));
+        JsonModel bakedCubeModel = JsonModel.cubeOf(CubeModel.of(NamespaceID.of("block/default"), NamespaceID.of("blocks/error"), properties1), NamespaceID.of("blocks/error"));
         DEFAULT.set(bakedCubeModel);
         QuantumClient.invokeAndWait(() -> bakedCubeModel.load(QuantumClient.get()));
         return bakedCubeModel;

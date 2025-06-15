@@ -17,32 +17,34 @@ public class CompoundCodec<T> implements Codec<T> {
         return this.map.apply(map);
     }
 
-    public static Builder builder(Function<Map<String, Object>, T> map) {
-        return new Builder(new CompoundCodec(map));
+    public static <T> Builder<T> builder(Function<Map<String, Object>, T> map) {
+        return new Builder<>(new CompoundCodec<>(map));
     }
 
     @Override
     public <D> DataResult<D> write(DataWriter<D> writer, T data) {
         D map = writer.createMap();
         for (Map.Entry<String, FieldCodec<T, ?>> entry : this.codecByField.entrySet()) {
-            writer.writeMapEntry(entry.getKey(), this.getterByField.get(entry.getKey()).apply(data));
+//            writer.writeMapEntry(entry.getKey(), this.getterByField.get(entry.getKey()).apply(data));
         }
         return new DataResult<>(map, true);
     }
 
     @Override
     public <D> DataResult<T> read(DataReader<D> reader, D data) {
-        if (data instanceof Map) {
-            Map<String, D> map = (Map<String, D>) data;
-            reader.iterate(data, d -> {
-                String key = reader.getString(d);
-                FieldCodec<T, ?> codec = this.codecByField.get(key);
-                if (codec == null) {
-                    return new DataResult<>(null, false);
-                }
-                return codec.codec.read(reader, d);
-            });
-        }
+//        if (data instanceof Map) {
+//            Map<String, D> map = (Map<String, D>) data;
+//            reader.iterate(data, d -> {
+//                String key = reader.getString(d);
+//                FieldCodec<T, ?> codec = this.codecByField.get(key);
+//                if (codec == null) {
+//                    return new DataResult<>(null, false);
+//                }
+//                return codec.codec.read(reader, d);
+//            });
+//        }
+
+        throw new UnsupportedOperationException("TODO");
     }
 
     public static class Builder<T> {

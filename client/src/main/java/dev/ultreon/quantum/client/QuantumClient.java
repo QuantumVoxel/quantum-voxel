@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -22,6 +23,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
+import com.badlogic.gdx.video.VideoPlayer;
+import com.badlogic.gdx.video.VideoPlayerCreator;
+import com.badlogic.gdx.video.assets.VideoLoader;
 import com.github.tommyettinger.textra.Font;
 import com.github.tommyettinger.textra.KnownFonts;
 import dev.ultreon.libs.commons.v0.Mth;
@@ -116,6 +120,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.annotation.WillClose;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.Queue;
@@ -274,9 +279,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final Resizer resizer;
     private boolean showUltreonSplash = false;
     private boolean showLibGDXSplash = true;
-    //    private boolean showLibGDXSplash = !GamePlatform.get().isDevEnvironment();
-    private long ultreonSplashTime;
-    private long libGDXSplashTime;
+    private VideoLoader videoLoader = new VideoLoader(new InternalFileHandleResolver());
+    private VideoPlayer ultreonSplashVideo;
+    private VideoPlayer libgdxSplashVideo;
 
     // File handles
     public FileHandle configDir;
@@ -462,6 +467,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final Queue<Runnable> serverTickQueue = new ArrayDeque<>();
 
     private final QuantumClientLoader loader = new QuantumClientLoader();
+    private long libGDXSplashTime;
+    private Texture videoTexture;
 
     /**
      * Initializer for the Quantum Voxel Client.
@@ -476,6 +483,44 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     QuantumClient(String[] argv) {
         super(QuantumClient.PROFILER);
+
+        VideoLoader.VideoParameter param = new VideoLoader.VideoParameter();
+        param.looping = false;
+        param.volume = 1f;
+        param.minFilter = Texture.TextureFilter.Linear;
+        param.magFilter = Texture.TextureFilter.Linear;
+        ultreonSplashVideo = VideoPlayerCreator.createVideoPlayer();
+        ultreonSplashVideo.setFilter(param.minFilter, param.magFilter);
+        ultreonSplashVideo.setLooping(param.looping);
+        ultreonSplashVideo.setVolume(param.volume);
+        try {
+            if (!ultreonSplashVideo.load(Gdx.files.internal("intro.webm"))) {
+                throw new AssertionError("Failed to load Ultreon intro video!");
+            }
+        } catch (FileNotFoundException ignored) {
+            crash(ignored);
+        }
+        ultreonSplashVideo.setOnCompletionListener(file -> {
+            showUltreonSplash = false;
+            ultreonSplashVideo.dispose();
+            this.startLoading();
+        });
+        libgdxSplashVideo = VideoPlayerCreator.createVideoPlayer();
+        libgdxSplashVideo.setFilter(param.minFilter, param.magFilter);
+        libgdxSplashVideo.setLooping(param.looping);
+        libgdxSplashVideo.setVolume(param.volume);
+        try {
+            if (!libgdxSplashVideo.load(Gdx.files.internal("libgdx.webm"))) {
+                throw new AssertionError("Failed to load libGDX intro video!");
+            }
+        } catch (FileNotFoundException ignored) {
+            crash(ignored);
+        }
+        libgdxSplashVideo.setOnCompletionListener(file -> {
+            this.showLibGDXSplash = false;
+            this.showUltreonSplash = true;
+            libgdxSplashVideo.dispose();
+        });
 
         if (QuantumClient.instance != null)
             throw new AssertionError("Double Loading!");
@@ -1666,32 +1711,32 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param renderer the renderer.
      */
     private void renderLibGDXSplash(Renderer renderer) {
-        try (var ignored = QuantumClient.PROFILER.start("libGdxSplash")) {
-            // Initialize splash time if not already set
-            if (this.libGDXSplashTime == 0L) {
-                this.libGDXSplashTime = System.currentTimeMillis();
-            }
+        try (var ignored = QuantumClient.PROFILER.start("libgdxSplash")) {
+            // Initialize splash screen timing and play sound on the first render
+            if (!this.libgdxSplashVideo.isPlaying())
+                this.libgdxSplashVideo.play();
+            libgdxSplashVideo.update();
+            videoTexture = this.libgdxSplashVideo.getTexture();
 
-            // Clear the screen with white color
-            ScreenUtils.clear(1, 1, 1, 1, true);
+            // Clear screen to black
+            ScreenUtils.clear(0, 0, 0, 1, true);
 
-            // Begin rendering
-            this.renderer.begin();
+            // Calculate zoom animation based on elapsed time
+            if (videoTexture != null) {
+                // Calculate scaled thumbnail dimensions
+                resizer.set(videoTexture.getWidth(), videoTexture.getHeight());
+                Vec2f thumbnail = this.resizer.thumbnail(this.getWidth(), this.getHeight());
+                float drawWidth = thumbnail.x;
+                float drawHeight = thumbnail.y;
 
-            // Calculate the size of the logo to be half of the smaller screen dimension
-            int size = Math.min(this.getWidth(), this.getHeight()) / 2;
+                // Center the thumbnail on screen
+                float drawX = (this.getWidth() - drawWidth) / 2;
+                float drawY = (this.getHeight() - drawHeight) / 2;
 
-            // Draw the libGDX logo centered on the screen
-            renderer.blit(this.libGDXLogoTex, (float) this.getWidth() / 2 - (float) size / 2, (float) this.getHeight() / 2 - (float) size / 2, size, size);
-
-            // End rendering
-            this.renderer.end();
-
-            // Check if 4 seconds have passed since splash started
-            if (System.currentTimeMillis() - this.libGDXSplashTime > 4000f) {
-                // Hide libGDX splash and show Ultreon splash
-                this.showLibGDXSplash = false;
-                this.showUltreonSplash = true;
+                // Render background and logo textures
+                renderer.begin();
+                renderer.blit(videoTexture, drawX, drawY, drawWidth, drawHeight, 0, 0, videoTexture.getWidth(), videoTexture.getHeight(), videoTexture.getWidth(), videoTexture.getHeight());
+                renderer.end();
             }
         }
     }
@@ -1703,38 +1748,31 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     private void renderUltreonSplash(Renderer renderer) {
         try (var ignored = QuantumClient.PROFILER.start("ultreonSplash")) {
-            // Initialize splash screen timing and play sound on first render
-            if (this.ultreonSplashTime == 0L) {
-                this.ultreonSplashTime = System.currentTimeMillis();
-                this.logoRevealSound.play(0.5f);
-            }
+            // Initialize splash screen timing and play sound on the first render
+            if (!this.ultreonSplashVideo.isPlaying())
+                this.ultreonSplashVideo.play();
+            ultreonSplashVideo.update();
+            videoTexture = this.ultreonSplashVideo.getTexture();
 
             // Clear screen to black
             ScreenUtils.clear(0, 0, 0, 1, true);
 
             // Calculate zoom animation based on elapsed time
-            final long timeDiff = System.currentTimeMillis() - this.ultreonSplashTime;
-            float zoom = (float) QuantumClient.interpolate(QuantumClient.FROM_ZOOM, QuantumClient.TO_ZOOM, Mth.clamp(timeDiff / QuantumClient.DURATION, 0f, 1f));
+            if (videoTexture != null) {
+                // Calculate scaled thumbnail dimensions
+                resizer.set(videoTexture.getWidth(), videoTexture.getHeight());
+                Vec2f thumbnail = this.resizer.thumbnail(this.getWidth(), this.getHeight());
+                float drawWidth = thumbnail.x;
+                float drawHeight = thumbnail.y;
 
-            // Calculate scaled thumbnail dimensions
-            Vec2f thumbnail = this.resizer.thumbnail(this.getWidth() * zoom, this.getHeight() * zoom);
-            float drawWidth = thumbnail.x;
-            float drawHeight = thumbnail.y;
+                // Center the thumbnail on screen
+                float drawX = (this.getWidth() - drawWidth) / 2;
+                float drawY = (this.getHeight() - drawHeight) / 2;
 
-            // Center the thumbnail on screen
-            float drawX = (this.getWidth() - drawWidth) / 2;
-            float drawY = (this.getHeight() - drawHeight) / 2;
-
-            // Render background and logo textures
-            this.renderer.begin();
-            renderer.blit(this.ultreonBgTex, 0, 0, this.getWidth(), this.getHeight(), 0, 0, 1024, 1024, 1024, 1024);
-            renderer.blit(this.ultreonLogoTex, (int) drawX, (int) drawY, (int) drawWidth, (int) drawHeight, 0, 0, 1920, 1080, 1920, 1080);
-            this.renderer.end();
-
-            // Stop showing splash and start loading when duration elapsed
-            if (System.currentTimeMillis() - this.ultreonSplashTime > QuantumClient.DURATION) {
-                showUltreonSplash = false;
-                this.startLoading();
+                // Render background and logo textures
+                renderer.begin();
+                renderer.blit(videoTexture, drawX, drawY, drawWidth, drawHeight, 0, 0, videoTexture.getWidth(), videoTexture.getHeight(), videoTexture.getWidth(), videoTexture.getHeight());
+                renderer.end();
             }
         }
     }

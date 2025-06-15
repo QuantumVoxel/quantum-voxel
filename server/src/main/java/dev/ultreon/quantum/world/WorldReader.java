@@ -3,10 +3,7 @@ package dev.ultreon.quantum.world;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
-import dev.ultreon.quantum.util.BlockHit;
-import dev.ultreon.quantum.util.EntityHit;
-import dev.ultreon.quantum.util.Ray;
-import dev.ultreon.quantum.util.WorldRayCaster;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +32,7 @@ public interface WorldReader {
      * @return the BlockState at the given BlockVec position
      */
     @NotNull
-    BlockState get(BlockVec pos);
+    BlockState get(Point pos);
 
     /**
      * Retrieves the BlockState at the specified coordinates within the world.

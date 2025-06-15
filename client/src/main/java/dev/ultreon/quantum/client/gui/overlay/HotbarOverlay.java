@@ -1,29 +1,20 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
-import com.badlogic.gdx.graphics.Color;
+import com.github.tommyettinger.textra.Layout;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.entity.player.Temperature;
-import dev.ultreon.quantum.entity.player.TemperatureUnit;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ItemSlot;
+import dev.ultreon.quantum.registry.Registries;
+import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Vec2i;
 
 import java.util.List;
 
 public class HotbarOverlay extends Overlay {
-    private static final NamespaceID TEXTURE = QuantumClient.id("textures/gui/new_hotbar.png");
-    private static final NamespaceID SELECT = QuantumClient.id("textures/gui/new_hotbar_select.png");
-    private static final Vec2i HEALTH_OFFSET = new Vec2i(5, 5);
-    private static final Vec2i AIR_OFFSET = new Vec2i(5, 18);
-    private static final Vec2i ITEMS_OFFSET = new Vec2i(66, 7);
-    private static final Vec2i HUNGER_OFFSET = new Vec2i(240, 5);
-    private static final Vec2i THIRST_OFFSET = new Vec2i(240, 18);
-    private static final Vec2i TEMP_OFFSET = new Vec2i(292, 5);
-    private static final Vec2i TEMP_LOW_OFFSET = new Vec2i(291, 19);
+    private final Layout layout = new Layout();
 
     @Override
     protected void render(Renderer renderer, float deltaTime) {
@@ -31,40 +22,45 @@ public class HotbarOverlay extends Overlay {
         if (player == null) return;
         if (player.isSpectator()) return;
 
-        renderer.blit(TEXTURE, (width >> 1) - 150, height - 48, 300, 32, 0, 0, 300, 32, 300, 32);
+        int x = player.selected * 19;
+        ItemStack selectedItem = player.getSelectedItem();
+        NamespaceID key = Registries.ITEM.getId(selectedItem.getItem());
 
-        renderer.fill((width >> 1) - 150 + HEALTH_OFFSET.x, height - 48 + HEALTH_OFFSET.y, (int) (55 * player.getHealth() / player.getMaxHealth()), 9, Color.SCARLET);
-        renderer.fill((width >> 1) - 150 + AIR_OFFSET.x, height - 48 + AIR_OFFSET.y, (int) (55 * player.getAir() / player.getMaxAir()), 5, Color.SKY);
+        var widgetsTex = this.client.getTextureManager().getTexture(NamespaceID.of("textures/gui/widgets.png"));
+        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 87, leftY - 48, 179, 32, 0, 61);
+        renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 87 + x + 5, leftY - 43, 18, 18, 0, 42);
 
-        renderer.fill((width >> 1) - 150 + HUNGER_OFFSET.x, height - 48 + HUNGER_OFFSET.y, 47 * player.getFoodStatus().getFoodLevel() / 20, 9, Color.FIREBRICK);
-        renderer.fill((width >> 1) - 150 + THIRST_OFFSET.x, height - 48 + THIRST_OFFSET.y, (int) (47 * player.getFoodStatus().getThirstLevel() / 20), 5, Color.ROYAL);
+        List<ItemSlot> allowed = player.inventory.getHotbarSlots();
+        for (int index = 0, allowedLength = allowed.size(); index < allowedLength; index++) {
+            this.drawHotbarSlot(renderer, allowed, index);
+        }
 
-        renderer.fill((width >> 1) - 150 + TEMP_LOW_OFFSET.x, height - 48 + TEMP_LOW_OFFSET.y, 4, 4, Color.CHARTREUSE);
-        renderer.fill((width >> 1) - 150 + TEMP_OFFSET.x, height - 48 + TEMP_OFFSET.y + 14 - (int) (14 * player.getTemperature() / 50.0F), 2, (int) (14 * player.getTemperature() / 50.0F), Color.CHARTREUSE);
+        if (key != null && !selectedItem.isEmpty() && renderer.pushScissors((int) ((float) this.client.getScaledWidth() / 2) - 83, leftY - 41, 166, 17)) {
+            TextObject name = selectedItem.getItem().getTranslation();
+            layout.clear();
+            font.markup(name.getText(), layout);
+            int tWidth = (int) layout.getWidth();
 
-        Temperature temperature = new Temperature(player.getTemperature());
-        double temp = temperature.convertTo(TemperatureUnit.CELSIUS);
+            renderer.blit(widgetsTex, (int) ((float) this.client.getScaledWidth() / 2) - tWidth / 2 - 4, leftY - 40, 4, 14, 79, 42, 4, 17);
+            renderer.blit(widgetsTex, (int) ((float) this.client.getScaledWidth() / 2) - tWidth / 2 - 1, leftY - 40, tWidth + 2, 14, 83, 42, 14, 17);
+            renderer.blit(widgetsTex, (int) ((float) this.client.getScaledWidth() / 2) - tWidth / 2 + tWidth, leftY - 40, 4, 14, 97, 42, 4, 17);
 
-        renderer.textLeft(String.format("%.1f °C", temp), (width >> 1) - 150 + TEMP_OFFSET.x + 18, height - 48 + TEMP_OFFSET.y + 8, RgbColor.WHITE, true);
+            renderer.textCenter(name, (int) ((float) this.client.getScaledWidth()) / 2, leftY - 39);
+            renderer.popScissors();
+        }
 
-        int selX = 65 + player.selected * 19;
-        int selY = 6;
-        int selW = 18, selH = 18;
-
-        renderer.blit(SELECT, (width >> 1) - 150 + selX, height - 48 + selY, selW, selH, 0, 0, selW, selH, selW, selH);
-
-        for (int i = 0; i < 9; i++)
-            this.drawHotbarSlot(renderer, player.inventory.getHotbarSlots(), i);
+        leftY -= 63;
+        rightY -= 63;
     }
 
-    private void drawHotbarSlot(Renderer renderer, List<ItemSlot> slots, int index) {
-        ItemStack item = slots.get(index).getItem();
-        int ix = (width >> 1) - 150 + (65 + index * 19);
-        this.client.itemRenderer.render(item.getItem(), renderer, ix, this.client.getScaledHeight() - 41);
+    private void drawHotbarSlot(Renderer renderer, List<ItemSlot> allowed, int index) {
+        ItemStack item = allowed.get(index).getItem();
+        int ix = (int) ((float) this.client.getScaledWidth() / 2) - 90 + index * 20 + 2;
+        this.client.itemRenderer.render(item.getItem(), renderer, ix, this.client.getScaledHeight() - 24);
         int count = item.getCount();
         if (!item.isEmpty() && count > 1) {
             String text = Integer.toString(count);
-            renderer.textLeft(text, ix + 18 - this.client.renderer.textWidth(text), this.client.getScaledHeight() - 24 - this.client.font.getLineHeight(), RgbColor.WHITE, false);
+            renderer.textRight(text, ix + 18f, this.client.getScaledHeight() - 7 - this.client.font.lineHeight, RgbColor.WHITE, false);
         }
     }
 }

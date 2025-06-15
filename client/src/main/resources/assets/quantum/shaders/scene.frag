@@ -140,16 +140,14 @@ void main() {
     float ao = v_color.g;
 
     vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseTexUV);
-    #if LOD_LEVEL < 1
     if (diffuse.a <= 0.01) discard;
-    #endif
     gl_FragColor.a = 1.0;
 
     #if LOD_LEVEL < 2
     vec3 light = vec3(2.0-u_globalSunlight) * sunLight;
     light += blockLight.rgb * (1.0 - light);
     #else
-    vec3 light = vec3(u_globalSunlight);
+    vec3 light = vec3(2.0-u_globalSunlight) * sunLight;
     #endif
 
     light *= ao;

@@ -59,11 +59,11 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     }
 
     public void register(Block block, BlockState predicate, CubeModel model) {
-        this.customRegistry.computeIfAbsent(block, key -> new HashMap<>()).put(predicate, () -> JsonModel.cubeOf(model));
+        this.customRegistry.computeIfAbsent(block, key -> new HashMap<>()).put(predicate, () -> JsonModel.cubeOf(model, model.buried()));
     }
 
     public void register(Block block, CubeModel model) {
-        this.customRegistry.computeIfAbsent(block, key -> new HashMap<>()).put(block.getDefaultState(), () -> JsonModel.cubeOf(model));
+        this.customRegistry.computeIfAbsent(block, key -> new HashMap<>()).put(block.getDefaultState(), () -> JsonModel.cubeOf(model, model.buried()));
     }
 
     public void registerCustom(Block block, BlockState predicate, Supplier<BlockModel> model) {
@@ -71,7 +71,10 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     }
 
     public void register(Supplier<Block> block, BlockState predicate, Supplier<CubeModel> model) {
-        this.customRegistry.computeIfAbsent(block.get(), key -> new HashMap<>()).put(predicate, Suppliers.memoize(() -> JsonModel.cubeOf(model.get())));
+        this.customRegistry.computeIfAbsent(block.get(), key -> new HashMap<>()).put(predicate, Suppliers.memoize(() -> {
+            CubeModel cubeModel = model.get();
+            return JsonModel.cubeOf(cubeModel, cubeModel.buried());
+        }));
     }
 
     public void registerDefault(Block block) {

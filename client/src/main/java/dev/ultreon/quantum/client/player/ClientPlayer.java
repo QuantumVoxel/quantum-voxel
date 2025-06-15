@@ -6,6 +6,7 @@ import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.util.MathHelper;
+import dev.ultreon.quantum.util.Vec;
 import dev.ultreon.quantum.util.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
@@ -115,7 +116,7 @@ public abstract class ClientPlayer extends Player {
      * @param vec The vector where the interpolated coordinates will be stored.
      * @return The vector containing the interpolated position.
      */
-    public Vec3d getPosition(float partialTick, Vec3d vec) {
+    public Vec getPosition(float partialTick, Vec vec) {
         vec.x = MathHelper.lerp(partialTick, this.ox, this.x);
         vec.y = MathHelper.lerp(partialTick, this.oy, this.y);
         vec.z = MathHelper.lerp(partialTick, this.oz, this.z);

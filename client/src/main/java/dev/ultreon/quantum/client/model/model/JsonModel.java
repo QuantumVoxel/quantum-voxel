@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.model.model;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -13,6 +14,7 @@ import dev.ultreon.libs.collections.v0.tables.Table;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.block.property.BlockDataEntry;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.model.block.BakedCubeModel;
 import dev.ultreon.quantum.client.model.block.BlockModel;
@@ -53,17 +55,18 @@ public class JsonModel implements BlockModel, ItemModel {
         this.id = id;
     }
 
-    public static JsonModel cubeOf(CubeModel model) {
+    public static JsonModel cubeOf(CubeModel model, @Nullable NamespaceID buriedTexture) {
+        Map<String, NamespaceID> elements = new java.util.HashMap<>();
+        elements.put("top", model.top());
+        elements.put("bottom", model.bottom());
+        elements.put("left", model.left());
+        elements.put("right", model.right());
+        elements.put("front", model.front());
+        elements.put("back", model.back());
+        if (buriedTexture != null) elements.put("buried", buriedTexture);
         return new JsonModel(
                 model.resourceId(),
-                Map.of(
-                        "top", model.top(),
-                        "bottom", model.bottom(),
-                        "left", model.left(),
-                        "right", model.right(),
-                        "front", model.front(),
-                        "back", model.back()
-                ),
+                elements,
                 List.of(
                         new ModelElement(
                                 Map.of(
@@ -202,5 +205,14 @@ public class JsonModel implements BlockModel, ItemModel {
 
     public void setBlock(BlockState block) {
         this.block = block;
+    }
+
+    @Override
+    public @Nullable TextureRegion getBuriedTexture() {
+        NamespaceID namespaceID = textureElements.get("buried");
+        if (block != null && namespaceID != null) {
+            return QuantumClient.get().blocksTextureAtlas.get(namespaceID, TextureAtlas.TextureAtlasType.DIFFUSE);
+        }
+        return null;
     }
 }

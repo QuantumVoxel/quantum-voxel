@@ -140,6 +140,8 @@ dependencies {
     implementation api("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
     implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion")
     implementation api("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
+    implementation api("com.badlogicgames.gdx-video:gdx-video:$gdxVideoVersion")
+    implementation api("com.badlogicgames.gdx-video:gdx-video:$gdxVideoVersion")
     implementation api("com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion") {
         exclude group: "org.lwjgl", module: "lwjgl"
         exclude group: "org.lwjgl", module: "lwjgl-glfw"

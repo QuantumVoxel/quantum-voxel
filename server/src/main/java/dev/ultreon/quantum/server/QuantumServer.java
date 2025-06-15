@@ -150,7 +150,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             try {
                 worldData = this.storage.read("world.ubo");
             } catch (IOException e) {
-                this.crash(e);
+                QuantumServer.LOGGER.error("Failed to read world data!", e);
             }
         }
 

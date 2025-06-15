@@ -6,8 +6,8 @@ public class Resizer {
     private final float ratio;
     private final float relativeRatio;
     private final Orientation orientation;
-    private final float sourceWidth;
-    private final float sourceHeight;
+    private float sourceWidth;
+    private float sourceHeight;
 
     public Resizer(float srcWidth, float srcHeight) {
         this.ratio = srcWidth / srcHeight;
@@ -58,6 +58,11 @@ public class Resizer {
         }
 
         return new Vec2f(width, height);
+    }
+
+    public void set(int width, int height) {
+        this.sourceWidth = width;
+        this.sourceHeight = height;
     }
 
     /**

@@ -1,10 +1,7 @@
 package dev.ultreon.quantum.world.vec;
 
 import dev.ultreon.quantum.ubo.types.MapType;
-import dev.ultreon.quantum.util.Point;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3f;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.Direction;
 
 import java.util.Objects;
@@ -108,6 +105,11 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         return this.dst(point.getIntX(), point.getIntY(), point.getIntZ());
     }
 
+    @Override
+    public double dot(Point vec) {
+        return this.dot(vec.getIntX(), vec.getIntY(), vec.getIntZ());
+    }
+
     public BlockVec offset(Direction direction) {
         return this.offset(direction.getOffset());
     }
@@ -203,6 +205,38 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         if (this.z < 0 && this.z % (CS * REGION_SIZE) != 0) rz--;
 
         return new RegionVec(rx, ry, rz);
+    }
+
+    @Override
+    public BlockVec add(Point vec) {
+        this.x += vec.getIntX();
+        this.y += vec.getIntY();
+        this.z += vec.getIntZ();
+        return this;
+    }
+
+    @Override
+    public BlockVec sub(Point vec) {
+        this.x -= vec.getIntX();
+        this.y -= vec.getIntY();
+        this.z -= vec.getIntZ();
+        return this;
+    }
+
+    @Override
+    public BlockVec scl(Point vec) {
+        this.x *= vec.getIntX();
+        this.y *= vec.getIntY();
+        this.z *= vec.getIntZ();
+        return this;
+    }
+
+    @Override
+    public BlockVec div(Point vec) {
+        this.x /= vec.getIntX();
+        this.y /= vec.getIntY();
+        this.z /= vec.getIntZ();
+        return this;
     }
 
     public ChunkVec chunk() {

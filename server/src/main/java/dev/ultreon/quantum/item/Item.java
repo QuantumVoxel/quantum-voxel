@@ -44,6 +44,7 @@ public class Item {
             food.onEaten(player);
 
             player.getFoodStatus().eat(food);
+            return UseResult.ALLOW;
         }
         return UseResult.SKIP;
     }
