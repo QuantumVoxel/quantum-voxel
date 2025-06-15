@@ -10,7 +10,7 @@ import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.ShaderContext;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.shaders.Shaders;
-import dev.ultreon.quantum.client.shaders.provider.SceneShaders;
+import dev.ultreon.quantum.client.shaders.provider.WorldShaders;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +25,7 @@ import java.util.function.Supplier;
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class BackgroundNode extends RenderPipeline.RenderNode {
-    private final Supplier<SceneShaders> shaderProvider = Shaders.WORLD;
+    private final Supplier<WorldShaders> shaderProvider = Shaders.WORLD;
 
     /**
      * Renders the world.
@@ -54,7 +54,7 @@ public class BackgroundNode extends RenderPipeline.RenderNode {
      */
     @Override
     public void render(ObjectMap<String, Texture> textures, GameCamera camera, float deltaTime) {
-        SceneShaders shaderProvider = this.shaderProvider.get();
+        WorldShaders shaderProvider = this.shaderProvider.get();
         ShaderContext.set(shaderProvider);
         this.renderWorld(client.renderBuffers());
         textures.put("skybox", this.getFrameBuffer().getColorBufferTexture());

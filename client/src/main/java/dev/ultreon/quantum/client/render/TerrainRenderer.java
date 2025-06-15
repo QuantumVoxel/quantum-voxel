@@ -43,6 +43,8 @@ public interface TerrainRenderer extends Disposable {
      */
     void renderBackground(RenderBufferSource bufferSource, float deltaTime);
 
+    void renderImmersive();
+
     /**
      * Renders the terrain using the specified model batch and render layer with a given delta time.
      *

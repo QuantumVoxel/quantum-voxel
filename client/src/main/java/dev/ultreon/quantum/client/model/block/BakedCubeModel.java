@@ -145,7 +145,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel, Item
 
     private static Mesh createMesh(NamespaceID resourceId, TextureRegion top, TextureRegion bottom, TextureRegion west, TextureRegion east, TextureRegion north, TextureRegion south) {
         MeshBuilder builder = new MeshBuilder();
-        builder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorPacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL20.GL_TRIANGLES);
+        builder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorUnpacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL20.GL_TRIANGLES);
         builder.setColor(Color.WHITE);
 
         MeshPartBuilder.VertexInfo v00 = new MeshPartBuilder.VertexInfo();

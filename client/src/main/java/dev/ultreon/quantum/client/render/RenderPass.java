@@ -14,6 +14,8 @@ import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.util.Suppliers;
 import net.mgsx.gltf.scene3d.attributes.FogAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
+import net.mgsx.gltf.scene3d.shaders.PBRShaderProvider;
 import org.jetbrains.annotations.ApiStatus;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -44,8 +46,10 @@ public class RenderPass {
     private static final Array<RenderPass> MANAGED = new Array<>();
 
     private final String name;
+    private final Supplier<? extends PBRShaderProvider> pbrShader;
     private final Supplier<? extends ShaderProvider> shader;
     private final Supplier<Material> material;
+    private final Supplier<Material> pbrMaterial;
     private final Supplier<Material> instanceMaterial;
     private final VertexAttribute[] attributes;
     private final int mode;
@@ -53,11 +57,17 @@ public class RenderPass {
     private RenderPass(Builder builder) {
         this.name = builder.name;
         this.shader = builder.shader;
+        this.pbrShader = builder.pbrShader;
         this.material = builder.material;
+        this.pbrMaterial = builder.pbrMaterial;
         this.instanceMaterial = builder.instanceMaterial;
         this.attributes = builder.attributes;
         this.mode = builder.mode;
         MANAGED.add(this);
+    }
+
+    public PBRShaderProvider createPBRShader() {
+        return pbrShader.get();
     }
 
     public String name() {
@@ -93,8 +103,17 @@ public class RenderPass {
         private int mode = GL_TRIANGLES;
         private String name;
         private Supplier<? extends ShaderProvider> shader;
+        private Supplier<? extends PBRShaderProvider> pbrShader = () -> new PBRShaderProvider(null);
         private Supplier<Material> material;
         private Supplier<Material> instanceMaterial;
+        private Supplier<Material> pbrMaterial = () -> {
+            TextureAtlas blocksTextureAtlas = QuantumClient.get().blocksTextureAtlas;
+            Material mat = new Material();
+            mat.set(PBRTextureAttribute.createBaseColorTexture(blocksTextureAtlas.getTexture()));
+            if (blocksTextureAtlas.getEmissiveTexture() != null) mat.set(PBRTextureAttribute.createEmissiveTexture(blocksTextureAtlas.getEmissiveTexture()));
+            if (blocksTextureAtlas.getNormalTexture() != null) mat.set(PBRTextureAttribute.createNormalTexture(blocksTextureAtlas.getNormalTexture()));
+            return mat;
+        };
         private final Array<AttributeDelegate> attributeDelegates = new Array<>();
         private final Array<AttributeDelegate> instanceAttributeDelegates = new Array<>();
         private final Color backgroundColor = new Color(0.0f, 0.0f, 0.0f, 0.0f);
@@ -114,6 +133,11 @@ public class RenderPass {
         }
 
         public Builder shader(Supplier<? extends ShaderProvider> shaderSupplier) {
+            shader = shaderSupplier;
+            return this;
+        }
+
+        public Builder pbrShader(Supplier<? extends ShaderProvider> shaderSupplier) {
             shader = shaderSupplier;
             return this;
         }
@@ -701,7 +725,7 @@ public class RenderPass {
                 }
     }
 
-    public static final RenderPass SKYBOX = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
+    public static final RenderPass SKYBOX = RenderPass.builder(Position(), Normal(), ColorUnpacked(), TexCoords(0))
             .name("skybox")
             .shader(Shaders.SKYBOX)
             .depthTest(false)
@@ -715,7 +739,7 @@ public class RenderPass {
             .depthTest(false)
             .build();
 
-    public static final RenderPass TRANSPARENT = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
+    public static final RenderPass TRANSPARENT = RenderPass.builder(Position(), Normal(), ColorUnpacked(), TexCoords(0))
             .name("transparent")
             .shader(Shaders.TRANSPARENT)
             .blending()
@@ -723,7 +747,7 @@ public class RenderPass {
             .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
             .build();
 
-    public static final RenderPass WATER = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
+    public static final RenderPass WATER = RenderPass.builder(Position(), Normal(), ColorUnpacked(), TexCoords(0))
             .name("water")
             .shader(Shaders.WATER)
             .blending()
@@ -731,14 +755,14 @@ public class RenderPass {
             .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
             .build();
 
-    public static final RenderPass OPAQUE = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
+    public static final RenderPass OPAQUE = RenderPass.builder(Position(), Normal(), ColorUnpacked(), TexCoords(0))
             .name("opaque")
             .shader(Shaders.WORLD)
             .depthTest()
             .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
             .build();
 
-    public static final RenderPass GIZMO = RenderPass.builder(Position(), ColorPacked(), TexCoords(0))
+    public static final RenderPass GIZMO = RenderPass.builder(Position(), ColorUnpacked(), TexCoords(0))
             .name("gizmo")
             .shader(Shaders.GIZMO)
             .alphaTest(0.01f)
@@ -746,7 +770,7 @@ public class RenderPass {
             .depthTest()
             .build();
 
-    public static final RenderPass GIZMO_OUTLINE = RenderPass.builder(Position(), ColorPacked(), TexCoords(0))
+    public static final RenderPass GIZMO_OUTLINE = RenderPass.builder(Position(), ColorUnpacked(), TexCoords(0))
             .name("gizmo_outline")
             .shader(Shaders.GIZMO_OUTLINE)
             .alphaTest(0.01f)
@@ -761,9 +785,17 @@ public class RenderPass {
             .depthTest()
             .build();
 
-    public static final RenderPass CUTOUT = RenderPass.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
+    public static final RenderPass CUTOUT = RenderPass.builder(Position(), Normal(), ColorUnpacked(), TexCoords(0))
             .name("cutout")
             .shader(Shaders.CUTOUT)
+            .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
+            .alphaTest()
+            .depthTest()
+            .build();
+
+    public static final RenderPass FOLIAGE = RenderPass.builder(Position(), Normal(), ColorUnpacked(), TexCoords(0))
+            .name("foliage")
+            .shader(Shaders.FOLIAGE)
             .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
             .alphaTest()
             .depthTest()
@@ -811,6 +843,10 @@ public class RenderPass {
 
     public Material createMaterial() {
         return material.get();
+    }
+
+    public Material createPBRMaterial() {
+        return pbrMaterial.get();
     }
 
 

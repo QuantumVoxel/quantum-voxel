@@ -15,23 +15,23 @@ import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.shaders.WorldShader;
 import dev.ultreon.quantum.client.world.ClientChunk;
 
-public class SceneShaders extends DefaultShaderProvider implements GameShaders {
+public class WorldShaders extends DefaultShaderProvider implements GameShaders {
     private final DefaultShader.Config config;
 
-    public SceneShaders(final DefaultShader.Config config) {
+    public WorldShaders(final DefaultShader.Config config) {
         super(config);
         this.config = config;
     }
 
-    public SceneShaders(final String vertexShader, final String fragmentShader) {
+    public WorldShaders(final String vertexShader, final String fragmentShader) {
         this(new DefaultShader.Config(vertexShader, fragmentShader));
     }
 
-    public SceneShaders(final FileHandle vertexShader, final FileHandle fragmentShader) {
+    public WorldShaders(final FileHandle vertexShader, final FileHandle fragmentShader) {
         this(vertexShader.readString(), fragmentShader.readString());
     }
 
-    public SceneShaders() {
+    public WorldShaders() {
         this(new GeomShaderConfig());
     }
 

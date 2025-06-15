@@ -79,6 +79,10 @@ public final class ServerChunk extends Chunk {
         biomeStorage.load(biomeData, data -> RegistryKey.of(RegistryKeys.BIOME, new NamespaceID(data.getString("id"))));
 
         ServerChunk chunk = new ServerChunk(world, pos, storage, biomeStorage, region);
+        chunk.active = true;
+        chunk.modified = false;
+        chunk.original = false;
+        chunk.lastTracked = currentTimeMillis();
         chunk.load(chunkData);
         return chunk;
     }

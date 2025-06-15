@@ -11,8 +11,10 @@ import dev.ultreon.quantum.client.gui.screens.tabs.TabBuilder;
 import dev.ultreon.quantum.client.gui.widget.CycleButton;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.Slider;
+import dev.ultreon.quantum.client.render.GraphicsSetting;
 import dev.ultreon.quantum.text.TextObject;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import static dev.ultreon.quantum.world.World.CS;
@@ -69,6 +71,21 @@ public class VideoSettingsUI {
                 .value(ClientConfiguration.fpsLimit.getValue())
                 .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 175, 150, 21))
                 .setCallback(this::setFrameRate));
+
+
+        builder.add(TextObject.translation("quantum.screen.options.video.graphicsMode"), new CycleButton<GraphicsSetting>()
+                .values(GraphicsSetting.values())
+                .value(GraphicsSetting.of(ClientConfiguration.graphicsSetting.getValue()))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 200, 150, 21))
+                .formatter(setting -> TextObject.translation("quantum.graphicsMode." + setting.name().toLowerCase(Locale.ROOT)))
+                .withCallback(this::setGraphicsMode));
+    }
+
+    private void setGraphicsMode(CycleButton<GraphicsSetting> graphicsSettingCycleButton) {
+        GraphicsSetting setting = graphicsSettingCycleButton.getValue();
+        ClientConfiguration.graphicsSetting.setValue(setting.ordinal());
+        this.client.setGraphicsSetting(setting);
+        ClientConfiguration.save();
     }
 
     private void setFpsCounter(CycleButton<BooleanEnum> cycleButton) {

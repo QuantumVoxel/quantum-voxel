@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.client.config;
 
+import com.badlogic.gdx.ai.pfa.Graph;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.client.render.GraphicsSetting;
 import dev.ultreon.quantum.client.text.LanguageManager;
 import dev.ultreon.quantum.config.api.ConfigCategory;
 import dev.ultreon.quantum.config.api.Configuration;
@@ -24,6 +26,7 @@ public class ClientConfiguration {
     public static final ConfigProperty<Boolean> fog = videoCat.create("fog", true);
     public static final ConfigProperty<Boolean> enableVsync = videoCat.create("vsync", true);
     public static final ConfigProperty<Integer> fpsLimit = videoCat.create("fpsLimit", 60, 10, 240);
+    public static final ConfigProperty<Integer> graphicsSetting = videoCat.create("graphicsSetting", GraphicsSetting.NORMAL.ordinal(), 0, GraphicsSetting.values().length);
     public static final ConfigProperty<Integer> fov = videoCat.create("fov", 70, 40, 120);
     public static final ConfigProperty<Integer> guiScale = videoCat.create("guiScale", 0, 0, 6);
     public static final ConfigProperty<Boolean> fullscreen = videoCat.create("fullscreen", false);
@@ -89,6 +92,6 @@ public class ClientConfiguration {
     }
 
     public static void save() {
-        config.save();;
+        config.save();
     }
 }

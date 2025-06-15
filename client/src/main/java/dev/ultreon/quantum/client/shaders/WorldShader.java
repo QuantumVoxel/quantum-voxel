@@ -6,12 +6,12 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.math.GridPoint3;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
+import dev.ultreon.quantum.client.render.GraphicsSetting;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
@@ -44,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class WorldShader extends DefaultShader {
     public static final Vector3 CAMERA_UP = new Vector3();
+    public static final float TEXTURE_SIZE = 16f;
     public final int u_globalSunlight;
     public final int u_atlasSize;
     public final int u_atlasOffset;
@@ -52,6 +53,7 @@ public class WorldShader extends DefaultShader {
     public final int u_cameraUp0;
     public final int u_fogColor;
     public final int u_chunkPosition;
+    public final int u_shadowPixelSize;
     private int lod = -1;
     protected String log;
 
@@ -165,21 +167,23 @@ public class WorldShader extends DefaultShader {
         this.u_cameraUp0 = this.register(Inputs.cameraUp, Setters.cameraUp);
         this.u_fogColor = this.register(Inputs.fogColor, Setters.fogColor);
         this.u_chunkPosition = this.register(Inputs.chunkPosition, Setters.chunkPosition);
+        this.u_shadowPixelSize = this.register(Inputs.shadowPixelSize, Setters.shadowPixelSize);
     }
 
     public static class Inputs extends DefaultShader.Inputs {
-        public final static Uniform globalSunlight = new Uniform("u_globalSunlight");
-        public final static Uniform atlasSize = new Uniform("u_atlasSize");
-        public final static Uniform atlasOffset = new Uniform("u_atlasOffset");
-        public final static Uniform lod = new Uniform("u_lod");
-        public final static Uniform lodThreshold = new Uniform("u_lodThreshold");
-        public final static Uniform cameraUp = new Uniform("u_cameraUp0");
-        public final static Uniform fogColor = new Uniform("u_fogColor");
-        public final static Uniform chunkPosition = new Uniform("u_chunkPosition");
+        public static final Uniform globalSunlight = new Uniform("u_globalSunlight");
+        public static final Uniform atlasSize = new Uniform("u_atlasSize");
+        public static final Uniform atlasOffset = new Uniform("u_atlasOffset");
+        public static final Uniform lod = new Uniform("u_lod");
+        public static final Uniform lodThreshold = new Uniform("u_lodThreshold");
+        public static final Uniform cameraUp = new Uniform("u_cameraUp0");
+        public static final Uniform fogColor = new Uniform("u_fogColor");
+        public static final Uniform chunkPosition = new Uniform("u_chunkPosition");
+        public static final Uniform shadowPixelSize = new Uniform("u_shadowPixelSize");
 
     }
     public static class Setters extends DefaultShader.Setters {
-        public final static Setter globalSunlight = new GlobalSetter() {
+        public static final Setter globalSunlight = new GlobalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 @Nullable ClientWorldAccess world = QuantumClient.get().world;
@@ -191,7 +195,7 @@ public class WorldShader extends DefaultShader {
             }
         };
 
-        public final static Setter atlasSize = new GlobalSetter() {
+        public static final Setter atlasSize = new GlobalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 Vec2f f = ClientWorld.ATLAS_SIZE.get().f();
@@ -199,7 +203,7 @@ public class WorldShader extends DefaultShader {
             }
         };
 
-        public final static Setter atlasOffset = new GlobalSetter() {
+        public static final Setter atlasOffset = new GlobalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 Vec2f f = ClientWorld.ATLAS_OFFSET.get().f();
@@ -207,14 +211,14 @@ public class WorldShader extends DefaultShader {
             }
         };
 
-        public final static Setter lodThreshold = new GlobalSetter() {
+        public static final Setter lodThreshold = new GlobalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 shader.set(inputID, ClientConfiguration.lodThreshold.getValue());
             }
         };
 
-        public final static Setter lod = new LocalSetter() {
+        public static final Setter lod = new LocalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 if (renderable.userData instanceof ClientChunk) {
@@ -224,14 +228,14 @@ public class WorldShader extends DefaultShader {
             }
         };
 
-        public final static Setter cameraUp = new GlobalSetter() {
+        public static final Setter cameraUp = new GlobalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 shader.set(inputID, CAMERA_UP);
             }
         };
 
-        public final static Setter fogColor = new GlobalSetter() {
+        public static final Setter fogColor = new GlobalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 WorldRenderer worldRenderer = QuantumClient.get().worldRenderer;
@@ -243,7 +247,7 @@ public class WorldShader extends DefaultShader {
             }
         };
 
-        public final static Setter chunkPosition = new LocalSetter() {
+        public static final Setter chunkPosition = new LocalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 Object userData = renderable.userData;
@@ -252,6 +256,15 @@ public class WorldShader extends DefaultShader {
                     shader.set(inputID, chunk.vec.x, chunk.vec.y, chunk.vec.z);
                 } else {
                     shader.set(inputID, 0, 0, 0);
+                }
+            }
+        };
+
+        public static final Setter shadowPixelSize = new GlobalSetter() {
+            @Override
+            public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+                if (QuantumClient.get().graphicsSetting.compareTo(GraphicsSetting.IMMERSIVE) >= 0.0) {
+                    shader.set(inputID, 1f / TEXTURE_SIZE);
                 }
             }
         };
@@ -271,7 +284,7 @@ public class WorldShader extends DefaultShader {
         try {
             super.init();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize world shader", e);
+            throw new GdxRuntimeException("Failed to initialize world shader", e);
         }
     }
 }

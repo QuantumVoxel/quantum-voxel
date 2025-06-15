@@ -202,6 +202,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public ClientSyncRegistries registries = new ClientSyncRegistries(this);
     public boolean saving;
     public WorldSaveInfo worldSaveInfo;
+    public GraphicsSetting graphicsSetting = GraphicsSetting.NORMAL;
 
     ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
 
@@ -759,6 +760,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         this.camera.fov = ClientConfiguration.fov.getValue();
+        this.graphicsSetting = GraphicsSetting.of(ClientConfiguration.graphicsSetting.getValue());
 
         // Cancel vibration if it is not enabled
         if (!ClientConfiguration.vibration.getValue()) {
@@ -3620,5 +3622,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public boolean isDebugOverlayShown() {
         return debugOverlayShown;
+    }
+
+    public void setGraphicsSetting(GraphicsSetting setting) {
+        this.graphicsSetting = setting;
+        WorldRenderer currentWorldRenderer = this.worldRenderer;
+        if (currentWorldRenderer != null) currentWorldRenderer.reloadFully();
     }
 }

@@ -22,7 +22,7 @@ public abstract class EntityModel<T extends Entity> {
 
     protected BoxBuilder box(int x, int y, int z, int width, int height, int depth) {
         MeshBuilder builder = new MeshBuilder();
-        builder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorPacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL_TRIANGLES);
+        builder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorUnpacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL_TRIANGLES);
         builder.setColor(1, 1, 1, 1);
         return new BoxBuilder(builder, x, y, z, width, height, depth);
     }

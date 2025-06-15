@@ -1,11 +1,13 @@
 package dev.ultreon.quantum.client.render;
 
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
-import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.util.GameObject;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("GDXJavaUnsafeIterator")
 public class RenderBufferSource extends GameObject implements Disposable {
@@ -14,16 +16,19 @@ public class RenderBufferSource extends GameObject implements Disposable {
     private final ObjectMap<RenderPass, RenderBuffer> buffers = new ObjectMap<>();
     private final ObjectMap<RenderPass, RenderBuffer> backBuffers = new ObjectMap<>();
     private final Array<RenderPass> buffersSorted = new Array<>(RenderPass.class);
-    private @Nullable GameCamera camera;
+    private Camera camera;
     private boolean started;
     public long timeSpan;
+    protected Environment forceEnvironment;
 
     public RenderBufferSource() {
         MANAGED.add(this);
     }
 
-    public void begin(GameCamera camera) {
-        if (this.started) throw new IllegalStateException("RenderBuffer already started");        this.camera = camera;
+    public void begin(Camera camera) {
+        if (this.started) throw new IllegalStateException("RenderBuffer already started");
+        if (camera == null) throw new IllegalArgumentException("Camera cannot be null");
+        this.camera = camera;
         this.started = true;
     }
 
@@ -47,7 +52,7 @@ public class RenderBufferSource extends GameObject implements Disposable {
                 buffer = backBuffers.get(pass);
                 backBuffers.remove(pass);
             } else {
-                buffer = new RenderBuffer(pass);
+                buffer = createBuffer(pass);
             }
         }
 
@@ -59,8 +64,14 @@ public class RenderBufferSource extends GameObject implements Disposable {
         return buffer;
     }
 
+    public @NotNull RenderBuffer createBuffer(RenderPass pass) {
+        return new RenderBuffer(pass);
+    }
+
     @SuppressWarnings("GDXJavaFlushInsideLoop")
     public void end() {
+        if (!started) throw new IllegalStateException("RenderBuffer not started");
+
         long start = System.nanoTime() / 1000;
         for (RenderPass pass : this.buffersSorted) {
             RenderBuffer buffer = buffers.get(pass);
@@ -100,5 +111,10 @@ public class RenderBufferSource extends GameObject implements Disposable {
 
     public static int getManagedCount() {
         return MANAGED.size;
+    }
+
+    @ApiStatus.Internal
+    public void setForceEnvironment(Environment forceEnvironment) {
+        this.forceEnvironment = forceEnvironment;
     }
 }

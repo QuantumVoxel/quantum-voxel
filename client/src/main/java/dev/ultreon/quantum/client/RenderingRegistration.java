@@ -64,6 +64,8 @@ public class RenderingRegistration {
         // Register the RenderType.WATER render type for the Blocks.WATER block.
         BlockRenderPassRegistry.register(Blocks.WATER, RenderPass.WATER);
         BlockRenderPassRegistry.register(Blocks.LEAVES, RenderPass.CUTOUT);
+        BlockRenderPassRegistry.register(Blocks.SHORT_GRASS, RenderPass.FOLIAGE);
+        BlockRenderPassRegistry.register(Blocks.SNOWY_SHORT_GRASS, RenderPass.FOLIAGE);
 
         // Call the onRegister() method of the BLOCK_RENDER_TYPES factory.
         ClientRegistrationEvents.BLOCK_RENDER_TYPES.factory().onRegister();

@@ -190,7 +190,7 @@ public final class ModelElement {
                     : texRef.startsWith("#") ? textureElements.get(texRef.substring(1))
                     : NamespaceID.parse(texRef)).mapPath(path -> "textures/" + path + ".png");
 
-            meshBuilder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorPacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL20.GL_TRIANGLES);
+            meshBuilder.begin(new VertexAttributes(VertexAttribute.Position(), VertexAttribute.ColorUnpacked(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)), GL20.GL_TRIANGLES);
             v00.setCol(Color.WHITE);
             v01.setCol(Color.WHITE);
             v10.setCol(Color.WHITE);

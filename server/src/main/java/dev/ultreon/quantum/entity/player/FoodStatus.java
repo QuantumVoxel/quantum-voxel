@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.entity.player;
 
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.item.food.FoodData;
 
@@ -93,6 +94,7 @@ public class FoodStatus {
     }
 
     public void eat(FoodData foodData) {
+        CommonConstants.LOGGER.debug("Eating food: " + foodData.getFood() + " saturation: " + foodData.getSaturation());
         this.foodLevel += foodData.getFood();
         this.saturationLevel += foodData.getSaturation();
         if (this.foodLevel >= 20) {
@@ -101,6 +103,8 @@ public class FoodStatus {
 
         this.exhaustion = 20;
         this.isStarving = false;
+
+        CommonConstants.LOGGER.debug("Food status: " + this.foodLevel + " " + this.saturationLevel);
     }
 
     public void tick() {

@@ -47,9 +47,6 @@ java {
     withJavadocJar()
 }
 
-evaluationDependsOn(":gameprovider")
-evaluationDependsOn(":server")
-
 javadoc {
     dependsOn(":gameprovider:javadocJar")
     dependsOn(":gameprovider:sourcesJar")

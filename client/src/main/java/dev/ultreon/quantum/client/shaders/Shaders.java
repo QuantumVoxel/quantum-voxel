@@ -37,44 +37,55 @@ public class Shaders {
     public static final Supplier<DefaultShaderProvider> DEFAULT = Shaders.register("default", MyDefaultShaderProvider::new);
 
     /**
-     * The scene shader provider. Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
+     * The scene shader provider. Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}.
      * 
-     * @see SceneShaders
+     * @see WorldShaders
      */
-    public static final Supplier<SceneShaders> WORLD = Shaders.register("world", () -> new SceneShaders(
+    public static final Supplier<WorldShaders> WORLD = Shaders.register("world", () -> new WorldShaders(
             QuantumClient.resource(NamespaceID.of("shaders/scene.vert")),
             QuantumClient.resource(NamespaceID.of("shaders/scene.frag"))
     ));
 
     /**
      * The scene shader provider.
-     * Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
+     * Located in {@code shaders/transparent.vert}, {@code shaders/transparent.frag}.
      *
-     * @see SceneShaders
+     * @see WorldShaders
      */
-    public static final Supplier<SceneShaders> TRANSPARENT = Shaders.register("transparent", () -> new SceneShaders(
+    public static final Supplier<WorldShaders> TRANSPARENT = Shaders.register("transparent", () -> new WorldShaders(
             QuantumClient.resource(NamespaceID.of("shaders/transparent.vert")),
             QuantumClient.resource(NamespaceID.of("shaders/transparent.frag"))));
 
     /**
      * The scene shader provider.
-     * Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
+     * Located in {@code shaders/water.vert}, {@code shaders/water.frag}.
      *
-     * @see SceneShaders
+     * @see WorldShaders
      */
-    public static final Supplier<SceneShaders> WATER = Shaders.register("water", () -> new SceneShaders(
+    public static final Supplier<WorldShaders> WATER = Shaders.register("water", () -> new WorldShaders(
             QuantumClient.resource(NamespaceID.of("shaders/water.vert")),
             QuantumClient.resource(NamespaceID.of("shaders/water.frag"))));
 
     /**
      * The scene shader provider.
-     * Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
+     * Located in {@code shaders/cutout.vert}, {@code shaders/cutout.frag}.
      *
-     * @see SceneShaders
+     * @see WorldShaders
      */
-    public static final Supplier<SceneShaders> CUTOUT = Shaders.register("cutout", () -> new SceneShaders(
+    public static final Supplier<WorldShaders> CUTOUT = Shaders.register("cutout", () -> new WorldShaders(
             QuantumClient.resource(NamespaceID.of("shaders/cutout.vert")),
             QuantumClient.resource(NamespaceID.of("shaders/cutout.frag"))
+    ));
+
+    /**
+     * The scene shader provider.
+     * Located in {@code shaders/foliage.vert}, {@code shaders/foliage.frag}.
+     *
+     * @see WorldShaders
+     */
+    public static final Supplier<WorldShaders> FOLIAGE = Shaders.register("foliage", () -> new WorldShaders(
+            QuantumClient.resource(NamespaceID.of("shaders/foliage.vert")),
+            QuantumClient.resource(NamespaceID.of("shaders/foliage.frag"))
     ));
 
     /**

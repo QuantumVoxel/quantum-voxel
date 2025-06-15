@@ -257,7 +257,11 @@ public class GameRenderer implements Disposable {
 
         var position = localPlayer.getPosition(client.partialTick);
         Array<Entity> toSort = new Array<>(world.getAllEntities());
-        worldRenderer.render(client.renderBuffers(), deltaTime);
+        if (this.client.graphicsSetting.isImmersive()) {
+            worldRenderer.renderImmersive();
+        } else {
+            worldRenderer.render(client.renderBuffers(), deltaTime);
+        }
         toSort.sort((e1, e2) -> {
             var d1 = e1.getPosition().dst(position);
             var d2 = e2.getPosition().dst(position);

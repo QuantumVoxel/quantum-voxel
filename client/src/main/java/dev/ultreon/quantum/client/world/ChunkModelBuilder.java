@@ -50,7 +50,7 @@ public class ChunkModelBuilder {
         MeshBuilder builder = builders.get(pass);
         if (builder == null) {
             builder = new MeshBuilder();
-            builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.TextureCoordinates, GL20.GL_TRIANGLES);
+            builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorUnpacked | VertexAttributes.Usage.TextureCoordinates, GL20.GL_TRIANGLES);
             builders.put(pass, builder);
         }
         return builder;

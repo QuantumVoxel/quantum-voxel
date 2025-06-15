@@ -123,7 +123,7 @@ public abstract class Player extends LivingEntity {
 
         super.tick();
 
-        this.foodStatus.tick();
+        if (world.isServerSide()) this.foodStatus.tick();
 
         if (this.isHurt() && !isDead) {
             this.regenerate();
