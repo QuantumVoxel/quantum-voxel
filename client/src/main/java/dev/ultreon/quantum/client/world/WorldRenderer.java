@@ -1,8 +1,10 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
@@ -54,7 +56,6 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.mgsx.gltf.scene3d.attributes.FogAttribute;
-import net.mgsx.gltf.scene3d.lights.DirectionalShadowLight;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -80,7 +81,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private static final Vec3d TMP_3D_A = new Vec3d();
     private static final Vec3d TMp_3D_B = new Vec3d();
     public static final String OUTLINE_CURSOR_ID = CommonConstants.strId("outline_cursor");
-    public static final int QV_CHUNK_ATTRS = VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorUnpacked | VertexAttributes.Usage.Normal;
+    public static final int QV_CHUNK_ATTRS = VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal;
     public static final NamespaceID MOON_ID = NamespaceID.of("generated/moon");
     public static final NamespaceID SUN_ID = NamespaceID.of("generated/sun");
     public ParticleSystem particleSystem = new ParticleSystem();
@@ -126,10 +127,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private @Nullable Vec3d lastPlayerPos;
     private final Array<RenderBuffer> buffers = new Array<>(RenderBuffer.class);
     private final Color fogColor = new Color(0.6F, 0.7F, 1.0F, 1.0F);
-    private DirectionalShadowLight shadowMap;
-    private OrthographicCamera shadeCam;
-    private ShadowRenderer shadows;
-    private ModelBatch batch;
 
     /**
      * Constructs a WorldRenderer instance for rendering a given client world.
@@ -155,11 +152,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         this.setupBreaking();
         this.setupEnvironment();
         this.setupParticles();
-
-        if (client.graphicsSetting.isImmersive()) {
-            this.setupShadowMap();
-        }
-
     }
 
     private void setupParticles() {
@@ -213,7 +205,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         material.set(new DepthTestAttribute(GL_LEQUAL, true));
         material.set(IntAttribute.createCullFace(0));
 
-        this.skybox.model = modelBuilder.createBox(60, 60, 60, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorUnpacked);
+        this.skybox.model = modelBuilder.createBox(60, 60, 60, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked);
 
         ModelInstance modelInstance = new ModelInstance(this.skybox.model, 0, 0, 0);
         modelInstance.userData = Shaders.SKYBOX.get();
@@ -374,11 +366,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         }
     }
 
-    @Override
-    public void renderImmersive() {
-        shadows.render(this::renderShadows, this::renderColors, this::renderSkybox);
-    }
-
     /**
      * Renders the world to the screen using the provided ModelBatch and RenderLayer.
      *
@@ -455,7 +442,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
                 var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
 
-                WorldRenderer.buildOutlineBox(sizeX + 0.1f, sizeY + 0.1f, sizeZ + 0.1f, modelBuilder.part("outline", GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorUnpacked, material));
+                WorldRenderer.buildOutlineBox(sizeX + 0.1f, sizeY + 0.1f, sizeZ + 0.1f, modelBuilder.part("outline", GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorPacked, material));
             });
 
             this.cursor = new ModelInstance(model, renderOffsetC.x - 0.05f, renderOffsetC.y - 0.05f, renderOffsetC.z - 0.05f);
@@ -882,14 +869,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
         this.disposed = true;
 
-        if (this.shadowMap != null) {
-            shadowMap.dispose();
-        }
-
-        if (this.shadows != null) {
-            this.shadows.dispose();
-        }
-
         Model skybox = this.skybox.model;
         this.skybox.model = null;
         this.skybox.modelInstance = null;
@@ -977,10 +956,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             this.setupBreaking();
             this.setupEnvironment();
             this.setupParticles();
-
-            if (client.graphicsSetting.isImmersive()) {
-                this.setupShadowMap();
-            }
         });
     }
 
@@ -1133,61 +1108,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     public Color getFogColor() {
         return fogColor;
-    }
-
-    public void reloadFully() {
-        this.reloadChunks();
-        this.modelInstances.clear();
-        this.blockInstances.clear();
-        this.breakingInstances.clear();
-        this.disposables.clear();
-        this.visibleChunks = 0;
-        this.loadedChunks = 0;
-        this.disposed = false;
-        this.client.worldCat.clear();
-        this.client.backgroundCat.clear();
-
-        if (this.shadowMap != null) {
-            shadowMap.dispose();
-        }
-
-        if (this.shadows != null) {
-            this.shadows.dispose();
-        }
-
-        this.setupMaterials(this.client.blocksTextureAtlas.getTexture(), this.client.blocksTextureAtlas.getEmissiveTexture());
-        this.setupSunAndMoon();
-        this.setupDynamicSkybox();
-        this.setupBreaking();
-        this.setupEnvironment();
-        this.setupParticles();
-
-        if (client.graphicsSetting.isImmersive()) {
-            this.setupShadowMap();
-        }
-    }
-
-    private void setupShadowMap() {
-        shadowMap = new DirectionalShadowLight(1024, 1024);
-        shadeCam = new OrthographicCamera();
-
-        shadows = new ShadowRenderer();
-        shadows.setCamera(client.camera);
-        shadows.setAmbientLight(0.05f);
-        shadows.environment.add(shadowMap);
-    }
-
-    private void renderShadows(RenderBufferSource renderBufferSource) {
-        render(renderBufferSource, Gdx.graphics.getDeltaTime());
-    }
-
-    private void renderColors(RenderBufferSource renderBufferSource, Environment environment1) {
-        renderBufferSource.setForceEnvironment(environment1);
-        render(renderBufferSource, Gdx.graphics.getDeltaTime());
-    }
-
-    private void renderSkybox(RenderBufferSource renderBufferSource) {
-        renderBackground(renderBufferSource, Gdx.graphics.getDeltaTime());
     }
 
     private static class ChunkRenderRef {

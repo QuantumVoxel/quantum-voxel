@@ -362,8 +362,9 @@ public abstract class GamePlatform {
         return false;
     }
 
+    @Deprecated
     public boolean hasImGui() {
-        return false;
+        return isImGuiSupported();
     }
 
     public String getUserAgent() {
@@ -396,6 +397,10 @@ public abstract class GamePlatform {
 
     public TimerInstance getTimer() {
         return timer;
+    }
+
+    public boolean isImGuiSupported() {
+        return false;
     }
 
     private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {

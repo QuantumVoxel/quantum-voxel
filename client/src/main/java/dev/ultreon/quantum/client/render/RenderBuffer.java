@@ -19,16 +19,17 @@ import java.util.function.Consumer;
 public class RenderBuffer extends GameObject implements Disposable {
     private static final Array<RenderBuffer> MANAGED = new Array<>();
 
-    protected final ModelBatch modelBatch;
+    private final ModelBatch modelBatch;
+    public final Material material;
     public final String name;
-    protected final ShaderProvider shader;
-    protected final int primitiveType;
+    private final ShaderProvider shader;
+    private final int primitiveType;
     private final VertexAttributes attributes;
-    protected final Material instanceMaterial;
-    protected boolean started = false;
+    private final Material instanceMaterial;
+    private boolean started = false;
     private final Array<Renderable> buffer = new Array<>(16);
     private final RenderablePool pool = new RenderablePool();
-    protected int currentRenderCount;
+    private int currentRenderCount;
     public int renderCount;
     public int lastRenderCount;
     public long timeSpan;
@@ -36,21 +37,14 @@ public class RenderBuffer extends GameObject implements Disposable {
     private final MeshBuilder builder = new MeshBuilder();
 
     RenderBuffer(RenderPass pass) {
-        this.shader = getShader(pass);
+        this.shader = pass.createShader();
         this.modelBatch = new ModelBatch(shader);
-        this.instanceMaterial = getMaterial(pass).copy();
+        this.material = pass.createMaterial();
+        this.instanceMaterial = pass.createInstanceMaterial();
         this.name = pass.name();
         this.primitiveType = pass.mode();
         this.attributes = pass.attributes();
         MANAGED.add(this);
-    }
-
-    public Material getMaterial(RenderPass pass) {
-        return pass.createMaterial();
-    }
-
-    public ShaderProvider getShader(RenderPass pass) {
-        return pass.createShader();
     }
 
     public void createMesh(Consumer<MeshPartBuilder> consumer) {

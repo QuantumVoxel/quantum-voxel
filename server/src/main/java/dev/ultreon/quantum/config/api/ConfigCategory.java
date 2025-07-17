@@ -82,6 +82,7 @@ public class ConfigCategory implements ConfigValue {
     @Override
     public void setJson(JsonValue value) {
         for (JsonValue json : value) {
+            if (!properties.containsKey(json.name)) continue;
             properties.get(json.name).setJson(json);
         }
     }

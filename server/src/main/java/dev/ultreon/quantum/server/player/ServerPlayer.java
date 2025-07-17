@@ -747,13 +747,8 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public UseResult useItem(BlockHit hitResult, ItemStack stack, ItemSlot slot) {
         UseItemContext ctx = new UseItemContext(getWorld(), this, hitResult, stack, 1F);
         BlockHit result = (BlockHit) ctx.result();
-        if (result == null) {
-            UseResult itemResult = stack.getItem().use(ctx);
-            if (itemResult == UseResult.DENY)
-                slot.update();
-
+        if (result == null)
             return UseResult.SKIP;
-        }
 
         Block block = result.getBlock();
         if (block != null && !block.isAir()) {

@@ -119,3 +119,7 @@ build {
     finalizedBy ":desktop:build"
     finalizedBy ":client:build"
 }
+
+test {
+    useJUnitPlatform()
+}

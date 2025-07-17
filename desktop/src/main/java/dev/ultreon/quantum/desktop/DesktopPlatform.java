@@ -78,16 +78,22 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void preInitImGui() {
+        if (!isImGuiSupported()) return;
         QuantumClient.invokeAndWait(ImGuiOverlay::preInitImGui);
     }
 
     @Override
     public void setupImGui() {
+        if (!isImGuiSupported()) return;
         ImGuiOverlay.setupImGui();
     }
 
     @Override
     public void renderImGui() {
+        if (!isImGuiSupported()) {
+            QuantumClient.get().updateViewport();
+            return;
+        }
         if (ImGuiOverlay.isShown()) ImGuiOverlay.setBounds(insets);
         else insets.idt();
         QuantumClient.get().updateViewport();
@@ -104,17 +110,19 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public void onGameDispose() {
         super.onGameDispose();
-        if (hasImGui())
+        if (isImGuiSupported())
             ImGuiOverlay.dispose();
     }
 
     @Override
     public boolean isShowingImGui() {
+        if (!isImGuiSupported()) return false;
         return ImGuiOverlay.isShown();
     }
 
     @Override
     public void setShowingImGui(boolean value) {
+        if (!isImGuiSupported()) return;
         ImGuiOverlay.setShowingImGui(value);
         if (!value) insets.idt();
         else ImGuiOverlay.setBounds(insets);
@@ -122,11 +130,13 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public boolean areChunkBordersVisible() {
+        if (!isImGuiSupported()) return false;
         return ImGuiOverlay.isChunkSectionBordersShown();
     }
 
     @Override
     public boolean showRenderPipeline() {
+        if (!isImGuiSupported()) return false;
         return ImGuiOverlay.SHOW_RENDER_PIPELINE.get();
     }
 
@@ -489,7 +499,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public boolean hasImGui() {
-        return true;
+        return false;
     }
 
     @Override

@@ -180,7 +180,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         // Handle key press for player
         Player player = this.client.player;
 
-        if (GamePlatform.get().hasImGui() && KeyAndMouseInput.IM_GUI_KEY.is(keyCode)) this.handleImGuiKey();
+        if (GamePlatform.get().isImGuiSupported() && KeyAndMouseInput.IM_GUI_KEY.is(keyCode)) this.handleImGuiKey();
         if (KeyAndMouseInput.DEBUG_KEY.is(keyCode)) handleDebugKey();
         devKeyHandler.handleViewMode(this);
 
