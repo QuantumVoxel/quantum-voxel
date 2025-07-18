@@ -25,6 +25,7 @@ import static dev.ultreon.quantum.CommonConstants.RANDOM;
 
 public class WorldCreationScreen extends Screen {
     private static final WordGenerator WORD_GEN = new WordGenerator(new WordGenerator.Config().minSize(4).maxSize(6).named());
+    private String deferrredSeed;
     private TextEntry worldNameEntry;
     private IconButton reloadButton;
     private TextButton createButton;
@@ -38,6 +39,12 @@ public class WorldCreationScreen extends Screen {
 
     public WorldCreationScreen() {
         super(TextObject.translation("quantum.screen.world_creation.title"));
+    }
+
+    public WorldCreationScreen(String seed) {
+        super(TextObject.translation("quantum.screen.world_creation.title"));
+
+        this.deferrredSeed = seed;
     }
 
     @Override
@@ -77,6 +84,11 @@ public class WorldCreationScreen extends Screen {
 
         cancelButton = add(TextButton.of(UITranslations.CANCEL, 95)
                 .withCallback(this::onBack));
+
+        if (deferrredSeed != null) {
+            seedEntry.setValue(deferrredSeed);
+            setSeed(seedEntry);
+        }
     }
 
     private static long murmurHash64(String input) {

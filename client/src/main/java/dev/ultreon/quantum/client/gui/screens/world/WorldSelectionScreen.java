@@ -13,6 +13,7 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -27,8 +28,9 @@ public class WorldSelectionScreen extends Screen {
     public static final FileHandle WORLDS_DIR = Gdx.files.local("worlds");
     private SelectionList<WorldStorage> worldList;
     private WorldStorage selected;
-    private IconButton editButton;
+    private TextButton editButton;
     private TextButton createButton;
+    private TextButton duplicateButton;
     private TextButton playButton;
     private TextButton deleteWorld;
     private TextButton prevButton;
@@ -71,14 +73,17 @@ public class WorldSelectionScreen extends Screen {
 
         buttonPlatform = add(Platform.create());
 
-        editButton = add(IconButton.of(ButtonIcon.Edit)
+        editButton = add(TextButton.of(TextObject.translation("quantum.screen.world_selection.edit"), 150)
                 .withCallback(this::editWorld)
                 .withType(Button.Type.DARK_EMBED));
         editButton.setSize(20, 20);
-        editButton.isVisible = false;
 
         createButton = add(TextButton.of(TextObject.translation("quantum.screen.world_selection.create"), 150)
                 .withCallback(this::createWorld)
+                .withType(Button.Type.DARK_EMBED));
+
+        duplicateButton = add(TextButton.of(TextObject.translation("quantum.screen.world_selection.duplicate"), 150)
+                .withCallback(this::duplicateWorld)
                 .withType(Button.Type.DARK_EMBED));
 
         playButton = add(TextButton.of(TextObject.translation("quantum.screen.world_selection.play"), 150)
@@ -88,9 +93,14 @@ public class WorldSelectionScreen extends Screen {
         deleteWorld = add(TextButton.of(TextObject.translation("quantum.screen.world_selection.delete"), 150)
                 .withCallback(this::deleteWorld)
                 .withType(Button.Type.DARK_EMBED));
+
+        editButton.enabled = false;
+        playButton.enabled = false;
+        duplicateButton.enabled = false;
+        deleteWorld.enabled = false;
     }
 
-    private void editWorld(IconButton iconButton) {
+    private void editWorld(TextButton button) {
         this.client.showScreen(new WorldEditScreen(selected));
     }
 
@@ -98,17 +108,18 @@ public class WorldSelectionScreen extends Screen {
     public void resized(int width, int height) {
         super.resized(width, height);
 
-        worldList.setBounds(pos.x, pos.y - 3, 250, size.height - 35);
+        worldList.setBounds(pos.x, pos.y - 3, 250, size.height - 70);
         worldInfo.setBounds(pos.x + 250, pos.y - 1, size.width-250, size.height - 37);
         shadowFar.setBounds(2, size.height - 37, size.width - 4, 46);
         shadowNear.setBounds(1, size.height - 36, size.width - 2, 44);
 
-        buttonPlatform.setBounds(-5, size.height - 38, size.width + 10, 46);
+        buttonPlatform.setBounds(-5, size.height - 73, size.width + 10, 81);
 
-        createButton.setPos(this.getWidth() / 2 - 227, this.getHeight() - 31);
-        editButton.setPos(this.getWidth() / 2 - 227, this.getHeight() - 31);
-        playButton.setPos(this.getWidth() / 2 - 75, this.getHeight() - 31);
-        deleteWorld.setPos(this.getWidth() / 2 + 77, this.getHeight() - 31);
+        createButton.setBounds(this.getWidth() / 2 - 150, this.getHeight() - 66, 145, 21);
+        duplicateButton.setBounds(this.getWidth() / 2 + 5, this.getHeight() - 66, 145, 21);
+        playButton.setBounds(this.getWidth() / 2 - 150, this.getHeight() - 31, 95, 21);
+        editButton.setBounds(this.getWidth() / 2 - 50, this.getHeight() - 31, 95, 21);
+        deleteWorld.setBounds(this.getWidth() / 2 + 50, this.getHeight() - 31, 95, 21);
     }
 
     private void renderWorldItem(Renderer renderer, WorldStorage worldStorage, int y, boolean selected, float delta) {
@@ -161,14 +172,21 @@ public class WorldSelectionScreen extends Screen {
         this.client.showScreen(new WorldCreationScreen());
     }
 
-    private void selectWorld(WorldStorage storage) {
+    private void duplicateWorld(TextButton caller) {
+        if (this.selected == null) return;
+        this.client.showScreen(new WorldCreationScreen(String.valueOf(worldInfo.info.seed())));
+    }
+
+    private void selectWorld(@Nullable WorldStorage storage) {
         this.selected = storage;
-        this.editButton.isVisible = storage != null;
+        this.editButton.enabled = storage != null;
+        this.playButton.enabled = storage != null;
+        this.duplicateButton.enabled = storage != null;
+        this.deleteWorld.enabled = storage != null;
         if (storage != null) {
             layout.clear();
             layout.setFont(font);
             font.markup(storage.getName(), layout);
-            this.editButton.setX((int) (worldList.getX() + worldList.getWidth() + 10 + layout.getWidth() * 2 + 10));
         }
     }
 
@@ -191,8 +209,6 @@ public class WorldSelectionScreen extends Screen {
         }
         int scaledHeight = (size.width - 4) * worldInfo.currentPic.getHeight() / worldInfo.currentPic.getWidth();
         int displayHeight = Math.min(scaledHeight, size.height / 2);
-
-        this.editButton.setY(displayHeight + 6);
 
         super.renderBackground(renderer);
     }

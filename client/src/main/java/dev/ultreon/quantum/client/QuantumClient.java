@@ -609,6 +609,12 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             onReloadConfig();
         });
 
+        // Skip splash screen if configured so.
+        if (ClientConfiguration.skipSplashScreen.getValue()) {
+            this.showLibGDXSplash = false;
+            this.showUltreonSplash = false;
+        }
+
         // Set the command line arguments
         this.argv = argv;
 
@@ -671,6 +677,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.closeButton = new ControlButton(ControlIcon.Close);
         this.maximizeButton = new ControlButton(ControlIcon.Maximize);
         this.minimizeButton = new ControlButton(ControlIcon.Minimize);
+
+        if (ClientConfiguration.skipSplashScreen.getValue()) {
+            this.startLoading();
+        }
     }
 
     public BitmapFont loadFont(@NotNull NamespaceID resource, boolean b) {

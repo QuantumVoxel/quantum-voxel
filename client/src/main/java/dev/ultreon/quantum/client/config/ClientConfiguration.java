@@ -36,6 +36,7 @@ public class ClientConfiguration {
     public static final ConfigProperty<Boolean> enable4xScreenshot = guiCat.create("enable4xScreenshot", false);
     public static final ConfigProperty<Boolean> enableCrosshair = guiCat.create("enableCrosshair", true);
     public static final ConfigProperty<Boolean> showMemoryUsage = guiCat.create("showMemoryUsage", GamePlatform.get().isDevEnvironment() && GamePlatform.get().isWindows());
+    public static final ConfigProperty<Boolean> skipSplashScreen = guiCat.create("skipSplashScreen", GamePlatform.get().isDevEnvironment());
 
     private static final ConfigCategory genericCat = config.createCategory("generic");
     public static final ConfigProperty<NamespaceID> language = genericCat.create("language", new NamespaceID("en_us"), id -> LanguageManager.INSTANCE.getLanguageIDs().contains(id));

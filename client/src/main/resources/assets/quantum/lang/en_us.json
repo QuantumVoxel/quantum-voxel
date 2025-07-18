@@ -154,7 +154,8 @@
   quantum.screen.options.personalisation.enableFpsCounter: Enable FPS Counter
   quantum.screen.options.personalisation.showOnlyCraftable: Show Only Craftable Items
   quantum.screen.options.personalisation.fullVibrancy: Full Window Vibrancy
-  quantum.screen.options.personalisation.windowVibrancy: Window Vibrancy (Acrylic blur)
+  quantum.screen.options.personalisation.windowVibrancy: Window Vibrancy
+  quantum.screen.options.personalisation.skipSplashScreen: Skip Splash Screen
   quantum.screen.options.language: "Language..."
   quantum.screen.options.language.title: Language
   quantum.screen.pause.back_to_game: Back to the game
