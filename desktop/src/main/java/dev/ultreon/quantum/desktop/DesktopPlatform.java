@@ -7,23 +7,25 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import dev.ultreon.quantum.*;
+import dev.ultreon.quantum.ModInitializer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.dedicated.FabricMod;
 import dev.ultreon.quantum.dedicated.JavaWebSocket;
+import dev.ultreon.quantum.dedicated.XeoxFileHandle;
+import dev.ultreon.quantum.dedicated.XeoxMod;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
+import dev.ultreon.xeox.api.IFileSystem;
+import dev.ultreon.xeox.api.IMod;
+import dev.ultreon.xeox.api.IPath;
+import dev.ultreon.xeox.api.IXeoxLoader;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.api.metadata.ModOrigin;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.Platform;
@@ -37,7 +39,6 @@ import java.net.URI;
 import java.net.URL;
 import java.net.http.WebSocketHandshakeException;
 import java.nio.channels.ClosedChannelException;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -46,11 +47,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
-import static dev.ultreon.quantum.client.QuantumClient.crash;
 import static dev.ultreon.quantum.desktop.DesktopLauncher.LOGGER;
 
 public abstract class DesktopPlatform extends GamePlatform {
-    private final Map<String, FabricMod> mods = new IdentityHashMap<>();
+    private final Map<String, XeoxMod> mods = new IdentityHashMap<>();
     private final boolean angleGLES;
     private final SafeLoadWrapper safeWrapper;
     private final LuaJit luaJit;
@@ -64,15 +64,15 @@ public abstract class DesktopPlatform extends GamePlatform {
 
         luaJit = new LuaJit();
         @Language("lua") String script = "--[[\n" +
-                                         "print = java.method(java.import('java.lang.System').out, 'println', 'java.lang.Object')\n" +
-                                         "thread = java.import('java.lang.Thread')(function()\n" +
-                                         "\n" +
-                                         "    print('Hello World from LuaJ')\n" +
-                                         "\n" +
-                                         "end)\n" +
-                                         "thread:start()]]\n" +
-                                         "\n" +
-                                         "print(\"Hello World from LuaJ\")\n";
+                "print = java.method(java.import('java.lang.System').out, 'println', 'java.lang.Object')\n" +
+                "thread = java.import('java.lang.Thread')(function()\n" +
+                "\n" +
+                "    print('Hello World from LuaJ')\n" +
+                "\n" +
+                "end)\n" +
+                "thread:start()]]\n" +
+                "\n" +
+                "print(\"Hello World from LuaJ\")\n";
         luaJit.run(script);
     }
 
@@ -117,6 +117,7 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public boolean isShowingImGui() {
         if (!isImGuiSupported()) return false;
+//        return ImGuiOverlay.isShown();
         return ImGuiOverlay.isShown();
     }
 
@@ -147,60 +148,63 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public Optional<Mod> getMod(String id) {
-        return FabricLoader.getInstance().getModContainer(id).map(container -> (Mod) this.mods.computeIfAbsent(id, v -> new FabricMod(container))).or(() -> super.getMod(id));
+        IMod iMod = IXeoxLoader.get().getMod(id);
+        if (iMod == null) {
+            XeoxMod mod = this.mods.get(id);
+            if (mod != null) {
+                return Optional.of(mod);
+            }
+            return Optional.empty();
+        }
+        return Optional.of(new XeoxMod(iMod));
     }
 
     @Override
     public boolean isModLoaded(String id) {
-        return FabricLoader.getInstance().isModLoaded(id) || super.isModLoaded(id);
+        return IXeoxLoader.get().getMod(id) != null || this.mods.containsKey(id);
     }
 
     @Override
     public Collection<? extends Mod> getMods() {
-        var list = new ArrayList<Mod>();
-        list.addAll(FabricLoader.getInstance().getAllMods().stream().map(container -> this.mods.computeIfAbsent(container.getMetadata().getId(), v -> new FabricMod(container))).collect(Collectors.toList()));
-        list.addAll(super.getMods());
-        return list;
+        IXeoxLoader.get().getMods().forEach(mod -> this.mods.put(mod.modId(), new XeoxMod(mod)));
+        return this.mods.values();
     }
 
     @Override
     public void initMods() {
         CommonConstants.LOGGER.info("Initializing mods...");
 
-        FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
-        FabricLoader.getInstance().invokeEntrypoints("client", ClientModInitializer.class, ClientModInitializer::onInitializeClient);
+        IXeoxLoader.get().invokeEntrypoints("common", ModInitializer.class, ModInitializer::onInitialize);
+        IXeoxLoader.get().invokeEntrypoints("server", dev.ultreon.quantum.desktop.ClientModInitializer.class, dev.ultreon.quantum.desktop.ClientModInitializer::onInitializeClient);
     }
 
     @Override
     public boolean isDevEnvironment() {
-        return FabricLoader.getInstance().isDevelopmentEnvironment();
+        return IXeoxLoader.get().isDevEnvironment();
     }
 
     @Override
     public <T> void invokeEntrypoint(String name, Class<T> initClass, Consumer<T> init) {
-        FabricLoader.getInstance().invokeEntrypoints(name, initClass, init);
+        IXeoxLoader.get().invokeEntrypoints(name, initClass, init);
     }
 
     @Override
     public Env getEnv() {
-        switch (FabricLoader.getInstance().getEnvironmentType()) {
-            case CLIENT:
-                return Env.CLIENT;
-            case SERVER:
-                return Env.SERVER;
-            default:
-                throw new IllegalArgumentException();
-        }
+        return switch (IXeoxLoader.get().getEnvironment()) {
+            case CLIENT -> Env.CLIENT;
+            case SERVER -> Env.SERVER;
+            default -> throw new IllegalArgumentException();
+        };
     }
 
     @Override
     public FileHandle getConfigDir() {
-        return new FileHandle(FabricLoader.getInstance().getConfigDir().toFile());
+        return new XeoxFileHandle(IXeoxLoader.get().getConfigDir());
     }
 
     @Override
     public FileHandle getGameDir() {
-        return new FileHandle(FabricLoader.getInstance().getGameDir().toFile());
+        return new XeoxFileHandle(IXeoxLoader.get().getGameDir());
     }
 
     @Override
@@ -215,8 +219,23 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void locateResources() {
+        IFileSystem filesystem = IXeoxLoader.get().getMod(CommonConstants.NAMESPACE).filesystem();
+        if (filesystem == null) {
+            CommonConstants.LOGGER.warn("Quantum Voxel resources unavailable!");
+            return;
+        }
+        IPath rootPath = filesystem.root();
         try {
-            URL resource = QuantumClient.class.getResource("/.quantum-resources");
+            QuantumClient.get().getResourceManager().importPackage(new XeoxFileHandle(rootPath));
+        } catch (IOException ex) {
+            throw new GdxRuntimeException("Failed to import resources!", ex);
+        }
+    }
+
+    @Override
+    public void locateServerResources(QuantumServer server) {
+        try {
+            URL resource = server.getClass().getResource("/.quantum-server-resources");
             if (resource == null) {
                 throw new GdxRuntimeException("Quantum Voxel resources unavailable!");
             }
@@ -232,30 +251,40 @@ public abstract class DesktopPlatform extends GamePlatform {
                 path = path.substring(0, path.length() - 1);
             }
 
-            QuantumClient.get().getResourceManager().importPackage(new FileHandle(new File(new URI(path))));
+            server.getResourceManager().importPackage(new FileHandle(new File(new URI(path))));
         } catch (Exception e) {
-            for (Path rootPath : FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE).orElseThrow().getRootPaths()) {
-                try {
-                    QuantumClient.get().getResourceManager().importPackage(new FileHandle(rootPath.toFile()));
-                } catch (IOException ex) {
-                    crash(ex);
-                }
+            IPath rootPath = IXeoxLoader.get().getMod(CommonConstants.NAMESPACE).filesystem().path("/");
+            try {
+                server.getResourceManager().importPackage(new XeoxFileHandle(rootPath));
+            } catch (IOException ex) {
+                throw new GdxRuntimeException("Failed to import resources!", ex);
             }
         }
     }
 
     @Override
     public void locateModResources() {
-        for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
-            if (mod.getOrigin().getKind() != ModOrigin.Kind.PATH) continue;
+//        for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
+//            if (mod.getOrigin().getKind() != ModOrigin.Kind.PATH) continue;
+//
+//            for (Path rootPath : mod.getRootPaths()) {
+//                // Try to import a resource package for the given mod path.
+//                try {
+//                    QuantumClient.get().getResourceManager().importPackage(rootPath.toUri());
+//                } catch (IOException e) {
+//                    CommonConstants.LOGGER.warn("Importing resources failed for path: {}", rootPath.toFile(), e);
+//                }
+//            }
+//        }
 
-            for (Path rootPath : mod.getRootPaths()) {
-                // Try to import a resource package for the given mod path.
-                try {
-                    QuantumClient.get().getResourceManager().importPackage(rootPath.toUri());
-                } catch (IOException e) {
-                    CommonConstants.LOGGER.warn("Importing resources failed for path: {}", rootPath.toFile(), e);
-                }
+        for (IMod iMod : IXeoxLoader.get().getMods()) {
+            IFileSystem filesystem = iMod.filesystem();
+            if (filesystem == null) continue;
+            IPath rootPath = filesystem.path("/");
+            try {
+                QuantumClient.get().getResourceManager().importPackage(new XeoxFileHandle(rootPath));
+            } catch (IOException e) {
+                CommonConstants.LOGGER.warn("Importing resources failed for mod {}", iMod.name(), e);
             }
         }
     }
@@ -533,6 +562,34 @@ public abstract class DesktopPlatform extends GamePlatform {
     }
 
     @Override
+    public boolean isImGuiSupported() {
+        return isWindows() && IXeoxLoader.get().isDevEnvironment();
+    }
+
+    @Override
+    public boolean isDevFlagEnabled(DevFlag devFlag) {
+        if (devFlag == DevFlag.ImGui) {
+            return isImGuiSupported();
+        }
+        return ImGuiOverlay.isDevFlagEnabled(devFlag);
+    }
+
+    @Override
+    public Collection<String> getModIds() {
+        return IXeoxLoader.get().getModIds();
+    }
+
+    @Override
+    public String getGameVersion() {
+        return IXeoxLoader.get().getGameVersion();
+    }
+
+    @Override
+    public Mod getGameMod() {
+        return new XeoxMod(IXeoxLoader.get().getMod(CommonConstants.NAMESPACE));
+    }
+
+    @Override
     public void handleCrash(ApplicationCrash crash) {
         safeWrapper.crash(crash);
     }
@@ -688,10 +745,8 @@ public abstract class DesktopPlatform extends GamePlatform {
         public T get() {
             try {
                 return completableFuture.get();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } catch (ExecutionException e) {
-                throw new RuntimeException(e);
+            } catch (InterruptedException | ExecutionException e) {
+                throw new GdxRuntimeException("Failed to complete promise", e);
             }
         }
 

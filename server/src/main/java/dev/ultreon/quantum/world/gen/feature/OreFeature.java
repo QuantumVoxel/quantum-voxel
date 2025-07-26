@@ -9,10 +9,10 @@ import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.Fork;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.gen.TerrainFeature;
+import dev.ultreon.quantum.world.gen.biome.IntRange;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import kotlin.ranges.IntRange;
 import org.jetbrains.annotations.NotNull;
 
 import static dev.ultreon.quantum.world.World.CS;

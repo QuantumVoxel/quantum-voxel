@@ -122,6 +122,10 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
             int id = theirPacketData.getId(packet);
 
+            if (instance.listener() != null) {
+                instance.listener().onSent();
+            }
+
             this.otherSide.receive(id, bos.toByteArray());
 
             if (instance.listener() != null) {

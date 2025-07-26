@@ -9,6 +9,7 @@ import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.LoginServerPacketHandler;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
+import dev.ultreon.quantum.network.stage.LoginPacketStage;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.network.system.IConnection;

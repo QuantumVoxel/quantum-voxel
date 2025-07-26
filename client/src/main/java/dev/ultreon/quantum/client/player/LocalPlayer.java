@@ -3,12 +3,13 @@ package dev.ultreon.quantum.client.player;
 import java.util.*;
 import java.util.stream.Stream;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import dev.ultreon.quantum.world.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
@@ -53,7 +54,9 @@ import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Location;
 import dev.ultreon.quantum.world.SoundEvent;
+
 import static dev.ultreon.quantum.world.World.CS;
+
 import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
@@ -70,8 +73,9 @@ import dev.ultreon.quantum.world.vec.ChunkVecSpace;
  */
 public class LocalPlayer extends ClientPlayer {
 
+    private final EnumSet<Direction> occludedDirections = EnumSet.noneOf(Direction.class);
     private double swimSpeed = 0.06;
-    private final QuantumClient client = QuantumClient.get();
+    public final QuantumClient client = QuantumClient.get();
     public boolean movedLastFrame;
     private ClientWorldAccess clientWorld;
     private int oldSelected;
@@ -92,13 +96,14 @@ public class LocalPlayer extends ClientPlayer {
     private final Queue<ChunkVec> sendQueue = new ArrayDeque<>();
     private boolean isLoading;
     private final Vec3d vel = new Vec3d();
+    private final Vector3 lookVec = new Vector3();
 
     /**
      * Constructs a new LocalPlayer.
      *
      * @param entityType The entity type.
-     * @param world The client world access.
-     * @param uuid The UUID of the player.
+     * @param world      The client world access.
+     * @param uuid       The UUID of the player.
      */
     public LocalPlayer(EntityType<? extends Player> entityType, ClientWorldAccess world, UUID uuid) {
         super(entityType, world);
@@ -124,6 +129,22 @@ public class LocalPlayer extends ClientPlayer {
 
         Vec3d tmp = new Vec3d();
         Vector3 velocity = this.client.playerInput.getVelocity();
+        if (client.detachedCam) {
+            client.detachedPos.add(velocity.scl(4));
+            if (this.client.playerInput.up) this.client.detachedPos.y += 0.2f;
+            if (this.client.playerInput.down) this.client.detachedPos.y -= 0.2f;
+            this.client.playerInput.up = false;
+            this.client.playerInput.down = false;
+
+            if (client.detachedPos.x < -512) client.detachedPos.x = -512;
+            if (client.detachedPos.y < -512) client.detachedPos.y = -512;
+            if (client.detachedPos.z < -512) client.detachedPos.z = -512;
+            if (client.detachedPos.x > 512) client.detachedPos.x = 512;
+            if (client.detachedPos.y > 512) client.detachedPos.y = 512;
+            if (client.detachedPos.z > 512) client.detachedPos.z = 512;
+
+            velocity.setZero();
+        }
         this.vel.set(velocity.x, velocity.y, velocity.z);
 
         // Water movement
@@ -153,7 +174,7 @@ public class LocalPlayer extends ClientPlayer {
 
         setVelocity(getVelocity().add(this.vel));
         // Determine if the player is jumping based on input
-        this.jumping = !this.isDead() && (Gdx.input.isKeyPressed(Input.Keys.SPACE) && Gdx.input.isCursorCatched());
+        this.jumping = !this.isDead() && (client.playerInput.up && Gdx.input.isCursorCatched());
 
         var connection = this.client.connection;
         if (xRot != oXRot || yRot != oYRot || xHeadRot != oXHeadRot) {
@@ -349,6 +370,18 @@ public class LocalPlayer extends ClientPlayer {
         this.refreshChunks();
     }
 
+    @Override
+    public void rotateHead(float x, float y) {
+        if (client.detachedCam) {
+            client.detachedRot.add(x, y);
+            client.detachedRot.x %= 360;
+            client.detachedRot.y = MathUtils.clamp(client.detachedRot.y, -89, 89);
+            return;
+        }
+
+        super.rotateHead(x, y);
+    }
+
     /**
      * Unloads a chunk.
      * <p>
@@ -444,7 +477,7 @@ public class LocalPlayer extends ClientPlayer {
     /**
      * If the sound event is not null, it also plays the sound using the client.
      *
-     * @param sound The sound event to be played. Can be null.
+     * @param sound  The sound event to be played. Can be null.
      * @param volume The volume at which the sound should be played.
      */
     @Override
@@ -474,7 +507,7 @@ public class LocalPlayer extends ClientPlayer {
      * AbilitiesPacket.
      *
      * @param packet The AbilitiesPacket containing the player's abilities
-     * information.
+     *               information.
      */
     @Override
     public void onAbilities(@NotNull AbilitiesPacket packet) {
@@ -558,7 +591,7 @@ public class LocalPlayer extends ClientPlayer {
      * This method will open the menu specified if it is not already open.
      *
      * @param menuType The type of menu to open.
-     * @param items The items to open the menu with.
+     * @param items    The items to open the menu with.
      */
     public void onOpenMenu(MenuType<?> menuType, List<ItemStack> items) {
         ContainerMenu openedBefore = openMenu;
@@ -704,7 +737,7 @@ public class LocalPlayer extends ClientPlayer {
      * This method will update the menu.
      *
      * @param menuId The menu id to update.
-     * @param stack The stack to update the menu with.
+     * @param stack  The stack to update the menu with.
      */
     public void onMenuChanged(@NotNull NamespaceID menuId, ItemStack @NotNull [] stack) {
         ContainerMenu currentMenu = this.openMenu;
@@ -719,5 +752,49 @@ public class LocalPlayer extends ClientPlayer {
 
     public void setSwimSpeed(double swimSpeed) {
         this.swimSpeed = swimSpeed;
+    }
+
+    public Direction getDirection() {
+        if (yRot < -45) {
+            return Direction.DOWN;
+        } else if (yRot > 45) {
+            return Direction.UP;
+        }
+
+        float xRot = xHeadRot;
+        xRot = (xRot % 360 + 360) % 360;
+        if (xRot >= 315 || xRot < 45) {
+            return Direction.SOUTH;
+        } else if (xRot >= 45 && xRot < 135) {
+            return Direction.EAST;
+        } else if (xRot >= 135 && xRot < 225) {
+            return Direction.NORTH;
+        } else {
+            return Direction.WEST;
+        }
+    }
+
+    public Set<Direction> getOccludedDirections(float fovDegrees) {
+        occludedDirections.clear();
+
+        // Convert FOV to cosine threshold
+        float fovRadians = (float) Math.toRadians(fovDegrees);
+        float visibilityThreshold = (float) Math.cos(fovRadians / 2f); // anything below this is outside the cone
+
+        // Player look direction vector
+        Vec3d lookVector = getLookVector();
+        Vector3 lookDir = new Vector3((float) lookVector.x, (float) lookVector.y, (float) lookVector.z); // from pitch/yaw
+        lookDir.nor(); // normalize
+
+        for (Direction dir : Direction.values()) {
+            Vector3 dirVec = dir.getNormal();
+            float dot = lookDir.dot(dirVec);
+
+            if (dot < visibilityThreshold) {
+                occludedDirections.add(dir);
+            }
+        }
+
+        return occludedDirections;
     }
 }

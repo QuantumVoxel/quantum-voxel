@@ -9,9 +9,10 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.ObjectMap;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
@@ -21,39 +22,39 @@ import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.ShowInNodeView;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import kotlin.Lazy;
-import kotlin.LazyKt;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.IntBuffer;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.badlogic.gdx.graphics.GL20.GL_LINES;
 
 public class ChunkModel extends GameObject {
-    private static final Lazy<Model> gizmo = LazyKt.lazy(ChunkModel::createBorderGizmo);
+    private static final LazyInitializer<Model> gizmo = LazyInitializer.<Model>builder().setInitializer(ChunkModel::createBorderGizmo).get();
     private static final Color CHUNK_GIZMO_COLOR = new Color(0.0f, 1.0f, 0.0f, 1.0f);
     private final ChunkVec pos;
     private final ClientChunk chunk;
     private final Material material;
-    private final WorldRenderer worldRenderer;
+    private final WorldRenderer renderer;
     @Nullable
     private ModelInstance gizmoInstance = null;
-    private final Array<RenderPass> usedPasses = new Array<>();
 
     @ShowInNodeView
     private boolean beingBuilt;
 
-    private final ChunkModelBuilder chunkModelBuilder;
     private final MeshBuilder meshBuilder = new MeshBuilder();
     private final ObjectMap<RenderPass, ChunkMesh> meshes = new ObjectMap<>();
+    private final BoundingBox bounds = new BoundingBox();
+    private final OpaqueFaces opaqueFaces = new OpaqueFaces();
 
     public ChunkModel(ChunkVec pos, ClientChunk chunk, WorldRenderer renderer) {
         this.material = renderer.getMaterial();
+        this.renderer = renderer;
         this.pos = pos;
         this.chunk = chunk;
-        this.worldRenderer = renderer;
-        this.chunkModelBuilder = new ChunkModelBuilder(chunk);
+        this.chunk.opaqueFaces = opaqueFaces;
 
         if (Gdx.gl30 != null) {
             IntBuffer buf = BufferUtils.newIntBuffer(1);
@@ -61,29 +62,37 @@ public class ChunkModel extends GameObject {
         }
     }
 
-    public boolean build() {
-        if (beingBuilt) return true;
-        generateModel();
+    /**
+     *
+     * @return a tight-fit bounding box of the chunk.
+     */
+    public @Nullable BoundingBox build() {
+        bounds.inf();
+        if (beingBuilt) return null;
+        generateModel(bounds);
         chunk.dirty = false;
         chunk.initialized = true;
-        return true;
+        return bounds;
     }
 
-    private void generateModel() {
+    private void generateModel(BoundingBox bounds) {
         chunk.immediateRebuild = false;
-        this.gizmoInstance = new ModelInstance(gizmo.getValue(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
+        try {
+            this.gizmoInstance = new ModelInstance(gizmo.get(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
+        } catch (ConcurrentException e) {
+            throw new RuntimeException(e);
+        }
 
         this.beingBuilt = true;
         if (meshes.isEmpty()) {
-            ChunkVec pos = chunk.getVec();
+            ChunkVec pos = chunk.vec;
             QuantumClient.invokeAndWait(() -> {
                 ModelBuilder builder = new ModelBuilder();
                 builder.begin();
                 return builder;
             });
 
-
-            buildAsync(pos);
+            buildAsync(pos, bounds);
         }
         QuantumClient.invokeAndWait(chunk::loadCustomRendered);
 
@@ -96,7 +105,7 @@ public class ChunkModel extends GameObject {
     }
 
     @SuppressWarnings("GDXJavaUnsafeIterator")
-    private void buildAsync(ChunkVec pos) {
+    private void buildAsync(ChunkVec pos, BoundingBox bounds) {
         long millis = System.currentTimeMillis();
         chunk.meshStatus = MeshStatus.MESHING;
 
@@ -107,35 +116,52 @@ public class ChunkModel extends GameObject {
         }
 
         try {
-            for (ObjectMap.Entry<RenderPass, ChunkMesh> model : this.meshes.entries()) {
-                if (model != null) model.value.dispose();
+            for (ObjectMap.Entry<RenderPass, ChunkMesh> mesh : this.meshes.entries()) {
+                if (mesh != null) mesh.value.dispose();
             }
-            AtomicBoolean passed = new AtomicBoolean(false);
             RenderBufferSource bufferSource = QuantumClient.get().renderBuffers();
-            chunkModelBuilder.begin(bufferSource);
+            ChunkModelBuilder chunkModelBuilder = new ChunkModelBuilder(chunk);
+            GamePlatform.get().supplyAsync(() -> {
+                chunkModelBuilder.begin();
 
-            if (!chunk.mesher.buildMesh((blk, model, pass) -> {
-                if (model == null) return true;
-                return pass.equals(model.getRenderPass());
-            }, chunkModelBuilder)) {
-                chunk.meshStatus = MeshStatus.SKIPPED;
+                if (!chunk.mesher.buildMesh(bounds, opaqueFaces, (blk, model, pass) -> {
+                    if (model == null) return true;
+                    return pass.equals(model.getRenderPass());
+                }, chunkModelBuilder)) {
+                    chunk.meshStatus = MeshStatus.SKIPPED;
+                    chunk.meshDuration = System.currentTimeMillis() - millis;
+                    return null;
+                }
+
+                return QuantumClient.invoke(() -> chunkModelBuilder.end(meshes));
+            }).exceptionally(throwable -> {
+                crash(new CrashLog("Failed to generate chunk model: " + pos, throwable), pos, millis);
+                return null;
+            }).thenAccept(v -> {
+                if (v == null || v.getNow(null) == null) return;
+                chunk.meshStatus = MeshStatus.MESHED;
                 chunk.meshDuration = System.currentTimeMillis() - millis;
-                return;
-            }
-
-            chunkModelBuilder.end(meshes, bufferSource);
-            chunk.meshStatus = MeshStatus.MESHED;
-            chunk.meshDuration = System.currentTimeMillis() - millis;
+            }).exceptionally(throwable -> {
+                crash(new CrashLog("Failed to generate chunk model: " + pos, throwable), pos, millis);
+                return null;
+            });
         } catch (Throwable t) {
-            CrashLog crashLog = new CrashLog("Failed to generate chunk model: " + pos, t);
-            CrashCategory category = new CrashCategory("Chunk Details");
-            category.add("Position", pos.toString());
-            category.add("Time", System.currentTimeMillis() - millis);
-            crashLog.addCategory(category);
-            QuantumClient.crash(crashLog);
+            crashDirect(new CrashLog("Failed to generate chunk model: " + pos, t), pos, millis);
         } finally {
             this.beingBuilt = false;
         }
+    }
+
+    private static void crash(CrashLog pos, ChunkVec pos1, long millis) {
+        QuantumClient.invoke(() -> crashDirect(pos, pos1, millis));
+    }
+
+    private static void crashDirect(CrashLog pos, ChunkVec pos1, long millis) {
+        CrashCategory category = new CrashCategory("Chunk Details");
+        category.add("Position", pos1.toString());
+        category.add("Time", System.currentTimeMillis() - millis);
+        pos.addCategory(category);
+        QuantumClient.crash(pos);
     }
 
     @SuppressWarnings("GDXJavaUnsafeIterator")
@@ -167,7 +193,9 @@ public class ChunkModel extends GameObject {
 
     public void rebuild() {
         if (beingBuilt) return;
-        build();
+        BoundingBox build = build();
+        if (build == null) return;
+        chunk.tightBounds.set(build);
         chunk.dirty = false;
         chunk.onUpdated();
         chunk.initialized = true;
@@ -191,7 +219,7 @@ public class ChunkModel extends GameObject {
         return world.isChunkInvalidated(chunk);
     }
 
-    public static Lazy<Model> getGizmo() {
+    public static LazyInitializer<Model> getGizmo() {
         return gizmo;
     }
 

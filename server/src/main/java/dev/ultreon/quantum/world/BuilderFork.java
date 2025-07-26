@@ -42,4 +42,9 @@ public class BuilderFork implements Fork {
     public boolean isAir(int x, int y, int z) {
         return this.generator.getCarver().isAir(x, y, z);
     }
+
+    @Override
+    public BlockState get(int x, int y, int z) {
+        return this.chunk.get(x, y, z);
+    }
 }

@@ -23,7 +23,7 @@ public abstract class RandomBlocksLayer extends TerrainLayer {
     public static RandomBlocksLayer surface(int thickness, int from, int to, Block... blocks) {
         return new RandomBlocksLayer(from, to, blocks) {
             public boolean shouldGenerate(int x, int y, int z, int height) {
-                return y >= height - thickness && y < height;
+                return y >= height - thickness && y <= height;
             }
         };
     }
@@ -48,14 +48,14 @@ public abstract class RandomBlocksLayer extends TerrainLayer {
             }
 
             public boolean shouldGenerate(int x, int y, int z, int height) {
-                return y < height && noise.eval(x, y, z) < threshold;
+                return y <= height && noise.eval(x, y, z) <= threshold;
             }
         };
     }
 
     @Override
     public boolean handle(@NotNull World world, BlockSetter chunk, @NotNull RNG rng, int x, int y, int z, int height) {
-        if (from <= y && y <= to && y < height && shouldGenerate(x, y, z, height)) {
+        if (from <= y && y <= to && y <= height && shouldGenerate(x, y, z, height)) {
             Block block = blocks[rng.nextInt(blocks.length)];
             chunk.set(x, y, z, block.getDefaultState());
             return true;

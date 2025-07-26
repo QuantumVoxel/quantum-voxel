@@ -40,10 +40,6 @@ public abstract class Button<T extends Button<T>> extends Widget {
     }
 
     protected void renderButton(Renderer renderer, Texture texture, int x, int y) {
-        if (!isHovered() && pressed) {
-            this.pressed = false;
-        }
-
         calculateOffset();
 
         renderer.fill(x + 1, y + this.size.height, this.size.width - 2, 1, Renderer.DARK_TRANSPARENT);
@@ -54,11 +50,6 @@ public abstract class Button<T extends Button<T>> extends Widget {
             renderer.drawHighlightPlatform(pos.x, pos.y, size.width, size.height, yOffset);
         } else {
             renderer.drawPlatform(pos.x, pos.y, size.width, size.height, yOffset);
-        }
-
-        if (!pressed && wasPressed && !isHovered) {
-            this.wasPressed = false;
-            this.client.playSound(SoundEvents.BUTTON_RELEASE, 1.0f);
         }
     }
 

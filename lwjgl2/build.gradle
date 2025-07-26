@@ -27,7 +27,6 @@ buildscript {
     dependencies {
         classpath group: 'commons-io', name: 'commons-io', version: '2.13.0'
         classpath "com.google.code.gson:gson:2.10.1"
-        classpath "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:1.9.22"
         classpath("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.8")
     }
 }
@@ -36,9 +35,7 @@ buildscript {
 //     Plugins     //
 //*****************//
 apply plugin: 'java'
-apply plugin: 'groovy'
 apply plugin: 'idea'
-apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'java'
 apply plugin: 'java-library'
 apply(plugin: "org.jetbrains.gradle.plugin.idea-ext")
@@ -50,7 +47,6 @@ apply(plugin: "org.jetbrains.gradle.plugin.idea-ext")
 //    type ProjectType.Desktop
 //}
 
-evaluationDependsOn(":gameprovider")
 evaluationDependsOn(":server")
 evaluationDependsOn(":mixinprovider")
 evaluationDependsOn(":client")
@@ -82,7 +78,6 @@ sourceSets {
 }
 
 dependencies {
-    implementation api(project(":gameprovider"))
     implementation api(project(":client"))
     implementation api(project(":server"))
     implementation api(project(":dedicated"))
@@ -105,11 +100,6 @@ dependencies {
     // Others
     implementation api("com.github.crykn.guacamole:gdx-desktop:v0.3.5")
 
-    // Apache Log4J
-    runtimeOnly("org.apache.logging.log4j:log4j:$log4jVersion")
-    runtimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    runtimeOnly("org.apache.logging.log4j:log4j-api:$log4jVersion")
-    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
     implementation api("org.tukaani:xz:$tukaaniXzVersion")
     implementation api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
 
@@ -131,9 +121,6 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
     implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
-    implementation api("org.apache.logging.log4j:log4j:$log4jVersion")
-    implementation api("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    implementation api("org.apache.logging.log4j:log4j-api:$log4jVersion")
 
     // fabric-loader dependencies
     implementation api("org.ow2.asm:asm:${project.asmVersion}")
@@ -145,41 +132,16 @@ dependencies {
     implementation 'party.iroiro.luajava:luajit:4.0.2'
     runtimeOnly 'party.iroiro.luajava:luajit-platform:4.0.2:natives-desktop'
 
-    implementation api("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
-        exclude module: 'launchwrapper'
-        exclude module: 'guava'
-    }
-
     // Add JNA
     implementation api('net.java.dev.jna:jna:5.15.0')
     implementation api('net.java.dev.jna:jna-platform:5.15.0')
-
-    //noinspection GradleDynamicVersion
-    implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
-    implementation api('net.fabricmc:tiny-remapper:0.8.7')
-    //noinspection GradleDynamicVersion
-    implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
-    implementation api('net.fabricmc:access-widener:2.1.0')
-
-    implementation api("net.fabricmc:fabric-loader:$fabricVersion")
-
-    //noinspection GradleDynamicVersion
-    implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
-    implementation api('net.fabricmc:tiny-remapper:0.8.7')
-    //noinspection GradleDynamicVersion
-    implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
-    implementation api('net.fabricmc:access-widener:2.1.0')
-
-    implementation api("net.fabricmc:fabric-loader:$fabricVersion")
 }
 
 compileJava {
-    dependsOn ":gameprovider:build"
     dependsOn ":client:build"
 }
 
 processResources {
-    dependsOn ":gameprovider:build"
     dependsOn ":client:build"
     from(file("$rootProject.projectDir/LICENSE")) { into "META-INF/" }
     exclude "*.pdn", "*.xcf", "*.ps"
@@ -188,7 +150,6 @@ processResources {
 }
 
 jar {
-    dependsOn ":gameprovider:build"
     dependsOn ":client:build"
     //noinspection GroovyAssignabilityCheck
     manifest {

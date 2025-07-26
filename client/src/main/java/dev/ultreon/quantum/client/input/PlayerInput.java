@@ -8,6 +8,7 @@ import dev.ultreon.quantum.client.config.ClientConfiguration;
 //import dev.ultreon.quantum.client.input.controller.ControllerInput;
 //import dev.ultreon.quantum.client.input.controller.context.InGameControllerContext;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
+import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.util.Utils;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.util.Vec3d;
@@ -26,7 +27,7 @@ public class PlayerInput {
     private final Vector3 tmp = new Vector3();
     private int flyCountdown = 0;
 
-    public void tick(@NotNull Player player, float speed) {
+    public void tick(@NotNull LocalPlayer player, float speed) {
         vel.set(0, 0, 0);
 
         moveX = 0;
@@ -47,7 +48,11 @@ public class PlayerInput {
 
         rotate(player);
 
-        tmp.set(-moveX, 0, moveY).nor().scl(speed).rotate(player.xHeadRot, 0, 1, 0);
+        if (player.client.detachedCam) {
+            tmp.set(-moveX, 0, moveY).nor().scl(speed).rotate(player.client.detachedRot.x, 0, 1, 0);
+        } else {
+            tmp.set(-moveX, 0, moveY).nor().scl(speed).rotate(player.xHeadRot, 0, 1, 0);
+        }
         vel.set(tmp);
     }
 
@@ -67,7 +72,7 @@ public class PlayerInput {
         flyCountdown = 0;
     }
 
-    private void rotate(@NotNull Player player) {
+    private void rotate(@NotNull LocalPlayer player) {
         if (moveX > 0)
             player.xRot = Math.max(player.xRot - 45 / (player.xHeadRot - player.xRot + 50), player.xRot - 90);
         else if (moveX < -0)

@@ -30,6 +30,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.BitSet;
 import java.util.stream.IntStream;
 
+import static com.badlogic.gdx.Input.Keys.*;
+
 /**
  * The input for the desktop client.
  *
@@ -38,7 +40,7 @@ import java.util.stream.IntStream;
  */
 @SuppressWarnings("t")
 public final class KeyAndMouseInput extends GameInput implements InputProcessor {
-    private static final BitSet KEYS = new BitSet(Input.Keys.MAX_KEYCODE);
+    private static final BitSet KEYS = new BitSet(MAX_KEYCODE);
 
     public static final KeyBind PAUSE_KEY = KeyBinds.pauseKey;
     public static final KeyBind DROP_ITEM_KEY = KeyBinds.dropItemKey;
@@ -53,8 +55,8 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     public static final KeyBind COMMAND_KEY = KeyBinds.commandKey;
     public static final KeyBind FULL_SCREEN_KEY = KeyBinds.fullScreenKey;
     public static final KeyBind THIRD_PERSON_KEY = KeyBinds.thirdPersonKey;
-    private static final BitSet PRESSED = new BitSet(Input.Keys.MAX_KEYCODE);
-    private static final BitSet WAS_PRESSED = new BitSet(Input.Keys.MAX_KEYCODE);
+    private static final BitSet PRESSED = new BitSet(MAX_KEYCODE);
+    private static final BitSet WAS_PRESSED = new BitSet(MAX_KEYCODE);
     private long lastKeyCancelFrame;
     private float partialSelect;
 
@@ -107,17 +109,17 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
     public static boolean isCtrlDown() {
         if (GamePlatform.get().isMacOSX()) {
-            return Gdx.input.isKeyPressed(Input.Keys.SYM);
+            return Gdx.input.isKeyPressed(SYM);
         }
-        return Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT);
+        return Gdx.input.isKeyPressed(CONTROL_LEFT) || Gdx.input.isKeyPressed(CONTROL_RIGHT);
     }
 
     public static boolean isShiftDown() {
-        return Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
+        return Gdx.input.isKeyPressed(SHIFT_LEFT) || Gdx.input.isKeyPressed(SHIFT_RIGHT);
     }
 
     public static boolean isAltDown() {
-        return Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT);
+        return Gdx.input.isKeyPressed(ALT_LEFT) || Gdx.input.isKeyPressed(ALT_RIGHT);
     }
 
     public static boolean isKeyPressed(int key) {
@@ -180,6 +182,17 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         // Handle key press for player
         Player player = this.client.player;
 
+        if (Gdx.input.isKeyJustPressed(F1) && Gdx.input.isKeyPressed(CONTROL_LEFT)) {
+            if (this.client.detachedCam) {
+                this.client.detachedCam = false;
+                return;
+            } else {
+                this.client.detachedPos.set(0, 0, 0);
+                this.client.detachedCam = true;
+            }
+            return;
+        }
+
         if (GamePlatform.get().isImGuiSupported() && KeyAndMouseInput.IM_GUI_KEY.is(keyCode)) this.handleImGuiKey();
         if (KeyAndMouseInput.DEBUG_KEY.is(keyCode)) handleDebugKey();
         devKeyHandler.handleViewMode(this);
@@ -189,11 +202,11 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         if (player != null) {
             handleKeyBinds(keyCode, currentScreen, player);
         }
-        if (player == null || keyCode < Input.Keys.NUM_1 || keyCode > Input.Keys.NUM_9 || !Gdx.input.isCursorCatched())
+        if (player == null || keyCode < NUM_1 || keyCode > NUM_9 || !Gdx.input.isCursorCatched())
             return;
 
         // Select block by index based on keycode for number keys.
-        int index = keyCode - Input.Keys.NUM_1;
+        int index = keyCode - NUM_1;
         player.selectBlock(index);
     }
 
@@ -243,14 +256,14 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      */
     @Override
     public void update(float deltaTime) {
-        for (int key = 32; key < Input.Keys.MAX_KEYCODE; key++) WAS_PRESSED.set(key, PRESSED.get(key));
-        for (int key = 32; key < Input.Keys.MAX_KEYCODE; key++) PRESSED.set(key, Gdx.input.isKeyPressed(key));
+        for (int key = 32; key < MAX_KEYCODE; key++) WAS_PRESSED.set(key, PRESSED.get(key));
+        for (int key = 32; key < MAX_KEYCODE; key++) PRESSED.set(key, Gdx.input.isKeyPressed(key));
 
         // Get player and current screen
         Player player = this.client.player;
         Screen currentScreen = this.client.screen;
 
-        if (player != null && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+        if (player != null && Gdx.input.isKeyPressed(CONTROL_LEFT) && Gdx.input.isKeyJustPressed(TAB)) {
             cycleGamemode(player);
             return;
         }
@@ -267,8 +280,13 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         return "Keyboard & Mouse";
     }
 
+    @Override
+    public boolean hasCursor() {
+        return true;
+    }
+
     private static void cycleGamemode(Player player) {
-        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+        if (Gdx.input.isKeyPressed(SHIFT_LEFT)) {
             switch (player.getGamemode()) {
                 case SURVIVAL:
                     player.runCommand("gm spectator");
@@ -311,7 +329,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      * Handles different input events like opening inventory, chat, debug keys, etc.
      */
     private void handleInputEvents() {
-        if (Gdx.input.isKeyPressed(Input.Keys.F12) && (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)))
+        if (Gdx.input.isKeyPressed(F12) && (Gdx.input.isKeyPressed(CONTROL_LEFT) || Gdx.input.isKeyPressed(CONTROL_RIGHT)))
             QuantumClient.get().reloadResourcesAsync();
     }
 
@@ -365,14 +383,14 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         // Check if the left shift key is pressed
         // If not pressed, navigate to the next page in debug GUI
         // If pressed, navigate to the previous page in debug GUI
-        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) this.client.debugGui.prevPage();
+        if (Gdx.input.isKeyPressed(SHIFT_LEFT)) this.client.debugGui.prevPage();
         else this.client.debugGui.nextPage();
 
         // Check if debug HUD is not shown
         // Disable profiling
         if (!this.client.isShowDebugHud()) QuantumClient.PROFILER.setProfiling(false);
         else // Enable profiling if debug HUD is shown and specific conditions are met
-            if (ClientConfiguration.enableDebugUtils.getValue() && Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+            if (ClientConfiguration.enableDebugUtils.getValue() && Gdx.input.isKeyPressed(SHIFT_LEFT))
                 QuantumClient.PROFILER.setProfiling(true);
     }
 

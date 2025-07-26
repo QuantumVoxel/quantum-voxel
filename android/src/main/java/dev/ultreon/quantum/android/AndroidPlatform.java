@@ -15,12 +15,11 @@ import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.dedicated.JavaWebSocket;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Result;
 
 import java.util.*;
 import java.util.function.Consumer;
-
-import static androidx.core.app.ActivityCompat.startActivityForResult;
 
 public class AndroidPlatform extends GamePlatform {
     public static final int IMPORT_MOD_CODE = 0x00000001;
@@ -85,12 +84,14 @@ public class AndroidPlatform extends GamePlatform {
             Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
             chooseFile.addCategory(Intent.CATEGORY_OPENABLE);
             chooseFile.setType("application/zip");
-            startActivityForResult(
-                    this.launcher,
-                    Intent.createChooser(chooseFile, "Choose mod file"),
-                    IMPORT_MOD_CODE,
-                    null
-            );
+//            startActivityForResult(
+//                    this.launcher,
+//                    Intent.createChooser(chooseFile, "Choose mod file"),
+//                    IMPORT_MOD_CODE,
+//                    null
+//            );
+
+            // No activities for you!
         });
         return Result.ok(false);
     }
@@ -105,6 +106,11 @@ public class AndroidPlatform extends GamePlatform {
     @Override
     public void locateResources() {
         QuantumClient.get().getResourceManager().importDeferredPackage(QuantumClient.class);
+    }
+
+    @Override
+    public void locateServerResources(QuantumServer server) {
+        server.getResourceManager().importDeferredPackage(QuantumServer.class);
     }
 
     @Override

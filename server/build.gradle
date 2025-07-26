@@ -29,13 +29,10 @@ buildscript {
     dependencies {
         classpath group: 'commons-io', name: 'commons-io', version: '2.13.0'
         classpath "com.google.code.gson:gson:2.10.1"
-        classpath "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:1.9.22"
     }
 }
 
 apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'java-library'
 
 @Language("jvm-class-name")
@@ -58,10 +55,6 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:1.18.34"
 
     runtimeOnly "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
-
-    // Language adapters
-    api 'org.apache.groovy:groovy:4.0.14'
-    api 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
 
     // CoreLibs
     implementation api("dev.ultreon.corelibs:collections-v0:$coreLibsVersion")

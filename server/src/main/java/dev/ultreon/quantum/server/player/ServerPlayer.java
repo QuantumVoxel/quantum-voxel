@@ -4,6 +4,7 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.api.commands.variables.PlayerVariables;
+import dev.ultreon.quantum.api.neocommand.CommandRegistrant;
 import dev.ultreon.quantum.api.neocommand.Commands;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.BlockState;
@@ -45,16 +46,13 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Server-side player implementation.
  * Represents an online player.
- * <p style="color: red;">NOTE: Should not be stored in collections, if you need to store a player in a collection. You should get the cached player instead,</p>
+ * <p style="color: red;">NOTE: Should not be stored in collections if you need to store a player in a collection. You should get the cached player instead.</p>
  *
  * @see QuantumServer#getCachedPlayer(String)
  */
@@ -76,7 +74,11 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     private boolean isInactive;
     private final Vec3d tmp3Da = new Vec3d();
 
-    public ServerPlayer(EntityType<? extends Player> entityType, ServerWorld world, UUID uuid, String name, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
+    public ServerPlayer(EntityType<? extends Player> entityType,
+                        ServerWorld world,
+                        UUID uuid,
+                        String name,
+                        @Nullable IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
         super(entityType, world, name);
         this.world = world;
         this.uuid = uuid;
@@ -103,7 +105,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      * @param message the kick message.
      */
     public void kick(TextObject message) {
-        this.connection.disconnect(message);
+        if (this.connection != null) {
+            this.connection.disconnect(message);
+        }
     }
 
     /**
@@ -120,7 +124,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             // Calculate the spawn position
             @NotNull Vec3d spawnAt = spawnPoint.vec().d().add(0.5, 0, 0.5);
 
-            // Set player's position, health, and status
+            // Set the player's position, health, and status
             this.setPosition(spawnAt);
             this.health = this.getMaxHealth();
             this.getFoodStatus().reset();
@@ -147,13 +151,15 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         // Check if the damage immunity is active
         if (this.damageImmunity > 0) return true;
 
-        // Call the superclass to handle the damage as player/living entity. To get if the damage was canceled.
+        // Call the superclass to handle the damage as a player / living entity. To get if the damage was canceled.
         boolean noDamage = super.onHurt(damage, source);
 
         if (!noDamage) {
             // Play hurt sound
             this.playSound(this.getHurtSound(), 1.0f);
-            this.connection.send(new S2CPlayerHurtPacket(damage, source));
+            if (this.connection != null) {
+                this.connection.send(new S2CPlayerHurtPacket(damage, source));
+            }
         }
         return noDamage;
     }
@@ -189,8 +195,10 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         this.sendRecipes();
 
         // Send gamemode and respawn packets to the connection
-        this.connection.send(new S2CGamemodePacket(this.getGamemode()));
-        this.connection.send(new S2CRespawnPacket(this.getPosition()));
+        if (this.connection != null) {
+            this.connection.send(new S2CGamemodePacket(this.getGamemode()));
+            this.connection.send(new S2CRespawnPacket(this.getPosition()));
+        }
 
         // Mark the entity as spawned
         this.spawned = true;
@@ -200,7 +208,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void sendRecipes() {
         for (RecipeType<?> type : Registries.RECIPE_TYPE.values()) {
-            this.connection.send(new S2CRecipeSyncPacket(type, this.world.getServer().getRecipeManager().getRegistry(type)));
+            if (this.connection != null) {
+                this.connection.send(new S2CRecipeSyncPacket(type, this.world.getServer().getRecipeManager().getRegistry(type)));
+            }
         }
     }
 
@@ -238,7 +248,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         // Check if the player's health has changed
         if (this.oldHealth != this.health) {
             // Send the updated health to the client
-            this.connection.send(new S2CPlayerHealthPacket(this.health));
+            if (this.connection != null) {
+                this.connection.send(new S2CPlayerHealthPacket(this.health));
+            }
             // Update the old health value
             this.oldHealth = this.health;
         }
@@ -271,12 +283,14 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     @ApiStatus.Internal
     public void sendAllData() {
         Vec3d position = getPosition();
-        connection.send(new S2CPlayerPositionPacket(uuid, position, xHeadRot, xRot, yRot));
-        connection.send(new S2CPlayerHealthPacket(health));
-        connection.send(new S2CGamemodePacket(getGamemode()));
-        connection.send(new S2CTemperatureSyncPacket(getTemperature()));
-        inventory.onAllChanged();
-        sendAbilities();
+        if (connection != null) {
+            connection.send(new S2CPlayerPositionPacket(uuid, position, xHeadRot, xRot, yRot));
+            connection.send(new S2CPlayerHealthPacket(health));
+            connection.send(new S2CGamemodePacket(getGamemode()));
+            connection.send(new S2CTemperatureSyncPacket(getTemperature()));
+            inventory.onAllChanged();
+            sendAbilities();
+        }
     }
 
     @Override
@@ -289,7 +303,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     private void autoCloseMenu() {
-        this.connection.send(new S2CCloseMenuPacket());
+        if (this.connection != null) {
+            this.connection.send(new S2CCloseMenuPacket());
+        }
     }
 
     @Override
@@ -314,13 +330,15 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         }
 
         if (isInactive) {
-            connection.send(new S2CPlayerPositionPacket(this.getUuid(), this.getPosition(), xHeadRot, xRot, yRot));
+            if (connection != null) {
+                connection.send(new S2CPlayerPositionPacket(this.getUuid(), this.getPosition(), xHeadRot, xRot, yRot));
+            }
             isInactive = false;
         }
 
         super.onMoved();
 
-        // Set old position.
+        // Set the old position.
         this.ox = this.x;
         this.oy = this.y;
         this.oz = this.z;
@@ -329,9 +347,11 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         for (ServerPlayer player : this.server.getPlayers()) {
             if (player == this) continue;
 
-            // Check if player is within entity render distance
+            // Check if the player is within entity render distance
             if (player.getPosition().dst(this.getPosition()) < this.server.getEntityRenderDistance())
-                player.connection.send(new S2CPlayerPositionPacket(this.getUuid(), this.getPosition(), xHeadRot, xRot, yRot));
+                if (player.connection != null) {
+                    player.connection.send(new S2CPlayerPositionPacket(this.getUuid(), this.getPosition(), xHeadRot, xRot, yRot));
+                }
         }
     }
 
@@ -339,14 +359,18 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public void teleportTo(int x, int y, int z) {
         super.teleportTo(x, y, z);
 
-        this.connection.send(new S2CPlayerSetPosPacket(x + 0.5, y, z + 0.5));
+        if (this.connection != null) {
+            this.connection.send(new S2CPlayerSetPosPacket(x + 0.5, y, z + 0.5));
+        }
     }
 
     @Override
     public void teleportTo(double x, double y, double z) {
         super.teleportTo(x, y, z);
 
-        this.connection.send(new S2CPlayerSetPosPacket(x, y, z));
+        if (this.connection != null) {
+            this.connection.send(new S2CPlayerSetPosPacket(x, y, z));
+        }
     }
 
     @Override
@@ -414,7 +438,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
     public void sendPacket(Packet<? extends ClientPacketHandler> packet) {
         try {
-            this.connection.send(packet);
+            if (this.connection != null) {
+                this.connection.send(packet);
+            }
         } catch (Exception e) {
             this.connection.disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Internal server error");
             this.connection.on3rdPartyDisconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Internal server error");
@@ -453,7 +479,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             chunk.getTracker().stopTracking(this);
             this.chunkTracker.stopTracking(vec);
 
-            this.connection.send(new S2CChunkUnloadPacket(vec));
+            if (this.connection != null) {
+                this.connection.send(new S2CChunkUnloadPacket(vec));
+            }
         }
     }
 
@@ -466,7 +494,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public void sendChunk(@NotNull ChunkVec vec, @NotNull ServerChunk chunk) {
         if (this.sendingChunk) return;
 
-        this.connection.send(new S2CChunkDataPacket(vec, chunk.info, chunk.storage.clone(), chunk.biomeStorage.clone(), chunk.getBlockEntities()));
+        if (this.connection != null) {
+            this.connection.send(new S2CChunkDataPacket(vec, chunk.info, chunk.storage.clone(), chunk.biomeStorage.clone(), chunk.getBlockEntities()));
+        }
         this.sendingChunk = false;
     }
 
@@ -479,7 +509,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     @Override
     public void playSound(@Nullable SoundEvent sound, float volume) {
         if (sound == null) return;
-        this.connection.send(new S2CPlaySoundPacket(sound.getId(), volume));
+        if (this.connection != null) {
+            this.connection.send(new S2CPlaySoundPacket(sound.getId(), volume));
+        }
     }
 
     /**
@@ -487,7 +519,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     @Override
     protected void sendAbilities() {
-        this.connection.send(new S2CAbilitiesPacket(this.abilities));
+        if (this.connection != null) {
+            this.connection.send(new S2CAbilitiesPacket(this.abilities));
+        }
     }
 
     /**
@@ -500,12 +534,14 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public void onAbilities(@NotNull AbilitiesPacket packet) {
         // Check if the player is trying to fly
         boolean flying = packet.flying();
-        // Check if flight is allowed
+        // Check if flying is allowed
         boolean allowFlight = this.abilities.allowFlight;
 
         // If the player is trying to fly and flight is not allowed, disconnect them
         if (flying && !allowFlight) {
-            this.connection.disconnect(CloseCodes.VIOLATED_POLICY.getCode(), "Kicked for flying.");
+            if (this.connection != null) {
+                this.connection.disconnect(CloseCodes.VIOLATED_POLICY.getCode(), "Kicked for flying.");
+            }
             return;
         }
 
@@ -517,7 +553,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     /**
-     * Override method to open a menu.
+     * Override the method to open a menu.
      * If the menu open event is not canceled, opens the menu by sending a packet.
      *
      * @param menu The menu to be opened.
@@ -537,12 +573,16 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         super.openMenu(menu);
 
         // Send a packet to open the container menu
-        this.connection.send(S2COpenMenuPacket.of(menu.getType().getId(), Arrays.asList(menu.slots)));
+        if (this.connection != null) {
+            this.connection.send(S2COpenMenuPacket.of(menu.getType().getId(), Arrays.asList(menu.slots)));
+        }
     }
 
     @Override
     public void setCursor(@NotNull ItemStack cursor) {
-        this.connection.send(new S2CMenuCursorPacket(cursor));
+        if (this.connection != null) {
+            this.connection.send(new S2CMenuCursorPacket(cursor));
+        }
         super.setCursor(cursor);
     }
 
@@ -558,11 +598,15 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
         // If the gamemode has changed, send relevant packets
         if (old != gamemode) {
-            this.connection.send(new S2CGamemodePacket(gamemode));
+            if (this.connection != null) {
+                this.connection.send(new S2CGamemodePacket(gamemode));
+            }
 
             // Set the abilities of the player and send them to the client
             gamemode.setAbilities(this.abilities);
-            this.connection.send(new S2CAbilitiesPacket(this.abilities));
+            if (this.connection != null) {
+                this.connection.send(new S2CAbilitiesPacket(this.abilities));
+            }
         }
     }
 
@@ -657,48 +701,14 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public void tabComplete(String input) {
         List<String> options = Commands.complete(this, server, input.split(" "));
         if (options == null || options.isEmpty()) return;
-        this.connection.send(new S2CTabCompletePacket(options));
+        if (this.connection != null) {
+            this.connection.send(new S2CTabCompletePacket(options));
+        }
     }
 
     public void onMessageSent(String message) {
         if (GamePlatform.get().isDevEnvironment()) {
-            String[] cmd = message.split(" ");
-            if (cmd.length != 0) {
-                if (cmd[0].equals("!dbg")) {
-                    if (cmd.length > 1) {
-                        if (cmd[1].equals("log")) {
-                            if (cmd.length > 2) {
-                                String[] args = new String[cmd.length - 2];
-                                System.arraycopy(cmd, 2, args, 0, args.length);
-                                Debugger.log(String.join(" ", args));
-                            }
-                            return;
-                        } else if (cmd[1].equals("gm")) {
-                            if (cmd.length == 3) {
-                                switch (cmd[2]) {
-                                    case "builder":
-                                        this.setGameMode(GameMode.BUILDER);
-                                        break;
-                                    case "builder-plus":
-                                        this.setGameMode(GameMode.BUILDER_PLUS);
-                                        break;
-                                    case "spectator":
-                                        this.setGameMode(GameMode.SPECTATOR);
-                                        break;
-                                    case "survival":
-                                        this.setGameMode(GameMode.SURVIVAL);
-                                        break;
-                                    default:
-                                        Chat.sendError(this, "Unknown gamemode: " + cmd[2]);
-                                        break;
-                                }
-                                return;
-                            }
-                        }
-                    }
-                    return;
-                }
-            }
+            if (devMessage(message)) return;
         }
 
         for (ServerPlayer player : this.server.getPlayers()) {
@@ -706,8 +716,72 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         }
     }
 
+    private boolean devMessage(String message) {
+        String[] cmd = message.split(" ");
+        if (cmd.length != 0) {
+            if (cmd[0].equals("!dbg")) {
+                dbgCommand(cmd);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void dbgCommand(String[] cmd) {
+        if (cmd.length <= 1) return;
+
+        switch (cmd[1]) {
+            case "log":
+                dbgLog(cmd);
+                break;
+            case "gm":
+                dbgGamemode(cmd);
+                break;
+            case "biome":
+                dbgBiome(cmd);
+                break;
+        }
+    }
+
+    private void dbgBiome(String[] cmd) {
+        if (cmd.length != 2) return;
+
+        sendMessage(TextObject.literal("Biome: " + this.world.getBiome(getBlockVec()).id()));
+    }
+
+    private static void dbgLog(String[] cmd) {
+        if (cmd.length <= 2) return;
+
+        String[] args = new String[cmd.length - 2];
+        System.arraycopy(cmd, 2, args, 0, args.length);
+        Debugger.log(String.join(" ", args));
+    }
+
+    private void dbgGamemode(String[] cmd) {
+        if (cmd.length != 3) return;
+
+        switch (cmd[2]) {
+            case "builder":
+                this.setGameMode(GameMode.BUILDER);
+                break;
+            case "builder-plus":
+                this.setGameMode(GameMode.BUILDER_PLUS);
+                break;
+            case "spectator":
+                this.setGameMode(GameMode.SPECTATOR);
+                break;
+            case "survival":
+                this.setGameMode(GameMode.SURVIVAL);
+                break;
+            default:
+                Chat.sendError(this, "Unknown gamemode: " + cmd[2]);
+                break;
+        }
+    }
+
     @Override
     public void sendMessage(@NotNull TextObject textObj) {
+        if (this.connection == null) return;
         this.connection.send(new S2CChatPacket(textObj));
     }
 
@@ -741,7 +815,14 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public void resendCommands() {
-//        this.connection.send(new S2CCommandSyncPacket(CommandRegistry.getCommandNames().collect(Collectors.toUnmodifiableList())));
+        List<String> list = new ArrayList<>();
+        for (CommandRegistrant commandRegistrant : Commands.getCommands()) {
+            List<String> aliases = commandRegistrant.getAliases();
+            list.addAll(aliases);
+        }
+
+        if (this.connection == null) return;
+        this.connection.send(new S2CCommandSyncPacket(Collections.unmodifiableList(list)));
     }
 
     public UseResult useItem(BlockHit hitResult, ItemStack stack, ItemSlot slot) {

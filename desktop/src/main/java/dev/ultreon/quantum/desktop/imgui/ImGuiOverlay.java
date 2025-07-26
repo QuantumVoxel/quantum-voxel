@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.TextureDescriptor;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.ScreenUtils;
+import dev.ultreon.quantum.DevFlag;
 import dev.ultreon.quantum.GameInsets;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.BlockState;
@@ -97,6 +98,7 @@ public class ImGuiOverlay {
     private static final ImBoolean SHOW_CHUNK_SECTION_BORDERS = new ImBoolean(false);
     private static final ImBoolean SHOW_CHUNK_DEBUGGER = new ImBoolean(false);
     private static final ImBoolean SHOW_PROFILER = new ImBoolean(false);
+    private static final ImBoolean SHOW_OCCLUSION_DEBUG = new ImBoolean(false);
 
     private static final ImBoolean SHOW_ABOUT = new ImBoolean(false);
     private static final ImBoolean SHOW_METRICS = new ImBoolean(false);
@@ -124,9 +126,9 @@ public class ImGuiOverlay {
     private static final GameInsets bounds = new GameInsets();
     private static final ImInt rotType = new ImInt(0);
     private static TextureRegion frameBufferPixels;
-    private static final Map<NamespaceID, TextEditor> textEditors = new HashMap<>();
-    private static TextEditorLanguageDefinition glsl;
-    private static final Map<NamespaceID, TextEditorCoordinates> textEditorPos = new HashMap<>();
+    public static final Map<NamespaceID, TextEditor> textEditors = new HashMap<>();
+    public static TextEditorLanguageDefinition glsl;
+    public static final Map<NamespaceID, TextEditorCoordinates> textEditorPos = new HashMap<>();
     private static boolean firstLoop = true;
     private static ImInt gameDockId;
 
@@ -216,8 +218,7 @@ public class ImGuiOverlay {
     }
 
     private static void process(QuantumClient client) {
-        if (frameBufferPixels != null) frameBufferPixels.getTexture().dispose();
-        frameBufferPixels = ScreenUtils.getFrameBufferTexture(0, QuantumClient.get().getHeight() - bounds.bottom, bounds.right, bounds.bottom);
+        captureGame();
 
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_STENCIL_BUFFER_BIT);
@@ -277,6 +278,11 @@ public class ImGuiOverlay {
         ImGui.end();
 
         ImGuiOverlay.handleTriggers();
+    }
+
+    private static void captureGame() {
+        if (frameBufferPixels != null) frameBufferPixels.getTexture().dispose();
+        frameBufferPixels = ScreenUtils.getFrameBufferTexture(0, QuantumClient.get().getHeight() - bounds.bottom, bounds.right, bounds.bottom);
     }
 
     private static void renderDisplay() {
@@ -1290,6 +1296,7 @@ public class ImGuiOverlay {
                 ImGui.menuItem("Render Pipeline", null, ImGuiOverlay.SHOW_RENDER_PIPELINE);
                 ImGui.menuItem("Model Viewer", null, ImGuiOverlay.SHOW_MODEL_VIEWER);
                 ImGui.menuItem("Show Hidden Fields", null, SHOW_HIDDEN_FIELDS);
+                ImGui.menuItem("Show Occlusion Debug", null, SHOW_OCCLUSION_DEBUG);
                 ImGui.endMenu();
             }
 
@@ -1471,7 +1478,8 @@ public class ImGuiOverlay {
     }
 
     public static boolean isShown() {
-        return ImGuiOverlay.SHOW_IM_GUI.get() && !GamePlatform.get().isMacOSX() && GamePlatform.get().isDesktop();
+//        return ImGuiOverlay.SHOW_IM_GUI.get() && !GamePlatform.get().isMacOSX() && GamePlatform.get().isDesktop();
+        return true;
     }
 
     public static void setShowingImGui(boolean value) {
@@ -1506,5 +1514,24 @@ public class ImGuiOverlay {
 
     public static void setBounds(GameInsets bounds) {
         bounds.set(ImGuiOverlay.bounds);
+    }
+
+    public static boolean isDevFlagEnabled(DevFlag devFlag) {
+        switch (devFlag) {
+            case ShowChunkSectionBorders:
+                return ImGuiOverlay.SHOW_CHUNK_SECTION_BORDERS.get();
+            case ShowChunkDebugger:
+                return ImGuiOverlay.SHOW_CHUNK_DEBUGGER.get();
+            case ShowMetrics:
+                return ImGuiOverlay.SHOW_METRICS.get();
+            case ShowModelViewer:
+                return ImGuiOverlay.SHOW_MODEL_VIEWER.get();
+            case ShowProfiler:
+                return ImGuiOverlay.SHOW_PROFILER.get();
+            case OcclusionDebug:
+                return ImGuiOverlay.SHOW_OCCLUSION_DEBUG.get();
+            default:
+                return false;
+        }
     }
 }

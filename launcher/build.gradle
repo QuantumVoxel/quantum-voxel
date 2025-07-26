@@ -30,7 +30,6 @@ buildscript {
         classpath "io.github.fourlastor:construo:1.5.1"
         classpath group: 'commons-io', name: 'commons-io', version: '2.11.0'
         classpath "com.google.code.gson:gson:2.10.1"
-        classpath "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:1.9.22"
     }
 }
 
@@ -44,8 +43,6 @@ plugins {
 
 apply plugin: 'io.github.fourlastor.construo'
 apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'org.jetbrains.kotlin.jvm'
 
 //****************************//
 // Setting up main properties //
@@ -63,7 +60,14 @@ base {
 java {
     withSourcesJar()
     withJavadocJar()
+
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
+
+java.sourceCompatibility = JavaVersion.VERSION_17
+java.targetCompatibility = JavaVersion.VERSION_17
 
 graalvmNative {
     binaries {
@@ -102,7 +106,6 @@ configurations {
 evaluationDependsOn(":client")
 
 dependencies {
-    addToJar runtimeOnly(project(":gameprovider"))
     runtimeOnly(project(":client"))
     runtimeOnly(project(":desktop"))
     runtimeOnly(project(":mixinprovider"))
@@ -125,12 +128,6 @@ dependencies {
     runtimeOnly("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
     runtimeOnly("org.tukaani:xz:$tukaaniXzVersion")
     runtimeOnly("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
-
-    // Apache Log4J
-    runtimeOnly("org.apache.logging.log4j:log4j:$log4jVersion")
-    runtimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    runtimeOnly("org.apache.logging.log4j:log4j-api:$log4jVersion")
-    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
 
     // JNA
     runtimeOnly("net.java.dev.jna:jna:$jnaVersion")
@@ -155,9 +152,6 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
     runtimeOnly("org.xbib.elasticsearch:joptsimple:6.3.2.1")
-    runtimeOnly("org.apache.logging.log4j:log4j:$log4jVersion")
-    runtimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    runtimeOnly("org.apache.logging.log4j:log4j-api:$log4jVersion")
 
     // fabric-loader dependencies
     runtimeOnly("org.ow2.asm:asm:${project.asmVersion}")
@@ -166,20 +160,6 @@ dependencies {
     runtimeOnly("org.ow2.asm:asm-tree:${project.asmVersion}")
     runtimeOnly("org.ow2.asm:asm-util:${project.asmVersion}")
 
-    runtimeOnly("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
-        exclude module: 'launchwrapper'
-        exclude module: 'guava'
-    }
-
-    //noinspection GradleDynamicVersion
-    runtimeOnly('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
-    runtimeOnly('net.fabricmc:tiny-remapper:0.8.7')
-    //noinspection GradleDynamicVersion
-    runtimeOnly('net.fabricmc:dev-launch-injector:0.2.1+build.8')
-    runtimeOnly('net.fabricmc:access-widener:2.1.0')
-
-    runtimeOnly("net.fabricmc:fabric-loader:$fabricVersion")
-    
     natives_win runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-windows")
     natives_win runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-windows-arm64")
     natives_linux runtimeOnly("org.lwjgl:lwjgl:3.3.3:natives-linux")
@@ -237,7 +217,6 @@ processResources {
 }
 
 jar {
-    dependsOn ":gameprovider:build"
     dependsOn ":desktop:build"
     dependsOn ":client:build"
     dependsOn ":mixinprovider:build"
@@ -260,7 +239,6 @@ jar {
         println "DESK_MERGE FILE: ${file("$projectDir/build/libs/").list().toArrayString()}"
         println "CORE FILE: ${file("${project(":client")buildDir}/libs/").list().toArrayString()}"
         println "DESKTOP FILE: ${file("${project(":desktop")buildDir}/libs/").list().toArrayString()}"
-        println "GAMEPROVIDER FILE: ${file("${project(":gameprovider")buildDir}/libs/").list().toArrayString()}"
     }
 
     archiveBaseName = base.archivesName
@@ -279,7 +257,7 @@ tasks.withType(Jar).configureEach {
 }
 
 build {
-    dependsOn ":gameprovider:build", ":desktop:build", ":server:build", ":dedicated:build", ":dedicated:build", ":client:build"
+    dependsOn ":desktop:build", ":server:build", ":dedicated:build", ":dedicated:build", ":client:build"
 }
 
 construo {

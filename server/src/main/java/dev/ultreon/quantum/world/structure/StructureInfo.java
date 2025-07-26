@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world.structure;
 
-import kotlin.ranges.IntRange;
+import dev.ultreon.quantum.world.gen.biome.IntRange;
 
 import java.util.Objects;
 

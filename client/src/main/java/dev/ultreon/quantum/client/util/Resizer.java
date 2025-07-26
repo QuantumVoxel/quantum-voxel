@@ -27,7 +27,11 @@ public class Resizer {
         this.sourceHeight = srcHeight;
     }
 
-    public Vec2f thumbnail(float maxWidth, float maxHeight) {
+    public Resizer() {
+        this(1, 1);
+    }
+
+    public Vec2f fill(float maxWidth, float maxHeight) {
         float aspectRatio;
         float width;
         float height;
@@ -64,6 +68,32 @@ public class Resizer {
         this.sourceWidth = width;
         this.sourceHeight = height;
     }
+
+    public Vec2f fit(float maxWidth, float maxHeight) {
+        float aspectRatio = this.sourceWidth / this.sourceHeight;
+        float width;
+        float height;
+
+        if (maxWidth / maxHeight > aspectRatio) {
+            height = maxHeight;
+            width = height * aspectRatio;
+        } else {
+            width = maxWidth;
+            height = width / aspectRatio;
+        }
+
+        return new Vec2f(width, height);
+    }
+
+    public Vec2f center(float maxWidth, float maxHeight) {
+        float width = this.sourceWidth;
+        float height = this.sourceHeight;
+
+        return width < maxWidth && height < maxHeight
+                ? new Vec2f(width, height)
+                : fit(maxWidth, maxHeight);
+    }
+
 
     /**
      * Aspect ratio orientation.

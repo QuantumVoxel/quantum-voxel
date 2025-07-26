@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
@@ -50,6 +51,7 @@ import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -71,7 +73,7 @@ import static dev.ultreon.quantum.world.World.CS;
  * The {@code WorldRenderer} class is responsible for rendering the game world based on the client-side
  * world state. It handles the rendering of chunks, entities, particles, dynamic lighting,
  * skyboxes, and special effects such as block breaking animations.
- *
+ * <p>
  * This class provides functionality for managing rendering contexts, creating and disposing
  * of rendering resources, and updating the visual state of the world.
  */
@@ -84,6 +86,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     public static final int QV_CHUNK_ATTRS = VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal;
     public static final NamespaceID MOON_ID = NamespaceID.of("generated/moon");
     public static final NamespaceID SUN_ID = NamespaceID.of("generated/sun");
+    private final List<Gizmo> gizmoSort = new ArrayList<>();
+    public final Set<Rectangle> occlusionBounds = new HashSet<>();
     public ParticleSystem particleSystem = new ParticleSystem();
     final AsyncExecutor executor = new AsyncExecutor(Math.max(GamePlatform.get().cpuCores() / 3, 4));
 
@@ -122,11 +126,12 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private final Vector3 sunDirection = new Vector3();
     private final Vector3 tmp2 = new Vector3();
     private final BlendingAttribute attribute = new BlendingAttribute(0.5f);
-    private @Nullable Vector3 lastCamPos;
-    private @Nullable Vector3 lastCamDir;
-    private @Nullable Vec3d lastPlayerPos;
     private final Array<RenderBuffer> buffers = new Array<>(RenderBuffer.class);
     private final Color fogColor = new Color(0.6F, 0.7F, 1.0F, 1.0F);
+    private final Vector3 tmpFrust = new Vector3();
+    private final Vector3 tmpFrust2 = new Vector3();
+    private final List<ClientChunk> shownChunks = new ArrayList<>();
+    private BoundingBox tmpBounds = new BoundingBox();
 
     /**
      * Constructs a WorldRenderer instance for rendering a given client world.
@@ -217,7 +222,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      * both opaque and transparent materials with appropriate texture attributes, blending,
      * and depth testing settings.
      *
-     * @param blockTex the texture used for the diffuse property of the materials
+     * @param blockTex         the texture used for the diffuse property of the materials
      * @param emissiveBlockTex the texture used for the emissive property of the materials
      */
     private void setupMaterials(Texture blockTex, Texture emissiveBlockTex) {
@@ -347,8 +352,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     /**
      * Renders the world to the screen using the provided ModelBatch and RenderLayer.
      *
-     * @param bufferSource     the ModelBatch to render with
-     * @param deltaTime the time between the last and current frame
+     * @param bufferSource the ModelBatch to render with
+     * @param deltaTime    the time between the last and current frame
      */
     @Override
     public void renderBackground(RenderBufferSource bufferSource, float deltaTime) {
@@ -369,8 +374,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     /**
      * Renders the world to the screen using the provided ModelBatch and RenderLayer.
      *
-     * @param batch         the ModelBatch to render with
-     * @param deltaTime     the time between the last and current frame
+     * @param batch     the ModelBatch to render with
+     * @param deltaTime the time between the last and current frame
      */
     @Override
     public void render(RenderBufferSource batch, float deltaTime) {
@@ -383,7 +388,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         this.fogColor.set(this.skybox.bottomColor);
 
         // Get the loaded chunks and sort them by distance from the player.
-        var chunks = WorldRenderer.chunksInViewSorted(this.world.getLoadedChunks(), player);
+        var chunks = WorldRenderer.chunksInViewSorted(getRayVisibleChunks(), player);
         this.loadedChunks = chunks.size();
         this.visibleChunks = 0;
 
@@ -469,9 +474,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private void renderGizmos(float deltaTime) {
         for (String category : world.getEnabledGizmoCategories()) {
             Gizmo[] gizmos = world.getGizmos(category);
-            List<Gizmo> toSort = new ArrayList<>();
-            for (Gizmo gizmo1 : gizmos) if (gizmo1 != null) toSort.add(gizmo1);
-            toSort.sort((o1, o2) -> {
+            gizmoSort.clear();
+            for (Gizmo gizmo1 : gizmos) if (gizmo1 != null) gizmoSort.add(gizmo1);
+            gizmoSort.sort((o1, o2) -> {
                 double dst1 = 0;
                 double dst2 = 0;
                 if (client.player != null) {
@@ -494,11 +499,17 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     @SuppressWarnings("t")
     private void collectChunks(RenderBufferSource bufferSource, List<ClientChunk> chunks, Array<ChunkVec> positions, LocalPlayer player, ChunkRenderRef ref) {
-        for (var chunk : chunks) {
-            if (chunk.isEmpty()) continue;
+        shownChunks.clear();
+        occlusionBounds.clear();
+        for (int i = chunks.size() - 1; i >= 0; i--) {
+            var chunk = chunks.get(i);
+            if (chunk.isEmpty() || chunk.isDisposed() || chunk.isSubmerged()) {
+                chunk.enabled = false;
+                continue;
+            }
 
             if (positions.contains(chunk.vec, false)) {
-                QuantumClient.LOGGER.warn("Duplicate chunk: {}", chunk.vec);
+                LOGGER.warn("Duplicate chunk: {}", chunk.vec);
                 continue;
             }
 
@@ -513,11 +524,21 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             Vec3i chunkOffset = chunk.getOffset();
             Vec3f renderOffsetC = chunkOffset.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f().div(WorldRenderer.SCALE);
             chunk.renderOffset.set(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z).add(chunk.deltaOffset);
-            chunk.getBoundingBox().min.set(renderOffsetC.x - 16, renderOffsetC.y - 16, renderOffsetC.z - 16);
-            chunk.getBoundingBox().max.set(renderOffsetC.x + 16, renderOffsetC.y + 16, renderOffsetC.z + 16);
+            BoundingBox boundingBox = chunk.getBoundingBox();
+            boundingBox.set(tmpFrust.set(chunk.renderOffset), tmpFrust2.set(chunk.renderOffset).add(CS));
 
+            if (chunk.isEmpty()) {
+                chunk.enabled = false;
+                continue;
+            }
             if (frustumCulling(chunk)) continue;
+            if (occlusionCulling(chunk, occlusionBounds)) continue;
 
+            shownChunks.add(chunk);
+        }
+
+        for (int i = shownChunks.size() - 1; i >= 0; i--) {
+            ClientChunk chunk = shownChunks.get(i);
             ChunkModel model = this.chunkModels.get(chunk.vec);
             if (chunk.getWorld().isChunkInvalidated(chunk) || !chunk.initialized) {
                 model = revalidateChunk(ref, chunk, model);
@@ -533,43 +554,108 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             this.renderBlockBreaking(bufferSource, chunk);
 
-            model.setTranslation(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z);
+            Vector3 renderOffset = chunk.renderOffset;
+            model.setTranslation(renderOffset.x, renderOffset.y, renderOffset.z);
 
             this.visibleChunks++;
         }
     }
 
-    private boolean frustumCulling(ClientChunk chunk) {
-        try (var ignoredFrustumCullingSection = PROFILER.start("frustum-culling")) {
-            if (updateCamPos()) return false;
+    private boolean occlusionCulling(ClientChunk chunk, Set<Rectangle> occlusionBounds) {
+        try (var ignored = PROFILER.start("occlusion-culling")) {
+            Rectangle rect = chunk.occlusionBounds
+                    .set(chunk.tightBounds)
+                    .project(client.camera.combined).rect(new Rectangle());
 
-            if (chunk.enabled && !this.client.camera.frustum.boundsInFrustum(chunk.getBoundingBox())) {
+            if (rect.width <= 0 || rect.height <= 0 || occlusionBounds.contains(rect)) return true;
+            for (var occlusion : occlusionBounds) {
+                if (occlusion.contains(rect)) {
+                    return true;
+                }
+            }
+
+            occlusionBounds.add(rect);
+        }
+
+        return false;
+    }
+
+    public Set<ClientChunk> getRayVisibleChunks() {
+        Set<ClientChunk> visible = new HashSet<>();
+        Queue<ClientChunk> queue = new ArrayDeque<>();
+        Set<ChunkVec> visited = new HashSet<>();
+
+        LocalPlayer player = client.player;
+        if (player == null) return visible;
+        ClientChunk origin = world.getChunk(player.getChunkVec());
+        if (origin == null) return visible;
+        queue.add(origin);
+        visited.add(origin.vec);
+
+        while (!queue.isEmpty()) {
+            ClientChunk chunk = queue.poll();
+            if (chunk == null) continue;
+
+            visible.add(chunk);
+
+            for (Direction dir : Direction.values()) {
+                ClientChunk neighbor = chunk.relative(dir);
+                if (neighbor == null
+                        || visited.contains(neighbor.vec)
+                        || distance(origin, neighbor) > world.getRenderDistance())
+                    continue;
+
+
+                if (hasVisiblePath(chunk, neighbor, dir)) {
+                    queue.add(neighbor);
+                    visited.add(neighbor.vec);
+                }
+            }
+        }
+
+        return visible;
+    }
+
+    private double distance(ClientChunk origin, ClientChunk neighborPos) {
+        int renderDistance = world.getRenderDistance();
+        int distanceSquared = origin.getDistanceSquared(neighborPos);
+        return Math.max(0, renderDistance - Math.sqrt(distanceSquared));
+    }
+
+    private boolean hasVisiblePath(ClientChunk from, ClientChunk to, Direction dir) {
+        // We'll check transparency across the shared face between chunks
+        int faceSize = 16;
+
+        for (int i = 0; i < faceSize; i++) {
+            for (int j = 0; j < faceSize; j++) {
+                int x = dir == Direction.EAST ? (ClientWorld.CS - 1) : dir == Direction.WEST ? 0 : i;
+                int y = dir == Direction.UP ? (ClientWorld.CS - 1) : dir == Direction.DOWN ? 0 : j;
+                int z = dir == Direction.SOUTH ? (ClientWorld.CS - 1) : dir == Direction.NORTH ? 0 : j;
+
+                if (dir.getOffsetX() != 0) z = i;
+                if (dir.getOffsetY() != 0) x = i;
+                if (dir.getOffsetZ() != 0) x = i;
+
+                BlockState state = from.get(x, y, z);
+                if (state.isTransparent()) return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean frustumCulling(ClientChunk chunk) {
+        try (var ignored = PROFILER.start("frustum-culling")) {
+            this.tmpBounds.set(tmpFrust.set(chunk.renderOffset), tmpFrust2.set(chunk.renderOffset).add(CS));
+            boolean inFrustum = this.client.camera.frustum.boundsInFrustum(tmpBounds);
+            if (chunk.enabled && !inFrustum) {
                 chunk.enabled = false;
-                return true;
-            } else if (!chunk.enabled) {
+            } else if (!chunk.enabled && inFrustum) {
                 chunk.enabled = true;
             }
         }
 
         return !chunk.enabled;
-    }
-
-    private boolean updateCamPos() {
-        if (lastCamPos != null && lastCamDir != null && lastPlayerPos != null) {
-            if (client.camera.position.epsilonEquals(lastCamPos, 0.1f)) return true;
-            if (client.camera.direction.epsilonEquals(lastCamDir, 0.1f)) return true;
-            if (client.player != null && client.player.x - lastPlayerPos.x < 0.1f && client.player.y - lastPlayerPos.y < 0.1f && client.player.z - lastPlayerPos.z < 0.1f
-                    && client.player.x - lastPlayerPos.x > -0.1f && client.player.y - lastPlayerPos.y > -0.1f && client.player.z - lastPlayerPos.z > -0.1f)
-                return true;
-            lastCamPos.set(client.camera.position);
-            lastCamDir.set(client.camera.direction);
-            if (client.player != null) lastPlayerPos.set(client.player.getPosition(0));
-        } else {
-            lastCamPos = new Vector3(client.camera.position);
-            lastCamDir = new Vector3(client.camera.direction);
-            if (client.player != null) lastPlayerPos = new Vec3d(client.player.getPosition(0));
-        }
-        return false;
     }
 
     /**
@@ -586,7 +672,10 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         try (var ignoredRebuildSection = this.client.profiler.start("build-chunk")) {
             chunk.dirty = false;
             model = new ChunkModel(chunk.vec, chunk, this);
-            model.build();
+            BoundingBox build = model.build();
+            if (build != null) {
+                chunk.tightBounds.set(build);
+            }
             ref.chunkRendered = true;
             chunk.dirty = false;
             chunk.initialized = true;
@@ -855,13 +944,13 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      * Disposes all resources and performs cleanup for the {@code WorldRenderer}.
      * This includes shutting down executor services, releasing models, instances,
      * and disposables, as well as clearing all internal structures.
-     *
+     * <p>
      * Once this method is executed, the renderer is marked as disposed
      * and cannot be reused.
-     *
+     * <p>
      * Throws:
      * - {@link TerminationFailedException} if the executor service fails
-     *   to terminate within the defined timeout period.
+     * to terminate within the defined timeout period.
      */
     @Override
     public void dispose() {
@@ -902,8 +991,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      * Otherwise, the disposable is added to the internal disposables list for future disposal when
      * the {@code WorldRenderer} itself is disposed.
      *
-     * @param <T>         the type of the disposable, which must extend {@link Disposable}
-     * @param disposable  the disposable object to defer for disposal; cannot be null
+     * @param <T>        the type of the disposable, which must extend {@link Disposable}
+     * @param disposable the disposable object to defer for disposal; cannot be null
      * @return the same disposable object that was passed in
      * @throws NullPointerException if the provided disposable is null
      */
@@ -924,7 +1013,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      * for the rendering system. This method is responsible for handling textures, model instances, dynamic skyboxes,
      * breaking animations, environment setups, and particles.
      *
-     * @param context the {@code ReloadContext} object that handles the submission of reload tasks
+     * @param context         the {@code ReloadContext} object that handles the submission of reload tasks
      * @param materialManager the {@code MaterialManager} responsible for managing material allocations and updates
      */
     @Override

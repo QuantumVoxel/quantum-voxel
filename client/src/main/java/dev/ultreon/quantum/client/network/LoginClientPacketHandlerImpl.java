@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.network;
 
-import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientPlayerEvents;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
@@ -38,7 +37,6 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
 
     @Override
     public void onLoginAccepted(S2CLoginAcceptedPacket packet) {
-
         UUID uuid = packet.uuid();
         Vec3d spawnPos = packet.spawnPos();
         GameMode gameMode = packet.gameMode();
@@ -70,8 +68,7 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
                 this.client.renderWorld = true;
                 ClientWorld clientWorldAccess = this.client.world;
                 if (clientWorldAccess instanceof ClientWorld) {
-                    ClientWorld clientWorld = clientWorldAccess;
-                    this.client.worldRenderer = new WorldRenderer(clientWorld);
+                    this.client.worldRenderer = new WorldRenderer(clientWorldAccess);
                 }
                 this.client.showScreen(null);
             });
@@ -93,7 +90,7 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
         this.disconnected = true;
         try {
             this.connection.close();
-        } catch (ClosedConnectionException | ClosedChannelException e) {
+        } catch (ClosedChannelException e) {
             // Ignored
         } catch (IOException e) {
             IConnection.LOGGER.error("Failed to close connection", e);

@@ -6,6 +6,7 @@ import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
 import org.jetbrains.annotations.NotNull;
@@ -88,23 +89,11 @@ public abstract class GamePlatform {
         return true;
     }
 
-    /**
-     * Get the mod metadata by id
-     *
-     * @param id game mod id
-     * @return the mod metadata
-     */
-    public Optional<Mod> getMod(String id) {
-        return Optional.empty();
-    }
+    public abstract Optional<Mod> getMod(String id);
 
-    public boolean isModLoaded(String id) {
-        return false;
-    }
+    public abstract boolean isModLoaded(String id);
 
-    public Collection<? extends Mod> getMods() {
-        return Collections.emptyList();
-    }
+    public abstract Collection<? extends Mod> getMods();
 
     public void initMods() {
         // No mods available I guess :(
@@ -155,6 +144,8 @@ public abstract class GamePlatform {
     public void locateResources() {
         // Implemented in subclasses
     }
+
+    public abstract void locateServerResources(QuantumServer server);
 
     public void locateModResources() {
         // Implemented in subclasses
@@ -401,6 +392,22 @@ public abstract class GamePlatform {
 
     public boolean isImGuiSupported() {
         return false;
+    }
+
+    public boolean isDevFlagEnabled(DevFlag devFlag) {
+        return false;
+    }
+
+    public Collection<String> getModIds() {
+        return Collections.emptyList();
+    }
+
+    public String getGameVersion() {
+        return "Unknown";
+    }
+
+    public Mod getGameMod() {
+        return null;
     }
 
     private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {

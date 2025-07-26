@@ -120,7 +120,7 @@ public class TitleScreen extends Screen {
     @Override
     protected void renderSolidBackground(Renderer renderer) {
         if (!GamePlatform.get().hasBackPanelRemoved()) {
-            Vec2f thumbnail = this.resizer.thumbnail(this.size.width, this.size.height);
+            Vec2f thumbnail = this.resizer.fill(this.size.width, this.size.height);
 
             float drawWidth = thumbnail.x;
             float drawHeight = thumbnail.y;

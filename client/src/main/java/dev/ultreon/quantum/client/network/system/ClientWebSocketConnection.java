@@ -65,8 +65,8 @@ public class ClientWebSocketConnection extends WebSocketConnection<ClientPacketH
     }
 
     @Override
-    protected Packet<ServerPacketHandler> getDisconnectPacket(String message) {
-        return new C2SDisconnectPacket<>(message);
+    protected Packet<ServerPacketHandler> getDisconnectPacket(int code, String message) {
+        return new C2SDisconnectPacket<>(code, message);
     }
 
     @Override

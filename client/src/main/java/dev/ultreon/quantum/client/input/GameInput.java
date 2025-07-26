@@ -187,4 +187,8 @@ public abstract class GameInput implements Disposable {
     }
 
     public abstract String getName();
+
+    public boolean hasCursor() {
+        return false;
+    }
 }

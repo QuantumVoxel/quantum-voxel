@@ -53,9 +53,9 @@ public interface SuggestionProvider {
     }
 
     default void suggestModIDs(QuantumServer server) {
-        for (Mod value : GamePlatform.get().getMods()) {
-            if (getCurrent().startsWith(value.getId()) || getCurrent().startsWith(value.getName())) {
-                this.suggest(value.getId());
+        for (String value : GamePlatform.get().getModIds()) {
+            if (getCurrent().startsWith(value)) {
+                this.suggest(value);
             }
         }
     }

@@ -24,12 +24,13 @@ public class NamedTag<T> {
 
     public void reload(ReloadContext context) {
         ResourceManager resourceManager = context.getResourceManager();
-        Resource res = resourceManager.getResource(name.mapPath(path -> {
+        NamespaceID entry = name.mapPath(path -> {
             String domain = registry.id().getDomain();
             if (domain.equals(CommonConstants.NAMESPACE))
                 return "tags/" + registry.id().getPath() + "/" + path + ".quant";
             return "tags/" + domain + "." + registry.id().getPath() + path + ".quant";
-        }));
+        });
+        Resource res = resourceManager.getResource(entry);
         if (res == null) {
             CommonConstants.LOGGER.warn("Tag not found: {} for registry {}", name, registry.id());
             this.loaded = false;
@@ -38,12 +39,19 @@ public class NamedTag<T> {
         JsonValue rootElem = res.loadJson();
 
         if (!(rootElem.isObject())) {
+            CommonConstants.LOGGER.warn("Invalid tag root element for registry {} in tag {}", registry.id(), name);
             return;
         }
-        JsonValue root = rootElem;
+        JsonValue root = rootElem.get("elements");
+
+        if (!(root.isArray())) {
+            CommonConstants.LOGGER.warn("Invalid tag elements for registry {} in tag {}", registry.id(), name);
+            return;
+        }
 
         for (JsonValue elem : root) {
             if (!elem.isString()) {
+                CommonConstants.LOGGER.warn("Invalid tag element for registry {} in tag {}", registry.id(), name);
                 continue;
             }
 

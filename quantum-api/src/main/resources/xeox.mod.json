@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "quantapi",
+  "version": "${version}",
+  "name": "Quant API",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "Apache-2.0",
+  "icon": "assets/quantapi/icon.png",
+  "environment": "*",
+  "entrypoints": [
+    "client:dev.ultreon.quantapi.QuantAPI"
+  ],
+  "mixins": [
+
+  ],
+  "depends": {
+    "xeoxloader": ">=0.1.0",
+    "quantum": "${version}"
+  },
+  "permissions": [
+
+  ]
+}

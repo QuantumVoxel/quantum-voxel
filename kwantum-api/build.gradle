@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.9.22'
+    id 'org.jetbrains.kotlin.jvm' version '2.2.0'
 }
 
 group = 'dev.ultreon.quantum'
@@ -8,6 +8,9 @@ version = rootProject.version
 repositories {
     mavenCentral()
 }
+
+java.sourceCompatibility = JavaVersion.VERSION_17
+java.targetCompatibility = JavaVersion.VERSION_17
 
 dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
@@ -19,7 +22,7 @@ test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 processResources {

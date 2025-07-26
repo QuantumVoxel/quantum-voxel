@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.WorldRenderer;
-import dev.ultreon.quantum.debug.DebugFlags;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Ray;
 import dev.ultreon.quantum.util.Vec3d;
@@ -38,6 +37,27 @@ public class GameCamera extends PerspectiveCamera {
         super(fieldOfViewY, viewportWidth, viewportHeight);
     }
 
+    public GameCamera(GameCamera copy) {
+        this.fov = copy.fov;
+        this.fovModifier = copy.fovModifier;
+        this.fovModifierGoal = copy.fovModifierGoal;
+        this.hitPosition = copy.hitPosition;
+        this.camPos.set(copy.camPos);
+        this.hitResult = copy.hitResult;
+        this.player = copy.player;
+        this.cameraBop = copy.cameraBop;
+        this.inverseBop = copy.inverseBop;
+        this.walking = copy.walking;
+        this.position.set(copy.position);
+        this.direction.set(copy.direction);
+        this.up.set(copy.up);
+        this.viewportWidth = copy.viewportWidth;
+        this.viewportHeight = copy.viewportHeight;
+        this.fieldOfView = copy.fieldOfView;
+        this.near = copy.near;
+        this.far = copy.far;
+    }
+
     public float getFovModifier() {
         return fovModifier;
     }
@@ -52,21 +72,21 @@ public class GameCamera extends PerspectiveCamera {
      * @param player the player to update the camera for.
      */
     public void update(LocalPlayer player) {
-        var lookVec = player.getLookVector(client.partialTick);
-        this.camPos = player.getPosition(client.partialTick).div(WorldRenderer.SCALE).add(0, player.getEyeHeight() / WorldRenderer.SCALE, 0);
-        this.player = player;
+        if (!this.client.detachedCam) {
+            var lookVec = player.getLookVector(client.partialTick);
+            this.camPos = player.getPosition(client.partialTick).div(WorldRenderer.SCALE).add(0, player.getEyeHeight() / WorldRenderer.SCALE, 0);
+            this.player = player;
 
-        float deltaTime = Gdx.graphics.getDeltaTime();
-        smoothFps(deltaTime);
+            float deltaTime = Gdx.graphics.getDeltaTime();
+            smoothFov(deltaTime);
 
-        if (this.client.isInThirdPerson()) {
-            updateThirdPerson(lookVec);
-        } else {
-//            this.updateThirdPerson(lookVec);
-            updateFirstPerson(lookVec);
+            if (this.client.isInThirdPerson()) {
+                updateThirdPerson(lookVec);
+            } else {
+                updateFirstPerson(lookVec);
+            }
+            cameraBop(player, deltaTime);
         }
-
-        cameraBop(player, deltaTime);
 
         super.update(true);
     }
@@ -84,7 +104,7 @@ public class GameCamera extends PerspectiveCamera {
         this.direction.set((float) lookVec.x, (float) lookVec.y, (float) lookVec.z);
     }
 
-    private void smoothFps(float deltaTime) {
+    private void smoothFov(float deltaTime) {
         if (fovModifierGoal != fovModifier) {
             if (fovModifierGoal > fovModifier) {
                 fovModifier += deltaTime * 12f * Math.abs(fovModifier - fovModifierGoal);

@@ -1,5 +1,8 @@
-include 'launcher', 'gameprovider', 'desktop', 'teavm', 'android', 'client', 'server', 'testmod', 'mixinprovider', 'kwantum-api', 'quantum-api'
+include 'launcher', 'desktop', 'teavm', 'android', 'client', 'server', 'testmod', 'mixinprovider', 'kwantum-api', 'quantum-api'
 
 
 include 'dedicated'
 include 'lwjgl2'
+include 'logging'
+include 'xeox-loader'
+include 'xeox-loader:permission-helper'

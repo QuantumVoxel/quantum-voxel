@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class ResourceManager extends GameObject implements Closeable {
+public abstract class ResourceManager extends GameObject implements Closeable {
     protected final List<ResourcePackage> resourcePackages = new ArrayList<>();
     public static Logger logger = (level, msg, t) -> {
     };
@@ -176,10 +176,10 @@ public class ResourceManager extends GameObject implements Closeable {
                         }
 
                         // Calculate resource path.
-                        FileHandle relative = Gdx.files.getFileHandle(resPackage.path().substring(assets.path().length() + 1), resPackage.type());
+                        FileHandle relative = Gdx.files.getFileHandle(assetPath.path().substring(resPackage.path().length() + 1), resPackage.type());
                         String s = relative.toString().replaceAll("\\\\", "/");
 
-                        // Create resource entry/
+                        // Create resource entry.
                         NamespaceID entry;
                         try {
                             entry = new NamespaceID(namespace, s);
@@ -408,9 +408,7 @@ public class ResourceManager extends GameObject implements Closeable {
         }
     }
 
-    private void importGameResources() {
-        GamePlatform.get().locateResources();
-    }
+    protected abstract void importGameResources();
 
     public void importModResources() {
         GamePlatform.get().locateModResources();

@@ -17,12 +17,14 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import de.damios.guacamole.Preconditions;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.render.meshing.FaceCull;
 import dev.ultreon.quantum.client.render.meshing.Light;
 import dev.ultreon.quantum.client.world.AOUtils;
+import dev.ultreon.quantum.client.world.OpaqueFaces;
 import dev.ultreon.quantum.util.Axis;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Direction;
@@ -54,7 +56,7 @@ public final class ModelElement {
         this.to = to;
     }
 
-    public void bakeInto(int idx, MeshPartBuilder meshBuilder, Map<String, NamespaceID> textureElements, int x, int y, int z, int cull, int[] ao, long light) {
+    public void bakeInto(BoundingBox bounds, OpaqueFaces opaqueFaces, MeshPartBuilder builder, Map<String, NamespaceID> textureElements, int x, int y, int z, int cull, int[] ao, long light) {
         final var from = this.from();
         final var to = this.to();
 
@@ -65,7 +67,10 @@ public final class ModelElement {
         for (var $ : blockFaceFaceElementMap.entrySet()) {
             final var direction = $.getKey();
             final var faceElement = $.getValue();
-            if (faceElement.cullface == direction && FaceCull.culls(faceElement.cullface, cull)) continue;
+            if (faceElement.cullface == direction && FaceCull.culls(faceElement.cullface, cull)) {
+                opaqueFaces.add(x, y, z, direction);
+                continue;
+            }
             final var texRef = faceElement.texture;
             final @Nullable NamespaceID texture = Objects.equals(texRef, "#missing") ? NamespaceID.of("blocks/error")
                     : texRef.startsWith("#") ? textureElements.get(texRef.substring(1))
@@ -152,6 +157,11 @@ public final class ModelElement {
                     break;
             }
 
+            bounds.ext(v00.position);
+            bounds.ext(v01.position);
+            bounds.ext(v10.position);
+            bounds.ext(v11.position);
+
             rotate(v00, v01, v10, v11, rotation);
 
             v00.position.add(x, y, z);
@@ -159,7 +169,7 @@ public final class ModelElement {
             v10.position.add(x, y, z);
             v11.position.add(x, y, z);
 
-            meshBuilder.rect(v00, v10, v11, v01);
+            builder.rect(v00, v10, v11, v01);
 
             final var material = new Material();
             material.set(TextureAttribute.createDiffuse(QuantumClient.get().blocksTextureAtlas.getTexture()));

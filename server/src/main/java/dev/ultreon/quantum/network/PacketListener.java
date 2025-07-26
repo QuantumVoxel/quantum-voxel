@@ -37,6 +37,10 @@ public interface PacketListener {
 
     }
 
+    default void onSent() {
+
+    }
+
     default void onFailure() {
 
     }

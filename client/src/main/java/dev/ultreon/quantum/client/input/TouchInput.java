@@ -6,26 +6,32 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Screen;
+import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
+import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.client.gui.screens.PauseScreen;
+import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.input.key.KeyBind;
+import dev.ultreon.quantum.client.input.key.KeyBindRegistry;
 import dev.ultreon.quantum.client.input.key.KeyBinds;
-import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.platform.MouseDevice;
+import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
+import dev.ultreon.quantum.util.BlockHit;
+import dev.ultreon.quantum.util.EntityHit;
 import dev.ultreon.quantum.util.Hit;
-import dev.ultreon.quantum.util.Vec2i;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.BitSet;
 import java.util.stream.IntStream;
 
 public class TouchInput extends GameInput implements InputProcessor {
-    private static final Set<Integer> KEYS = new HashSet<>(Input.Keys.MAX_KEYCODE);
+    private static final BitSet KEYS = new BitSet(Input.Keys.MAX_KEYCODE);
 
     public static final KeyBind PAUSE_KEY = KeyBinds.pauseKey;
     public static final KeyBind IM_GUI_KEY = KeyBinds.imGuiKey;
@@ -39,7 +45,11 @@ public class TouchInput extends GameInput implements InputProcessor {
     public static final KeyBind COMMAND_KEY = KeyBinds.commandKey;
     public static final KeyBind FULL_SCREEN_KEY = KeyBinds.fullScreenKey;
     public static final KeyBind THIRD_PERSON_KEY = KeyBinds.thirdPersonKey;
-    private final Vector2 cursorPos = new Vector2();
+    private static final KeyBind DROP_ITEM_KEY = KeyBinds.dropItemKey;
+    private static final BitSet PRESSED = new BitSet(Input.Keys.MAX_KEYCODE);
+    private static final BitSet WAS_PRESSED = new BitSet(Input.Keys.MAX_KEYCODE);
+    private long lastKeyCancelFrame;
+    private float partialSelect;
 
     public TouchInput(QuantumClient client, Camera camera) {
         super(client, camera);
@@ -47,246 +57,487 @@ public class TouchInput extends GameInput implements InputProcessor {
         Gdx.input.setCatchKey(Input.Keys.BACK, true);
     }
 
+    @Override
+    protected void switchOut() {
+        for (int key : PRESSED.stream().toArray()) this.keyUp(key);
+
+        for (KeyBind keyBind : KeyBindRegistry.getAll()) keyBind.release();
+    }
+
+    public static boolean isKeyDown(int keycode) {
+        return TouchInput.KEYS.get(keycode);
+    }
+
+    /**
+     * Get the mouse delta of the mouse in screen pixels.
+     *
+     * @return The mouse delta in screen pixels.
+     */
     public static Vector2 getMouseDelta() {
         return new Vector2(Gdx.input.getDeltaX(), Gdx.input.getDeltaY());
     }
 
+    /**
+     * Checks if any mouse button is pressed.
+     *
+     * @return true if any mouse button is pressed, false otherwise
+     */
     public static boolean isPressingAnyButton() {
         return IntStream.rangeClosed(0, Input.Buttons.FORWARD).anyMatch(i -> Gdx.input.isButtonPressed(i));
     }
 
+    /**
+     * Set the cursor to be caught or uncaught.
+     *
+     * @param caught true to set the cursor to be caught, false for uncaught
+     */
     public static void setCursorCaught(boolean caught) {
-        if (GamePlatform.get().isMouseCaptured() == caught) return;
+        // Already in that state
+        if (Gdx.input.isCursorCatched() == caught) return;
 
-        GamePlatform.get().setMouseCaptured(caught);
-        if (!caught) {
-            // TODO: Fix cursor position
-            GamePlatform.get().setCursorPosition(QuantumClient.get().getWidth() / 2, QuantumClient.get().getHeight() / 2);
-        }
+        Gdx.input.setCursorCatched(caught);
     }
 
+    public static boolean isCtrlDown() {
+        if (GamePlatform.get().isMacOSX()) {
+            return Gdx.input.isKeyPressed(Input.Keys.SYM);
+        }
+        return Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT);
+    }
+
+    public static boolean isShiftDown() {
+        return Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
+    }
+
+    public static boolean isAltDown() {
+        return Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT);
+    }
+
+    public static boolean isKeyPressed(int key) {
+        return PRESSED.get(key);
+    }
+
+    public static boolean isKeyJustPressed(int key) {
+        return PRESSED.get(key) && !WAS_PRESSED.get(key);
+    }
+
+    public static boolean isKeyReleased(int key) {
+        return !PRESSED.get(key);
+    }
+
+    public static boolean isKeyJustReleased(int key) {
+        return !PRESSED.get(key) && WAS_PRESSED.get(key);
+    }
+
+    public static boolean isButtonJustPressed(int keyCode) {
+        return Gdx.input.isButtonJustPressed(keyCode);
+    }
+
+    public static boolean isButtonPressed(int keyCode) {
+        return Gdx.input.isButtonPressed(keyCode);
+    }
+
+    /**
+     * Handles key down events.
+     *
+     * @param keyCode the key code
+     * @return true if the key was handled, false otherwise
+     */
     @Override
     public boolean keyDown(int keyCode) {
-        GamePlatform.get().catchNative(() -> {
-            KEYS.add(keyCode);
+        GamePlatform.get().catchNative(() -> doKeyDown(keyCode));
+        return false;
 
-            Screen currentScreen = this.client.screen;
-            if (currentScreen != null && !Gdx.input.isCursorCatched() && currentScreen.keyPress(keyCode))
-                return;
+    }
 
-            Player player = this.client.player;
-            if (player == null || keyCode < Input.Keys.NUM_1 || keyCode > Input.Keys.NUM_9 || !Gdx.input.isCursorCatched())
-                return;
+    private void doKeyDown(int keyCode) {
+        GameInput.switchTo(this);
 
-            int index = keyCode - Input.Keys.NUM_1;
-            player.selectBlock(index);
+        if (WindowManager.keyPress(keyCode)) return;
+
+        if (!isActive()) return;
+
+        TouchInput.KEYS.set(keyCode);
+
+        PRESSED.set(keyCode);
+
+        // Invoke the key press event for the current screen
+        Screen currentScreen = this.client.screen;
+        if (currentScreen != null && !Gdx.input.isCursorCatched() && currentScreen.keyPress(keyCode)) {
+            ScreenEvents.KEY_PRESS.factory().onKeyPressScreen(keyCode);
+            return;
+        }
+
+        lastKeyCancelFrame = Gdx.graphics.getFrameId();
+
+        // Handle key press for player
+        Player player = this.client.player;
+
+        if (TouchInput.DEBUG_KEY.is(keyCode)) handleDebugKey();
+
+        if (player != null) {
+            handleKeyBinds(keyCode, currentScreen, player);
+        }
+        if (player == null || keyCode < Input.Keys.NUM_1 || keyCode > Input.Keys.NUM_9 || !Gdx.input.isCursorCatched())
+            return;
+
+        // Select block by index based on keycode for number keys.
+        int index = keyCode - Input.Keys.NUM_1;
+        player.selectBlock(index);
+    }
+
+    @SuppressWarnings("t")
+    private void handleKeyBinds(int keyCode, Screen currentScreen, Player player) {
+        if (TouchInput.IM_GUI_FOCUS_KEY.is(keyCode)) handleImGuiFocus();
+        else if (TouchInput.INVENTORY_KEY.is(keyCode) && currentScreen == null) player.openInventory();
+        else if (TouchInput.INVENTORY_KEY.is(keyCode) && currentScreen instanceof InventoryScreen) client.showScreen(null);
+        else if (TouchInput.CHAT_KEY.is(keyCode) && currentScreen == null) client.showScreen(new ChatScreen());
+        else if (TouchInput.COMMAND_KEY.is(keyCode) && currentScreen == null) client.showScreen(new ChatScreen("/"));
+        else if (TouchInput.SCREENSHOT_KEY.is(keyCode)) client.getScreenshots().screenshot(screenshot -> {
         });
-        return true;
-
+        else if (TouchInput.HIDE_HUD_KEY.is(keyCode)) client.hideHud = !client.hideHud;
+        else if (TouchInput.FULL_SCREEN_KEY.is(keyCode)) client.setFullScreen(!client.isFullScreen());
+        else if (TouchInput.THIRD_PERSON_KEY.is(keyCode)) client.cyclePlayerView();
+        else if (client.world != null && TouchInput.PAUSE_KEY.is(keyCode) && Gdx.input.isCursorCatched())
+            client.showScreen(new PauseScreen());
+        else if (TouchInput.PAUSE_KEY.is(keyCode) && !Gdx.input.isCursorCatched() && client.screen instanceof PauseScreen)
+            client.showScreen(null);
+        else if (TouchInput.DROP_ITEM_KEY.is(keyCode)) player.dropItem();
     }
 
     @Override
     public boolean keyUp(int keyCode) {
         GamePlatform.get().catchNative(() -> {
-            KEYS.remove(keyCode);
+            if (!KEYS.get(keyCode)) return;
 
-            Screen currentScreen = this.client.screen;
-            if (currentScreen != null)
+            KEYS.clear(keyCode);
+
+            GameInput.switchTo(this);
+
+            PRESSED.clear(keyCode);
+
+            Screen currentScreen = client.screen;
+            if (currentScreen != null) {
+                ScreenEvents.KEY_RELEASE.factory().onKeyReleaseScreen(keyCode);
                 currentScreen.keyRelease(keyCode);
+            }
         });
         return false;
     }
 
+    /**
+     * Update the method that handles player input and interactions.
+     *
+     * @param deltaTime The time passed since the last update
+     */
     @Override
     public void update(float deltaTime) {
-        MouseDevice mouseDevice = GamePlatform.get().getMouseDevice();
-        if (mouseDevice != null)
-            this.updateMouse(mouseDevice);
+        for (int key = 32; key < Input.Keys.MAX_KEYCODE; key++) WAS_PRESSED.set(key, PRESSED.get(key));
+        for (int key = 32; key < Input.Keys.MAX_KEYCODE; key++) PRESSED.set(key, Gdx.input.isKeyPressed(key));
 
-        if (TouchInput.PAUSE_KEY.isJustPressed() && Gdx.input.isCursorCatched()) {
-            this.client.showScreen(new PauseScreen());
-        } else if (TouchInput.PAUSE_KEY.isJustPressed() && !Gdx.input.isCursorCatched()) {
-            this.client.showScreen(null);
+        // Get player and current screen
+        Player player = this.client.player;
+        Screen currentScreen = this.client.screen;
+
+        if (player != null && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+            cycleGamemode(player);
+            return;
         }
 
-        LocalPlayer player = this.client.player;
-        if (this.client.screen == null && player != null && Gdx.input.isPeripheralAvailable(Input.Peripheral.MultitouchScreen) && client.motionPointer != null) {
-            float deltaX = Gdx.input.getDeltaX(client.motionPointer.pointer());
-            float deltaY = Gdx.input.getDeltaY(client.motionPointer.pointer());
+        // Handle various input events
+        handleInputEvents();
 
-            if (deltaX != 0 || deltaY != 0) {
-                player.rotate(deltaX, deltaY);
-            }
-        }
-
-        if (client.motionPointer != null && client.motionPointer.pos().dst(getPos(client.motionPointer.pointer())) > 10 * QuantumClient.get().getGuiScale()) {
-            this.client.resetBreaking();
-        }
+        // Check for player interaction with the world
+        handlePlayerInteraction(player, currentScreen);
     }
 
     @Override
     public String getName() {
-        return "Touchscreen";
+        return "Keyboard & Mouse";
     }
 
-    private void updateMouse(MouseDevice mouseDevice) {
-        this.cursorPos.set(mouseDevice.getX(), mouseDevice.getY());
+    private static void cycleGamemode(Player player) {
+        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+            switch (player.getGamemode()) {
+                case SURVIVAL:
+                    player.runCommand("gm spectator");
+                    break;
+                case BUILDER:
+                    player.runCommand("gm survival");
+                    break;
+                case BUILDER_PLUS:
+                    player.runCommand("gm builder");
+                    break;
+                case ADVENTUROUS:
+                    player.runCommand("gm builder_plus");
+                    break;
+                case SPECTATOR:
+                    player.runCommand("gm adventurous");
+                    break;
+            }
+            return;
+        }
+        switch (player.getGamemode()) {
+            case SURVIVAL:
+                player.runCommand("gm builder");
+                break;
+            case BUILDER:
+                player.runCommand("gm builder_plus");
+                break;
+            case BUILDER_PLUS:
+                player.runCommand("gm adventurous");
+                break;
+            case ADVENTUROUS:
+                player.runCommand("gm spectator");
+                break;
+            case SPECTATOR:
+                player.runCommand("gm survival");
+                break;
+        }
     }
 
-    private Vec2i getPos(int pointer) {
-        return new Vec2i(Gdx.input.getX(pointer), Gdx.input.getY(pointer));
+    /**
+     * Handles different input events like opening inventory, chat, debug keys, etc.
+     */
+    private void handleInputEvents() {
+        if (Gdx.input.isKeyPressed(Input.Keys.F12) && (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)))
+            QuantumClient.get().reloadResourcesAsync();
     }
 
+    /**
+     * Handles player interaction with the world based on the mouse button pressed.
+     *
+     * @param player        The player object
+     * @param currentScreen The current screen
+     */
+    private void handlePlayerInteraction(Player player, Screen currentScreen) {
+        if (player == null || currentScreen != null) return;
+        if (!Gdx.input.isCursorCatched()) return;
+
+        @Nullable ClientWorld world = this.client.world;
+        if (world == null) return;
+
+        Hit hit = this.client.hit;
+        if (hit == null) return;
+
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+            this.doPlayerInteraction(Input.Buttons.LEFT, hit, world, player);
+        else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT))
+            this.doPlayerInteraction(Input.Buttons.RIGHT, hit, world, player);
+        else if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE))
+            this.doPlayerInteraction(Input.Buttons.MIDDLE, hit, world, player);
+        else if (Gdx.input.isButtonPressed(Input.Buttons.BACK))
+            this.doPlayerInteraction(Input.Buttons.BACK, hit, world, player);
+        else if (Gdx.input.isButtonPressed(Input.Buttons.FORWARD))
+            this.doPlayerInteraction(Input.Buttons.FORWARD, hit, world, player);
+
+    }
+
+    /**
+     * Handles the debug key based on certain conditions.
+     */
+    private void handleDebugKey() {
+        // Check if the left shift key is pressed
+        // If not pressed, navigate to the next page in debug GUI
+        // If pressed, navigate to the previous page in debug GUI
+        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) this.client.debugGui.prevPage();
+        else this.client.debugGui.nextPage();
+
+        // Check if debug HUD is not shown
+        // Disable profiling
+        if (!this.client.isShowDebugHud()) QuantumClient.PROFILER.setProfiling(false);
+        else // Enable profiling if debug HUD is shown and specific conditions are met
+            if (ClientConfiguration.enableDebugUtils.getValue() && Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+                QuantumClient.PROFILER.setProfiling(true);
+    }
+
+    /**
+     * Handles the focus for ImGui.
+     * <p>
+     * If the ImGui hud is being displayed, the world is not null, and there is no active screen,
+     * then toggles the cursor catch status.
+     */
+    private void handleImGuiFocus() {
+        if (GamePlatform.get().isShowingImGui() && this.client.world != null && this.client.screen == null)
+            TouchInput.setCursorCaught(!Gdx.input.isCursorCatched());
+    }
+
+    /**
+     * This method is called when a key is typed.
+     * It checks if the current screen is not null,
+     * and if so, it triggers the CHAR_TYPE event and calls the charType method of the current screen.
+     * If there is no current screen, it returns true.
+     *
+     * @param character the character that was typed
+     * @return true if there is no current screen, false otherwise
+     */
     @Override
     public boolean keyTyped(char character) {
         GamePlatform.get().catchNative(() -> {
+            if (WindowManager.keyTyped(character)) return;
+
+            // Check if there is a current screen and if so, trigger the CHAR_TYPE event
             Screen currentScreen = this.client.screen;
-            if (currentScreen != null)
+            if (currentScreen != null && lastKeyCancelFrame != Gdx.graphics.getFrameId()) {
+                ScreenEvents.CHAR_TYPE.factory().onCharTypeScreen(character);
                 currentScreen.charType(character);
+            }
         });
-        return true;
+        return false;
     }
 
+    /**
+     * Overrides the method to handle mouse movement events.
+     * Adjusts the screen coordinates based on the draw offset and scales them before passing to the current screen.
+     * Does not process mouse movement if the cursor is caught or if there is no current screen.
+     *
+     * @param screenX The setX-coordinate of the mouse on the screen
+     * @param screenY The setY-coordinate of the mouse on the screen
+     * @return true if the mouse movement was processed, false otherwise
+     */
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        screenX -= this.client.getDrawOffset().x;
-        screenY -= this.client.getDrawOffset().y;
-        int finalScreenX = screenX;
-        int finalScreenY = screenY;
         GamePlatform.get().catchNative(() -> {
+            // Adjust screen coordinates based on the draw offset
+            int adjustedX = this.client.getMousePos().x;
+            int adjustedY = this.client.getMousePos().y;
 
+            if (WindowManager.mouseMoved(adjustedX, adjustedY)) return;
+
+            // Check if the cursor is already caught
             if (Gdx.input.isCursorCatched())
                 return;
 
             Screen currentScreen = this.client.screen;
 
-            if (currentScreen == null)
-                return;
-
-            currentScreen.mouseMoved((int) (finalScreenX / this.client.getGuiScale()), (int) (finalScreenY / this.client.getGuiScale()));
+            if (currentScreen != null) client.mouseMoved(adjustedX, adjustedY);
         });
-        return true;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        screenX -= this.client.getDrawOffset().x;
-        screenY -= this.client.getDrawOffset().y;
-        int finalScreenX = screenX;
-        int finalScreenY = screenY;
-        GamePlatform.get().catchNative(() -> {
-
-            if (!Gdx.input.isCursorCatched()) {
-                Screen currentScreen = this.client.screen;
-                if (currentScreen != null) currentScreen.mouseDrag(
-                        (int) (finalScreenX / this.client.getGuiScale()), (int) (finalScreenY / this.client.getGuiScale()),
-                        (int) (Gdx.input.getDeltaX(pointer) / this.client.getGuiScale()), (int) (-Gdx.input.getDeltaY(pointer) / this.client.getGuiScale()), pointer);
-            }
-        });
-        return true;
-    }
-
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        final int finalScreenX = screenX - this.client.getDrawOffset().x;
-        final int finalScreenY = screenY - this.client.getDrawOffset().y;
-
-        GamePlatform.get().catchNative(() -> {
-            Screen currentScreen = this.client.screen;
-            @Nullable ClientWorld world = this.client.world;
-            Player player = this.client.player;
-            if (!Gdx.input.isCursorCatched() && currentScreen != null) {
-                int mouseX = (int) (finalScreenX / this.client.getGuiScale());
-                int mouseY = (int) (finalScreenY / this.client.getGuiScale());
-                ScreenEvents.MOUSE_PRESS.factory().onMousePressScreen(mouseX, mouseY, button);
-                currentScreen.mousePress(mouseX, mouseY, button);
-                return;
-            }
-
-            if (world == null || this.client.screen != null)
-                return;
-
-            if (player == null)
-                return;
-
-            this.client.touchPosStart[pointer].set(finalScreenX, finalScreenY);
-
-            int mouseX = (int) (finalScreenX / this.client.getGuiScale());
-            int mouseY = (int) (finalScreenY / this.client.getGuiScale());
-
-            this.client.touchPosStartScl[pointer].set(mouseX, mouseY);
-
-            if (this.client.hud.isMouseOver(mouseX, mouseY)) {
-                this.client.hud.touchDown(mouseX, mouseY, pointer, button);
-                return;
-            }
-
-            if (this.client.screen == null && Gdx.input.isPeripheralAvailable(Input.Peripheral.MultitouchScreen) && this.client.motionPointer == null) {
-                this.client.motionPointer = new TouchPoint(finalScreenX, finalScreenY, pointer, button);
-            }
-
-            this.hit = client.hit;
-
-            this.doPlayerInteraction(button, hit, world, player);
-        });
-        return true;
-    }
-
-    private boolean doPlayerInteraction(int button, Hit hit, @Nullable ClientWorld world, Player player) {
-        if (button == Input.Buttons.RIGHT) {
-            this.useItem(player, world, hit);
-            return true;
-        }
-
         return false;
     }
 
+    /**
+     * Overrides the touchDragged method to handle mouse dragging events.
+     * Adjusts the screenX and screenY coordinates and then calls the appropriate method on the current screen.
+     *
+     * @param screenX The setX-coordinate of the mouse on the screen
+     * @param screenY The setY-coordinate of the mouse on the screen
+     * @param pointer The pointer id
+     * @return Always returns true
+     */
     @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        final int finalScreenX = screenX - this.client.getDrawOffset().x;
-        final int finalScreenY = screenY - this.client.getDrawOffset().y;
-
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
         GamePlatform.get().catchNative(() -> {
-            this.client.touchMoved[pointer].set(this.client.touchPosStart[pointer]);
+            // Adjust the screen coordinates based on the draw offset
+            int adjustedX = this.client.getMousePos().x;
+            int adjustedY = this.client.getMousePos().y;
 
-            this.client.stopBreaking();
+            WindowManager.mouseDragged(adjustedX, adjustedY);
+        });
+        return false;
+    }
 
-            LocalPlayer player = this.client.player;
-            TouchPoint motionPoint = this.client.motionPointer;
-            if (this.client.screen == null && player != null && Gdx.input.isPeripheralAvailable(Input.Peripheral.MultitouchScreen) && motionPoint != null && motionPoint.pointer() == pointer) {
-                this.client.motionPointer = null;
+    /**
+     * Handles touch-down events.
+     *
+     * @param screenX The setX-coordinate of the touch event
+     * @param screenY The setY-coordinate of the touch event
+     * @param pointer The pointer index for the event
+     * @param button  The button pressed
+     * @return Whether the touch event was successfully handled
+     */
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        GamePlatform.get().catchNative(() -> {
+            // Adjust for draw offset
+            int adjustedX = this.client.getMousePos().x;
+            int adjustedY = this.client.getMousePos().y;
+
+            if (WindowManager.mousePress(adjustedX, adjustedY, button)) return;
+
+            Screen currentScreen = this.client.screen;
+
+            // Check if the cursor is not caught and there is a current screen
+            if (!Gdx.input.isCursorCatched() && currentScreen != null) {
+                client.mousePress(adjustedX, adjustedY, button);
+            }
+        });
+        return false;
+    }
+
+    /**
+     * Handles player interaction with the game environment.
+     *
+     * @param button the input button pressed by the player
+     * @param hit    the result of the player's hit test
+     * @param world  the game world
+     * @param player the player entity
+     */
+    private void doPlayerInteraction(int button, Hit hit, @Nullable ClientWorld world, Player player) {
+        // Get the position and metadata of the current and next blocks
+        BlockVec pos = hit.getBlockVec();
+        if (!(hit instanceof BlockHit)) {
+            if (!(hit instanceof EntityHit) || !hit.isCollide()) return;
+            EntityHit entityHitResult = (EntityHit) hit;
+            // + Miss
+
+            if (button == Input.Buttons.LEFT && player.abilities.blockBreak)
+                this.client.attack(entityHitResult.getEntity());
+            return;
+        }
+        BlockHit blockHitResult = (BlockHit) hit;
+        assert world != null;
+        BlockState block = world.get(new BlockVec(pos));
+
+        // Check if the hit result is valid and the current block is not air
+        if (!blockHitResult.isCollide() || block.isAir())
+            return;
+
+        // Handle left button input for block breaking
+        // Stop breaking if the left button is not pressed
+        if (button == Input.Buttons.LEFT && player.abilities.blockBreak) {
+            // Check for instant mine ability
+            if (player.abilities.instaMine) {
+                // Send a block break packet if instant mine is active
+                this.client.connection.send(new C2SBlockBreakPacket(new BlockVec(blockHitResult.getBlockVec())));
                 return;
             }
 
-            Screen currentScreen = this.client.screen;
-            if (currentScreen == null) {
-                @Nullable TouchPoint motionPointer = this.client.motionPointer;
-                if (motionPointer != null && motionPointer.pointer() == pointer) {
-                    this.client.motionPointer = null;
-                    return;
-                } else {
-                    int mouseX = (int) (finalScreenX / this.client.getGuiScale());
-                    int mouseY = (int) (finalScreenY / this.client.getGuiScale());
+            // Start breaking the block
+            this.client.startBreaking();
+            return;
+        }
 
-                    this.client.touchMovedScl[pointer].set(mouseX, mouseY);
+        // Stop breaking if the left button is not pressed
+        this.client.stopBreaking();
 
-                    this.client.hud.touchUp(mouseX, mouseY, pointer, button);
-                    return;
-                }
-            }
+        // Handle right button input for using items on the next block
+        if (button == Input.Buttons.RIGHT) this.useItem(player, world, blockHitResult);
+    }
 
-            int mouseX = (int) (finalScreenX / this.client.getGuiScale());
-            int mouseY = (int) (finalScreenY / this.client.getGuiScale());
+    /**
+     * Called when the user releases a touch or mouse button.
+     * Stops breaking action and handles mouse events.
+     *
+     * @param screenX The setX coordinate of the touch or mouse release event
+     * @param screenY The setY coordinate of the touch or mouse release event
+     * @param pointer The pointer for the event
+     * @param button  The button that was released
+     * @return true if the event was handled, false otherwise
+     */
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        GamePlatform.get().catchNative(() -> {
+            // Adjust screen coordinates based on the draw offset
+            int adjustedX = this.client.getMousePos().x;
+            int adjustedY = this.client.getMousePos().y;
 
-            this.client.touchMovedScl[pointer].set(mouseX, mouseY);
+            if (WindowManager.mouseRelease(adjustedX, adjustedY, button)) return;
 
-            if (!ScreenEvents.MOUSE_RELEASE.factory().onMouseReleaseScreen(mouseX, mouseY, button).isCanceled())
-                currentScreen.mouseRelease(mouseX, mouseY, button);
-
-            if (!ScreenEvents.MOUSE_CLICK.factory().onMouseClickScreen(mouseX, mouseY, button, 1).isCanceled())
-                currentScreen.mouseClick(mouseX, mouseY, button, 1);
+            // Stop breaking action
+            this.client.stopBreaking();
+            this.client.mouseRelease(adjustedX, adjustedY, button);
         });
-        return true;
+        return false;
     }
 
     @Override
@@ -296,27 +547,37 @@ public class TouchInput extends GameInput implements InputProcessor {
         return false;
     }
 
+    /**
+     * Overrides the scrolled method to handle mouse scroll events.
+     * If the ImGui overlay is shown, the method returns {@code false}.
+     *
+     * @param amountX The amount scrolled on the setX-axis.
+     * @param amountY The amount scrolled on the setY-axis.
+     * @return {@code true} if the scroll event was handled, {@code false} otherwise.
+     */
     @Override
     public boolean scrolled(float amountX, float amountY) {
         GamePlatform.get().catchNative(() -> {
             Screen currentScreen = this.client.screen;
 
-            if (GamePlatform.get().isShowingImGui()) return;
+            // Check if ImGui overlay is shown
+            if (WindowManager.mouseScroll(Gdx.input.getX(), Gdx.input.getY(), amountY)) return;
 
+            // Handle hotbar scrolling with the mouse wheel
             Player player = this.client.player;
-            if (currentScreen == null && player != null) {
-                int scrollAmount = (int) amountY;
-                int i = (player.selected + scrollAmount) % 9;
-
-                if (i < 0)
-                    i += 9;
-
-                player.selected = i;
+            if (currentScreen != null || player == null) {
+                client.mouseWheel(amountX, amountY);
                 return;
             }
 
-            if (currentScreen != null && !ScreenEvents.MOUSE_WHEEL.factory().onMouseWheelScreen((int) (Gdx.input.getX() / this.client.getGuiScale()), (int) (Gdx.input.getY() / this.client.getGuiScale()), amountY).isCanceled())
-                currentScreen.mouseWheel((int) (Gdx.input.getX() / this.client.getGuiScale()), (int) (Gdx.input.getY() / this.client.getGuiScale()), amountY);
+            this.partialSelect += amountY;
+
+            // Handle smooth scrolling
+            if (Math.abs(partialSelect) >= 1f) {
+                int steps = (int) Math.signum(partialSelect);
+                player.selected = Math.floorMod(player.selected + steps, 9);
+                partialSelect = 0;
+            }
         });
         return false;
     }

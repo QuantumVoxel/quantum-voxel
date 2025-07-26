@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.network;
 
-import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
@@ -54,11 +53,11 @@ import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.ChunkBuildInfo;
+import dev.ultreon.quantum.world.Timing;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.ubo.types.MapType;
-import kotlin.system.TimingKt;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -154,7 +153,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                         ClientChunk data;
                     };
 
-                    long l = TimingKt.measureTimeMillis(() -> {
+                    long l = Timing.measureTimeMillis(() -> {
                         @Nullable ClientWorld world = this.client.world;
 
                         if (world == null) {
@@ -219,7 +218,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
         try {
             this.client.connection.close();
-        } catch (ClosedChannelException | ClosedConnectionException e) {
+        } catch (ClosedChannelException e) {
             // Ignored
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -241,7 +240,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
             try {
                 this.connection.close();
-            } catch (ClosedChannelException | ClosedConnectionException e) {
+            } catch (ClosedChannelException e) {
                 // Ignored
             } catch (IOException e) {
                 throw new RuntimeException(e);

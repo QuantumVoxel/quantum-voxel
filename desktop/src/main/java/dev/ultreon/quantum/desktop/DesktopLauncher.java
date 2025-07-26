@@ -58,6 +58,23 @@ public class DesktopLauncher {
      */
     @ApiStatus.Internal
     public static void main(String[] argv) {
+        // Check for RenderDoc
+        if (System.getProperty("renderdoc.path") != null) {
+            String property = System.getProperty("renderdoc.path");
+            if (property.endsWith(".dll")) {
+                System.load(property);
+            } else if (property.endsWith(".so")) {
+                System.loadLibrary(property.substring(0, property.length() - 3));
+            } else if (property.endsWith(".dylib")) {
+                System.loadLibrary(property.substring(0, property.length() - 6));
+            } else {
+                System.loadLibrary(property);
+            }
+
+            GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GLFW.GLFW_TRUE);
+            GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
+        }
+
         Thread.UncaughtExceptionHandler defaultUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             private final Logger logger = LoggerFactory.getLogger("Quantum:ExceptionHandler");

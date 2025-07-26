@@ -325,7 +325,7 @@ public abstract class Screen extends UIContainer<Screen> {
             renderer.clearColor(0, 0, 0, 1);
             renderer.clear();
             renderer.blurred(true, () -> {
-                Vec2f thumbnail = this.resizer.thumbnail(this.client.getScaledWidth(), this.client.getScaledHeight());
+                Vec2f thumbnail = this.resizer.fill(this.client.getScaledWidth(), this.client.getScaledHeight());
 
                 float drawWidth = thumbnail.x;
                 float drawHeight = thumbnail.y;

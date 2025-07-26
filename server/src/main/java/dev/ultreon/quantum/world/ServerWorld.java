@@ -45,7 +45,6 @@ import dev.ultreon.quantum.world.loot.LootGenerator;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.vec.*;
-import kotlin.system.TimingKt;
 import org.apache.commons.collections4.queue.SynchronizedQueue;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.*;
@@ -1662,7 +1661,7 @@ public class ServerWorld extends World implements Audience {
                 };
 
                 @SuppressWarnings("UnnecessaryLocalVariable") // It's a necessary local variable, IntelliJ is broken
-                long l = TimingKt.measureTimeMillis(() -> {
+                long l = Timing.measureTimeMillis(() -> {
                     ref.builtChunk = this.buildChunk(globalVec);
                     return null;
                 });

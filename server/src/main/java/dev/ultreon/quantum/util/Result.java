@@ -71,10 +71,12 @@ public class Result<T> {
     }
 
     public T getValueOrNull() {
+        if (this.ok == null) return null;
         return this.ok.value;
     }
 
     public Throwable getFailureOrNull() {
+        if (this.failure == null) return null;
         return this.failure.throwable;
     }
 

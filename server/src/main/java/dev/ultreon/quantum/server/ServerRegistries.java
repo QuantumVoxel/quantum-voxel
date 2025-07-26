@@ -4,6 +4,7 @@ import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.registry.*;
+import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.DimensionInfo;
@@ -30,6 +31,7 @@ public class ServerRegistries implements RegistryHandle {
         dimensions = create(RegistryKeys.DIMENSION);
         noiseConfigs = create(RegistryKeys.NOISE_CONFIG);
 
+        //TODO! This is a temp fix!
         biomes.createTag(new NamespaceID("overworld_biomes"));
     }
 

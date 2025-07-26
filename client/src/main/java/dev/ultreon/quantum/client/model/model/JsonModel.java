@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import dev.ultreon.libs.collections.v0.tables.HashTable;
 import dev.ultreon.libs.collections.v0.tables.Table;
 import dev.ultreon.quantum.block.BlockState;
@@ -22,6 +23,7 @@ import dev.ultreon.quantum.client.model.block.CubeModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.world.OpaqueFaces;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Direction;
 import org.jetbrains.annotations.Nullable;
@@ -90,10 +92,10 @@ public class JsonModel implements BlockModel, ItemModel {
     }
 
     @Override
-    public void bakeInto(MeshPartBuilder meshPartBuilder, int x, int y, int z, int cull, int[] ao, long light) {
+    public void bakeInto(BoundingBox bounds, OpaqueFaces opaqueFaces, MeshPartBuilder builder, int x, int y, int z, int cull, int[] ao, long light) {
         for (int i = 0, modelElementsSize = modelElements.size(); i < modelElementsSize; i++) {
             ModelElement modelElement = modelElements.get(i);
-            modelElement.bakeInto(i, meshPartBuilder, textureElements, x, y, z, cull, ao, light);
+            modelElement.bakeInto(bounds, opaqueFaces, builder, textureElements, x, y, z, cull, ao, light);
         }
     }
 

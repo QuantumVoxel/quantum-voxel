@@ -11,21 +11,24 @@ import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.dedicated.FabricMod;
 import dev.ultreon.quantum.dedicated.JavaWebSocket;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Result;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.WebSocketHandshakeException;
 import java.nio.channels.ClosedChannelException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -39,6 +42,7 @@ import static dev.ultreon.gameprovider.quantum.AnsiColors.PURPLE;
 import static dev.ultreon.gameprovider.quantum.AnsiColors.RED;
 import static dev.ultreon.gameprovider.quantum.AnsiColors.RESET;
 import static dev.ultreon.gameprovider.quantum.AnsiColors.YELLOW;
+import static dev.ultreon.quantum.client.QuantumClient.crash;
 
 public abstract class DesktopPlatform extends GamePlatform {
     private final boolean angleGLES;
@@ -236,6 +240,17 @@ public abstract class DesktopPlatform extends GamePlatform {
             QuantumClient.get().getResourceManager().importPackage(new FileHandle(new File(new URI(path))));
         } catch (Exception e) {
             throw new GdxRuntimeException("Failed to locate resources!", e);
+        }
+    }
+
+    @Override
+    public void locateServerResources(QuantumServer server) {
+        for (Path rootPath : FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE).orElseThrow().getRootPaths()) {
+            try {
+                server.getResourceManager().importPackage(rootPath.toUri());
+            } catch (IOException ex) {
+                crash(ex);
+            }
         }
     }
 

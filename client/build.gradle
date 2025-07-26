@@ -24,12 +24,11 @@ buildscript {
     }
 
     dependencies {
-        classpath group: 'commons-io', name: 'commons-io', version: '2.13.0'
-        classpath "com.google.code.gson:gson:2.10.1"
-        classpath "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:1.9.22"
+        classpath group: 'commons-io', name: 'commons-io', version: '2.18.0'
+        classpath "com.google.code.gson:gson:2.11.0"
 
         // Shadow
-        classpath "com.github.jengelman.gradle.plugins:shadow:+"
+        classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
     }
 }
 
@@ -37,8 +36,6 @@ buildscript {
 //     Plugins     //
 //*****************//
 apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'org.jetbrains.kotlin.jvm'
 
 group projectGroup // https://maven.apache.org/guides/mini/guide-naming-conventions.html
 
@@ -47,13 +44,7 @@ java {
     withJavadocJar()
 }
 
-evaluationDependsOn(":gameprovider")
 evaluationDependsOn(":server")
-
-javadoc {
-    dependsOn(":gameprovider:javadocJar")
-    dependsOn(":gameprovider:sourcesJar")
-}
 
 configurations {
     shadow {
@@ -81,6 +72,7 @@ dependencies {
     shadow(compileOnly("com.jagrosh:DiscordIPC:+"))
 
     // LibGDX
+
     api("com.badlogicgames.gdx:gdx:$gdxVersion")
     api("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
     api("com.badlogicgames.ashley:ashley:$ashleyVersion")

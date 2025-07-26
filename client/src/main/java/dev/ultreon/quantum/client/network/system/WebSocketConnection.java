@@ -4,7 +4,6 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.WebSocket;
 import dev.ultreon.quantum.network.*;
-import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.stage.PacketStage;
@@ -56,9 +55,11 @@ public abstract class WebSocketConnection<OurHandler extends PacketHandler, Thei
     @Override
     public void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener) {
         if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Sending: " + packet.getClass().getName());;
+        int id = getOtherSidePackets().getId(packet);
+        if (resultListener != null) resultListener.onSent();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PacketIO io = new PacketIO(null, out, handle);
-        io.writeShort(getOtherSidePackets().getId(packet));
+        io.writeShort(id);
         packet.toBytes(io);
         socket.send(out.toByteArray(), resultListener);
     }
@@ -149,7 +150,7 @@ public abstract class WebSocketConnection<OurHandler extends PacketHandler, Thei
 
     protected abstract ServerPlayer getPlayer();
 
-    protected abstract Packet<ServerPacketHandler> getDisconnectPacket(String message);
+    protected abstract Packet<ServerPacketHandler> getDisconnectPacket(int code, String message);
 
     public final boolean received(byte[] bytes) {
         PacketIO io = new PacketIO(new ByteArrayInputStream(bytes), null, handle);

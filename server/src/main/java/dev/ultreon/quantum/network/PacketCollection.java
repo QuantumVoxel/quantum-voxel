@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.network;
 
 import dev.ultreon.libs.commons.v0.tuple.Pair;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.network.packets.Packet;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -65,8 +66,9 @@ public class PacketCollection<H extends PacketHandler> {
      */
     public Packet<H> decode(int id, PacketIO buffer) {
         Function<PacketIO, ? extends Packet<H>> decoder = this.decoders.get(id);
-        if (decoder == null)
+        if (decoder == null) {
             throw new PacketException("Unknown packet ID: " + id);
+        }
         return decoder.apply(buffer);
     }
 

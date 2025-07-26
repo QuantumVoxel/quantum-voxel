@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.server;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Disposable;
-import com.sun.jdi.connect.spi.ClosedConnectionException;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.api.ModApi;
@@ -40,6 +38,7 @@ import dev.ultreon.quantum.server.player.PermissionMap;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.util.RejectedExecutionException;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.biome.Biomes;
 import dev.ultreon.quantum.world.gen.chunk.*;
@@ -54,9 +53,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -123,6 +120,11 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @ShowInNodeView
     protected long seed;
     private Runnable finalizer;
+    private final ScheduledExecutorService service = Executors.newScheduledThreadPool(1, r -> {
+        Thread thread = new Thread(r, "Quantum Timer");
+        thread.setDaemon(false);
+        return thread;
+    });
 
     /**
      * Creates a new {@link QuantumServer} instance.
@@ -162,22 +164,23 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.add("Biomes", biomes);
         this.add("Dimension Manager", this.dimManager);
 
-        this.resourceManager = new ResourceManager("data");
-        try {
-            resourceManager.importPackage(Gdx.files.internal("."));
-        } catch (IOException e) {
-            LOGGER.warn("Server resources location is unknown!");
-        }
+        this.resourceManager = new ResourceManager("data") {
+            @Override
+            protected void importGameResources() {
+                GamePlatform.get().locateServerResources(QuantumServer.this);
+            }
+        };
+        resourceManager.reload();
         this.recipeManager = new RecipeManager(this);
         this.recipeManager.load(this.resourceManager);
+
+        reload(ReloadContext.create(this, this.resourceManager));
 
         this.loadRegistries();
 
         for (Biome value : this.registries.get(RegistryKeys.BIOME).values()) {
             value.buildLayers();
         }
-
-        reload(ReloadContext.create(this, this.resourceManager));
 
         Recipes.init();
     }
@@ -455,7 +458,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         // Close all connections.
         try {
             this.networker.close();
-        } catch (ClosedChannelException | ClosedConnectionException e) {
+        } catch (ClosedChannelException e) {
             // Ignored
         } catch (IOException e) {
             // Log error for closing connections failure.
@@ -665,6 +668,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         });
         this.players.clear();
         this.resourceManager.close();
+
+        this.service.shutdown();
     }
 
     /**
@@ -1091,5 +1096,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     public void onSaveEvent(SaveEventType type, int... args) {
         CommonConstants.LOGGER.warn("SAVE [" + type + "] @ " + Arrays.stream(args).mapToObj(Integer::toString).collect(Collectors.joining(", ")));
+    }
+
+    public ScheduledExecutorService getService() {
+        return this.service;
     }
 }

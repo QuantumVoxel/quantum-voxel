@@ -10,7 +10,9 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -24,6 +26,8 @@ import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.meshing.FaceCull;
 import dev.ultreon.quantum.client.render.meshing.Light;
 import dev.ultreon.quantum.client.world.AOUtils;
+import dev.ultreon.quantum.client.world.ChunkModelBuilder;
+import dev.ultreon.quantum.client.world.OpaqueFaces;
 import dev.ultreon.quantum.util.LazyValue;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
@@ -283,7 +287,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel, Item
     }
 
     @Override
-    public void bakeInto(MeshPartBuilder meshPartBuilder, int x, int y, int z, int cull, int[] ao, long light) {
+    public void bakeInto(BoundingBox bounds, OpaqueFaces opaqueFaces, MeshPartBuilder builder, int x, int y, int z, int cull, int[] ao, long light) {
         final var from = w_from;
         final var to = w_to;
 
@@ -292,7 +296,10 @@ public final class BakedCubeModel extends BakedModel implements BlockModel, Item
         final var v10 = new VertexInfo();
         final var v11 = new VertexInfo();
         for (var direction : Direction.values()) {
-            if (FaceCull.culls(direction, cull)) continue;
+            if (FaceCull.culls(direction, cull)) {
+                opaqueFaces.add(x, y, z, direction);
+                continue;
+            }
 
             int sAo = AOUtils.aoForSide(ao, direction);
             byte sLight = Light.get(light, direction);
@@ -358,12 +365,18 @@ public final class BakedCubeModel extends BakedModel implements BlockModel, Item
                     v11.setPos(to.x, to.y, to.z);
                     break;
             }
+
+            bounds.ext(v00.position);
+            bounds.ext(v01.position);
+            bounds.ext(v10.position);
+            bounds.ext(v11.position);
+
             v00.position.add(x, y, z);
             v01.position.add(x, y, z);
             v10.position.add(x, y, z);
             v11.position.add(x, y, z);
 
-            meshPartBuilder.rect(v00, v10, v11, v01);
+            builder.rect(v00, v10, v11, v01);
         }
     }
 

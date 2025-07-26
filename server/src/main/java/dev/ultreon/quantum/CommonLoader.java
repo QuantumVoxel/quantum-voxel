@@ -1,7 +1,10 @@
 package dev.ultreon.quantum;
 
+import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.events.ConfigEvents;
+import dev.ultreon.quantum.network.system.KyroNetSlf4jLogger;
+import dev.ultreon.quantum.network.system.KyroSlf4jLogger;
 import dev.ultreon.quantum.text.icon.EmoteMap;
 import dev.ultreon.quantum.text.icon.IconMap;
 import dev.ultreon.quantum.util.Env;
@@ -21,6 +24,9 @@ public final class CommonLoader {
 
         // Trigger event for config load on the client side.
         ConfigEvents.LOAD.factory().onConfigLoad(Env.CLIENT);
+
+        KyroSlf4jLogger.set();
+        KyroNetSlf4jLogger.set();
 
         IconMap.register();
         EmoteMap.register();

@@ -8,13 +8,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
-import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.DevFlag;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.api.events.RenderEvents;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
@@ -64,6 +62,7 @@ public class GameRenderer implements Disposable {
     private final float[] mouseVec = new float[2];
     private final Vector3 tmp3 = new Vector3();
     private Vec3f tmp1 = new Vec3f();
+    private Vec3f direction = new Vec3f();
 
     /**
      * Constructs a new GameRenderer with the specified client, model batch, and render pipeline.
@@ -126,10 +125,19 @@ public class GameRenderer implements Disposable {
                 renderer.clearColor(1 / 255f, 1 / 255f, 1 / 255f, 1);
             }
 
+            if (GamePlatform.get().isDevFlagEnabled(DevFlag.OcclusionDebug)) {
+                WorldRenderer worldRenderer1 = this.client.worldRenderer;
+                if (worldRenderer1 != null && !worldRenderer1.isDisposed()) {
+                    for (Rectangle occlusionBound : worldRenderer1.occlusionBounds) {
+                        renderer.box((int) occlusionBound.x * (int) client.getGuiScale(), (int) occlusionBound.y * (int) client.getGuiScale(), (int) occlusionBound.width * (int) client.getGuiScale(), (int) occlusionBound.height * (int) client.getGuiScale(), Color.WHITE);
+                    }
+                }
+            }
+
             this.renderOverlays(renderer, screen, world, deltaTime);
 
             if (this.client.crashOverlay != null) {
-                if (!GamePlatform.get().isMacOSX() && Gdx.input.isKeyPressed(Input.Keys.F1) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
+                if (!GamePlatform.get().isMacOSX() && Gdx.input.isKeyPressed(Input.Keys.F1) && Gdx.input.isKeyPressed(Input.Keys.C)) {
                     this.client.crashOverlay.render(renderer, deltaTime);
                 } else if (GamePlatform.get().isMacOSX() && Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) && Gdx.input.isKeyPressed(Input.Keys.C)) {
                     this.client.crashOverlay.render(renderer, deltaTime);
@@ -173,22 +181,58 @@ public class GameRenderer implements Disposable {
             int centerY = height / 2;
             if (GamePlatform.get().isMobile()) {
                 if (Gdx.input.isTouched()) {
-                    float dx = (int) (-Gdx.input.getDeltaX() * ClientConfiguration.cameraSensitivity.getValue());
-                    float dy = (int) (-Gdx.input.getDeltaY() * ClientConfiguration.cameraSensitivity.getValue());
+                    float dx = -Gdx.input.getDeltaX() * ClientConfiguration.cameraSensitivity.getValue();
+                    float dy = -Gdx.input.getDeltaY() * ClientConfiguration.cameraSensitivity.getValue();
+                    dx *= Gdx.graphics.getDeltaTime() * 150;
+                    dy *= Gdx.graphics.getDeltaTime() * 150;
                     player.rotateHead(dx, dy);
                 }
             } else if (GamePlatform.get().isWeb()) {
-                float dx = (int) (-Gdx.input.getDeltaX() * ClientConfiguration.cameraSensitivity.getValue());
-                float dy = (int) (-Gdx.input.getDeltaY() * ClientConfiguration.cameraSensitivity.getValue());
+                float dx = -Gdx.input.getDeltaX() * ClientConfiguration.cameraSensitivity.getValue();
+                float dy = -Gdx.input.getDeltaY() * ClientConfiguration.cameraSensitivity.getValue();
+                dx *= Gdx.graphics.getDeltaTime() * 150;
+                dy *= Gdx.graphics.getDeltaTime() * 150;
                 player.rotateHead(dx, dy);
             } else if (GamePlatform.get().isDesktop()) {
-                float dx = (int) (-(Gdx.input.getX() - centerX) * ClientConfiguration.cameraSensitivity.getValue());
-                float dy = (int) (-(Gdx.input.getY() - centerY) * ClientConfiguration.cameraSensitivity.getValue());
+                float dx = -(Gdx.input.getX() - centerX) * ClientConfiguration.cameraSensitivity.getValue();
+                float dy = -(Gdx.input.getY() - centerY) * ClientConfiguration.cameraSensitivity.getValue();
+                dx *= Math.min(Gdx.graphics.getDeltaTime() * 150, Gdx.graphics.getBackBufferScale());
+                dy *= Math.min(Gdx.graphics.getDeltaTime() * 150, Gdx.graphics.getBackBufferScale());
                 player.rotateHead(dx, dy);
             }
 
             // Reset position
             Gdx.input.setCursorPosition(centerX, centerY);
+        }
+
+        if (client.detachedCam) {
+            client.renderCamera.position.set(client.detachedPos);
+
+            var rotation = this.tmp.set(client.detachedRot.x, client.detachedRot.y);
+            var quaternion = new Quaternion();
+            quaternion.setFromAxis(Vector3.Y, rotation.x);
+            quaternion.mul(new Quaternion(Vector3.X, rotation.y));
+            quaternion.conjugate();
+
+            // Calculate the direction vector
+            float yRot = client.detachedRot.y;
+            float xHeadRot = client.detachedRot.x;
+            direction.x = (float) (Math.cos(Math.toRadians(yRot)) * Math.sin(Math.toRadians(xHeadRot)));
+            direction.z = (float) (Math.cos(Math.toRadians(yRot)) * Math.cos(Math.toRadians(xHeadRot)));
+            direction.y = (float) (Math.sin(Math.toRadians(yRot)));
+
+            // Normalize the direction vector
+            direction.nor();
+            this.client.renderCamera.direction.set(direction.x, direction.y, direction.z);
+
+            // Add camera bop. Use easing and animate with cameraBop. Camera Bop is a sort of camera movement while walking.
+            float cameraBop = calculateCameraBop(deltaTime);
+
+            this.client.renderCamera.up.set(0, 1, 0);
+            this.client.renderCamera.up.rotate(Vector3.Y, rotation.x);
+            this.client.renderCamera.up.rotate(Vector3.Z, cameraBop);
+            this.client.renderCamera.up.rotate(Vector3.Y, -rotation.x);
+            return;
         }
 
         this.client.camera.update(player);

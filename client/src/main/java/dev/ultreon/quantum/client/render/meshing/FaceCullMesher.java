@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.render.meshing;
 
+import com.badlogic.gdx.math.collision.BoundingBox;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
@@ -7,6 +8,7 @@ import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.world.AOUtils;
 import dev.ultreon.quantum.client.world.ChunkModelBuilder;
 import dev.ultreon.quantum.client.world.ClientChunk;
+import dev.ultreon.quantum.client.world.OpaqueFaces;
 
 import static dev.ultreon.quantum.world.World.CS;
 
@@ -18,13 +20,13 @@ public class FaceCullMesher implements Mesher {
     }
 
     @Override
-    public boolean buildMesh(UseCondition condition, ChunkModelBuilder builder1) {
+    public boolean buildMesh(BoundingBox bounds, OpaqueFaces opaqueFaces, UseCondition condition, ChunkModelBuilder builder1) {
         // Part 1: Default world
         boolean flag = false;
         for (int x = 0; x < CS; x++) {
             for (int y = 0; y < CS; y++) {
                 for (int z = 0; z < CS; z++) {
-                    flag |= loadBlockInto(builder1, x, y, z);
+                    flag |= loadBlockInto(bounds, opaqueFaces, builder1, x, y, z);
                 }
             }
         }
@@ -33,7 +35,7 @@ public class FaceCullMesher implements Mesher {
     }
 
     private boolean loadBlockInto(
-            ChunkModelBuilder meshPartBuilder,
+            BoundingBox bounds, OpaqueFaces opaqueFaces, ChunkModelBuilder meshPartBuilder,
             int x,
             int y,
             int z
@@ -57,7 +59,7 @@ public class FaceCullMesher implements Mesher {
                     (byte) chunk.getLight(x + 1, y, z)
             );
 
-            model.bakeInto(
+            model.bakeInto(bounds, opaqueFaces,
                     meshPartBuilder.get(BlockRenderPassRegistry.get(block)), x, y, z, FaceCull.of(
                             shouldMerge(block, top),
                             shouldMerge(block, bottom),

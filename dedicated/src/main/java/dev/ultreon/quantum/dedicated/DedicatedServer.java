@@ -12,13 +12,13 @@ import dev.ultreon.quantum.text.ServerLanguage;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.WorldStorage;
-import org.glassfish.tyrus.server.Server;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class DedicatedServer extends QuantumServer {
     private static final Profiler PROFILER = new Profiler();
     private static DedicatedServer instance;
     private final ServerLanguage language = createServerLanguage();
-    private final Server server;
+    private final TcpNetworker server;
 
     /**
      * Creates a new dedicated server instance.
@@ -54,12 +54,18 @@ public class DedicatedServer extends QuantumServer {
 
         DedicatedServer.instance = this;
 
-        server = new Server(host, port, null, null, JavaWebSocketServer.class);
+//        server = new Server(host, port, null, null, JavaWebSocketServer.class);
+//
+//        try {
+//            server.start();
+//            CommonConstants.LOGGER.info("WebSocket server running at ws://" + host + ":" + port + "/" + path);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
 
         try {
-            server.start();
-            CommonConstants.LOGGER.info("WebSocket server running at ws://" + host + ":" + port + "/" + path);
-        } catch (Exception e) {
+            server = new TcpNetworker(this, host == null ? InetAddress.getLocalHost() : InetAddress.getByName(host), port);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -154,7 +160,12 @@ public class DedicatedServer extends QuantumServer {
         super.shutdown(finalizer);
 
         this.profiler.dispose();
-        this.server.stop();
+        try {
+            this.server.close();
+        } catch (IOException e) {
+            CommonConstants.LOGGER.error("Failed to close server!", e);
+            System.exit(1);
+        }
     }
 
     @Override

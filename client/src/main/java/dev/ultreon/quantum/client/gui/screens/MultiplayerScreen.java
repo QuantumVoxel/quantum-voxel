@@ -170,7 +170,7 @@ public class MultiplayerScreen extends Screen {
 
         try {
             this.client.serverInfo = selected.info;
-            this.client.connectToServer((selected.info.secure() ? "wss://" : "ws://") + selected.info.address());
+            this.client.connectToServer(selected.info.address());
         } catch (Exception e) {
             QuantumClient.LOGGER.error("Can't connect to server", e);
         }

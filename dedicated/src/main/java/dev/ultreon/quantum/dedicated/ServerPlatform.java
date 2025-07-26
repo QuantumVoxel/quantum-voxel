@@ -1,21 +1,27 @@
 package dev.ultreon.quantum.dedicated;
 
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
-import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
+import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.xeox.api.IMod;
+import dev.ultreon.xeox.api.IPath;
+import dev.ultreon.xeox.api.IXeoxLoader;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class ServerPlatform extends GamePlatform {
-    private final Map<String, FabricMod> mods = new IdentityHashMap<>();
+    private final Map<String, XeoxMod> mods = new IdentityHashMap<>();
 
     @Override
     public WebSocket newWebSocket(String location, Consumer<Throwable> onError, WebSocket.InitializeListener initializeListener, WebSocket.ConnectedListener connectedListener) {
@@ -136,32 +142,81 @@ public class ServerPlatform extends GamePlatform {
 
     @Override
     public Optional<Mod> getMod(String id) {
-        return FabricLoader.getInstance().getModContainer(id).map(container -> (Mod) this.mods.computeIfAbsent(id, v -> new FabricMod(container))).or(() -> super.getMod(id));
+        IMod iMod = IXeoxLoader.get().getMod(id);
+        if (iMod == null) {
+            XeoxMod mod = this.mods.get(id);
+            if (mod != null) {
+                return Optional.of(mod);
+            }
+            return Optional.empty();
+        }
+        return Optional.of(new XeoxMod(iMod));
     }
 
     @Override
     public boolean isModLoaded(String id) {
-        return FabricLoader.getInstance().isModLoaded(id) || super.isModLoaded(id);
+        return IXeoxLoader.get().getMod(id) != null || this.mods.containsKey(id);
     }
 
     @Override
     public Collection<? extends Mod> getMods() {
-        var list = new ArrayList<Mod>();
-        list.addAll(FabricLoader.getInstance().getAllMods().stream().map(container -> this.mods.computeIfAbsent(container.getMetadata().getId(), v -> new FabricMod(container))).collect(Collectors.toList()));
-        list.addAll(super.getMods());
-        return list;
+        return new ArrayList<>(this.mods.values());
     }
 
     @Override
     public void initMods() {
         CommonConstants.LOGGER.info("Initializing mods...");
 
-        FabricLoader.getInstance().invokeEntrypoints("main", net.fabricmc.api.ModInitializer.class, ModInitializer::onInitialize);
-        FabricLoader.getInstance().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
+        IXeoxLoader.get().invokeEntrypoints("common", ModInitializer.class, ModInitializer::onInitialize);
+        IXeoxLoader.get().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
     }
 
     @Override
     public boolean isDevEnvironment() {
-        return FabricLoader.getInstance().isDevelopmentEnvironment();
+        return IXeoxLoader.get().isDevEnvironment();
+    }
+
+    @Override
+    public void locateServerResources(QuantumServer server) {
+        try {
+            URL resource = server.getClass().getResource("/.quantum-server-resources");
+            if (resource == null) {
+                throw new GdxRuntimeException("Quantum Voxel resources unavailable!");
+            }
+            String path = resource.toString();
+
+            if (path.startsWith("jar:")) {
+                path = path.substring("jar:".length());
+            }
+
+            path = path.substring(0, path.lastIndexOf('/'));
+
+            if (path.endsWith("!")) {
+                path = path.substring(0, path.length() - 1);
+            }
+
+            server.getResourceManager().importPackage(new FileHandle(new File(new URI(path))));
+        } catch (Exception e) {
+            IPath path = IXeoxLoader.get().getMod(CommonConstants.NAMESPACE).filesystem().path("/");
+            try {
+                server.getResourceManager().importPackage(new XeoxFileHandle(path));
+            } catch (IOException ex) {
+                CommonConstants.LOGGER.error("Failed to import resources!", ex);
+                throw new GdxRuntimeException("Quantum Voxel resources unavailable!");
+            }
+        }
+    }
+
+    @Override
+    public void locateModResources() {
+        for (IMod mod : IXeoxLoader.get().getMods()) {
+            IPath path = mod.filesystem().path("/");
+            try {
+                QuantumServer.get().getResourceManager().importPackage(new XeoxFileHandle(path));
+            } catch (IOException ex) {
+                CommonConstants.LOGGER.error("Failed to import resources!", ex);
+            }
+            this.mods.put(mod.modId(), new XeoxMod(mod));
+        }
     }
 }

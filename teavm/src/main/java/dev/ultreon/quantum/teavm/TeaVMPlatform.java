@@ -8,6 +8,7 @@ import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Suppliers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -85,6 +86,15 @@ public class TeaVMPlatform extends GamePlatform {
     public void locateResources() {
         try {
             QuantumClient.get().getResourceManager().importPackage(Gdx.files.internal("."));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void locateServerResources(QuantumServer server) {
+        try {
+            server.getResourceManager().importPackage(Gdx.files.internal("."));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

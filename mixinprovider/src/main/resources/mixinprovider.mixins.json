@@ -2,21 +2,18 @@
   "required": true,
   "minVersion": "0.8",
   "package": "dev.ultreon.mixinprovider.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_17",
   "mixins": [
     "BaseShaderMixin",
-    "GLFWMixin",
-    "ImmediateModeRenderer20Mixin",
-    "KnownFontsMixin",
-    "Lwjgl3GL20Mixin",
-    "accessors.Lwjgl3ApplicationConfigurationAccessor",
-    "accessors.Lwjgl3WindowAccessor",
-    "accessors.SyncAccessor"
+    "ImGuiOverlayMixin",
+    "MainMixin",
+    "ModelMixin",
+    "SpriteBatches",
+    "TextureAtlasMixin",
+    "TextureMixin"
   ],
   "client": [
-    "ShaderCompatibilityHelperMixin",
-    "ShaderProgramMixin",
-    "SpriteBatchMixin"
+    "ShaderProgramMixin"
   ],
   "injectors": {
     "defaultRequire": 1

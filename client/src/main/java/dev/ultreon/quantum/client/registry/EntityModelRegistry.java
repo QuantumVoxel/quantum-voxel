@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.registry;
 
 import com.badlogic.gdx.assets.loaders.ModelLoader;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.utils.Disposable;
@@ -10,6 +11,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientRegistrationEvents;
 import dev.ultreon.quantum.client.model.entity.EntityModel;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
+import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.resources.ReloadContext;
@@ -148,24 +150,28 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
             NamespaceID id = e.getValue();
             NamespaceID mappedId = id.mapPath(path -> "models/entity/" + path + ".g3dj");
 
-            Model model = QuantumClient.invokeAndWait(() -> MODEL_LOADER.loadModel(QuantumClient.resource(mappedId), fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
-                if (path.startsWith("models/entity/")) {
-                    path = path.substring("models/entity/".length());
-                } else if (path.startsWith(mappedId.toString())) {
-                    path = path.substring(mappedId.toString().length());
-                } else {
-                    String string = mappedId.toString();
-                    System.out.println(string);
-                    System.out.println(path);
-                    int len = string.length() - path.length() - ".g3dj".length();
-                    System.out.println(len);
-                    if (path.startsWith(string.substring(0, len))) {
-                        path = path.substring(len);
+            Model model = QuantumClient.invokeAndWait(() -> {
+                FileHandle resource = QuantumClient.resource(mappedId);
+                if (!(resource instanceof ResourceFileHandle)) throw new RuntimeException("Invalid resource handle: " + resource.getClass().getName());
+                return MODEL_LOADER.loadModel(resource, fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
+                    if (path.startsWith("models/entity/")) {
+                        path = path.substring("models/entity/".length());
+                    } else if (path.startsWith(mappedId.toString())) {
+                        path = path.substring(mappedId.toString().length());
+                    } else {
+                        String string = mappedId.toString();
+                        System.out.println(string);
+                        System.out.println(path);
+                        int len = string.length() - path.length() - ".g3dj".length();
+                        System.out.println(len);
+                        if (path.startsWith(string.substring(0, len))) {
+                            path = path.substring(len);
+                        }
                     }
-                }
 
-                return "textures/entity/" + path;
-            }))));
+                    return "textures/entity/" + path;
+                })));
+            });
             LOGGER.warn("TOOD: Implement model loader for: {}", mappedId);
             this.finishedRegistry.put(e.getKey(), model);
         }

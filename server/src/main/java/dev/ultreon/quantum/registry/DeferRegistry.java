@@ -2,7 +2,6 @@ package dev.ultreon.quantum.registry;
 
 import dev.ultreon.quantum.registry.event.RegistryEvents;
 import dev.ultreon.quantum.util.NamespaceID;
-import groovy.lang.Closure;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -30,10 +29,6 @@ public class DeferRegistry<T> {
         this.objects.add(new HashMap.SimpleEntry<>(id, supplier::get));
 
         return new DeferredElement<>(this.registry, supplier, id);
-    }
-
-    public <C extends T> DeferredElement<C> defer(String s, Closure<C> closure) {
-        return defer(s, closure::call);
     }
 
     public void register() {

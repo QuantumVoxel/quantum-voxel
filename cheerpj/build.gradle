@@ -26,7 +26,6 @@ repositories {
 
 dependencies {
     implementation project(":lwjgl2")
-    implementation project(":gameprovider")
     implementation project(":dedicated")
     implementation project(":client")
     implementation project(":server")
@@ -49,11 +48,6 @@ dependencies {
     // Others
     implementation api("com.github.crykn.guacamole:gdx-desktop:v0.3.5")
 
-    // Apache Log4J
-    runtimeOnly("org.apache.logging.log4j:log4j:$log4jVersion")
-    runtimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    runtimeOnly("org.apache.logging.log4j:log4j-api:$log4jVersion")
-    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
     implementation api("org.tukaani:xz:$tukaaniXzVersion")
     implementation api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
 
@@ -75,9 +69,6 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
     implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
-    implementation api("org.apache.logging.log4j:log4j:$log4jVersion")
-    implementation api("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    implementation api("org.apache.logging.log4j:log4j-api:$log4jVersion")
 
     // fabric-loader dependencies
     implementation api("org.ow2.asm:asm:${project.asmVersion}")
@@ -88,29 +79,6 @@ dependencies {
 
     implementation 'party.iroiro.luajava:luajit:4.0.2'
     runtimeOnly 'party.iroiro.luajava:luajit-platform:4.0.2:natives-desktop'
-
-    implementation api("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
-        exclude module: 'launchwrapper'
-        exclude module: 'guava'
-    }
-
-    //noinspection GradleDynamicVersion
-    implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
-    implementation api('net.fabricmc:tiny-remapper:0.8.7')
-    //noinspection GradleDynamicVersion
-    implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
-    implementation api('net.fabricmc:access-widener:2.1.0')
-
-    implementation api("net.fabricmc:fabric-loader:$fabricVersion")
-
-    //noinspection GradleDynamicVersion
-    implementation api('net.fabricmc:tiny-mappings-parser:0.3.0+build.17')
-    implementation api('net.fabricmc:tiny-remapper:0.8.7')
-    //noinspection GradleDynamicVersion
-    implementation api('net.fabricmc:dev-launch-injector:0.2.1+build.8')
-    implementation api('net.fabricmc:access-widener:2.1.0')
-
-    implementation api("net.fabricmc:fabric-loader:$fabricVersion")
 }
 
 tasks.test {

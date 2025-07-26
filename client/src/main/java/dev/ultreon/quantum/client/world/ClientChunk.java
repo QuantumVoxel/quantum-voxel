@@ -74,8 +74,12 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     public int indexCount;
     public int faceCount;
     public int meshVertices;
+
+    @ShowInNodeView
+    public final BoundingBox tightBounds = new BoundingBox();
+    public final Box occlusionBounds = new Box();
+    public @Nullable OpaqueFaces opaqueFaces;
     private boolean empty = false;
-    private final BoundingBox boundingBox = new BoundingBox();
 
     @ShowInNodeView
     private final ObjectMap<RenderPass, ChunkMesh> meshes = new ObjectMap<>();
@@ -298,7 +302,22 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     @Override
     public boolean isEmpty() {
-        return empty;
+        return storage.isUniform() && storage.get(0).isAir();
+    }
+
+    public boolean isSubmerged() {
+        boolean isSubmerged = true;
+        for (Direction direction : Direction.values()) {
+            ClientChunk chunk = this.clientWorld.getChunk(this.vec.add(direction.getOffset()));
+            isSubmerged &= chunk != null && (chunk.isOpaque(direction.getOpposite()));
+        }
+
+        return isSubmerged;
+    }
+
+    private boolean isUniform(@Nullable Chunk chunk) {
+        if (chunk == null) return false;
+        return chunk.storage.isUniform() && !chunk.storage.get(0).isAir();
     }
 
     @Override
@@ -442,10 +461,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     public BoundingBox getBoundingBox() {
-        this.boundingBox.min.set(renderOffset).sub(WorldRenderer.HALF_CHUNK_DIMENSIONS);
-        this.boundingBox.max.set(renderOffset).add(WorldRenderer.HALF_CHUNK_DIMENSIONS);
-
-        return this.boundingBox;
+        return this.tightBounds;
     }
 
     public void addMesh(ChunkMesh chunkMesh) {
@@ -479,5 +495,18 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         }
 
         return 0xF0;
+    }
+
+    public boolean isOpaque(Direction direction) {
+        if (opaqueFaces == null) return false;
+        return opaqueFaces.isFull(direction);
+    }
+
+    public @Nullable ClientChunk relative(Direction dir) {
+        return (ClientChunk) this.world.getChunk(this.vec.relative(dir));
+    }
+
+    public int getDistanceSquared(ClientChunk neighborPos) {
+        return this.vec.distanceSquared(neighborPos.vec);
     }
 }

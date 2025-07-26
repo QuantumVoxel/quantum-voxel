@@ -3,7 +3,9 @@ package dev.ultreon.quantum.world.gen.chunk;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.Modifications;
 import dev.ultreon.quantum.registry.Registry;
+import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.MathHelper;
+import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.*;
@@ -19,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static dev.ultreon.quantum.world.World.CS;
@@ -42,7 +45,11 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     public OverworldGenerator(Registry<Biome> biomeRegistry) {
         super(biomeRegistry);
 
-        biomeRegistry.keys().forEach(this::addBiome);
+        Collection<Biome> overworldBiomes = biomeRegistry.getTag(NamespaceID.of("overworld_biomes")).orElseThrow().getValues();
+        for (Biome biome : overworldBiomes) {
+            if (biome.doesNotGenerate()) continue;
+            addBiome(biomeRegistry.getKey(biome));
+        }
     }
 
     @Override

@@ -37,7 +37,7 @@ public class LoadingOverlay implements StaticWidget {
         this.curProgressX += (this.progress - this.curProgressX) * deltaTime;
 
         renderer.fill(0, 0, width, height, RgbColor.rgb(0x101010));
-        Vec2f thumbnail = this.resizer.thumbnail(width * TO_ZOOM, height * TO_ZOOM);
+        Vec2f thumbnail = this.resizer.fill(width * TO_ZOOM, height * TO_ZOOM);
 
         float drawWidth = thumbnail.x;
         float drawHeight = thumbnail.y;

@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.badlogic.gdx.graphics.Color;
-import com.sun.jdi.connect.spi.ClosedConnectionException;
 
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.debug.BoxGizmo;
@@ -308,7 +307,7 @@ public class IntegratedServer extends QuantumServer {
 
         try {
             this.getNetworker().close();
-        } catch (ClosedChannelException | ClosedConnectionException e) {
+        } catch (ClosedChannelException e) {
             // Ignore
         } catch (IOException e) {
             throw new GdxRuntimeException(e);

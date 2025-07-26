@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.world.vec;
 
 import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -542,5 +543,13 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
 
     public boolean equals(int x, int y, int z) {
         return x == getIntX() && y == getIntY() && z == getIntZ();
+    }
+
+    public ChunkVec relative(Direction dir) {
+        return new ChunkVec(this.x + dir.getOffsetX(), this.y + dir.getOffsetY(), this.z + dir.getOffsetZ());
+    }
+
+    public int distanceSquared(@NotNull ChunkVec vec) {
+        return (int) Math.pow(this.x - vec.x, 2) + (int) Math.pow(this.y - vec.y, 2) + (int) Math.pow(this.z - vec.z, 2);
     }
 }
