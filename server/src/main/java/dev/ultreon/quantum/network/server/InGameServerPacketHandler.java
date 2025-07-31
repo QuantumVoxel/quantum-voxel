@@ -1,10 +1,9 @@
 package dev.ultreon.quantum.network.server;
 
-import dev.ultreon.quantum.api.ModApi;
-import dev.ultreon.quantum.api.events.block.BlockAttemptBreakEvent;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.block.BlockChangeEvent;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.entity.Attribute;
-import dev.ultreon.quantum.events.PlayerEvents;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.tool.ToolItem;
@@ -75,7 +74,6 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     @Override
     public void onDisconnect(String message) {
         IConnection.LOGGER.info("Player {} disconnected: {}", this.player.getName(), message);
-        PlayerEvents.PLAYER_LEFT.factory().onPlayerLeft(this.player);
 
         this.disconnected = true;
         this.connection.setReadOnly();
@@ -204,7 +202,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
 
             if (Math.abs(pos.vec().d().add(1).dst(this.player.getPosition())) > this.player.getAttributes().get(Attribute.BLOCK_REACH)
                     || this.player.blockBrokenTick
-                    || ModApi.getGlobalEventHandler().call(new BlockAttemptBreakEvent(world, pos, original, block, stack, this.player))) {
+                    || EventSystem.postCancelable(new BlockChangeEvent.AttemptBreak(world, pos, original, block, stack, this.player))) {
                 world.stopBreaking(pos, this.player);
                 revertBlockSet(pos, world);
                 return;

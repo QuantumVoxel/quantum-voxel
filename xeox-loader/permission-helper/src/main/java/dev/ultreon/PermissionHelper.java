@@ -118,7 +118,7 @@ public class PermissionHelper {
         ImGui.styleColorsDark();
         ImGuiStyle style = ImGui.getStyle();
         style.setWindowRounding(0);
-        style.setFrameRounding(0);
+        style.setFrameRounding(4);
         style.setChildRounding(0);
         style.setPopupRounding(0);
         style.setWindowBorderSize(0);

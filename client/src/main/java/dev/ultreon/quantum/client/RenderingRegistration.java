@@ -1,9 +1,12 @@
 package dev.ultreon.quantum.client;
 
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.SlabBlock;
 import dev.ultreon.quantum.block.property.StateProperties;
-import dev.ultreon.quantum.client.api.events.ClientRegistrationEvents;
+import dev.ultreon.quantum.client.api.events.RegisterBlockModelsEvent;
+import dev.ultreon.quantum.client.api.events.RegisterBlockRenderPassesEvent;
+import dev.ultreon.quantum.client.api.events.RegisterEntityRenderersEvent;
 import dev.ultreon.quantum.client.model.block.BlockModelRegistry;
 import dev.ultreon.quantum.client.model.block.CubeModel;
 import dev.ultreon.quantum.client.model.block.ModelProperties;
@@ -39,7 +42,6 @@ public class RenderingRegistration {
         registerBlockEntityModels(client);
 
         // Register block renderers
-        registerBlockRenderers();
         registerBlockRenderTypes();
 
         registerEntityRenderers();
@@ -50,9 +52,6 @@ public class RenderingRegistration {
      * @param client The QuantumClient instance.
      */
     private static void registerBlockEntityModels(QuantumClient client) {
-        // Call the onRegister() method of the BLOCK_ENTITY_MODELS factory.
-        ClientRegistrationEvents.BLOCK_ENTITY_MODELS.factory().onRegister();
-
         // Load block entity models using the client instance.
         BlockEntityModelRegistry.load(client);
     }
@@ -65,16 +64,7 @@ public class RenderingRegistration {
         BlockRenderPassRegistry.register(Blocks.WATER, RenderPass.WATER);
         BlockRenderPassRegistry.register(Blocks.LEAVES, RenderPass.CUTOUT);
 
-        // Call the onRegister() method of the BLOCK_RENDER_TYPES factory.
-        ClientRegistrationEvents.BLOCK_RENDER_TYPES.factory().onRegister();
-    }
-
-    /**
-     * Registers block renderers.
-     */
-    private static void registerBlockRenderers() {
-        // Call the onRegister() method of the BLOCK_RENDERERS factory.
-        ClientRegistrationEvents.BLOCK_RENDERERS.factory().onRegister();
+        EventSystem.postDefault(new RegisterBlockRenderPassesEvent());
     }
 
     /**
@@ -100,7 +90,7 @@ public class RenderingRegistration {
         registry.registerCustom(Blocks.PLANKS_SLAB, Blocks.PLANKS_SLAB.getDefaultState().with(StateProperties.SLAB_TYPE, SlabBlock.Type.DOUBLE), () -> new JsonModelLoader().load(Registries.BLOCK.getKey(Blocks.PLANKS_SLAB), NamespaceID.of("blocks/planks_slab_double")));
 
         // Trigger the block models factory registration event
-        ClientRegistrationEvents.BLOCK_MODELS.factory().onRegister();
+        EventSystem.postDefault(new RegisterBlockModelsEvent());
 
         // Register default block models for common blocks
         registry.registerDefault(Blocks.VOIDGUARD);
@@ -143,7 +133,6 @@ public class RenderingRegistration {
         EntityRendererRegistry.register(EntityTypes.PIG, PigRenderer::new);
         EntityRendererRegistry.register(EntityTypes.BANVIL, BanvilRenderer::new);
 
-        // Call the onRegister method of the factory in ENTITY_RENDERERS
-        ClientRegistrationEvents.ENTITY_RENDERERS.factory().onRegister();
+        EventSystem.postDefault(new RegisterEntityRenderersEvent());
     }
 }

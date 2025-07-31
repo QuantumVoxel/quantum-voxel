@@ -410,6 +410,14 @@ public abstract class GamePlatform {
         return null;
     }
 
+    public Set<String> getLoadedClasses() {
+        return Collections.emptySet();
+    }
+
+    public String getFileSep() {
+        return "/";
+    }
+
     private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {
         private boolean done = false;
         private boolean cancelled = false;

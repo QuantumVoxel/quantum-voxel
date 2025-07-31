@@ -8,6 +8,7 @@ import dev.ultreon.quantum.server.PlatformOS;
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  * @since 0.1.0
  */
+@Deprecated
 public class OS {
     /**
      * Checks if the operating system is Windows.

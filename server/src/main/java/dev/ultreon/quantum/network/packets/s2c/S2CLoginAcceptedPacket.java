@@ -28,7 +28,7 @@ public final class S2CLoginAcceptedPacket implements Packet<LoginClientPacketHan
 
     public static S2CLoginAcceptedPacket read(PacketIO buffer) {
         var uuid = buffer.readUuid();
-        var spawnPos = buffer.readVec3d();
+        var spawnPos = buffer.readVec3d(new Vec3d());
         var gameMode = buffer.readEnum(GameMode.SURVIVAL);
         var health = buffer.readFloat();
         var hunger = buffer.readInt();

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class BiomeLayersBuilt extends Event {
+public class BiomeLayersBuilt implements Event {
     private final @NotNull Biome biome;
     private final @NotNull List<@NotNull TerrainLayer> layers;
     private final @NotNull List<@NotNull TerrainFeature> features;

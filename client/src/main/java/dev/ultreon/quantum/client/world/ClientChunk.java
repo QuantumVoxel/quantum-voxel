@@ -7,20 +7,17 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
+import dev.ultreon.quantum.client.api.events.ClientChunkEvent;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
-import dev.ultreon.quantum.client.render.RenderBufferSource;
-import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.render.NodeCategory;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.meshing.FaceCullMesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
-import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.registry.RegistryKey;
@@ -52,6 +49,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private final ClientWorld clientWorld;
     public final Vector3 renderOffset = new Vector3();
     public final Vector3 deltaOffset = new Vector3();
+    private final ChunkVec tmpCV = new ChunkVec();
 
     public volatile boolean dirty;
     public boolean initialized = false;
@@ -79,22 +77,22 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     public final BoundingBox tightBounds = new BoundingBox();
     public final Box occlusionBounds = new Box();
     public @Nullable OpaqueFaces opaqueFaces;
-    private boolean empty = false;
 
-    @ShowInNodeView
-    private final ObjectMap<RenderPass, ChunkMesh> meshes = new ObjectMap<>();
-    private final int[] opqueColumnMask = new int[CS_2];
-
-    /**
-     * @deprecated Use {@link #ClientChunk(ClientWorld, dev.ultreon.quantum.world.vec.ChunkVec, Storage, Storage, Map)} instead
-     */
-    @Deprecated(since = "0.1.0", forRemoval = true)
-    public ClientChunk(ClientWorld world, int ignoredSize, int ignoredHeight, ChunkVec pos, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
-        this(world, pos, storage, biomeStorage, blockEntities);
-    }
+    private final @Nullable ClientChunk[] neighbors = new ClientChunk[6];
 
     public ClientChunk(ClientWorld world, ChunkVec pos, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         super(world, pos, storage, biomeStorage);
+
+        QuantumClient.invokeAndWait(() -> {
+            for (Direction direction : Direction.values()) {
+                ClientChunk chunk = world.getChunk(tmpCV.set(pos).add(direction.getOffset()));
+
+                this.neighbors[direction.ordinal()] = chunk;
+                if (chunk != null)
+                    chunk.neighbors[direction.getOpposite().ordinal()] = this;
+            }
+        });
+
         this.clientWorld = world;
         this.active = false;
 
@@ -105,21 +103,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         });
 
         this.mesher = new FaceCullMesher(this);
-
-        for (int i = 0; i < CS; i++) {
-            for (int j = 0; j < CS; j++) {
-                int opque = 0;
-                int index = index(i, j);
-                for (int k = 0; k < CS; k++) {
-                    BlockState state = this.storage.get(index);
-                    if (!state.isAir() && !state.isInvisible()) {
-                        opque |= 1 << k;
-                    }
-                }
-
-                this.opqueColumnMask[index] = opque;
-            }
-        }
     }
 
     public int index(int x, int z) {
@@ -178,6 +161,15 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         synchronized (this) {
             super.dispose();
 
+            Direction[] values = Direction.values();
+            for (int i = 0, neighborsLength = neighbors.length; i < neighborsLength; i++) {
+                ClientChunk chunk = neighbors[i];
+                if (chunk != null) {
+                    Direction direction = values[i];
+                    chunk.neighbors[direction.getOpposite().ordinal()] = null;
+                }
+            }
+
             @Nullable TerrainRenderer worldRenderer = QuantumClient.get().worldRenderer;
             if (worldRenderer != null) worldRenderer.unload(this);
 
@@ -222,10 +214,11 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
         this.dirty = true;
         this.immediateRebuild = true;
-        this.clientWorld.updateChunkAndNeighbours(this);
-
-        if (!block.isAir())
-            this.empty = false;
+        for (ClientChunk chunk : neighbors) {
+            if (chunk != null) {
+                chunk.immediateRebuild = true;
+            }
+        }
 
         return isBlockSet;
     }
@@ -238,7 +231,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
         super.onUpdated();
 
-        ClientChunkEvents.REBUILT.factory().onClientChunkRebuilt(this);
+        EventSystem.postDefault(new ClientChunkEvent.Rebuilt(this));
     }
 
     @Override
@@ -255,7 +248,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         this.ready = true;
         this.clientWorld.updateChunkAndNeighbours(this);
 
-        ClientChunkEvents.BUILT.factory().onClientChunkRebuilt(this);
+        EventSystem.postDefault(new ClientChunkEvent.Built(this));
     }
 
     public Map<BlockVec, BlockState> getCustomRendered() {
@@ -291,33 +284,20 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public void markEmpty() {
-        this.empty = true;
-    }
-
-    @Override
-    public void markNotEmpty() {
-        this.empty = false;
-    }
-
-    @Override
     public boolean isEmpty() {
         return storage.isUniform() && storage.get(0).isAir();
     }
 
     public boolean isSubmerged() {
         boolean isSubmerged = true;
-        for (Direction direction : Direction.values()) {
-            ClientChunk chunk = this.clientWorld.getChunk(this.vec.add(direction.getOffset()));
-            isSubmerged &= chunk != null && (chunk.isOpaque(direction.getOpposite()));
+        for (ClientChunk chunk : neighbors) {
+            if (chunk != null && !chunk.isEmpty()) {
+                isSubmerged = false;
+                break;
+            }
         }
 
         return isSubmerged;
-    }
-
-    private boolean isUniform(@Nullable Chunk chunk) {
-        if (chunk == null) return false;
-        return chunk.storage.isUniform() && !chunk.storage.get(0).isAir();
     }
 
     @Override
@@ -337,29 +317,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     @Override
     public int getSunlightSafe(int x, int y, int z) {
         return !getSafe(x, y, z).isAir() ? 15 : 6;
-    }
-
-    public void renderModels(NodeCategory nodeCategory) {
-        for (BlockVec pos : this.addedModels.keySet()) {
-            ModelInstance model = this.addedModels.get(pos);
-            model.userData = Shaders.MODEL_VIEW.get();
-            this.addedModels.remove(pos);
-            BlockObject value = new BlockObject(model);
-            this.models.put(pos, value);
-            nodeCategory.add("Block Object", value);
-        }
-
-        for (BlockVec pos : this.models.keySet()) {
-            BlockObject inst = this.models.get(pos);
-            inst.transform.setToTranslationAndScaling(renderOffset.x + pos.getIntX(), renderOffset.y + pos.getIntY(), renderOffset.z + pos.getIntZ(), 1 / 16f, 1 / 16f, 1 / 16f);
-        }
-
-        for (BlockVec pos : this.removedModels.toArray(BlockVec.class)) {
-            this.removedModels.removeValue(pos, false);
-            BlockObject model = this.models.remove(pos);
-            if (model != null)
-                this.remove(model);
-        }
     }
 
     public void loadCustomRendered() {
@@ -462,26 +419,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     public BoundingBox getBoundingBox() {
         return this.tightBounds;
-    }
-
-    public void addMesh(ChunkMesh chunkMesh) {
-        this.meshes.put(chunkMesh.pass, chunkMesh);
-        this.add("Mesh " + chunkMesh.pass.name(), chunkMesh);
-    }
-
-    public void removeMesh(ChunkMesh chunkMesh) {
-        this.meshes.remove(chunkMesh.pass);
-        this.remove(chunkMesh);
-    }
-
-    public int[] getOpaqueMask() {
-        return opqueColumnMask;
-    }
-
-    public void render(RenderBufferSource source) {
-        for (ChunkMesh chunkMesh : this.meshes.values()) {
-            chunkMesh.render(client.camera, source);
-        }
     }
 
     public int getLight(int x, int y, int z) {

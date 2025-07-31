@@ -13,7 +13,9 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.api.events.ClientChunkEvent;
 import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderPass;
@@ -24,7 +26,6 @@ import dev.ultreon.quantum.util.ShowInNodeView;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.IntBuffer;
@@ -37,21 +38,18 @@ public class ChunkModel extends GameObject {
     private final ChunkVec pos;
     private final ClientChunk chunk;
     private final Material material;
-    private final WorldRenderer renderer;
     @Nullable
     private ModelInstance gizmoInstance = null;
 
     @ShowInNodeView
     private boolean beingBuilt;
 
-    private final MeshBuilder meshBuilder = new MeshBuilder();
     private final ObjectMap<RenderPass, ChunkMesh> meshes = new ObjectMap<>();
     private final BoundingBox bounds = new BoundingBox();
     private final OpaqueFaces opaqueFaces = new OpaqueFaces();
 
     public ChunkModel(ChunkVec pos, ClientChunk chunk, WorldRenderer renderer) {
         this.material = renderer.getMaterial();
-        this.renderer = renderer;
         this.pos = pos;
         this.chunk = chunk;
         this.chunk.opaqueFaces = opaqueFaces;
@@ -119,7 +117,6 @@ public class ChunkModel extends GameObject {
             for (ObjectMap.Entry<RenderPass, ChunkMesh> mesh : this.meshes.entries()) {
                 if (mesh != null) mesh.value.dispose();
             }
-            RenderBufferSource bufferSource = QuantumClient.get().renderBuffers();
             ChunkModelBuilder chunkModelBuilder = new ChunkModelBuilder(chunk);
             GamePlatform.get().supplyAsync(() -> {
                 chunkModelBuilder.begin();
@@ -133,12 +130,19 @@ public class ChunkModel extends GameObject {
                     return null;
                 }
 
-                return QuantumClient.invoke(() -> chunkModelBuilder.end(meshes));
+                return QuantumClient.invoke(() -> {
+                    chunkModelBuilder.end(meshes);
+                    EventSystem.postDefault(new ClientChunkEvent.ModelBuilt(chunk, this));
+                });
             }).exceptionally(throwable -> {
                 crash(new CrashLog("Failed to generate chunk model: " + pos, throwable), pos, millis);
                 return null;
             }).thenAccept(v -> {
-                if (v == null || v.getNow(null) == null) return;
+                if (v == null) {
+                    return;
+                } else {
+                    v.getNow(null);
+                }
                 chunk.meshStatus = MeshStatus.MESHED;
                 chunk.meshDuration = System.currentTimeMillis() - millis;
             }).exceptionally(throwable -> {
@@ -162,15 +166,6 @@ public class ChunkModel extends GameObject {
         category.add("Time", System.currentTimeMillis() - millis);
         pos.addCategory(category);
         QuantumClient.crash(pos);
-    }
-
-    @SuppressWarnings("GDXJavaUnsafeIterator")
-    private void reset() {
-        meshBuilder.clear();
-        for (ObjectMap.Entry<RenderPass, ChunkMesh> entry : this.meshes.entries()) {
-            if (entry == null) continue;
-            entry.value.dispose();
-        }
     }
 
     private static Model createBorderGizmo() {
@@ -216,7 +211,7 @@ public class ChunkModel extends GameObject {
     }
 
     public boolean needsRebuild(ClientWorld world) {
-        return world.isChunkInvalidated(chunk);
+        return chunk.immediateRebuild;
     }
 
     public static LazyInitializer<Model> getGizmo() {

@@ -4,18 +4,17 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.*;
-import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
-import dev.ultreon.quantum.api.events.server.ServerStartedEvent;
-import dev.ultreon.quantum.api.events.server.ServerStartingEvent;
-import dev.ultreon.quantum.api.events.server.ServerStoppedEvent;
-import dev.ultreon.quantum.api.events.server.ServerStoppingEvent;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.LocateResourcesEvent;
+import dev.ultreon.quantum.api.events.ServerEvent;
+import dev.ultreon.quantum.api.events.ServerPlayerEvent;
+import dev.ultreon.quantum.api.events.tick.ServerTickEvent;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.debug.profiler.Profiler;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityTypes;
-import dev.ultreon.quantum.events.WorldEvents;
 import dev.ultreon.quantum.gamerule.GameRules;
 import dev.ultreon.quantum.network.Networker;
 import dev.ultreon.quantum.network.ServerStatusException;
@@ -137,7 +136,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         WorldSaveInfo worldSaveInfo = storage.loadInfo();
         seed = worldSaveInfo.seed();
 
-        ModApi.getGlobalEventHandler().call(new ServerStartingEvent(this));
+        EventSystem.postDefault(new ServerEvent.Starting(this));
 
         this.storage = storage;
 
@@ -168,6 +167,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             @Override
             protected void importGameResources() {
                 GamePlatform.get().locateServerResources(QuantumServer.this);
+                EventSystem.postDefault(new LocateResourcesEvent.Server(this));
             }
         };
         resourceManager.reload();
@@ -248,7 +248,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
                 if (!silent) LOGGER.info("Saving world {}", worldEntry.getKey());
 
                 var world = worldEntry.getValue();
-                if (world.isSaveable()) world.save(silent);
+                if (world.getCanSave()) world.save(silent);
             }
 
             if (!silent) LOGGER.info("Saving world data");
@@ -393,7 +393,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
         try {
             // Send server started event to mods.
-            ModApi.getGlobalEventHandler().call(new ServerStartedEvent(this));
+            EventSystem.postDefault(new ServerEvent.Started(this));
 
             //* Main-loop.
             while (this.running) {
@@ -442,7 +442,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             return;
         } finally {
             // Send server stopped event to mods.
-            ModApi.getGlobalEventHandler().call(new ServerStoppingEvent(this));
+            EventSystem.postDefault(new ServerEvent.Stopping(this));
         }
 
         // Save all the server data.
@@ -479,7 +479,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         QuantumServer.instance = null;
 
         // Send event for server stopping to mods.
-        ModApi.getGlobalEventHandler().call(new ServerStoppedEvent(this));
+        EventSystem.postDefault(new ServerEvent.Stopped(this));
 
         // Log server stopped event.
         QuantumServer.LOGGER.info("Server stopped.");
@@ -562,6 +562,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * operations are performed.
      */
     protected void runTick() {
+        if (EventSystem.postCancelable(new ServerTickEvent.Pre(this))) return;
+
         this.onlineTicks++;
 
         // Poll all the tasks in the queue.
@@ -575,14 +577,14 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         if (this.dimManager != null) {
             for (ServerWorld world : this.dimManager.getWorlds().values()) {
                 if (world == null) continue;
-                WorldEvents.PRE_TICK.factory().onPreTick(world);
                 world.tick();
-                WorldEvents.POST_TICK.factory().onPostTick(world);
             }
         }
 
         // Poll the chunk network queue.
         this.pollChunkPacket();
+
+        EventSystem.postDefault(new ServerTickEvent.Post(this));
     }
 
     /**
@@ -835,6 +837,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @ApiStatus.Internal
     public void onDisconnected(ServerPlayer player, String message) {
         QuantumServer.LOGGER.info("Player '{}' disconnected with message: {}", player.getName(), message);
+        EventSystem.postDefault(new ServerPlayerEvent.Left(player, message));
+
         try {
             savePlayer(false, player);
         } catch (IOException e) {

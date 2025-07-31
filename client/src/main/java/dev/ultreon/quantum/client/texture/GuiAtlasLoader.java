@@ -61,6 +61,6 @@ public class GuiAtlasLoader {
 
     private static void pack(PixmapPacker packer, NamespaceID id) {
         NamespaceID namespaceID = id.mapPath(path -> "textures/gui/" + path + ".png");
-        packer.pack(namespaceID.toString(), new Pixmap(QuantumClient.resource(namespaceID)));
+//        packer.pack(namespaceID.toString(), new Pixmap(QuantumClient.resource(namespaceID)));
     }
 }

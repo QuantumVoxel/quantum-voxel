@@ -44,9 +44,9 @@ public class BlockHit implements Hit {
         this.ray = new Ray(buffer);
         this.setDirection(ray.getDirection());
         this.distanceMax = buffer.readFloat();
-        this.position.set(buffer.readVec3d());
-        this.normal.set(buffer.readVec3d());
-        this.vec.set(buffer.readVec3i());
+        buffer.readVec3d(this.position);
+        buffer.readVec3d(this.normal);
+        buffer.readVec3i(this.vec);
         this.blockMeta = buffer.readBlockState();
         this.block = Registries.BLOCK.byRawId(buffer.readVarInt());
         this.collide = buffer.readBoolean();

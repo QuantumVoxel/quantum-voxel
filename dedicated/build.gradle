@@ -48,7 +48,7 @@ application {
             "-Xmx4g",
             "-Xms4g",
             "-Dfabric.dli.env=SERVER",
-            "-Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer",
+            "-Dfabric.dli.main=dev.ultreon.xeox.impl.main.Main",
             "-Dfabric.development=true",
             "-Dlog4j2.formatMsgNoLookups=true",
             "-Dfabric.log.disableAnsi=false",
@@ -59,7 +59,7 @@ application {
             ? ["-XstartOnFirstThread"]
             : [])
 
-    mainClass.set("net.fabricmc.devlaunchinjector.Main")
+    mainClass.set("dev.ultreon.xeox.impl.main.Main")
 }
 
 distZip {
@@ -106,7 +106,7 @@ jar {
                 "Implementation-Version": "${version}",
                 "Implementation-Vendor": "Ultreon Studios",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "Main-Class": "net.fabricmc.loader.impl.launch.knot.KnotServer"
+                "Main-Class": "dev.ultreon.xeox.impl.main.Main"
         ])
     }
 }

@@ -34,7 +34,7 @@ public class ModListScreen extends Screen {
     private SelectionList<Mod> list;
     private TextButton configButton;
     private TextButton backButton;
-    private static final Map<String, Texture> TEXTURES = new HashMap<>();
+    private static final Map<FileHandle, Texture> TEXTURES = new HashMap<>();
     private TextButton importXeox;
     private TextButton sourcesButton;
     private TextButton homepageButton;
@@ -200,23 +200,23 @@ public class ModListScreen extends Screen {
 
     private void drawIcon(Renderer renderer, Mod metadata, int x, int y, int size, boolean higlight) {
         NamespaceID iconId;
-        @Nullable String iconPath = metadata.getIconPath(128).orElse(null);
+        FileHandle file = metadata.getIconPath(128).orElse(null);
+        FileHandle iconPath = file;
         NamespaceID overrideId = ModIconOverrideRegistry.get(metadata.getId());
         TextureManager textureManager = this.client.getTextureManager();
         if (overrideId != null) {
             textureManager.registerTexture(overrideId);
             iconId = textureManager.isTextureLoaded(overrideId) ? overrideId : ModListScreen.DEFAULT_MOD_ICON;
         } else if (iconPath != null) {
-            FileHandle iconFileHandle = Gdx.files.internal(iconPath);
-            if (!iconFileHandle.exists()) return;
+            if (!iconPath.exists()) return;
             if (!ModListScreen.TEXTURES.containsKey(metadata.getId())) {
-                Texture texture = new Texture(iconFileHandle);
+                Texture texture = new Texture(iconPath);
                 texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
                 ModListScreen.TEXTURES.put(iconPath, texture);
             }
-            Texture texture = ModListScreen.TEXTURES.computeIfAbsent(metadata.getId(), s -> new Texture(Gdx.files.classpath(metadata.getIconPath(128).orElse(null))));
-            iconId = QuantumClient.id("generated/mod_icon/" + metadata.getId().replace("-", "_") + ".png");
+            Texture texture = ModListScreen.TEXTURES.computeIfAbsent(file, s -> new Texture(file));
+            iconId = NamespaceID.of("generated/mod_icon/" + metadata.getId().replace("-", "_") + ".png");
             if (!textureManager.isTextureLoaded(iconId)) textureManager.registerTexture(iconId, texture);
             if (!textureManager.isTextureLoaded(iconId)) iconId = ModListScreen.DEFAULT_MOD_ICON;
         } else {

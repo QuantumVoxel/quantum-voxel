@@ -24,7 +24,7 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.SanityCheckException;
+import dev.ultreon.quantum.util.SanityCheck;
 import dev.ultreon.quantum.util.Suppliers;
 
 import java.util.*;
@@ -79,7 +79,7 @@ public class BlockModelRegistry implements ContextAwareReloadable {
 
     public void registerDefault(Block block) {
         NamespaceID key = Registries.BLOCK.getId(block);
-        if (key == null) throw new SanityCheckException("Fabricated block!");
+        if (key == null) throw new SanityCheck("Fabricated block!");
         this.register(block, block.getDefaultState(), CubeModel.of(key.mapPath(path -> "blocks/" + path), key.mapPath(path -> "blocks/" + path)));
     }
 

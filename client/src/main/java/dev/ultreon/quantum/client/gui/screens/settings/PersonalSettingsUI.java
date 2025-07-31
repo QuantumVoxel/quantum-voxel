@@ -85,9 +85,12 @@ public class PersonalSettingsUI {
         builder.add(TextObject.translation("quantum.screen.options.personalisation.skipSplashScreen"), new CycleButton<BooleanEnum>()
                 .values(BooleanEnum.values())
                 .value(ClientConfiguration.skipSplashScreen.getValue() ? BooleanEnum.TRUE : BooleanEnum.FALSE)
-                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 275, 150, 21))
+                .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 300, 150, 21))
                 .formatter(booleanEnum -> TextObject.translation(booleanEnum == BooleanEnum.TRUE ? "quantum.ui.enabled" : "quantum.ui.disabled"))
-                .withCallback(caller -> ClientConfiguration.skipSplashScreen.setValue(caller.getValue().get())));
+                .withCallback(caller -> {
+                    ClientConfiguration.skipSplashScreen.setValue(caller.getValue().get());
+                    ClientConfiguration.save();
+                }));
 
         if (!GamePlatform.get().isVibrancySupported()) {
             fullVibrancy.disable();

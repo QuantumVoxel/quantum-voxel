@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+}
+
+group = 'dev.ultreon.quantum'
+version = '0.2.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation project(":logging")
+
+    implementation("com.badlogicgames.gdx:gdx:$gdxVersion")
+    implementation("space.earlygrey:shapedrawer:$shapeDrawerVersion")
+}
+
+test {
+    useJUnitPlatform()
+}

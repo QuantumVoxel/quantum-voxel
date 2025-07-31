@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.recipe;
 
-import dev.ultreon.quantum.events.LoadingEvent;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.LoadingEvent;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -12,7 +13,7 @@ public class Recipes {
         RecipeManager recipes = RecipeManager.get();
         Recipes.registerRecipes(recipes);
 
-        LoadingEvent.LOAD_RECIPES.factory().onRecipeState(recipes);
+        EventSystem.postDefault(new LoadingEvent.LoadRecipes(recipes));
 
         recipes.fireRecipeModifications();
     }

@@ -1,8 +1,7 @@
 package dev.ultreon.quantum.item;
 
-import dev.ultreon.quantum.api.ModApi;
-import dev.ultreon.quantum.api.events.block.BlockAttemptPlaceEvent;
-import dev.ultreon.quantum.api.events.block.BlockPlaceEvent;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.block.BlockChangeEvent;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.entity.player.Player;
@@ -35,14 +34,14 @@ public class BlockItem extends Item {
 
         var world = context.world();
         var stack = context.stack();
-        BlockHit hit = (BlockHit) context.result();
+        BlockHit hit = (BlockHit) context.hit();
         var pos = hit.getBlockVec();
         var next = hit.getNext();
         var direction = hit.getDirection();
         var player = context.player();
 
         BlockVec blockVec = new BlockVec(next);
-        if (ModApi.getGlobalEventHandler().call(new BlockAttemptPlaceEvent(context.world(), context.world().get(blockVec), blockVec, context.player(), hit)))
+        if (EventSystem.postCancelable(new BlockChangeEvent.AttemptPlace(context.world(), context.world().get(blockVec), blockVec, context.player(), hit)))
             return UseResult.DENY;
 
         if (!block.get().canBePlacedAt(world, blockVec, player, stack, direction))
@@ -72,7 +71,7 @@ public class BlockItem extends Item {
         }
         world.set(blockVec, state, BlockFlags.UPDATE | BlockFlags.SYNC | BlockFlags.LIGHT);
         Player player = useItemContext.player();
-        ModApi.getGlobalEventHandler().call(new BlockPlaceEvent(world, original, state, blockVec, player));
+        EventSystem.postDefault(new BlockChangeEvent.Place(world, original, state, blockVec, player));
 
         stack.shrink(1);
         return UseResult.ALLOW;

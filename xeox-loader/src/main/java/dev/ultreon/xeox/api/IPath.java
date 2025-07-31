@@ -9,7 +9,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public interface IPath {
@@ -133,9 +132,7 @@ public interface IPath {
     }
 
     default String readString() throws IOException {
-        try (InputStream read = read()) {
-            return new String(read.readAllBytes());
-        }
+        return new String(readBytes());
     }
 
     default void writeString(String content) throws IOException {
@@ -145,8 +142,26 @@ public interface IPath {
     }
 
     default byte[] readBytes() throws IOException {
-        try (InputStream read = read()) {
-            return read.readAllBytes();
+        try (InputStream stream = read()) {
+            int available = stream.available();
+            if (available == 0) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int read;
+                while ((read = stream.read(buffer)) != -1) {
+                    baos.write(buffer, 0, read);
+                }
+                return baos.toByteArray();
+            }
+            byte[] data = new byte[available];
+            byte[] buffer = new byte[1024];
+            int read;
+            int offset = 0;
+            while ((read = stream.read(buffer)) != -1) {
+                System.arraycopy(buffer, 0, data, offset, read);
+                offset += read;
+            }
+            return data;
         }
     }
 

@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class LoggerManager {
@@ -46,10 +45,10 @@ public class LoggerManager {
         try {
             debugOut = new MultiPrintStream(true, System.out, new PrintStream(new ANSIEscapingOutputStream(Files.newOutputStream(
                     new File("logs/debug.log").toPath()
-            ))));
+            )), true));
             out = new MultiPrintStream(true, debugOut, new PrintStream(new ANSIEscapingOutputStream(Files.newOutputStream(
                     new File("logs/latest.log").toPath()
-            ))));
+            )), true));
         } catch (IOException e) {
             throw new RuntimeException("Failed to create log file", e);
         }

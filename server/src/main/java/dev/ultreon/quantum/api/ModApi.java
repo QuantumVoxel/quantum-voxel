@@ -1,25 +1,29 @@
 package dev.ultreon.quantum.api;
 
-import dev.ultreon.quantum.api.event.GlobalEventHandler;
+import dev.ultreon.quantum.api.event.EventSystem;
+import org.jetbrains.annotations.Nullable;
 
 public final class ModApi {
-    private static ModApi instance;
+    private static final Object lock = new Object();
+    private static @Nullable ModApi instance;
 
-    private final GlobalEventHandler globalEventHandler = new GlobalEventHandler();
+    private static final EventSystem eventSystem = new EventSystem();
 
     private ModApi() {
 
     }
 
     public static ModApi init() {
-        if (instance != null) {
-            throw new IllegalStateException("Already initialized");
-        }
+        synchronized (lock) {
+            if (instance != null) {
+                throw new IllegalStateException("Already initialized");
+            }
 
-        return instance = new ModApi();
+            return instance = new ModApi();
+        }
     }
 
-    public static GlobalEventHandler getGlobalEventHandler() {
-        return instance.globalEventHandler;
+    public static EventSystem getEventSystem() {
+        return eventSystem;
     }
 }

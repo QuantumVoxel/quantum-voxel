@@ -1,40 +1,28 @@
 package dev.ultreon.quantapi.networking.api;
 
-import net.fabricmc.api.EnvType;
+import dev.ultreon.xeox.api.Environment;
 
 public enum PacketDestination {
     SERVER, CLIENT;
 
     public PacketDestination opposite() {
-        switch (this) {
-            case SERVER:
-                return PacketDestination.CLIENT;
-            case CLIENT:
-                return PacketDestination.SERVER;
-            default:
-                throw new IllegalArgumentException();
-        }
+        return switch (this) {
+            case SERVER -> PacketDestination.CLIENT;
+            case CLIENT -> PacketDestination.SERVER;
+        };
     }
 
-    public EnvType getSourceEnv() {
-        switch (this) {
-            case SERVER:
-                return EnvType.CLIENT;
-            case CLIENT:
-                return EnvType.SERVER;
-            default:
-                throw new IllegalArgumentException();
-        }
+    public Environment getSourceEnv() {
+        return switch (this) {
+            case SERVER -> Environment.CLIENT;
+            case CLIENT -> Environment.SERVER;
+        };
     }
 
-    public EnvType getDestinationEnv() {
-        switch (this) {
-            case SERVER:
-                return EnvType.SERVER;
-            case CLIENT:
-                return EnvType.CLIENT;
-            default:
-                throw new IllegalArgumentException();
-        }
+    public Environment getDestinationEnv() {
+        return switch (this) {
+            case SERVER -> Environment.SERVER;
+            case CLIENT -> Environment.CLIENT;
+        };
     }
 }

@@ -1,15 +1,12 @@
 package dev.ultreon.quantum.api.events.world;
 
 import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public abstract class WorldEvent extends WorldAccessEvent {
-    public WorldEvent(World world) {
-        super(world);
-    }
-
+public interface WorldEvent extends WorldAccessEvent {
     @Override
-    public @NotNull World getWorld() {
-        return (World) super.getWorld();
-    }
+    @Nullable
+    World getWorld();
 }

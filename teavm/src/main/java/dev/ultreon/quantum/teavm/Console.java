@@ -5,7 +5,7 @@ import org.teavm.jso.JSBody;
 public class Console {
     @JSBody(script = "return console.log(message);", params = {"message"})
     public static native void log(String message);
-    
+
     @JSBody(script = "return console.trace(message);", params = {"message"})
     public static native void trace(String message);
 
@@ -20,7 +20,7 @@ public class Console {
 
     @JSBody(script = "return console.error(message);", params = {"message"})
     public static native void error(String message);
-    
+
     @JSBody(script = "if(e.$jsException && e.$jsException.stack) { return console.log(message, e.$jsException.stack); } else if(e) { return console.log(message, e); } else { return console.log(message, e); }", params = {"message", "e"})
     public static native void log(String message, Object e);
 

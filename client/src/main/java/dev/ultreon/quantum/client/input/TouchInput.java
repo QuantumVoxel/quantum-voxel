@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
@@ -164,7 +163,6 @@ public class TouchInput extends GameInput implements InputProcessor {
         // Invoke the key press event for the current screen
         Screen currentScreen = this.client.screen;
         if (currentScreen != null && !Gdx.input.isCursorCatched() && currentScreen.keyPress(keyCode)) {
-            ScreenEvents.KEY_PRESS.factory().onKeyPressScreen(keyCode);
             return;
         }
 
@@ -196,7 +194,7 @@ public class TouchInput extends GameInput implements InputProcessor {
         else if (TouchInput.SCREENSHOT_KEY.is(keyCode)) client.getScreenshots().screenshot(screenshot -> {
         });
         else if (TouchInput.HIDE_HUD_KEY.is(keyCode)) client.hideHud = !client.hideHud;
-        else if (TouchInput.FULL_SCREEN_KEY.is(keyCode)) client.setFullScreen(!client.isFullScreen());
+        else if (TouchInput.FULL_SCREEN_KEY.is(keyCode)) client.setFullScreen(client.isWindowed());
         else if (TouchInput.THIRD_PERSON_KEY.is(keyCode)) client.cyclePlayerView();
         else if (client.world != null && TouchInput.PAUSE_KEY.is(keyCode) && Gdx.input.isCursorCatched())
             client.showScreen(new PauseScreen());
@@ -218,7 +216,6 @@ public class TouchInput extends GameInput implements InputProcessor {
 
             Screen currentScreen = client.screen;
             if (currentScreen != null) {
-                ScreenEvents.KEY_RELEASE.factory().onKeyReleaseScreen(keyCode);
                 currentScreen.keyRelease(keyCode);
             }
         });
@@ -379,7 +376,6 @@ public class TouchInput extends GameInput implements InputProcessor {
             // Check if there is a current screen and if so, trigger the CHAR_TYPE event
             Screen currentScreen = this.client.screen;
             if (currentScreen != null && lastKeyCancelFrame != Gdx.graphics.getFrameId()) {
-                ScreenEvents.CHAR_TYPE.factory().onCharTypeScreen(character);
                 currentScreen.charType(character);
             }
         });

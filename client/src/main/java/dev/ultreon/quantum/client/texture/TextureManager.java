@@ -8,8 +8,9 @@ import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Disposable;
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
+import dev.ultreon.quantum.client.api.events.ClientLifecycleEvent;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -60,7 +61,7 @@ public class TextureManager implements Disposable {
             PixmapPacker packer = new PixmapPacker(2048, 2048, Pixmap.Format.RGBA8888, 0, false, new PixmapPacker.GuillotineStrategy());
 
             GuiAtlasLoader.load(packer);
-            ClientLifecycleEvents.GUI_ATLAS_INIT.factory().onGuiAtlasInit(packer);
+            EventSystem.postDefault(new ClientLifecycleEvent.GuiAtlasInit(packer));
             this.guiAtlas = packer.generateTextureAtlas(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest, false);
 
             this.dumpAtlas();

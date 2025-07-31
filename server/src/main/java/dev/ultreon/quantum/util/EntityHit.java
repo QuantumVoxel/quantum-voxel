@@ -40,9 +40,9 @@ public class EntityHit implements Hit {
         this.ray = new Ray(buffer);
         this.setDirection(ray.getDirection());
         this.distanceMax = buffer.readFloat();
-        this.position.set(buffer.readVec3d());
-        this.normal.set(buffer.readVec3d());
-        this.pos.set(buffer.readVec3i());
+        buffer.readVec3d(this.position);
+        buffer.readVec3d(this.normal);
+        buffer.readVec3i(this.pos);
         this.collide = buffer.readBoolean();
         this.distance = buffer.readFloat();
     }

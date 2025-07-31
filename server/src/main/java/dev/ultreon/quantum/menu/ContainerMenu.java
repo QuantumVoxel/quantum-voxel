@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.menu;
 
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.MenuEvent;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.events.MenuEvents;
-import dev.ultreon.quantum.events.api.EventResult;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
@@ -177,8 +177,7 @@ public abstract class ContainerMenu implements Menu {
     public void onTakeItem(ServerPlayer player, int index, boolean rightClick) {
         ItemSlot slot = this.slots[index];
 
-        EventResult result = MenuEvents.MENU_CLICK.factory().onMenuClick(this, player, slot, rightClick);
-        if (result.isCanceled())
+        if (EventSystem.postCancelable(new MenuEvent.Click(this, player, slot, rightClick)))
             return;
 
         if (rightClick) {

@@ -182,7 +182,7 @@ public class RegionDataChannel {
         for (byte b : data) sum += (b & 0xFF);
         return sum;
     }
-    
+
     // Read chunk data by ID
     public ByteBuffer getChunkData(int index) throws IOException {
         Integer sector = chunkSectorMap.get(index);

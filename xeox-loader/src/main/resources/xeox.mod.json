@@ -1,0 +1,10 @@
+{
+  "id": "xeoxloader",
+  "name": "XeoxLoader",
+  "version": "${version}",
+  "permissions": [],
+  "mixins": [],
+  "entrypoints": [],
+  "author": "Ultreon Studios",
+  "license": "Apache-2.0"
+}

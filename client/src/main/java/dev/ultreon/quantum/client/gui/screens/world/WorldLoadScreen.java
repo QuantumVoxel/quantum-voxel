@@ -104,6 +104,7 @@ public class WorldLoadScreen extends Screen {
             this.client.showScreen(closeScreen);
             return false;
         }
+
         return super.onClose(next);
     }
 

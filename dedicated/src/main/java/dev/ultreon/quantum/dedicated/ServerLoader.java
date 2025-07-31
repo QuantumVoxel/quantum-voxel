@@ -5,7 +5,6 @@ import dev.ultreon.quantum.CommonRegistries;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.neocommand.CommandRegistration;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.server.GameCommands;
 
 /**
  * This class is responsible for loading the server configurations and initializing various components.

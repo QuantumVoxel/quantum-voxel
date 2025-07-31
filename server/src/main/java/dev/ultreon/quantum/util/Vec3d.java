@@ -283,7 +283,7 @@ public class Vec3d implements Cloneable {
         this.z = Math.pow(this.z, v);
         return this;
     }
-    
+
     public Vec3d neg() {
         this.x = -this.x;
         this.y = -this.y;
@@ -372,5 +372,12 @@ public class Vec3d implements Cloneable {
     @Override
     public String toString() {
         return String.format("%f, %f, %f", this.x, this.y, this.z);
+    }
+
+    public double distanceSquared(Vec3d position) {
+        double dx = this.x - position.x;
+        double dy = this.y - position.y;
+        double dz = this.z - position.z;
+        return dx * dx + dy * dy + dz * dz;
     }
 }

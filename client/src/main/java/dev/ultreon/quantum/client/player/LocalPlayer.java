@@ -5,6 +5,9 @@ import java.util.stream.Stream;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.client.api.events.ClientPlayerEvent;
+import dev.ultreon.quantum.util.SanityCheck;
 import dev.ultreon.quantum.world.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -73,7 +76,6 @@ import dev.ultreon.quantum.world.vec.ChunkVecSpace;
  */
 public class LocalPlayer extends ClientPlayer {
 
-    private final EnumSet<Direction> occludedDirections = EnumSet.noneOf(Direction.class);
     private double swimSpeed = 0.06;
     public final QuantumClient client = QuantumClient.get();
     public boolean movedLastFrame;
@@ -96,7 +98,6 @@ public class LocalPlayer extends ClientPlayer {
     private final Queue<ChunkVec> sendQueue = new ArrayDeque<>();
     private boolean isLoading;
     private final Vec3d vel = new Vec3d();
-    private final Vector3 lookVec = new Vector3();
 
     /**
      * Constructs a new LocalPlayer.
@@ -212,7 +213,7 @@ public class LocalPlayer extends ClientPlayer {
                 }
                 this.handleMove();
             } else {
-                // Update previous position if no significant change
+                // Update the previous position if no significant change
                 this.ox = this.x;
                 this.oy = this.y;
                 this.oz = this.z;
@@ -429,6 +430,8 @@ public class LocalPlayer extends ClientPlayer {
      */
     @Override
     public void jump() {
+        EventSystem.postDefault(new ClientPlayerEvent.Jump(this));
+
         if (isAffectedByFluid()) {
             this.swimUp();
             return;
@@ -506,7 +509,7 @@ public class LocalPlayer extends ClientPlayer {
      * Updates the player's abilities based on the information received in the
      * AbilitiesPacket.
      *
-     * @param packet The AbilitiesPacket containing the player's abilities
+     * @param packet The AbilitiesPacket containing the player abilities
      *               information.
      */
     @Override
@@ -557,10 +560,15 @@ public class LocalPlayer extends ClientPlayer {
     @Override
     public void openInventory() {
         super.openInventory();
-        if (this.client.connection != null) {
-            this.client.connection.send(new C2SOpenInventoryPacket());
-        }
+        if (this.client.connection == null) return;
+        this.client.connection.send(new C2SOpenInventoryPacket());
     }
+
+    @Override
+    public void drop(ItemStack itemStack) {
+        // Client can't do this
+    }
+
 
     /**
      * This method will return the client world.
@@ -638,11 +646,16 @@ public class LocalPlayer extends ClientPlayer {
      */
     @Override
     public void dropItem() {
+        // Can't call super() here since clients can only send the packet to make the server do the work.
+
+        if (this.client.connection == null) return;
+
+        // Send packet for dropping items.
         this.client.connection.send(new C2SDropItemPacket());
     }
 
     /**
-     * This method will return the permissions of the player.
+     * This method returns the client-side permissions of the player.
      *
      * @return The permissions of the player.
      */
@@ -651,9 +664,9 @@ public class LocalPlayer extends ClientPlayer {
     }
 
     /**
-     * This method will hurt the player.
+     * Handles the player hurt packet sent by the server.
      *
-     * @param packet The packet to hurt the player with.
+     * @param packet Ouch
      */
     public void onHurt(S2CPlayerHurtPacket packet) {
         this.hurt(packet.damage(), packet.source());
@@ -661,9 +674,10 @@ public class LocalPlayer extends ClientPlayer {
 
     /**
      * Returns the position with interpolation based on the partial tick.
+     * Might want better interpolation, but it is what it is for now. :(
      *
      * @param partialTick the partial tick for interpolation
-     * @return the interpolated position as a Vec3d object
+     * @return the interpolated position as a 3D vector object
      */
     public Vec3d getPosition(float partialTick) {
         return new Vec3d(
@@ -671,18 +685,6 @@ public class LocalPlayer extends ClientPlayer {
                 Mth.lerp(this.oy, this.y, partialTick),
                 Mth.lerp(this.oz, this.z, partialTick)
         );
-    }
-
-    /**
-     * This method will return the position of the player.
-     *
-     * @return The position of the player.
-     */
-    @Override
-    @Deprecated
-    public @NotNull
-    Vec3d getPosition() {
-        return super.getPosition();
     }
 
     /**
@@ -774,27 +776,20 @@ public class LocalPlayer extends ClientPlayer {
         }
     }
 
-    public Set<Direction> getOccludedDirections(float fovDegrees) {
-        occludedDirections.clear();
+    public Direction getHorizontalDirection() {
+        float xRot = xHeadRot;
+        xRot = (xRot % 360 + 360) % 360;
 
-        // Convert FOV to cosine threshold
-        float fovRadians = (float) Math.toRadians(fovDegrees);
-        float visibilityThreshold = (float) Math.cos(fovRadians / 2f); // anything below this is outside the cone
-
-        // Player look direction vector
-        Vec3d lookVector = getLookVector();
-        Vector3 lookDir = new Vector3((float) lookVector.x, (float) lookVector.y, (float) lookVector.z); // from pitch/yaw
-        lookDir.nor(); // normalize
-
-        for (Direction dir : Direction.values()) {
-            Vector3 dirVec = dir.getNormal();
-            float dot = lookDir.dot(dirVec);
-
-            if (dot < visibilityThreshold) {
-                occludedDirections.add(dir);
-            }
+        if (xRot >= 315 || xRot < 45) {
+            return Direction.NORTH;
+        } else if (xRot >= 45 && xRot < 135) {
+            return Direction.EAST;
+        } else if (xRot >= 135 && xRot < 225) {
+            return Direction.SOUTH;
+        } else if (xRot >= 225) {
+            return Direction.WEST;
         }
 
-        return occludedDirections;
+        throw new SanityCheck("Invalid xRot: " + xRot);
     }
 }

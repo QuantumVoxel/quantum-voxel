@@ -20,7 +20,7 @@
     "sources": "https://gitlab.com/ultreon/quantum/game",
     "issues": "https://gitlab.com/ultreon/quantum/game/issues"
   },
-  "license": "All-Rights-Reserved",
+  "license": "Apache-2.0",
   "environment": "*",
   "entrypoints": [],
   "mixins": [
@@ -31,6 +31,7 @@
     "xeoxloader": ">=0.1.0"
   },
   "permissions": [
-    "classpath:mixin"
+    "classpath:mixin",
+    "non-loader:permission"
   ]
 }

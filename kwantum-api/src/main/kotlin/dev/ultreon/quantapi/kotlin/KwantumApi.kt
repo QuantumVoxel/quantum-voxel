@@ -1,6 +1,6 @@
 package dev.ultreon.quantapi.kotlin
 
-import net.fabricmc.api.ModInitializer
+import dev.ultreon.quantum.ModInitializer
 
 class KwantumApi : ModInitializer {
     override fun onInitialize() {

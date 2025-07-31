@@ -17,8 +17,6 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +34,6 @@ public class ModNetChannel implements INetChannel {
     private final Int2ReferenceMap<Function<PacketIO, ? extends Packet<?>>> decoders = new Int2ReferenceArrayMap<>();
     private final Map<Class<? extends Packet<?>>, BiConsumer<? extends Packet<?>, Supplier<IPacketContext>>> consumers = new HashMap<>();
 
-    @Environment(EnvType.CLIENT)
     private IConnection<ClientPacketHandler, ServerPacketHandler> c2sConnection;
 
     private ModNetChannel(NamespaceID key) {
@@ -53,7 +50,6 @@ public class ModNetChannel implements INetChannel {
         return ModNetChannel.CHANNELS.get(channelId);
     }
 
-    @Environment(EnvType.CLIENT)
     public void setC2sConnection(IConnection<ClientPacketHandler, ServerPacketHandler> connection) {
         this.c2sConnection = connection;
     }
@@ -77,16 +73,22 @@ public class ModNetChannel implements INetChannel {
 
     @Override
     public <T extends Packet<T> & IClientEndpoint> void sendToClient(ServerPlayer player, T modPacket) {
-        player.connection.send(new S2CModPacket(this, modPacket));
+        if (player.connection != null) {
+            player.connection.send(new S2CModPacket(this, modPacket));
+        }
     }
 
     @Override
     public <T extends Packet<T> & IClientEndpoint> void sendToClients(List<ServerPlayer> players, T modPacket) {
         for (int i = 0; i < players.size(); i++) {
             ServerPlayer player = players.get(i);
-            player.connection.send(new S2CModPacket(this, modPacket));
-            if (i == players.size() - 1) {
+            if (player.connection != null) {
                 player.connection.send(new S2CModPacket(this, modPacket));
+            }
+            if (i == players.size() - 1) {
+                if (player.connection != null) {
+                    player.connection.send(new S2CModPacket(this, modPacket));
+                }
             }
         }
     }

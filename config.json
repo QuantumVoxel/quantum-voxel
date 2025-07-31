@@ -5,6 +5,6 @@
     "versions": ">=21",
     "type": "JavaJDK"
   },
-  "main-class": "net.fabricmc.loader.launch.knot.KnotMain",
+  "main-class": "dev.ultreon.xeox.impl.main.Main",
   "game": "quantum"
 }

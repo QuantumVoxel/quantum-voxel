@@ -40,7 +40,7 @@ public class Numbers {
             return null;
         }
     }
-    
+
     public static Byte toByteOrNull(String number) {
         try {
             return Byte.parseByte(number);
@@ -48,7 +48,7 @@ public class Numbers {
             return null;
         }
     }
-    
+
     public static Boolean toBooleanOrNull(String bool) {
         try {
             return Boolean.parseBoolean(bool);

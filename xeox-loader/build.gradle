@@ -43,6 +43,9 @@ test {
 }
 
 java {
+    withJavadocJar()
+    withSourcesJar()
+
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
@@ -50,4 +53,18 @@ java {
 
 compileJava {
     targetCompatibility = sourceCompatibility = 17
+}
+
+processResources {
+    inputs.property "version", version
+    filesMatching('xeox.mod.json') {
+        expand 'version': version
+    }
+}
+
+processResources {
+    inputs.property "version", version
+    filesMatching('xeox.mod.json') {
+        expand 'version': version
+    }
 }

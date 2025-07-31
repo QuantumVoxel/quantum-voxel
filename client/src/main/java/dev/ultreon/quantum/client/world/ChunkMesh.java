@@ -31,15 +31,11 @@ public class ChunkMesh extends GameObject implements Disposable {
         instance.userData = chunk;
 
         this.chunk = chunk;
-
-        chunk.addMesh(this);
     }
 
     public void dispose() {
         disposed = true;
         mesh.dispose();
-
-        chunk.removeMesh(this);
     }
 
     @Override

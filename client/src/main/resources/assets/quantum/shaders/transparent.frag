@@ -142,13 +142,11 @@ void main() {
     vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseTexUV);
 
     #if LOD_LEVEL < 2
-    vec3 light = vec3(2.0-u_globalSunlight) * sunLight;
+    vec3 light = vec3(1.0-u_globalSunlight) * sunLight;
     light += blockLight.rgb * (1.0 - light);
     #else
     vec3 light = vec3(u_globalSunlight);
     #endif
-
-    light *= ao;
 
     vec3 emissive = vec3(0.0);
     #if LOD_LEVEL < 1

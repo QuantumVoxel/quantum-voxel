@@ -1,20 +1,20 @@
 package dev.ultreon.quantum.desktop;
 
-import dev.ultreon.quantum.OS;
+import dev.ultreon.quantum.server.PlatformOS;
 
 public class StatusCode {
     public static int forAbort() {
-        if (OS.isWindows()) {
+        if (PlatformOS.isWindows) {
             return 3;
-        } else if (OS.isMac()) {
+        } else if (PlatformOS.isMac) {
             return 6;
-        } else if (OS.isLinux()) {
+        } else if (PlatformOS.isLinux) {
             return 6;
         }
         return -1;
     }
 
     public static int forException() {
-        return OS.isWindows() ? -1 : 1;
+        return PlatformOS.isWindows ? -1 : 1;
     }
 }

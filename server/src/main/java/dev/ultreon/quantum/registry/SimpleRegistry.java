@@ -1,8 +1,9 @@
 package dev.ultreon.quantum.registry;
 
 import dev.ultreon.quantum.LoadingContext;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.RegistryDumpEvent;
 import dev.ultreon.quantum.collection.OrderedMap;
-import dev.ultreon.quantum.registry.event.RegistryEvents;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,8 +17,8 @@ public class SimpleRegistry<T> extends Registry<T> {
 
     private SimpleRegistry(Builder<T> builder, RegistryKey<Registry<T>> key) throws IllegalStateException {
         super(builder, key);
-        RegistryEvents.REGISTRY_DUMP.subscribe(this::dumpRegistry);
-    }
+
+        EventSystem.addListenerDefault(RegistryDumpEvent.class, event -> this.dumpRegistry());    }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private SimpleRegistry(Builder<T> builder) {

@@ -28,7 +28,7 @@ public class SpaceGenerator extends SimpleChunkGenerator {
         super.create(world, seed);
 
         carver = new FloatingIslandsCarver(seed);
-        space = world.getServer().getBiomes().space.create(world, seed);
+        space = world.getServer().getBiomes().space.create(world);
     }
 
     @Override

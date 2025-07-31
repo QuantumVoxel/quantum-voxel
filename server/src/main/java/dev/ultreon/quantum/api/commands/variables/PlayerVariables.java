@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.api.commands.variables;
 
-import dev.ultreon.quantum.events.PlayerEvents;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.ServerPlayerEvent;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
 
@@ -13,7 +14,7 @@ public class PlayerVariables {
     private static final Map<UUID, PlayerVariables> players = new HashMap<>();
 
     static {
-        PlayerEvents.PLAYER_LEFT.subscribe(player1 -> players.remove(player1.getUuid()));
+        EventSystem.addListenerDefault(ServerPlayerEvent.Left.class, event -> players.remove(event.getEntity().getUuid()));
     }
 
     private final Map<String, Object> variables = new HashMap<>();

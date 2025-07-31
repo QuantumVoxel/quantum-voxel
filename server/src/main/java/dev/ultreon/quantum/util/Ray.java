@@ -22,7 +22,7 @@ import dev.ultreon.quantum.world.Direction;
 import java.io.Serializable;
 
 /** Encapsulates a ray having a starting position and a unit length direction.
- * 
+ *
  * @author badlogicgames@gmail.com */
 public class Ray implements Serializable {
 	public final Vec3d origin = new Vec3d();
@@ -41,8 +41,8 @@ public class Ray implements Serializable {
 	}
 
 	public Ray(PacketIO buffer) {
-		this.origin.set(buffer.readVec3d());
-		this.direction.set(buffer.readVec3d()).nor();
+		buffer.readVec3d(origin);
+		buffer.readVec3d(direction).nor();
 	}
 
 	public void write(PacketIO buffer) {

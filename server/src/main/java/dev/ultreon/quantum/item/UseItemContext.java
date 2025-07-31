@@ -38,7 +38,7 @@ public final class UseItemContext {
         return player;
     }
 
-    public Hit result() {
+    public Hit hit() {
         return result;
     }
 

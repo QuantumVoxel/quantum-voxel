@@ -7,7 +7,9 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.utils.Array;
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.api.events.RegisterRenderPassesEvent;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.management.TextureAtlasManager;
 import dev.ultreon.quantum.client.shaders.Shaders;
@@ -709,7 +711,7 @@ public class RenderPass {
 
     public static final RenderPass CELESTIAL_BODIES = RenderPass.builder(Position(), TexCoords(0))
             .name("celestial_bodies")
-            .shader(Shaders.SKYBOX)
+            .shader(Shaders.TRANSPARENT)
             .blending(GL_SRC_ALPHA, GL_ONE)
             .cull(0)
             .depthTest(false)
@@ -791,7 +793,7 @@ public class RenderPass {
     }
 
     public static void nopInit() {
-        // Load class
+        EventSystem.postDefault(new RegisterRenderPassesEvent());
     }
 
     /**
@@ -812,7 +814,6 @@ public class RenderPass {
     public Material createMaterial() {
         return material.get();
     }
-
 
     public Material createInstanceMaterial() {
         return instanceMaterial.get();

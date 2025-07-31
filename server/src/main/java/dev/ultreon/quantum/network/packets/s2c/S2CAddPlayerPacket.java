@@ -27,7 +27,7 @@ public final class S2CAddPlayerPacket implements Packet<InGameClientPacketHandle
         var id = buffer.readInt();
         var uuid = buffer.readUuid();
         var name = buffer.readString(20);
-        var position = buffer.readVec3d();
+        var position = buffer.readVec3d(new Vec3d());
 
         return new S2CAddPlayerPacket(id, uuid, name, position);
     }

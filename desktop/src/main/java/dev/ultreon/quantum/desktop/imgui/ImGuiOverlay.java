@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.TextureDescriptor;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.ScreenUtils;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.DevFlag;
 import dev.ultreon.quantum.GameInsets;
 import dev.ultreon.quantum.GamePlatform;
@@ -60,11 +61,15 @@ import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.*;
+import jdk.jshell.JShell;
+import jdk.jshell.SnippetEvent;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -104,6 +109,8 @@ public class ImGuiOverlay {
     private static final ImBoolean SHOW_METRICS = new ImBoolean(false);
     private static final ImBoolean SHOW_STACK_TOOL = new ImBoolean(false);
     private static final ImBoolean SHOW_STYLE_EDITOR = new ImBoolean(false);
+    private static final ImBoolean SHOW_JSHELL = new ImBoolean(false);
+    private static final ImBoolean SHOW_CLASS_ATTACHER = new ImBoolean(false);
 
     protected static final String[] keys = {"A", "B", "C"};
     protected static final Double[] values = {0.1, 0.3, 0.6};
@@ -122,7 +129,7 @@ public class ImGuiOverlay {
     private static String[] modelViewerList = new String[0];
 
     @SuppressWarnings("GDXJavaStaticResource")
-    private static GameNode selected = null;
+    private static Object selected = null;
     private static final GameInsets bounds = new GameInsets();
     private static final ImInt rotType = new ImInt(0);
     private static TextureRegion frameBufferPixels;
@@ -130,7 +137,15 @@ public class ImGuiOverlay {
     public static TextEditorLanguageDefinition glsl;
     public static final Map<NamespaceID, TextEditorCoordinates> textEditorPos = new HashMap<>();
     private static boolean firstLoop = true;
-    private static ImInt gameDockId;
+    private static final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    private static final PrintStream ps = new PrintStream(baos);
+    private static JShell jshell;
+    private static final ImString inputBuffer = new ImString(512);
+    private static final ImString inputBuffer1 = new ImString(512);
+    private static int selectedIndex;
+    private static boolean focusInput;
+    private static final List<String> filteredClasses = new ArrayList<>();
+    private static Class<?> selectedClass;
 
     public static void setupImGui() {
         if (GamePlatform.get().isAngleGLES() || GamePlatform.get().isMacOSX()) return;
@@ -238,7 +253,7 @@ public class ImGuiOverlay {
         if (firstLoop) {
             firstLoop = false;
 
-            gameDockId = new ImInt(dockSpace);
+            ImInt gameDockId = new ImInt(dockSpace);
 
             ImInt sceneDock = new ImInt(imgui.internal.ImGui.dockBuilderSplitNode(gameDockId.get(), ImGuiDir.Left, 0.15f, null, gameDockId));
             ImInt nodeDock = new ImInt(imgui.internal.ImGui.dockBuilderSplitNode(gameDockId.get(), ImGuiDir.Right, 0.3f, null, gameDockId));
@@ -266,13 +281,13 @@ public class ImGuiOverlay {
 
         ImGuiOverlay.renderDisplay();
         if (ImGui.begin("MenuBar", ImGuiWindowFlags.NoMove |
-                                   ImGuiWindowFlags.NoCollapse |
-                                   ImGuiWindowFlags.AlwaysAutoResize |
-                                   ImGuiWindowFlags.NoTitleBar |
-                                   ImGuiWindowFlags.MenuBar |
-                                   ImGuiWindowFlags.NoDocking |
-                                   ImGuiWindowFlags.NoDecoration |
-                                   ImGuiInputTextFlags.AllowTabInput)) {
+                ImGuiWindowFlags.NoCollapse |
+                ImGuiWindowFlags.AlwaysAutoResize |
+                ImGuiWindowFlags.NoTitleBar |
+                ImGuiWindowFlags.MenuBar |
+                ImGuiWindowFlags.NoDocking |
+                ImGuiWindowFlags.NoDecoration |
+                ImGuiInputTextFlags.AllowTabInput)) {
             ImGuiOverlay.renderMenuBar();
         }
         ImGui.end();
@@ -319,6 +334,134 @@ public class ImGuiOverlay {
         if (ImGuiOverlay.SHOW_SHADER_EDITOR.get()) ImGuiOverlay.showShaderEditor();
         if (ImGuiOverlay.SHOW_SKYBOX_EDITOR.get()) ImGuiOverlay.showSkyboxEditor();
         if (ImGuiOverlay.SHOW_MODEL_VIEWER.get()) ImGuiOverlay.showModelViewer();
+        if (ImGuiOverlay.SHOW_CLASS_ATTACHER.get()) showClassAttacher();
+        if (ImGuiOverlay.SHOW_JSHELL.get()) {
+            if (jshell == null) {
+                jshell = JShell.builder().out(ps).build();
+            }
+            ImGuiOverlay.showJShell(jshell);
+        } else if (jshell != null) {
+            jshell.close();
+            jshell = null;
+        }
+    }
+
+    private static void showClassAttacher() {
+        ImGui.begin("Class Autocomplete");
+
+        // Input Field
+        ImGui.setNextItemWidth(ImGui.getContentRegionAvailX());
+        ImGui.inputText("##class_input", inputBuffer1, ImGuiInputTextFlags.AutoSelectAll);
+
+        if (focusInput) {
+            ImGui.setKeyboardFocusHere(-1);
+            focusInput = false;
+        }
+
+        updateFiltered();
+
+        // Suggestions
+        if (!filteredClasses.isEmpty()) {
+            ImGui.beginChild("##suggestions", ImGui.getContentRegionAvailX(), ImGui.getContentRegionAvailY(), true);
+            for (int i = 0; i < filteredClasses.size(); i++) {
+                boolean isSelected = i == selectedIndex;
+                if (ImGui.selectable(filteredClasses.get(i), isSelected)) {
+                    inputBuffer1.set(filteredClasses.get(i));
+                    filteredClasses.clear(); // Hide suggestions after selection
+                    selectedIndex = -1;
+                }
+                if (isSelected && ImGui.isItemFocused()) {
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.BACKSPACE)) { // Backspace
+                        inputBuffer1.set("");
+                        filteredClasses.clear();
+                    }
+                }
+            }
+
+            ImGui.endChild();
+
+            // Keyboard navigation
+            if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) { // Down
+                selectedIndex = (selectedIndex + 1) % filteredClasses.size();
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) { // Up
+                selectedIndex = (selectedIndex - 1 + filteredClasses.size()) % filteredClasses.size();
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) { // Enter
+                if (selectedIndex >= 0 && selectedIndex < filteredClasses.size()) {
+                    String value = filteredClasses.get(selectedIndex);
+                    inputBuffer1.set(value);
+                    try {
+                        selectedClass = Class.forName(value);
+                    } catch (ClassNotFoundException e) {
+                        CommonConstants.LOGGER.error("Unable to load already loaded class " + value, e);
+                    }
+                    filteredClasses.clear();
+                    selectedIndex = -1;
+                }
+            }
+        }
+
+        ImGui.end();
+    }
+
+    private static void updateFiltered() {
+        Set<String> allClasses = GamePlatform.get().getLoadedClasses();
+        filteredClasses.clear();
+        if (!inputBuffer1.isEmpty()) {
+            filteredClasses.addAll(
+                    allClasses.stream()
+                            .filter(cls -> cls.toLowerCase().contains(inputBuffer1.get().toLowerCase()))
+                            .sorted()
+                            .limit(100)
+                            .toList()
+            );
+        }
+    }
+
+    private static void showJShell(JShell jshell) {
+        if (ImGui.begin("JShell")) {
+            // Output area
+            ImGui.beginChild("ConsoleOutput", 0, 300, true);
+            ImGui.textWrapped(baos.toString());
+            ImGui.setScrollHereY(1.0f); // Auto-scroll
+            ImGui.endChild();
+
+            // Input field
+            ImGui.separator();
+            ImGui.text("Enter Java expression:");
+            ImGui.inputTextMultiline("##input", inputBuffer, 512);
+
+            // Evaluate button
+            if (ImGui.button("Evaluate")) {
+                List<SnippetEvent> events = jshell.eval(inputBuffer.get());
+                for (SnippetEvent e : events) {
+                    if (e.value() != null) {
+                        ps.println("-> " + e.value());
+                        ps.println(" : STATUS: " + e.status());
+                        ps.println(e.value());
+                        ps.flush();
+                    } else if (e.exception() != null) {
+                        ps.println("-> Exception: " + e.exception().getMessage());
+                        e.exception().printStackTrace(ps);
+                        ps.println();
+                        ps.flush();
+                    } else {
+                        ps.println("-> No value returned");
+                        ps.println(" : " + e);
+                        ps.flush();
+                    }
+                }
+
+                inputBuffer.set(""); // Clear after evaluating
+            }
+
+            ImGui.sameLine();
+            if (ImGui.button("Clear Output")) {
+                baos.reset();
+            }
+        }
+        ImGui.end();
     }
 
     private static void showGame(QuantumClient ignoredClient) {
@@ -379,7 +522,7 @@ public class ImGuiOverlay {
                                         TextEditorCoordinates coordinates = textEditorPos.get(location);
                                         if (coordinates != null) textEditor.setCursorPosition(coordinates);
 
-                                        float v = textEditor.getTotalLines() * (ImGui.getFont().getFontSize()) + 16;
+                                        float v = textEditor.getTotalLines() * ImGui.getFont().getFontSize() + 16;
                                         textEditor.render("Shader Editor - " + location, ImGui.getContentRegionAvailX(), v);
 
                                         if (textEditor.isCursorPositionChanged()) {
@@ -415,7 +558,7 @@ public class ImGuiOverlay {
 
     private static void showNodeView(QuantumClient ignoredClient) {
         if (ImGui.begin("Node View", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove)) {
-            GameNode sel = selected;
+            Object sel = selected;
 
             if (sel != null) {
                 if (ImGui.treeNode("Game Object")) {
@@ -423,10 +566,12 @@ public class ImGuiOverlay {
                     ImGui.treePop();
                 }
 
-                for (Component<?> component : sel.getComponents()) {
-                    if (ImGui.treeNode(component.getClass().getName(), component instanceof GameComponent ? component.getClass().getSimpleName() : component.getClass().getSimpleName() + (GamePlatform.get().isDevEnvironment() ? ".java" : ".class"))) {
-                        renderComponent(component);
-                        ImGui.treePop();
+                if (sel instanceof GameNode) {
+                    for (Component<?> component : ((GameNode) sel).getComponents()) {
+                        if (ImGui.treeNode(component.getClass().getName(), component instanceof GameComponent ? component.getClass().getSimpleName() : component.getClass().getSimpleName() + (GamePlatform.get().isDevEnvironment() ? ".java" : ".class"))) {
+                            renderComponent(component);
+                            ImGui.treePop();
+                        }
                     }
                 }
 
@@ -451,10 +596,10 @@ public class ImGuiOverlay {
             Stack<Class<?>> stack = new Stack<>();
             while (true) {
                 for (Field field : component.getClass().getDeclaredFields()) {
-                    processField(component, field, fields, clazz);
+                    processField(component, field, fields);
                 }
                 for (Field field : component.getClass().getFields()) {
-                    processField(component, field, fields, clazz);
+                    processField(component, field, fields);
                 }
                 for (Class<?> anInterface : clazz.getInterfaces()) {
                     if (!stack.contains(anInterface) && anInterface != Object.class)
@@ -469,14 +614,14 @@ public class ImGuiOverlay {
         ImGui.endTable();
     }
 
-    private static void processField(@NotNull Object component, Field field, Set<Field> fields, Class<?> clazz) {
+    private static void processField(@NotNull Object component, Field field, Set<Field> fields) {
         if (fields.contains(field)) return;
         fields.add(field);
         if ((!Modifier.isPublic(field.getModifiers()) && !field.isAnnotationPresent(ShowInNodeView.class)
-             || field.isSynthetic()
-             || field.isAnnotationPresent(HiddenNode.class))
-            && !SHOW_HIDDEN_FIELDS.get()
-            || Modifier.isStatic(field.getModifiers()))
+                || field.isSynthetic()
+                || field.isAnnotationPresent(HiddenNode.class))
+                && !SHOW_HIDDEN_FIELDS.get()
+                || Modifier.isStatic(field.getModifiers()))
             return;
 
         boolean readOnly = Modifier.isFinal(field.getModifiers());
@@ -492,13 +637,12 @@ public class ImGuiOverlay {
     }
 
     @SuppressWarnings("unchecked")
-    private static Runnable renderObject(Object component, Field field, boolean readOnly) {
+    private static @Nullable Runnable renderObject(@Nullable Object component, Field field, boolean readOnly) {
         try {
             field.setAccessible(true);
             Object object = field.get(component);
             if (field.getType().isPrimitive()) return () -> {
-                if (object instanceof Number) {
-                    Number number = (Number) object;
+                if (object instanceof Number number) {
                     num(component, field, readOnly, number, object);
                 } else if (object instanceof Boolean) {
                     ImBoolean b = new ImBoolean((boolean) object);
@@ -515,24 +659,21 @@ public class ImGuiOverlay {
                     ImGui.text(String.valueOf(object));
                 }
             };
-            if (object instanceof GLTexture) {
-                GLTexture texture = (GLTexture) object;
+            if (object instanceof GLTexture texture) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), "Texture")) {
                         ImGui.image(texture.getTextureObjectHandle(), ImGui.getContentRegionAvailX(), ImGui.getContentRegionAvailX());
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof TextureRegion) {
-                TextureRegion region = (TextureRegion) object;
+            } else if (object instanceof TextureRegion region) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), "Texture Region")) {
                         ImGui.image(region.getTexture().getTextureObjectHandle(), ImGui.getContentRegionAvailX(), ImGui.getContentRegionAvailX(), region.getU(), region.getV(), region.getU2(), region.getV2());
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Material) {
-                Material material = (Material) object;
+            } else if (object instanceof Material material) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), "Material")) {
                         if (ImGui.beginTable("##Material[" + System.identityHashCode(material), 2, ImGuiTableFlags.Borders)) {
@@ -550,8 +691,7 @@ public class ImGuiOverlay {
                                 ImGui.text(Attribute.getAttributeAlias(attr.type));
                                 ImGui.tableSetColumnIndex(1);
 
-                                if (attr instanceof TextureAttribute) {
-                                    TextureAttribute textureAttribute = (TextureAttribute) attr;
+                                if (attr instanceof TextureAttribute textureAttribute) {
                                     TextureDescriptor<Texture> textureDescription = textureAttribute.textureDescription;
                                     if (textureDescription != null) {
                                         Texture texture = textureDescription.texture;
@@ -560,8 +700,7 @@ public class ImGuiOverlay {
                                             ImGui.treePop();
                                         }
                                     }
-                                } else if (attr instanceof ColorAttribute) {
-                                    ColorAttribute colorAttribute = (ColorAttribute) attr;
+                                } else if (attr instanceof ColorAttribute colorAttribute) {
                                     Color color = colorAttribute.color;
 
                                     float[] c = new float[4];
@@ -576,16 +715,14 @@ public class ImGuiOverlay {
                                             // ignore
                                         }
                                     }
-                                } else if (attr instanceof IntAttribute) {
-                                    IntAttribute colorAttribute = (IntAttribute) attr;
+                                } else if (attr instanceof IntAttribute colorAttribute) {
                                     int value = colorAttribute.value;
 
                                     ImInt imInt = new ImInt(value);
                                     if (ImGui.inputInt(field.getName(), imInt)) {
                                         colorAttribute.value = imInt.get();
                                     }
-                                } else if (attr instanceof FloatAttribute) {
-                                    FloatAttribute floatAttribute = (FloatAttribute) attr;
+                                } else if (attr instanceof FloatAttribute floatAttribute) {
                                     float value1 = floatAttribute.value;
 
                                     ImFloat imFloat = new ImFloat(value1);
@@ -601,8 +738,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof String) {
-                String s = (String) object;
+            } else if (object instanceof String s) {
                 return () -> {
                     ImString ims = new ImString(s);
                     if (ImGui.inputText(field.getName(), ims, readOnly ? ImGuiInputTextFlags.ReadOnly : 0) && !readOnly) {
@@ -613,8 +749,7 @@ public class ImGuiOverlay {
                         }
                     }
                 };
-            } else if (object instanceof NamespaceID) {
-                NamespaceID namespaceID = (NamespaceID) object;
+            } else if (object instanceof NamespaceID namespaceID) {
                 return () -> {
                     ImString s = new ImString(namespaceID.getDomain());
                     ImString n = new ImString(namespaceID.getPath());
@@ -632,13 +767,22 @@ public class ImGuiOverlay {
                             field.set(component, new NamespaceID(s.get(), n.get()));
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        CommonConstants.LOGGER.error("Unable to set namespace id", e);
                     }
                 };
+            } else if (object instanceof Class<?> clazz) {
+                for (Field field1 : clazz.getDeclaredFields()) {
+                    if (!Modifier.isStatic(field1.getModifiers()) || field1.isSynthetic()) continue;
+                    if (field1.getType().equals(clazz)) {
+                        return renderObject(null, field1, readOnly);
+                    }
+                }
+                return null;
             } else if (object instanceof Enum<?>) {
                 return () -> {
                     if (!readOnly) {
                         if (ImGui.beginCombo(field.getName(), object.toString())) {
+                            //noinspection rawtypes
                             for (Object enumValue : EnumSet.allOf((Class<? extends Enum>) field.getType())) {
                                 if (ImGui.selectable(enumValue.toString(), object.equals(enumValue))) {
                                     try {
@@ -655,8 +799,7 @@ public class ImGuiOverlay {
                         ImGui.text(object.toString());
                     }
                 };
-            } else if (object instanceof Color) {
-                Color color = (Color) object;
+            } else if (object instanceof Color color) {
                 return () -> {
                     float[] c = new float[4];
                     c[0] = color.r;
@@ -671,8 +814,7 @@ public class ImGuiOverlay {
                         }
                     }
                 };
-            } else if (object instanceof Vector3) {
-                Vector3 vec3 = (Vector3) object;
+            } else if (object instanceof Vector3 vec3) {
                 return () -> {
                     float[] v = new float[3];
                     v[0] = vec3.x;
@@ -686,8 +828,7 @@ public class ImGuiOverlay {
                         }
                     }
                 };
-            } else if (object instanceof Vector2) {
-                Vector2 vec3 = (Vector2) object;
+            } else if (object instanceof Vector2 vec3) {
                 return () -> {
                     float[] v = new float[2];
                     v[0] = vec3.x;
@@ -700,8 +841,7 @@ public class ImGuiOverlay {
                         }
                     }
                 };
-            } else if (object instanceof Vector4) {
-                Vector4 vec4 = (Vector4) object;
+            } else if (object instanceof Vector4 vec4) {
                 return () -> {
                     float[] v = new float[4];
                     v[0] = vec4.x;
@@ -716,30 +856,25 @@ public class ImGuiOverlay {
                         }
                     }
                 };
-            } else if (object instanceof UUID) {
-                UUID uuid = (UUID) object;
+            } else if (object instanceof UUID uuid) {
                 return () -> {
                     ImString text = new ImString(uuid.toString());
                     if (ImGui.inputText(field.getName(), text, readOnly ? ImGuiInputTextFlags.ReadOnly : 0) && !readOnly) {
                         try {
                             field.set(component, UUID.fromString(text.get()));
-                        } catch (IllegalArgumentException ignored) {
-                            // ignore
-                        } catch (IllegalAccessException e) {
+                        } catch (IllegalArgumentException | IllegalAccessException ignored) {
                             // ignore
                         }
                     }
                 };
-            } else if (object instanceof GameNode) {
-                GameNode gameObject = (GameNode) object;
+            } else if (object instanceof GameNode gameObject) {
                 return () -> {
                     if (ImGui.treeNode(System.identityHashCode(gameObject), gameObject.getName() == null ? gameObject.toString() : gameObject.getName())) {
                         renderComponent(gameObject);
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof List<?>) {
-                List<?> list = (List<?>) object;
+            } else if (object instanceof List<?> list) {
                 return () -> {
                     ImInt selected = new ImInt(-1);
                     ImGui.listBox("##List" + field.hashCode(), selected, list.stream().map(Object::toString).toArray(String[]::new));
@@ -752,8 +887,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Map<?, ?>) {
-                Map<?, ?> map = (Map<?, ?>) object;
+            } else if (object instanceof Map<?, ?> map) {
                 return () -> {
                     if (ImGui.treeNode(field.getName())) {
                         if (ImGui.beginTable("##Map" + field.hashCode(), 2, ImGuiTableFlags.Borders)) {
@@ -777,8 +911,7 @@ public class ImGuiOverlay {
                         ImGui.text(map.toString());
                     }
                 };
-            } else if (object instanceof Map.Entry<?, ?>) {
-                Map.Entry<?, ?> entry = (Map.Entry<?, ?>) object;
+            } else if (object instanceof Map.Entry<?, ?> entry) {
                 return () -> {
                     ImGui.setNextItemWidth((ImGui.getWindowSizeX() - 200) / 2 - 5);
                     ImGui.text(entry.getKey().toString());
@@ -786,16 +919,14 @@ public class ImGuiOverlay {
                     ImGui.setNextItemWidth((ImGui.getWindowSizeX() - 200) / 2 - 5);
                     renderComponent(entry.getValue());
                 };
-            } else if (object instanceof AtomicReference<?>) {
-                AtomicReference<?> reference = (AtomicReference<?>) object;
+            } else if (object instanceof AtomicReference<?> reference) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         renderComponent(reference.get());
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof AtomicBoolean) {
-                AtomicBoolean atomicBoolean = (AtomicBoolean) object;
+            } else if (object instanceof AtomicBoolean atomicBoolean) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -806,8 +937,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof AtomicLong) {
-                AtomicLong atomicLong = (AtomicLong) object;
+            } else if (object instanceof AtomicLong atomicLong) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -822,8 +952,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof AtomicInteger) {
-                AtomicInteger atomicInteger = (AtomicInteger) object;
+            } else if (object instanceof AtomicInteger atomicInteger) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -834,8 +963,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof BlockVec) {
-                BlockVec vec = (BlockVec) object;
+            } else if (object instanceof BlockVec vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -846,8 +974,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof ChunkVec) {
-                ChunkVec vec = (ChunkVec) object;
+            } else if (object instanceof ChunkVec vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -858,8 +985,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof RegionVec) {
-                RegionVec vec = (RegionVec) object;
+            } else if (object instanceof RegionVec vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -870,8 +996,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec3i) {
-                Vec3i vec = (Vec3i) object;
+            } else if (object instanceof Vec3i vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -882,8 +1007,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec3f) {
-                Vec3f vec = (Vec3f) object;
+            } else if (object instanceof Vec3f vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -894,8 +1018,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec2i) {
-                Vec2i vec = (Vec2i) object;
+            } else if (object instanceof Vec2i vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -906,8 +1029,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec2f) {
-                Vec2f vec = (Vec2f) object;
+            } else if (object instanceof Vec2f vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -918,8 +1040,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec4i) {
-                Vec4i vec = (Vec4i) object;
+            } else if (object instanceof Vec4i vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -930,8 +1051,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec4f) {
-                Vec4f vec = (Vec4f) object;
+            } else if (object instanceof Vec4f vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -942,8 +1062,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof BlockState) {
-                BlockState state = (BlockState) object;
+            } else if (object instanceof BlockState state) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.text("ID: " + state.getBlock().getId());
@@ -968,8 +1087,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Quaternion) {
-                Quaternion quat = (Quaternion) object;
+            } else if (object instanceof Quaternion quat) {
                 return () -> {
                     ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
                     ImGui.combo("Rotation Type", rotType, "Euler\0Quaternion\0");
@@ -1004,14 +1122,15 @@ public class ImGuiOverlay {
             } else {
                 return null;
             }
-        } catch (IllegalAccessException e) {
+        } catch (Throwable e) {
             ImGui.textColored(1f, 0.5f, 0.5f, 1f, e.getMessage());
         }
 
         return null;
     }
 
-    private static <T extends Annotation> boolean isAnnotationPresent(Class<?> type, Class<T> anno) {
+    @Contract(pure = true)
+    private static <T extends Annotation> boolean isAnnotationPresent(@NotNull Class<?> type, Class<T> anno) {
         if (type.isAnnotationPresent(anno)) {
             return true;
         }
@@ -1023,7 +1142,7 @@ public class ImGuiOverlay {
         return false;
     }
 
-    private static void num(Object component, Field field, boolean readOnly, Number number, Object object) {
+    private static void num(@Nullable Object component, Field field, boolean readOnly, Number number, Object object) {
         try {
             if (Objects.requireNonNull(number) instanceof Integer) {
                 ImInt i = new ImInt((int) object);
@@ -1116,14 +1235,97 @@ public class ImGuiOverlay {
                 ImGui.treePop();
             }
 
+            if (ImGui.treeNode(2, "Selected Class")) {
+                if (selectedClass != null) {
+                    renderClass(selectedClass);
+                }
+                ImGui.treePop();
+            }
+
             ImGui.getWindowSizeX();
         }
         ImGui.end();
     }
 
     private static final ImVec2 rectMin = new ImVec2();
+
     private static final ImVec2 rectMax = new ImVec2();
     private static final ImVec2 mousePos = new ImVec2();
+    private static void renderClass(Class<?> selectedClass) {
+        for (Field field : selectedClass.getDeclaredFields()) {
+            if (!Modifier.isStatic(field.getModifiers())) continue;
+
+            if (field.isAnnotationPresent(ShowInNodeView.class) && !field.isAnnotationPresent(HideInNodeView.class) || SHOW_HIDDEN_FIELDS.get()) {
+                ImGui.pushID(field.hashCode());
+                try {
+                    field.setAccessible(true);
+                    Object object = field.get(QuantumClient.get().screen);
+                    if (object != null) {
+                        if (ImGui.treeNode(field.hashCode(), field.getName())) {
+                            try {
+                                renderObject(object);
+                            } finally {
+                                ImGui.treePop();
+                            }
+                        }
+                        if (ImGui.isItemClicked(ImGuiMouseButton.Right)) {
+                            selected = object;
+                        }
+                    }
+                } catch (Throwable e) {
+                    ImGui.textColored(1f, 0.5f, 0.5f, 1f, e.getMessage());
+                } finally {
+                    ImGui.popID();
+                }
+            }
+        }
+    }
+
+    private static void renderObject(Object object) {
+        for (Field field : object.getClass().getFields()) {
+            if (Modifier.isStatic(field.getModifiers())) continue;
+
+            if (field.isAnnotationPresent(ShowInNodeView.class) && !field.isAnnotationPresent(HideInNodeView.class) || SHOW_HIDDEN_FIELDS.get()) {
+                ImGui.pushID(field.hashCode());
+                try {
+                    field.setAccessible(true);
+                    if (ImGui.treeNode(field.hashCode(), field.getName() + " (" + field.getType().getSimpleName() + ".class)")) {
+                        try {
+                            Object component = field.get(object);
+                            if (component != null) {
+                                renderObject(component);
+                            }
+                        } finally {
+                            ImGui.treePop();
+                        }
+                    }
+                    if (ImGui.isItemHovered()) {
+                        ImGui.beginTooltip();
+                        ImGui.textColored(1f, 1f, 0f, 1f, field.getName());
+                        try {
+                            field.setAccessible(true);
+                            Object component = field.get(object);
+                            if (component != null) {
+                                ImGui.text(component.getClass().getSimpleName());
+                                ImGui.text("");
+                                ImGui.textColored(.5f, .5f, .5f, 1f, String.valueOf(component));
+                            }
+                        } catch (Throwable ignored) {
+                            ImGui.textColored(.5f, .5f, .5f, 1f, "null");
+                        }
+                        ImGui.endTooltip();
+                    }
+                    if (ImGui.isItemClicked(ImGuiMouseButton.Right)) {
+                        selected = object;
+                    }
+                } catch (Throwable e) {
+                    ImGui.textColored(1f, 0.5f, 0.5f, 1f, e.getMessage());
+                } finally {
+                    ImGui.popID();
+                }
+            }
+        }
+    }
 
     private static void renderGameNode(GameNode object) {
         for (GameNode child : object.getChildren()) {
@@ -1156,8 +1358,7 @@ public class ImGuiOverlay {
     }
 
     private static void renderUINode(Widget widget) {
-        if (widget instanceof UIContainer<?>) {
-            UIContainer<?> container = (UIContainer<?>) widget;
+        if (widget instanceof UIContainer<?> container) {
             for (Widget child : container.children()) {
                 if (ImGui.treeNodeEx(System.identityHashCode(child), selected == child ? ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.OpenOnArrow, child.toString())) {
                     renderUINode(child);
@@ -1290,13 +1491,19 @@ public class ImGuiOverlay {
             }
             if (ImGui.beginMenu("View")) {
                 ImGui.menuItem("Utils", null, ImGuiOverlay.SHOW_UTILS);
+                ImGui.separator();
                 ImGui.menuItem("Chunks", null, ImGuiOverlay.SHOW_CHUNK_DEBUGGER);
                 ImGui.menuItem("Chunk Node Borders", "Ctrl+F4", ImGuiOverlay.SHOW_CHUNK_SECTION_BORDERS);
+                ImGui.separator();
                 ImGui.menuItem("InspectionRoot", "Ctrl+P", ImGuiOverlay.SHOW_PROFILER);
                 ImGui.menuItem("Render Pipeline", null, ImGuiOverlay.SHOW_RENDER_PIPELINE);
                 ImGui.menuItem("Model Viewer", null, ImGuiOverlay.SHOW_MODEL_VIEWER);
+                ImGui.separator();
                 ImGui.menuItem("Show Hidden Fields", null, SHOW_HIDDEN_FIELDS);
                 ImGui.menuItem("Show Occlusion Debug", null, SHOW_OCCLUSION_DEBUG);
+                ImGui.separator();
+                ImGui.menuItem("Classes", null, SHOW_CLASS_ATTACHER);
+                ImGui.menuItem("JShell", null, SHOW_JSHELL);
                 ImGui.endMenu();
             }
 
@@ -1312,8 +1519,7 @@ public class ImGuiOverlay {
 
             if (ImGui.beginMenu("Gizmos")) {
                 @Nullable ClientWorldAccess terrainRenderer = QuantumClient.get().world;
-                if (terrainRenderer instanceof ClientWorld) {
-                    ClientWorld world = (ClientWorld) terrainRenderer;
+                if (terrainRenderer instanceof ClientWorld world) {
                     for (String category : world.getGizmoCategories()) {
                         if (ImGui.menuItem("Gizmo '" + category + "'", null, world.isGimzoCategoryEnabled(category))) {
                             world.toggleGizmoCategory(category);
@@ -1517,21 +1723,14 @@ public class ImGuiOverlay {
     }
 
     public static boolean isDevFlagEnabled(DevFlag devFlag) {
-        switch (devFlag) {
-            case ShowChunkSectionBorders:
-                return ImGuiOverlay.SHOW_CHUNK_SECTION_BORDERS.get();
-            case ShowChunkDebugger:
-                return ImGuiOverlay.SHOW_CHUNK_DEBUGGER.get();
-            case ShowMetrics:
-                return ImGuiOverlay.SHOW_METRICS.get();
-            case ShowModelViewer:
-                return ImGuiOverlay.SHOW_MODEL_VIEWER.get();
-            case ShowProfiler:
-                return ImGuiOverlay.SHOW_PROFILER.get();
-            case OcclusionDebug:
-                return ImGuiOverlay.SHOW_OCCLUSION_DEBUG.get();
-            default:
-                return false;
-        }
+        return switch (devFlag) {
+            case ShowChunkSectionBorders -> ImGuiOverlay.SHOW_CHUNK_SECTION_BORDERS.get();
+            case ShowChunkDebugger -> ImGuiOverlay.SHOW_CHUNK_DEBUGGER.get();
+            case ShowMetrics -> ImGuiOverlay.SHOW_METRICS.get();
+            case ShowModelViewer -> ImGuiOverlay.SHOW_MODEL_VIEWER.get();
+            case ShowProfiler -> ImGuiOverlay.SHOW_PROFILER.get();
+            case OcclusionDebug -> ImGuiOverlay.SHOW_OCCLUSION_DEBUG.get();
+            default -> false;
+        };
     }
 }

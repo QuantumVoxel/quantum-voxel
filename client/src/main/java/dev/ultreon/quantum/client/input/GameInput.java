@@ -5,22 +5,21 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.ItemStackEvent;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.events.ItemEvents;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.network.packets.c2s.C2SItemUsePacket;
-import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Hit;
 import dev.ultreon.quantum.util.Vec3d;
@@ -144,10 +143,10 @@ public abstract class GameInput implements Disposable {
         ItemStack stack = player.getSelectedItem();
         UseItemContext context = new UseItemContext(world, player, hit, stack, amount);
         Item item = stack.getItem();
-        ItemEvents.USE.factory().onUseItem(item, context);
+        EventSystem.postDefault(new ItemStackEvent.Use(context));
         this.client.connection.send(new C2SItemUsePacket((BlockHit) hit));
 
-        Hit result = context.result();
+        Hit result = context.hit();
         if (result == null)
             return UseResult.SKIP;
 

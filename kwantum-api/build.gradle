@@ -28,7 +28,8 @@ kotlin {
 processResources {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
+    inputs.property "version", version
+    filesMatching('xeox.mod.json') {
+        expand 'version': version
     }
 }

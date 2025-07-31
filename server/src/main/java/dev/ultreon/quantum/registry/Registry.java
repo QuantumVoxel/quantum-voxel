@@ -3,11 +3,11 @@ package dev.ultreon.quantum.registry;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.libs.commons.v0.Logger;
-import dev.ultreon.quantum.collection.OrderedMap;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.RegistryDumpEvent;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
-import dev.ultreon.quantum.registry.event.RegistryEvents;
 import dev.ultreon.quantum.registry.exception.RegistryException;
 import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.tags.NamedTag;
@@ -41,7 +41,7 @@ public abstract class Registry<T> implements IdRegistry<T>, RegistryMap<Registry
         this.overrideAllowed = builder.allowOverride;
         this.syncDisabled = builder.doNotSync;
 
-        RegistryEvents.REGISTRY_DUMP.subscribe(this::dumpRegistry);
+        EventSystem.addListenerDefault(RegistryDumpEvent.class, event -> this.dumpRegistry());
     }
 
     protected Registry(Builder<T> builder) {
@@ -51,7 +51,7 @@ public abstract class Registry<T> implements IdRegistry<T>, RegistryMap<Registry
         this.syncDisabled = builder.doNotSync;
         this.key = RegistryKey.registry(this);
 
-        RegistryEvents.REGISTRY_DUMP.subscribe(this::dumpRegistry);
+        EventSystem.addListenerDefault(RegistryDumpEvent.class, event -> this.dumpRegistry());
     }
 
     private RegistryKey<T> subspace(NamespaceID namespaceID) {

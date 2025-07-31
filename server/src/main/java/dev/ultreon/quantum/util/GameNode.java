@@ -34,7 +34,9 @@ public abstract class GameNode implements Disposable {
         if (getClass().isAnnotationPresent(NodeDescription.class))
             description = getClass().getAnnotation(NodeDescription.class).value();
 
-        MANAGED.add(this);
+        synchronized (MANAGED) {
+            MANAGED.add(this);
+        }
     }
 
     public final void attach(GameNode parent) {
@@ -120,7 +122,9 @@ public abstract class GameNode implements Disposable {
             }
         }
 
-        MANAGED.removeValue(this, true);
+        synchronized (MANAGED) {
+            MANAGED.removeValue(this, true);
+        }
         if (enabled) {
             if (parent != null) parent.activeCount--;
             allActiveCount--;
@@ -330,7 +334,11 @@ public abstract class GameNode implements Disposable {
     }
 
     public static void disposeAll() {
-        for (GameNode gameNode : MANAGED.toArray(GameNode.class)) {
+        GameNode[] array;
+        synchronized (MANAGED) {
+            array = MANAGED.toArray(GameNode.class);
+        }
+        for (GameNode gameNode : array) {
             gameNode.dispose();
         }
     }

@@ -7,16 +7,16 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import com.badlogic.gdx.utils.Os;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
-import com.github.dgzt.gdx.lwjgl3.Lwjgl3VulkanApplication;
 import com.github.dgzt.gdx.lwjgl3.Lwjgl3WindowListener;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.WinDef;
-import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.blockstudio.BlockStudio;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.GameWindow;
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.api.events.WindowEvents;
+import dev.ultreon.quantum.client.api.events.WindowEvent;
 import dev.ultreon.quantum.client.input.KeyAndMouseInput;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -82,6 +82,11 @@ public class DesktopLauncher {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
                 try {
+                    if (List.of(argv).contains("--studio")) {
+                        LoggerFactory.getLogger("Quantum:Studio").error("Failed to launch game", e);
+                        defaultUncaughtExceptionHandler.uncaughtException(t, e);
+                        return;
+                    }
                     if (e instanceof ApplicationCrash) {
                         ApplicationCrash crash = (ApplicationCrash) e;
                         QuantumClient.crash(crash.getCrashLog());
@@ -117,6 +122,26 @@ public class DesktopLauncher {
     @SuppressWarnings("unused")
     private static void launch(String[] args) {
         if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS
+
+        if (List.of(args).contains("--studio")) {
+            Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+            config.useVsync(false);
+            config.setForegroundFPS(0);
+            config.setIdleFPS(10);
+            config.setBackBufferConfig(4, 4, 4, 4, 8, 8, 8);
+            config.setHdpiMode(HdpiMode.Pixels);
+            config.setWindowedMode(1280, 720);
+            config.setTitle("Quantum Voxel (Block Studio)");
+            try {
+                Lwjgl3Application lwjgl3Application = new Lwjgl3Application(new BlockStudio(), config);
+            } catch (Throwable e) {
+                LOGGER.error("Failed to launch game", e);
+                GamePlatform.get().halt(StatusCode.forException());
+                return;
+            }
+            System.exit(0);
+            return;
+        }
 
         LauncherConfig launcherConfig = LauncherConfig.get();
         boolean useAngleGraphics = launcherConfig.useAngleGraphics && SharedLibraryLoader.os == Os.Windows;
@@ -268,8 +293,9 @@ public class DesktopLauncher {
             gameWindow = new DesktopVulkanWindow(window);
 
             setupMacIcon();
-//            WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
             setupVibrancy(window.getWindowHandle());
+
+            EventSystem.postDefault(new WindowEvent.Created(gameWindow));
         }
 
         @Override
@@ -282,8 +308,9 @@ public class DesktopLauncher {
             gameWindow = new DesktopGLWindow(window);
 
             setupMacIcon();
-            WindowEvents.WINDOW_CREATED.factory().onWindowCreated(gameWindow);
             setupVibrancy(window.getWindowHandle());
+
+            EventSystem.postDefault(new WindowEvent.Created(gameWindow));
         }
 
         private static void setupVibrancy(long handle) {
@@ -336,22 +363,27 @@ public class DesktopLauncher {
 
         @Override
         public void focusLost() {
+            EventSystem.postDefault(new WindowEvent.FocusChanged(gameWindow, false));
+            
             QuantumClient quantumClient = QuantumClient.get();
             if (quantumClient == null) return;
             quantumClient.pause();
-
-            WindowEvents.WINDOW_FOCUS_CHANGED.factory().onWindowFocusChanged(quantumClient.getWindow(), false);
         }
 
         @Override
         public void focusGained() {
+            EventSystem.postDefault(new WindowEvent.FocusChanged(gameWindow, true));
+            
             QuantumClient quantumClient = QuantumClient.get();
             if (quantumClient == null) return;
-            WindowEvents.WINDOW_FOCUS_CHANGED.factory().onWindowFocusChanged(quantumClient.getWindow(), true);
         }
 
         @Override
         public boolean closeRequested() {
+            if (EventSystem.postCancelable(new WindowEvent.CloseRequested(gameWindow))) {
+                return false;
+            }
+            
             if (safeWrapper.isCrashed()) {
                 Runtime.getRuntime().halt(StatusCode.forAbort());
                 return true;
@@ -362,12 +394,36 @@ public class DesktopLauncher {
 
         @Override
         public void filesDropped(String[] files) {
+            if (EventSystem.postCancelable(new WindowEvent.FilesDropped(gameWindow, files))) {
+                return;
+            }
+            
             QuantumClient quantumClient = QuantumClient.get();
             if (quantumClient == null) return;
             quantumClient.filesDropped(files);
-
-            WindowEvents.WINDOW_FILES_DROPPED.factory().onWindowFilesDropped(quantumClient.getWindow(), files);
         }
 
+        @Override
+        public void iconified(boolean isIconified) {
+            if (isIconified) {
+                EventSystem.postDefault(new WindowEvent.Minimized(gameWindow));
+            } else {
+                EventSystem.postDefault(new WindowEvent.Restored(gameWindow));
+            }
+        }
+
+        @Override
+        public void maximized(boolean isMaximized) {
+            if (isMaximized) {
+                EventSystem.postDefault(new WindowEvent.Maximized(gameWindow));
+            } else {
+                EventSystem.postDefault(new WindowEvent.Restored(gameWindow));
+            }
+        }
+
+        @Override
+        public void refreshRequested() {
+            EventSystem.postDefault(new WindowEvent.RefreshRequested(gameWindow));
+        }
     }
 }

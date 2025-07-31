@@ -331,4 +331,8 @@
   quantum.message.disconnecting.desc: Disconnecting from world
   quantum.stats.item.attack_damage: Attack Damage
   quantum.stats.item.efficiency: Efficiency
+
+  quantum.screen.world_selection.edit: Edit World
+  quantum.screen.world_selection.duplicate: Duplicate World
+  quantum.screen.worlds.edit.title: Editing World
 }

@@ -1,12 +1,13 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.client.api.events.WidgetEvent;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.UIPath;
 import dev.ultreon.quantum.client.gui.widget.layout.Layout;
 import dev.ultreon.quantum.client.gui.widget.layout.StandardLayout;
-import dev.ultreon.quantum.client.api.events.gui.WidgetEvents;
 import dev.ultreon.quantum.client.input.controller.GuiNavigator;
 
 import org.jetbrains.annotations.ApiStatus;
@@ -224,16 +225,16 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
         widget.root = this.root;
         this.widgets.add(widget);
 
-        WidgetEvents.WIDGET_ADDED.factory().onWidgetAdded(this, widget);
+        EventSystem.postDefault(new WidgetEvent.Added(widget));
 
         return widget;
     }
 
     public void remove(Widget widget) {
+        EventSystem.postDefault(new WidgetEvent.Removed(widget));
+
         this.widgets.remove(widget);
         widget.disconnect(this);
-
-        WidgetEvents.WIDGET_REMOVED.factory().onWidgetRemoved(this, widget);
     }
 
     @Override

@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.Mod;
-import dev.ultreon.quantum.events.api.Event;
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.util.ModLoadingContext;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.Nullable;
@@ -49,11 +49,6 @@ public abstract class CraftyConfig {
     private final Map<String, Field> fieldsMap;
     private final Map<String, Ranged> rangesMap;
     private final FileHandle configPath;
-    public final Event<LoadConfig> event = Event.create(listeners -> () -> {
-        for (LoadConfig listener : listeners) {
-            listener.load();
-        }
-    });
 
     private final Mod mod;
 
@@ -207,7 +202,7 @@ public abstract class CraftyConfig {
             }
         }
 
-        event.factory().load();
+        EventSystem.postDefault(new CraftyConfigEvent.Load(this, root));
 
         return success;
     }
@@ -220,6 +215,8 @@ public abstract class CraftyConfig {
     protected void saveUnsafe() throws IOException {
         // Create a JsonValue to hold the configurations
         JsonValue root = new JsonValue(JsonValue.ValueType.object);
+
+        EventSystem.postDefault(new CraftyConfigEvent.Save(this, root));
 
         // Iterate through the default configurations
         for (Map.Entry<String, Object> entry : defaultsMap.entrySet()) {
@@ -877,20 +874,5 @@ public abstract class CraftyConfig {
 
     public String getComment(String key) {
         return entriesMap.get(key).comment();
-    }
-
-    /**
-     * Event that is called when the config file is loaded or reloaded.
-     *
-     * @see #event
-     */
-    @FunctionalInterface
-    public interface LoadConfig {
-        /**
-         * Called when the config file is loaded or reloaded.
-         *
-         * @throws IOException if an I/O error occurs
-         */
-        void load() throws IOException;
     }
 }

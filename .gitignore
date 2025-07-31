@@ -135,7 +135,7 @@ Thumbs.db
 /client/test_data*.u[bs]o
 /local/
 /logs
-/profile.jfr
+*.jfr
 /.profileconfig.json
 /client/src/main/resources/assets.txt
 /xeox-loader/permission-helper/build/

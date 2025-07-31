@@ -75,7 +75,7 @@ public class Item {
      * Get the maximum item stack size.
      *
      * @return the maximum stack size.
-     * @see ItemStack#getCount() 
+     * @see ItemStack#getCount()
      */
     public int getMaxStackSize() {
         return this.maxStackSize;

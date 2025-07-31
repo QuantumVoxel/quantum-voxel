@@ -16,7 +16,6 @@ import dev.ultreon.quantum.ubo.DataTypeRegistry;
 import dev.ultreon.quantum.ubo.types.DataType;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import dev.ultreon.quantum.world.vec.BlockVecSpace;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import org.jetbrains.annotations.NotNull;
@@ -332,159 +331,80 @@ public class PacketIO implements RegistryHandle {
     }
 
     public BitSet readBitSet() {
-        int size = this.readVarInt();
-        byte[] bytes = new byte[size];
-        this.readBytes0(bytes);
-        return BitSet.valueOf(bytes);
+        return BitSet.valueOf(this.readLongArray());
+    }
+
+    public BitSet readBitSet(int maxBytes) {
+        return BitSet.valueOf(this.readLongArray(maxBytes / 8));
     }
 
     public PacketIO writeBitSet(BitSet value) {
-        byte[] bytes = value.toByteArray();
-        this.writeVarInt(bytes.length);
-        this.writeBytes0(bytes);
+        this.writeLongArray(value.toLongArray());
         return this;
     }
 
-    public Vec2f readVec2f() {
-        float x = this.readFloat();
-        float y = this.readFloat();
-
-        return new Vec2f(x, y);
+    public Vec2f readVec2f(Vec2f vector) {
+        return vector.set(this.readFloat(), this.readFloat());
     }
 
     public void writeVec2f(Vec2f vec) {
-        try {
-            this.output.writeFloat(vec.x);
-            this.output.writeFloat(vec.y);
-        } catch (IOException e) {
-            throw new PacketException(e);
-        }
+        this.writeFloat(vec.x).writeFloat(vec.y);
     }
 
-    public Vec3f readVec3f() {
-        float x = this.readFloat();
-        float y = this.readFloat();
-        float z = this.readFloat();
-
-        return new Vec3f(x, y, z);
+    public Vec3f readVec3f(Vec3f vector) {
+        return vector.set(this.readFloat(), this.readFloat(), this.readFloat());
     }
 
     public void writeVec3f(Vec3f vec) {
-        try {
-            this.output.writeFloat(vec.x);
-            this.output.writeFloat(vec.y);
-            this.output.writeFloat(vec.z);
-        } catch (IOException e) {
-            throw new PacketException(e);
-        }
+        this.writeFloat(vec.x).writeFloat(vec.y).writeFloat(vec.z);
     }
 
-    public Vec4f readVec4f() {
-        float x = this.readFloat();
-        float y = this.readFloat();
-        float z = this.readFloat();
-        float w = this.readFloat();
-
-        return new Vec4f(x, y, z, w);
+    public Vec4f readVec4f(Vec4f vector) {
+        return vector.set(this.readFloat(), this.readFloat(), this.readFloat(), this.readFloat());
     }
 
     public void writeVec4f(Vec4f vec) {
-        try {
-            this.output.writeFloat(vec.x);
-            this.output.writeFloat(vec.y);
-            this.output.writeFloat(vec.z);
-            this.output.writeFloat(vec.w);
-        } catch (IOException e) {
-            throw new PacketException(e);
-        }
+        this.writeFloat(vec.x).writeFloat(vec.y).writeFloat(vec.z).writeFloat(vec.w);
     }
 
-    public Vec2d readVec2d() {
-        double x = this.readDouble();
-        double y = this.readDouble();
-
-        return new Vec2d(x, y);
+    public Vec2d readVec2d(Vec2d vector) {
+        return vector.set(this.readDouble(), this.readDouble());
     }
 
     public void writeVec2f(Vec2d vec) {
-        try {
-            this.output.writeDouble(vec.x);
-            this.output.writeDouble(vec.y);
-        } catch (IOException e) {
-            throw new PacketException(e);
-        }
+        this.writeDouble(vec.x).writeDouble(vec.y);
     }
 
-    public Vec3d readVec3d() {
-        double x = this.readDouble();
-        double y = this.readDouble();
-        double z = this.readDouble();
-
-        return new Vec3d(x, y, z);
+    public Vec3d readVec3d(Vec3d vector) {
+        return vector.set(this.readDouble(), this.readDouble(), this.readDouble());
     }
 
     public void writeVec3d(Vec3d vec) {
-        try {
-            this.output.writeDouble(vec.x);
-            this.output.writeDouble(vec.y);
-            this.output.writeDouble(vec.z);
-        } catch (IOException e) {
-            throw new PacketException(e);
-        }
+        this.writeDouble(vec.x).writeDouble(vec.y).writeDouble(vec.z);
     }
 
-    public Vec4d readVec4d() {
-        double x = this.readDouble();
-        double y = this.readDouble();
-        double z = this.readDouble();
-        double w = this.readDouble();
-
-        return new Vec4d(x, y, z, w);
+    public Vec4d readVec4d(Vec4d vector) {
+        return vector.set(this.readDouble(), this.readDouble(), this.readDouble(), this.readDouble());
     }
 
     public void writeVec4d(Vec4d vec) {
-        try {
-            this.output.writeDouble(vec.x);
-            this.output.writeDouble(vec.y);
-            this.output.writeDouble(vec.z);
-            this.output.writeDouble(vec.w);
-        } catch (IOException e) {
-            throw new PacketException(e);
-        }
+        this.writeDouble(vec.x).writeDouble(vec.y).writeDouble(vec.z).writeDouble(vec.w);
     }
 
-    public Vec2i readVec2i() {
-        int x = this.readInt();
-        int y = this.readInt();
-
-        return new Vec2i(x, y);
+    public Vec2i readVec2i(Vec2i vector) {
+        return vector.set(this.readInt(), this.readInt());
     }
 
     public void writeVec2i(Vec2i vec) {
-        try {
-            this.output.writeInt(vec.x);
-            this.output.writeInt(vec.y);
-        } catch (IOException e) {
-            throw new PacketException(e);
-        }
+        this.writeInt(vec.x).writeInt(vec.y);
     }
 
-    public Vec3i readVec3i() {
-        int x = this.readInt();
-        int y = this.readInt();
-        int z = this.readInt();
-
-        return new Vec3i(x, y, z);
+    public Vec3i readVec3i(Vec3i vector) {
+        return vector.set(this.readInt(), this.readInt(), this.readInt());
     }
 
     public void writeVec3i(Vec3i vec) {
-        try {
-            this.output.writeInt(vec.x);
-            this.output.writeInt(vec.y);
-            this.output.writeInt(vec.z);
-        } catch (IOException e) {
-            throw new PacketException(e);
-        }
+        this.writeInt(vec.x).writeInt(vec.y).writeInt(vec.z);
     }
 
     public Vec4i readVec4i() {
@@ -562,12 +482,13 @@ public class PacketIO implements RegistryHandle {
         return result;
     }
 
-    public void writeVarInt(int value) {
+    public PacketIO writeVarInt(int value) {
         while ((value & 0xFFFFFF80) != 0L) {
             writeByte((value & 0x7F) | 0x80);
             value >>>= 7;
         }
         writeByte(value & 0x7F);
+        return this;
     }
 
     public void writeUbo(DataType<?> ubo) {
@@ -1245,11 +1166,11 @@ public class PacketIO implements RegistryHandle {
             return 0;
         }
     }
-    
+
     private static class NullOutputStream extends OutputStream {
         @Override
         public void write(int b) {
-            
+
         }
     }
 }

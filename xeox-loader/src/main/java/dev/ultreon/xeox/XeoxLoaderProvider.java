@@ -3,16 +3,22 @@ package dev.ultreon.xeox;
 import dev.ultreon.xeox.api.*;
 import dev.ultreon.xeox.impl.EntryPoint;
 import dev.ultreon.xeox.impl.IPermissionProvider;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Consumer;
 
 public class XeoxLoaderProvider {
     private static IXeoxLoader instance;
+    private static boolean logged;
 
     public static IXeoxLoader get() {
         if (instance == null) {
-            throw new IllegalStateException("Not loaded by XeoxLoader! Please use XeoxLoader.create(...) to load the game!");
+            if (logged) {
+                return null;
+            }
+            LoggerFactory.getLogger(XeoxLoaderProvider.class).warn("Not loaded by XeoxLoader! Please use XeoxLoader.create(...) to load the game!");
+            logged = true;
         }
         return instance;
     }

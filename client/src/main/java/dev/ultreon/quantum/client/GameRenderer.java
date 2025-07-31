@@ -14,7 +14,10 @@ import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.DevFlag;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.client.api.events.RenderEvents;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.client.api.events.RenderHudEvent;
+import dev.ultreon.quantum.client.api.events.RenderScreenEvent;
+import dev.ultreon.quantum.client.api.events.RenderWorldEvent;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Overlays;
 import dev.ultreon.quantum.client.gui.Renderer;
@@ -60,9 +63,11 @@ public class GameRenderer implements Disposable {
     private boolean disposed;
     private final LineRenderer lineRenderer = new LineRenderer();
     private final float[] mouseVec = new float[2];
-    private final Vector3 tmp3 = new Vector3();
-    private Vec3f tmp1 = new Vec3f();
-    private Vec3f direction = new Vec3f();
+    private final Vector3 tmpV3 = new Vector3();
+    private final Vec3f tmp3F1 = new Vec3f();
+    private final Vec3f tmp3F2 = new Vec3f();
+    private final Vec3d tmp3D1 = new Vec3d();
+    private final Vec3d tmp3D2 = new Vec3d();
 
     /**
      * Constructs a new GameRenderer with the specified client, model batch, and render pipeline.
@@ -158,7 +163,7 @@ public class GameRenderer implements Disposable {
         if (this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed()) {
 
             try (var ignored = QuantumClient.PROFILER.start("world")) {
-                RenderEvents.PRE_RENDER_WORLD.factory().onRenderWorld(world, worldRenderer);
+                EventSystem.postDefault(new RenderWorldEvent.Pre(world, worldRenderer, deltaTime));
 
                 var blurScale = this.blurScale;
                 blurScale += client.screen != null ? Gdx.graphics.getDeltaTime() * 3f : -Gdx.graphics.getDeltaTime() * 3f;
@@ -167,7 +172,7 @@ public class GameRenderer implements Disposable {
                 this.blurScale = blurScale;
 
                 this.renderWorld(deltaTime);
-                RenderEvents.POST_RENDER_WORLD.factory().onRenderWorld(world, worldRenderer);
+                EventSystem.postDefault(new RenderWorldEvent.Post(world, worldRenderer, deltaTime));
             }
         }
     }
@@ -217,13 +222,13 @@ public class GameRenderer implements Disposable {
             // Calculate the direction vector
             float yRot = client.detachedRot.y;
             float xHeadRot = client.detachedRot.x;
-            direction.x = (float) (Math.cos(Math.toRadians(yRot)) * Math.sin(Math.toRadians(xHeadRot)));
-            direction.z = (float) (Math.cos(Math.toRadians(yRot)) * Math.cos(Math.toRadians(xHeadRot)));
-            direction.y = (float) (Math.sin(Math.toRadians(yRot)));
+            tmp3F2.x = (float) (Math.cos(Math.toRadians(yRot)) * Math.sin(Math.toRadians(xHeadRot)));
+            tmp3F2.z = (float) (Math.cos(Math.toRadians(yRot)) * Math.cos(Math.toRadians(xHeadRot)));
+            tmp3F2.y = (float) (Math.sin(Math.toRadians(yRot)));
 
             // Normalize the direction vector
-            direction.nor();
-            this.client.renderCamera.direction.set(direction.x, direction.y, direction.z);
+            tmp3F2.nor();
+            this.client.renderCamera.direction.set(tmp3F2.x, tmp3F2.y, tmp3F2.z);
 
             // Add camera bop. Use easing and animate with cameraBop. Camera Bop is a sort of camera movement while walking.
             float cameraBop = calculateCameraBop(deltaTime);
@@ -303,8 +308,8 @@ public class GameRenderer implements Disposable {
         Array<Entity> toSort = new Array<>(world.getAllEntities());
         worldRenderer.render(client.renderBuffers(), deltaTime);
         toSort.sort((e1, e2) -> {
-            var d1 = e1.getPosition().dst(position);
-            var d2 = e2.getPosition().dst(position);
+            var d1 = e1.getPosition(tmp3D1).dst(position);
+            var d2 = e2.getPosition(tmp3D2).dst(position);
             return Double.compare(d1, d2);
         });
         for (Entity entity : toSort.toArray(Entity.class)) {
@@ -361,7 +366,9 @@ public class GameRenderer implements Disposable {
             mouseVec[1] = GamePlatform.get().isShowingImGui() ? mouseOffset.y / this.client.getGuiScale() : Gdx.input.getY() / this.client.getGuiScale();
 
             processMouseCoords(mouseVec);
-            RenderEvents.PRE_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, mouseVec[0], mouseVec[1], deltaTime);
+
+            EventSystem.postDefault(new RenderScreenEvent.Pre(screen, renderer, mouseVec[0], mouseVec[1], deltaTime));
+
             Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
             renderer.getBatch().enableBlending();
             renderer.getBatch().setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_ONE, GL20.GL_ONE);
@@ -370,6 +377,8 @@ public class GameRenderer implements Disposable {
             screen.render(renderer, deltaTime);
             screen.renderTooltips(renderer, (int) mouseVec[0], (int) mouseVec[1], deltaTime);
             Timing.end("screen");
+
+            EventSystem.postDefault(new RenderScreenEvent.Post(screen, renderer, mouseVec[0], mouseVec[1], deltaTime));
 
             renderTopOverlay(renderer, screen, deltaTime, mouseVec[0], mouseVec[1]);
         }
@@ -397,14 +406,14 @@ public class GameRenderer implements Disposable {
         renderer.flush();
 
         Overlays.MEMORY.render(renderer, deltaTime);
-        RenderEvents.POST_RENDER_SCREEN.factory().onRenderScreen(screen, renderer, x, y, deltaTime);
     }
 
     private void renderHUD(Renderer renderer, ClientWorldAccess world, float deltaTime) {
         if (world != null) {
             try (var ignored = QuantumClient.PROFILER.start("hud")) {
+                if (EventSystem.postCancelable(new RenderHudEvent.Pre(world, renderer, deltaTime))) return;
                 OverlayManager.render(renderer, deltaTime);
-                RenderEvents.RENDER_OVERLAY.factory().onRenderOverlay(renderer, deltaTime);
+                EventSystem.postDefault(new RenderHudEvent.Post(world, renderer, deltaTime));
             }
         }
     }

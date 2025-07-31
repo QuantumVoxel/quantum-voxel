@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.network.server;
 
-import dev.ultreon.quantum.events.PlayerEvents;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.ServerPlayerEvent;
 import dev.ultreon.quantum.network.NetworkChannel;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketListener;
@@ -15,7 +16,6 @@ import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.world.vec.BlockVec;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -146,14 +146,14 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
                     public void onSuccess() {
                         server.placePlayer(player);
 
-                        PlayerEvents.PLAYER_JOINED.factory().onPlayerJoined(player);
+                        EventSystem.postDefault(new ServerPlayerEvent.Join(player));
                         player.sendAllData();
 
                         if (!player.isSpawned()) {
                             player.spawn(player.getPosition(), connection);
                         }
 
-                        PlayerEvents.PLAYER_SPAWNED.factory().onPlayerSpawned(player);
+                        EventSystem.postDefault(new ServerPlayerEvent.Spawned(player));
                     }
                 }
         );

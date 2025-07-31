@@ -32,7 +32,7 @@ public final class S2CPlayerPositionPacket implements Packet<InGameClientPacketH
 
     public static S2CPlayerPositionPacket read(PacketIO buffer) {
         var uuid = buffer.readUuid();
-        var pos = buffer.readVec3d();
+        var pos = buffer.readVec3d(new Vec3d());
         var xHeadRot = buffer.readFloat();
         var xRot = buffer.readFloat();
         var yRot = buffer.readFloat();

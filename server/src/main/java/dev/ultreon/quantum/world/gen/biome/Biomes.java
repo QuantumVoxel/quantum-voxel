@@ -55,12 +55,10 @@ public class Biomes extends GameObject {
         NoiseConfigs noiseConfigs = server.getNoiseConfigs();
 
         void_ = this.register("void", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY)
                 .doesNotGenerate()
                 .build());
         snowyPlains = this.register("snowy_plains", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(-1.0f, 0.0f)
                 .humidityRange(-1.0f, 0.0f)
                 .heightRange(65.6f, 108.0f)
@@ -76,7 +74,6 @@ public class Biomes extends GameObject {
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
         deepTaiga = this.register("deep_taiga", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(-2.0f, -1.0f)
                 .humidityRange(0.0f, 1.0f)
                 .heightRange(65.6f, 108.0f)
@@ -92,7 +89,6 @@ public class Biomes extends GameObject {
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
         taiga = this.register("taiga", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(-1.0f, 0.0f)
                 .humidityRange(0.0f, 1.0f)
                 .heightRange(65.6f, 108.0f)
@@ -108,7 +104,6 @@ public class Biomes extends GameObject {
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
         plains = this.register("plains", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(0.0f, 1.0f)
                 .humidityRange(0.0f, 1.0f)
                 .heightRange(65.6f, 70.5f)
@@ -124,7 +119,6 @@ public class Biomes extends GameObject {
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
         dryPlains = this.register("dry_plains", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(0.0f, 1.0f)
                 .humidityRange(-2.0f, -1.0f)
                 .heightRange(65.6f, 108.0f)
@@ -140,7 +134,6 @@ public class Biomes extends GameObject {
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
         rockyPlains = this.register("rocky_plains", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(0.0f, 1.0f)
                 .humidityRange(-1.0f, 0.0f)
                 .heightRange(65.6f, 108.0f)
@@ -156,7 +149,6 @@ public class Biomes extends GameObject {
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
         coldPlains = this.register("cold_plains", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(0.0f, 1.0f)
                 .humidityRange(-1.0f, 0.0f)
                 .heightRange(65.6f, 108.0f)
@@ -172,7 +164,6 @@ public class Biomes extends GameObject {
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
         frozenPlains = this.register("frozen_plains", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(-2.0f, -1.0f)
                 .humidityRange(0.0f, 1.0f)
                 .heightRange(65.6f, 108.0f)
@@ -186,7 +177,6 @@ public class Biomes extends GameObject {
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
         hills = this.register("hills", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(0.0f, 1.0f)
                 .humidityRange(0.0f, 1.0f)
                 .heightRange(70.5f, 108.0f)
@@ -202,7 +192,6 @@ public class Biomes extends GameObject {
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
         jungle = this.register("jungle", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(0.0f, 2.0f)
                 .humidityRange(1.0f, 2.0f)
                 .heightRange(65.6f, 108.0f)
@@ -218,7 +207,6 @@ public class Biomes extends GameObject {
                 .undergroundFeature(new OreFeature(Blocks.IRON_ORE, 20, new IntRange(4, 6), new IntRange(24, 72)))
                 .build());
         forest = this.register("forest", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(0.0f, 1.0f)
                 .humidityRange(1.0f, 2.0f)
                 .heightRange(65.6f, 108.0f)
@@ -233,7 +221,6 @@ public class Biomes extends GameObject {
                 .surfaceFeature(new TreeFeature(noiseConfigs.tree, Blocks.LOG, Blocks.LEAVES, 0.05f, 3, 6))
                 .build());
         desert = this.register("desert", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(1.0f, 2.0f)
                 .humidityRange(-2.0f, 0.0f)
                 .heightRange(64.0f, 320.0f)
@@ -246,7 +233,6 @@ public class Biomes extends GameObject {
                 .surfaceFeature(new PatchFeature(noiseConfigs.patch, Blocks.SANDSTONE, 0.1f, 4))
                 .build());
         beach = this.register("beach", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(-2.0f, 2.0f)
                 .humidityRange(-2.0f, 2.0f)
                 .heightRange(60.0f, 65.6f)
@@ -256,7 +242,6 @@ public class Biomes extends GameObject {
                 .layer(new WaterTerrainLayer(64))
                 .build());
         mountains = this.register("mountains", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(1.0f, 2.0f)
                 .humidityRange(-2.0f, 0.0f)
                 .heightRange(108.0f, 320.0f)
@@ -267,7 +252,6 @@ public class Biomes extends GameObject {
                 .surfaceFeature(new FoliageFeature(Blocks.SHORT_GRASS, 0.425f, Blocks.GRASS_BLOCK))
                 .build());
         ocean = this.register("ocean", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(0f, 0.5f)
                 .heightRange(-64.0f, 64.0f)
                 .layer(new SurfaceTerrainLayer(Blocks.DIRT, 4))
@@ -277,7 +261,6 @@ public class Biomes extends GameObject {
                 .ocean()
                 .build());
         lukeWarmOcean = this.register("luke_warm_ocean", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(0.5f, 1.0f)
                 .heightRange(-64.0f, 64.0f)
                 .layer(new SurfaceTerrainLayer(Blocks.SAND, 4))
@@ -287,7 +270,6 @@ public class Biomes extends GameObject {
                 .ocean()
                 .build());
         warmOcean = this.register("warm_ocean", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(1.0f, 2.0f)
                 .heightRange(-64.0f, 64.0f)
                 .layer(new SurfaceTerrainLayer(Blocks.SANDSTONE, 4))
@@ -296,7 +278,6 @@ public class Biomes extends GameObject {
                 .ocean()
                 .build());
         coldOcean = this.register("cold_ocean", Biome.builder()
-                .noise(noiseConfigs.genericNoise)
                 .temperatureRange(-2f, 0.0f)
                 .heightRange(-64.0f, 64.0f)
                 .layer(new SurfaceTerrainLayer(Blocks.DIRT, 4))
@@ -306,7 +287,6 @@ public class Biomes extends GameObject {
                 .build());
 
         space = this.register("space", Biome.builder()
-                .noise(noiseConfigs.empty)
                 .temperatureRange(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY)
                 .heightRange(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY)
                 .build());

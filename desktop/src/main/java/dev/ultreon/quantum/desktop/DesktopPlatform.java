@@ -24,6 +24,7 @@ import dev.ultreon.xeox.api.IFileSystem;
 import dev.ultreon.xeox.api.IMod;
 import dev.ultreon.xeox.api.IPath;
 import dev.ultreon.xeox.api.IXeoxLoader;
+import dev.ultreon.xeox.impl.XeoxLoader;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import org.intellij.lang.annotations.Language;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.ConnectException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.http.WebSocketHandshakeException;
 import java.nio.channels.ClosedChannelException;
@@ -63,16 +65,18 @@ public abstract class DesktopPlatform extends GamePlatform {
             System.setProperty("quantum.platform.anglegles", "true");
 
         luaJit = new LuaJit();
-        @Language("lua") String script = "--[[\n" +
-                "print = java.method(java.import('java.lang.System').out, 'println', 'java.lang.Object')\n" +
-                "thread = java.import('java.lang.Thread')(function()\n" +
-                "\n" +
-                "    print('Hello World from LuaJ')\n" +
-                "\n" +
-                "end)\n" +
-                "thread:start()]]\n" +
-                "\n" +
-                "print(\"Hello World from LuaJ\")\n";
+        @Language("lua") String script = """
+                --[[
+                print = java.method(java.import('java.lang.System').out, 'println', 'java.lang.Object')
+                thread = java.import('java.lang.Thread')(function()
+                
+                    print('Hello World from LuaJ')
+                
+                end)
+                thread:start()]]
+                
+                print("Hello World from LuaJ")
+                """;
         luaJit.run(script);
     }
 
@@ -148,7 +152,15 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public Optional<Mod> getMod(String id) {
-        IMod iMod = IXeoxLoader.get().getMod(id);
+        IXeoxLoader iXeoxLoader = IXeoxLoader.get();
+        if (iXeoxLoader == null) {
+            if (id.equals(CommonConstants.NAMESPACE)) {
+                return Optional.ofNullable(getGameMod());
+            }
+            CommonConstants.LOGGER.warn("Quantum Voxel mods unavailable!");
+            return Optional.empty();
+        }
+        IMod iMod = iXeoxLoader.getMod(id);
         if (iMod == null) {
             XeoxMod mod = this.mods.get(id);
             if (mod != null) {
@@ -166,7 +178,12 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public Collection<? extends Mod> getMods() {
-        IXeoxLoader.get().getMods().forEach(mod -> this.mods.put(mod.modId(), new XeoxMod(mod)));
+        IXeoxLoader iXeoxLoader = IXeoxLoader.get();
+        if (iXeoxLoader == null) {
+            CommonConstants.LOGGER.warn("Quantum Voxel mods unavailable!");
+            return Collections.emptyList();
+        }
+        iXeoxLoader.getMods().forEach(mod -> this.mods.put(mod.modId(), new XeoxMod(mod)));
         return this.mods.values();
     }
 
@@ -174,36 +191,66 @@ public abstract class DesktopPlatform extends GamePlatform {
     public void initMods() {
         CommonConstants.LOGGER.info("Initializing mods...");
 
-        IXeoxLoader.get().invokeEntrypoints("common", ModInitializer.class, ModInitializer::onInitialize);
-        IXeoxLoader.get().invokeEntrypoints("server", dev.ultreon.quantum.desktop.ClientModInitializer.class, dev.ultreon.quantum.desktop.ClientModInitializer::onInitializeClient);
+        IXeoxLoader iXeoxLoader = IXeoxLoader.get();
+        if (iXeoxLoader == null) {
+            CommonConstants.LOGGER.warn("Quantum Voxel mods unavailable!");
+            return;
+        }
+        iXeoxLoader.invokeEntrypoints("common", ModInitializer.class, ModInitializer::onInitialize);
+        iXeoxLoader.invokeEntrypoints("server", dev.ultreon.quantum.desktop.ClientModInitializer.class, dev.ultreon.quantum.desktop.ClientModInitializer::onInitializeClient);
     }
 
     @Override
     public boolean isDevEnvironment() {
-        return IXeoxLoader.get().isDevEnvironment();
+        IXeoxLoader iXeoxLoader = IXeoxLoader.get();
+        if (iXeoxLoader == null) {
+            return false;
+        }
+        return iXeoxLoader.isDevEnvironment();
     }
 
     @Override
     public <T> void invokeEntrypoint(String name, Class<T> initClass, Consumer<T> init) {
-        IXeoxLoader.get().invokeEntrypoints(name, initClass, init);
+        IXeoxLoader iXeoxLoader = IXeoxLoader.get();
+        if (iXeoxLoader == null) {
+            CommonConstants.LOGGER.warn("Quantum Voxel entrypoints unavailable!");
+            return;
+        }
+        iXeoxLoader.invokeEntrypoints(name, initClass, init);
     }
 
     @Override
     public Env getEnv() {
+        if (IXeoxLoader.get() == null) {
+            return Env.CLIENT;
+        }
         return switch (IXeoxLoader.get().getEnvironment()) {
             case CLIENT -> Env.CLIENT;
             case SERVER -> Env.SERVER;
-            default -> throw new IllegalArgumentException();
         };
     }
 
     @Override
     public FileHandle getConfigDir() {
+        if (IXeoxLoader.get() == null) {
+            FileHandle config = Gdx.files.local("config");
+            if (!config.exists()) {
+                config.mkdirs();
+            }
+            return config;
+        }
         return new XeoxFileHandle(IXeoxLoader.get().getConfigDir());
     }
 
     @Override
     public FileHandle getGameDir() {
+        if (IXeoxLoader.get() == null) {
+            FileHandle gameDir = Gdx.files.local(".");
+            if (!gameDir.exists()) {
+                gameDir.mkdirs();
+            }
+            return gameDir;
+        }
         return new XeoxFileHandle(IXeoxLoader.get().getGameDir());
     }
 
@@ -219,6 +266,10 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void locateResources() {
+        if (IXeoxLoader.get() == null) {
+            QuantumClient.get().getResourceManager().loadFromAssetsTxt(Gdx.files.internal("assets.txt"));
+            return;
+        }
         IFileSystem filesystem = IXeoxLoader.get().getMod(CommonConstants.NAMESPACE).filesystem();
         if (filesystem == null) {
             CommonConstants.LOGGER.warn("Quantum Voxel resources unavailable!");
@@ -276,6 +327,16 @@ public abstract class DesktopPlatform extends GamePlatform {
 //                }
 //            }
 //        }
+
+        IXeoxLoader iXeoxLoader = IXeoxLoader.get();
+        if (iXeoxLoader == null) {
+            try {
+                QuantumClient.get().getResourceManager().importPackage(Gdx.files.internal("."));
+            } catch (IOException e) {
+                CommonConstants.LOGGER.warn("Importing resources failed for internal", e);
+            }
+            return;
+        }
 
         for (IMod iMod : IXeoxLoader.get().getMods()) {
             IFileSystem filesystem = iMod.filesystem();
@@ -563,7 +624,8 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public boolean isImGuiSupported() {
-        return isWindows() && IXeoxLoader.get().isDevEnvironment();
+        IXeoxLoader iXeoxLoader = IXeoxLoader.get();
+        return isWindows() && iXeoxLoader != null && iXeoxLoader.isDevEnvironment();
     }
 
     @Override
@@ -576,17 +638,74 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public Collection<String> getModIds() {
-        return IXeoxLoader.get().getModIds();
+        IXeoxLoader iXeoxLoader = IXeoxLoader.get();
+        if (iXeoxLoader == null) {
+            return Collections.emptySet();
+        }
+        return iXeoxLoader.getMods().stream().map(IMod::modId).collect(Collectors.toSet());
     }
 
     @Override
     public String getGameVersion() {
-        return IXeoxLoader.get().getGameVersion();
+        return CommonConstants.VERSION;
     }
 
     @Override
     public Mod getGameMod() {
-        return new XeoxMod(IXeoxLoader.get().getMod(CommonConstants.NAMESPACE));
+        IXeoxLoader iXeoxLoader = IXeoxLoader.get();
+        if (iXeoxLoader == null) {
+            return new Mod() {
+                @Override
+                public @NotNull String getId() {
+                    return CommonConstants.NAMESPACE;
+                }
+
+                @Override
+                public @NotNull String getName() {
+                    return "Quantum Voxel";
+                }
+
+                @Override
+                public @NotNull String getVersion() {
+                    return "0.2.0-alpha.2";
+                }
+
+                @Override
+                public @NotNull String getDescription() {
+                    return "E";
+                }
+
+                @Override
+                public @NotNull Collection<String> getAuthors() {
+                    return List.of("Ultreon Studios");
+                }
+
+                @Override
+                public @NotNull ModOrigin getOrigin() {
+                    return ModOrigin.ACTUAL_PATH;
+                }
+
+                @Override
+                public @NotNull Iterable<FileHandle> getRootPaths() {
+                    return Collections.singleton(Gdx.files.internal("."));
+                }
+            };
+        }
+        return new XeoxMod(iXeoxLoader.getMod(CommonConstants.NAMESPACE));
+    }
+
+    @Override
+    public Set<String> getLoadedClasses() {
+        XeoxLoader xeoxLoader = XeoxLoader.get();
+        if (xeoxLoader == null) {
+            return Collections.emptySet();
+        }
+        return xeoxLoader.classLoader.loadedClasses.keySet();
+    }
+
+    @Override
+    public String getFileSep() {
+        return File.separator;
     }
 
     @Override

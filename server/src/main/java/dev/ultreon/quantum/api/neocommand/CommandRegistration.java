@@ -39,25 +39,25 @@ public class CommandRegistration {
                     // Since there aren't any arguments for this overload,
                     // we just get the sender.
                     CommandSender sender = ctx.sender();
-                    
+
                     // As the sender can also be the console or a non-living entity,
                     // we check whether the sender is a living entity.
                     if (!(sender instanceof LivingEntity))
                         return BasicCommandResult.error("You must be a living entity to use this command");
-                    
+
                     // Cast to a living entity
                     LivingEntity livingEntity = (LivingEntity) sender;
 
                     // Just calling kill() should do it :D
                     livingEntity.kill();
-                    
+
                     // So, the player just committed su-, wait, should I say that here?
                     return BasicCommandResult.success("You successfully killed yourself (wait why?)");
                 })
                 .overload(ctx -> {
                     // Get the entity to murder.
                     List<LivingEntity> entity = ctx.get("entity");
-                    
+
                     if (entity.isEmpty())
                         // We are alone in this empty lifeless world,
                         // at least we got an error when running this command...
@@ -65,7 +65,7 @@ public class CommandRegistration {
 
                     // Kill each living being in the list of living entities. Wait, isn't that genocide? :concern:
                     entity.forEach(LivingEntity::kill);
-                    
+
                     // Return success result with the amount they killed. How merciless!
                     return BasicCommandResult.success("You successfully killed " + entity.size() + " entities");
                 }, entitiesOf("entity", entity -> entity instanceof LivingEntity));
@@ -112,7 +112,7 @@ public class CommandRegistration {
                     CommandSender sender = context.sender();
                     if (!(sender instanceof LivingEntity))
                         return BasicCommandResult.error("You must be a living entity to use this command");
-                    
+
                     // Cast sender to LivingEntity since we validated the type
                     LivingEntity livingEntity = (LivingEntity) sender;
 
@@ -120,10 +120,10 @@ public class CommandRegistration {
                     int x = context.get("x");
                     int y = context.get("y");
                     int z = context.get("z");
-                    
+
                     // Teleport living entity to specified coordinates
                     livingEntity.teleportTo(x, y, z);
-                    
+
                     // Return success message with the coordinates
                     return BasicCommandResult.success("You successfully teleported to " + x + ", " + y + ", " + z);
                 }, ints("x"), ints("y"), ints("z"));

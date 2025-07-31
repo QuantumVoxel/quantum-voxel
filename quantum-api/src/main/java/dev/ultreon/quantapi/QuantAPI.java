@@ -6,7 +6,8 @@ import dev.ultreon.quantapi.networking.impl.NetworkManager;
 import dev.ultreon.quantapi.networking.impl.test.TestNetworking;
 import dev.ultreon.quantapi.networking.impl.test.TestPacket;
 import dev.ultreon.quantum.ModInitializer;
-import dev.ultreon.quantum.events.PlayerEvents;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.ServerPlayerEvent;
 import dev.ultreon.quantum.Logger;
 import dev.ultreon.quantum.LoggerFactory;
 import dev.ultreon.xeox.api.IXeoxLoader;
@@ -24,9 +25,9 @@ public class QuantAPI implements ModInitializer {
         NetworkManager.init();
 
         if (IXeoxLoader.get().isDevEnvironment()) {
-            PlayerEvents.PLAYER_JOINED.subscribe(player -> {
+            EventSystem.addListenerDefault(ServerPlayerEvent.Join.class, event -> {
                 Network network = TestNetworking.getNetwork();
-                network.sendPlayer(new TestPacket(), player);
+                network.sendPlayer(new TestPacket(), event.getEntity());
             });
         }
     }

@@ -15,6 +15,7 @@ public class Commands {
         // Create a new command registrant, and save it into the COMMANDS map.
         CommandRegistrant commandRegistrant = new CommandRegistrant(name);
         COMMANDS.put(name, commandRegistrant);
+        ALIASES.put(name, commandRegistrant);
         return commandRegistrant;
     }
 

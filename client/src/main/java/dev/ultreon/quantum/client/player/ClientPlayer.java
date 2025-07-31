@@ -135,15 +135,6 @@ public abstract class ClientPlayer extends Player {
     }
 
     /**
-     * Causes the client player to drop the currently selected item from their inventory.
-     * The actual logic for dropping the item is inherited from the superclass.
-     */
-    @Override
-    public void dropItem() {
-        super.dropItem();
-    }
-
-    /**
      * Computes the directional look vector of the player based on the partial tick time.
      *
      * @param partialTick The partial tick time used for interpolation, ranging from 0.0 to 1.0.

@@ -8,7 +8,9 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CommonRegistries;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.LoadingContext;
-import dev.ultreon.quantum.client.api.events.ClientLifecycleEvents;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.RegistryCreationEvent;
+import dev.ultreon.quantum.client.api.events.ClientLifecycleEvent;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Fonts;
 import dev.ultreon.quantum.client.gui.Hud;
@@ -40,10 +42,8 @@ import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.text.LanguageManager;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.menu.MenuTypes;
-import dev.ultreon.quantum.registry.SimpleRegistry;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.registry.Registry;
-import dev.ultreon.quantum.registry.event.RegistryEvents;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.Task;
 
@@ -166,7 +166,8 @@ class QuantumClientLoader implements Runnable {
         LoadingContext.withinContext(new LoadingContext(CommonConstants.NAMESPACE), () -> {
             RenderPass.nopInit();
             Registries.nopInit();
-//            RegistryEvents.REGISTRY_CREATION.factory().onRegistryCreation();
+
+            EventSystem.postDefault(new RegistryCreationEvent(CommonConstants.NAMESPACE));
         });
 
         LoadingContext.withinContext(new LoadingContext(CommonConstants.NAMESPACE), () -> {
@@ -225,7 +226,7 @@ class QuantumClientLoader implements Runnable {
 
         progress(client, 0.99F);
 
-        ClientLifecycleEvents.CLIENT_STARTED.factory().onGameLoaded(client);
+        EventSystem.postDefault(new ClientLifecycleEvent.ClientLoaded(client));
 
         ClientParticleRegistry.registerAll();
 //        ClientParticleRegistry.loadAll(client.batches);

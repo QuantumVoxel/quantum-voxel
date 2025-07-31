@@ -48,12 +48,12 @@ public interface Mod {
 
     /**
      * Get the icon path of the mod for the given size.
-     * 
+     *
      * @param size the size
      * @return the icon path or an empty optional if unavailable
      */
     @NotNull
-    default Optional<String> getIconPath(int size) {
+    default Optional<FileHandle> getIconPath(int size) {
         return Optional.empty();
     }
 

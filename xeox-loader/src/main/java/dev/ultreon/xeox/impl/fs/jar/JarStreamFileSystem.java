@@ -5,9 +5,9 @@ import dev.ultreon.xeox.api.IPath;
 import dev.ultreon.xeox.impl.fs.SeekableMemoryByteChannel;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.channels.ByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ public class JarStreamFileSystem implements IFileSystem {
     
     SeekableByteChannel channelFor(String path) throws IOException {
         if (entries.isEmpty() || !entries.containsKey(path)) {
-            return new SeekableMemoryByteChannel(locateEntry(path), true);
+            return new SeekableMemoryByteChannel(readZip(path), true);
         }
         
         return new SeekableMemoryByteChannel(entries.get(path), true);
@@ -32,23 +32,42 @@ public class JarStreamFileSystem implements IFileSystem {
     
     InputStream streamFor(String path) throws IOException {
         if (entries.isEmpty() || !entries.containsKey(path)) {
-            return new ByteArrayInputStream(locateEntry(path));
+            return new ByteArrayInputStream(readZip(path));
         }
         
         return new ByteArrayInputStream(entries.get(path));
     }
 
-    private byte[] locateEntry(String path) throws IOException {
+    private byte[] readZip(String path) throws IOException {
         JarEntry nextJarEntry = inputStream.getNextJarEntry();
         while (nextJarEntry != null) {
-            byte[] value = inputStream.readAllBytes();
-            entries.put(path, value);
-            if (path.equals(nextJarEntry.getName())) {
-                return value;
+            long size = nextJarEntry.getSize();
+            if (size > Integer.MAX_VALUE) {
+                throw new IOException("File is too large to fit in memory");
             }
+
+            byte[] buffer = new byte[1024];
+            byte[] value = new byte[(int) size];
+            int read;
+            int index = 0;
+            while ((read = inputStream.read(buffer)) != -1) {
+                if (index + read > value.length) throw new IOException("Size mismatch in zip file: " + path + " (" + index + " + " + read + " > " + value.length + ")");
+
+                System.arraycopy(buffer, 0, value, index, read);
+                index += read;
+
+                if (index == value.length) break;
+                if (inputStream.available() <= 0) break;
+            }
+            entries.put(path, value);
             nextJarEntry = inputStream.getNextJarEntry();
         }
-        throw new IOException("Could not find entry " + path);
+
+        byte[] bytes = entries.get(path);
+        if (bytes == null) {
+            throw new FileNotFoundException(path);
+        }
+        return bytes;
     }
 
     @Override

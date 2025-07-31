@@ -42,7 +42,7 @@ public class SlabBlock extends Block {
 
     @Override
     public BlockState onPlacedBy(BlockState blockMeta, BlockVec pos, UseItemContext context) {
-        double y = context.result().getVec().y % 1;
+        double y = context.hit().getVec().y % 1;
         return blockMeta.with(StateProperties.SLAB_TYPE, y < 0.5 ? Type.TOP : Type.BOTTOM);
     }
 

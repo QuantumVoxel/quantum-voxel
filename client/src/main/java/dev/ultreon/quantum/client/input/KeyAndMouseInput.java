@@ -6,9 +6,10 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.api.events.gui.ScreenEvents;
+import dev.ultreon.quantum.client.api.events.InputEvent;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
@@ -163,6 +164,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         GameInput.switchTo(this);
 
         if (WindowManager.keyPress(keyCode)) return;
+        if (EventSystem.postCancelable(new InputEvent.KeyPressed(keyCode))) return;
 
         if (!isActive()) return;
 
@@ -173,7 +175,6 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         // Invoke the key press event for the current screen
         Screen currentScreen = this.client.screen;
         if (currentScreen != null && !Gdx.input.isCursorCatched() && currentScreen.keyPress(keyCode)) {
-            ScreenEvents.KEY_PRESS.factory().onKeyPressScreen(keyCode);
             return;
         }
 
@@ -220,19 +221,25 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         else if (KeyAndMouseInput.SCREENSHOT_KEY.is(keyCode)) client.getScreenshots().screenshot(screenshot -> {
         });
         else if (KeyAndMouseInput.HIDE_HUD_KEY.is(keyCode)) client.hideHud = !client.hideHud;
-        else if (KeyAndMouseInput.FULL_SCREEN_KEY.is(keyCode)) client.setFullScreen(!client.isFullScreen());
+        else if (KeyAndMouseInput.FULL_SCREEN_KEY.is(keyCode)) client.setFullScreen(client.isWindowed());
         else if (KeyAndMouseInput.THIRD_PERSON_KEY.is(keyCode)) client.cyclePlayerView();
         else if (client.world != null && KeyAndMouseInput.PAUSE_KEY.is(keyCode) && Gdx.input.isCursorCatched())
             client.showScreen(new PauseScreen());
         else if (KeyAndMouseInput.PAUSE_KEY.is(keyCode) && !Gdx.input.isCursorCatched() && client.screen instanceof PauseScreen)
             client.showScreen(null);
         else if (KeyAndMouseInput.DROP_ITEM_KEY.is(keyCode)) player.dropItem();
+
+        InputEvent.HandleKeyBinds event = new InputEvent.HandleKeyBinds(keyCode, currentScreen, player);
+        EventSystem.postDefault(event);
     }
 
     @Override
     public boolean keyUp(int keyCode) {
         GamePlatform.get().catchNative(() -> {
             if (!KEYS.get(keyCode)) return;
+
+            if (WindowManager.keyRelease(keyCode)) return;
+            if (EventSystem.postCancelable(new InputEvent.KeyReleased(keyCode))) return;
 
             KEYS.clear(keyCode);
 
@@ -242,7 +249,6 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
             Screen currentScreen = client.screen;
             if (currentScreen != null) {
-                ScreenEvents.KEY_RELEASE.factory().onKeyReleaseScreen(keyCode);
                 currentScreen.keyRelease(keyCode);
             }
         });
@@ -418,11 +424,11 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     public boolean keyTyped(char character) {
         GamePlatform.get().catchNative(() -> {
             if (WindowManager.keyTyped(character)) return;
+            if (EventSystem.postCancelable(new InputEvent.CharTyped(character))) return;
 
             // Check if there is a current screen and if so, trigger the CHAR_TYPE event
             Screen currentScreen = this.client.screen;
             if (currentScreen != null && lastKeyCancelFrame != Gdx.graphics.getFrameId()) {
-                ScreenEvents.CHAR_TYPE.factory().onCharTypeScreen(character);
                 currentScreen.charType(character);
             }
         });
@@ -446,6 +452,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             int adjustedY = this.client.getMousePos().y;
 
             if (WindowManager.mouseMoved(adjustedX, adjustedY)) return;
+            if (EventSystem.postCancelable(new InputEvent.MouseMoved(adjustedX, adjustedY))) return;
 
             // Check if the cursor is already caught
             if (Gdx.input.isCursorCatched())
@@ -474,7 +481,8 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             int adjustedX = this.client.getMousePos().x;
             int adjustedY = this.client.getMousePos().y;
 
-            WindowManager.mouseDragged(adjustedX, adjustedY);
+            if (WindowManager.mouseDragged(adjustedX, adjustedY)) return;
+            EventSystem.postCancelable(new InputEvent.MouseDragged(adjustedX, adjustedY));
         });
         return false;
     }
@@ -496,6 +504,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             int adjustedY = this.client.getMousePos().y;
 
             if (WindowManager.mousePress(adjustedX, adjustedY, button)) return;
+            if (EventSystem.postCancelable(new InputEvent.MousePressed(button, adjustedX, adjustedY))) return;
 
             Screen currentScreen = this.client.screen;
 
@@ -575,6 +584,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             int adjustedY = this.client.getMousePos().y;
 
             if (WindowManager.mouseRelease(adjustedX, adjustedY, button)) return;
+            if (EventSystem.postCancelable(new InputEvent.MouseReleased(button, adjustedX, adjustedY))) return;
 
             // Stop breaking action
             this.client.stopBreaking();

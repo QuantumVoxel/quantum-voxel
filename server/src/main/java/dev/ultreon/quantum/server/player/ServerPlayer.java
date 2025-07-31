@@ -4,6 +4,10 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.api.commands.variables.PlayerVariables;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.MenuEvent;
+import dev.ultreon.quantum.api.events.ServerPlayerEvent;
+import dev.ultreon.quantum.api.events.tick.ServerPlayerTickEvent;
 import dev.ultreon.quantum.api.neocommand.CommandRegistrant;
 import dev.ultreon.quantum.api.neocommand.Commands;
 import dev.ultreon.quantum.block.Block;
@@ -15,8 +19,6 @@ import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.LivingEntity;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.events.MenuEvents;
-import dev.ultreon.quantum.events.PlayerEvents;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.Items;
 import dev.ultreon.quantum.item.UseItemContext;
@@ -223,6 +225,8 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     @Override
     public void tick() {
+        if (EventSystem.postCancelable(new ServerPlayerTickEvent.Pre(this))) return;
+
         // Reset the blockBrokenTick flag
         this.blockBrokenTick = false;
 
@@ -235,7 +239,6 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         velocityX = 0;
         velocityY = 0;
         velocityZ = 0;
-
 
         if (this.world.isServerSide()) {
             float curSpeed = (float) this.tmp3Da.set(this.ox, this.oy, this.oz).dst(this.x, this.y, this.z);
@@ -265,6 +268,8 @@ public class ServerPlayer extends Player implements CacheablePlayer {
                 // Auto-close the menu if the distance is greater than 5
                 this.autoCloseMenu();
         }
+
+        EventSystem.postDefault(new ServerPlayerTickEvent.Post(this));
     }
 
     @Override
@@ -566,7 +571,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         }
 
         // Check if the menu open event is canceled, if so, return early
-        if (MenuEvents.MENU_OPEN.factory().onMenuOpen(menu, this).isCanceled())
+        if (EventSystem.postCancelable(new MenuEvent.Open(menu, this)))
             return;
 
         // Call the superclass meth\od to open the menu
@@ -624,7 +629,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     public void setInitialItems() {
         // Check if the event for initial items is canceled
-        if (PlayerEvents.INITIAL_ITEMS.factory().onPlayerInitialItems(this, this.inventory).isCanceled()) {
+        if (EventSystem.postCancelable(new ServerPlayerEvent.InitialItems(this, this.inventory))) {
             return;
         }
         // Add initial items to the player's inventory
@@ -827,7 +832,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
     public UseResult useItem(BlockHit hitResult, ItemStack stack, ItemSlot slot) {
         UseItemContext ctx = new UseItemContext(getWorld(), this, hitResult, stack, 1F);
-        BlockHit result = (BlockHit) ctx.result();
+        BlockHit result = (BlockHit) ctx.hit();
         if (result == null)
             return UseResult.SKIP;
 

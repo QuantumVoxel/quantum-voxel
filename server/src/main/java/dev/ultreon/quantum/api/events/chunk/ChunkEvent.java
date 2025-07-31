@@ -1,21 +1,18 @@
 package dev.ultreon.quantum.api.events.chunk;
 
+import dev.ultreon.quantum.api.events.world.WorldAccessEvent;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.WorldAccess;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public abstract class ChunkEvent {
-    private final @NotNull Chunk chunk;
+public interface ChunkEvent extends WorldAccessEvent {
+    @Nullable Chunk getChunk();
 
-    public ChunkEvent(@NotNull Chunk chunk) {
-        this.chunk = chunk;
-    }
-
-    public @NotNull Chunk getChunk() {
-        return chunk;
-    }
-
-    public WorldAccess getWorld() {
-        return chunk.getWorld();
+    @Override
+    default @Nullable WorldAccess getWorld() {
+        if(getChunk() == null) {
+            return null;
+        }
+        return getChunk().getWorld();
     }
 }

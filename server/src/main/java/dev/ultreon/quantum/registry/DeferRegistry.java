@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.registry;
 
-import dev.ultreon.quantum.registry.event.RegistryEvents;
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +32,10 @@ public class DeferRegistry<T> {
     }
 
     public void register() {
-        RegistryEvents.AUTO_REGISTER.subscribe((modId, registry) -> {
+        EventSystem.addListenerDefault(AutoRegisterEvent.class, event -> {
+            String modId = event.getModId();
+            Registry<?> registry = event.getRegistry();
+
             if (!registry.getType().equals(this.registry.getType()) || !this.modId.equals(modId)) {
                 return;
             }

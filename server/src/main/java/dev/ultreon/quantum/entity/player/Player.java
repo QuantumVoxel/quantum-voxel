@@ -2,12 +2,13 @@ package dev.ultreon.quantum.entity.player;
 
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.MenuEvent;
+import dev.ultreon.quantum.api.events.ServerPlayerEvent;
 import dev.ultreon.quantum.entity.Attribute;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.LivingEntity;
-import dev.ultreon.quantum.events.ItemEvents;
-import dev.ultreon.quantum.events.MenuEvents;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.*;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
@@ -351,7 +352,7 @@ public abstract class Player extends LivingEntity {
      */
     public Hit rayCast() {
         Ray ray1 = new Ray(this.getPosition().add(0, this.getEyeHeight(), 0), this.getLookVector());
-        return this.world.rayCast(ray1, this, this.getReach(), CommonConstants.VEC3D_0_C);
+        return this.world.rayCast(ray1, this, this.getReach(), CommonConstants.VEC3D);
     }
 
     @Override
@@ -470,7 +471,7 @@ public abstract class Player extends LivingEntity {
 
         if (this instanceof ServerPlayer) {
             ServerPlayer serverPlayer = (ServerPlayer) this;
-            MenuEvents.MENU_CLOSE.factory().onMenuClose(this.openMenu, serverPlayer);
+            EventSystem.postDefault(new MenuEvent.Close(this.openMenu, serverPlayer));
         }
 
         if (!(this.openMenu instanceof Inventory)) {
@@ -519,7 +520,7 @@ public abstract class Player extends LivingEntity {
      * @return The closest entity intersecting with the ray, or null if no intersection is found.
      */
     public @Nullable Entity rayCast(Iterable<Entity> entities) {
-        Ray ray = new Ray(this.getPosition(), this.getLookVector());
+        Ray ray = new Ray(this.getPosition(tmp3D1), this.getLookVector(tmp3D2));
         boolean seen = false;
         Entity best = null;
         Comparator<Entity> comparator = Comparator.comparing(entity -> entity.getPosition().dst(ray.origin));
@@ -638,8 +639,10 @@ public abstract class Player extends LivingEntity {
      * @param itemStack the item stack to be dropped in the world
      */
     public void drop(ItemStack itemStack) {
-        this.world.drop(itemStack, this.getPosition());
-        ItemEvents.DROPPED.factory().onDropped(itemStack);
+        if (this instanceof ServerPlayer && EventSystem.postCancelable(new ServerPlayerEvent.ItemDropped((ServerPlayer) this, itemStack)))
+            return;
+
+        this.world.drop(itemStack, this.getPosition(tmp3D1));
     }
 
     /**

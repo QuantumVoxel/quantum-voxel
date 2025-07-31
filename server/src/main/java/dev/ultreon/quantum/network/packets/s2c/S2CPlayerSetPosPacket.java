@@ -20,7 +20,7 @@ public final class S2CPlayerSetPosPacket implements Packet<InGameClientPacketHan
     }
 
     public static S2CPlayerSetPosPacket read(PacketIO buffer) {
-        var pos = buffer.readVec3d();
+        var pos = buffer.readVec3d(new Vec3d());
 
         return new S2CPlayerSetPosPacket(pos);
     }

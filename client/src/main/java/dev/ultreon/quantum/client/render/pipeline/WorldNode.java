@@ -14,6 +14,7 @@ import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
+import dev.ultreon.quantum.util.Vec3d;
 
 import static com.badlogic.gdx.graphics.GL30.GL_DEPTH_COMPONENT24;
 import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
@@ -27,6 +28,9 @@ import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public class WorldNode extends WorldRenderNode {
+
+    private final Vec3d tmp3D1 = new Vec3d();
+    private final Vec3d tmp3D2 = new Vec3d();
 
     @Override
     public void render(ObjectMap<String, Texture> textures, GameCamera camera, float deltaTime) {
@@ -43,8 +47,8 @@ public class WorldNode extends WorldRenderNode {
         Array<Entity> toSort = new Array<>(world.getAllEntities());
         worldRenderer.render(client.renderBuffers(), deltaTime);
         toSort.sort((e1, e2) -> {
-            var d1 = e1.getPosition().dst(position);
-            var d2 = e2.getPosition().dst(position);
+            var d1 = e1.getPosition(tmp3D1).dst(position);
+            var d2 = e2.getPosition(tmp3D2).dst(position);
             return Double.compare(d1, d2);
         });
         for (Entity entity : toSort.toArray(Entity.class)) {

@@ -7,8 +7,9 @@ import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.JsonReader;
 
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.api.events.ClientRegistrationEvents;
+import dev.ultreon.quantum.client.api.events.RegisterEntityModelsEvent;
 import dev.ultreon.quantum.client.model.entity.EntityModel;
 import dev.ultreon.quantum.client.resources.ContextAwareReloadable;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
@@ -152,7 +153,9 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
 
             Model model = QuantumClient.invokeAndWait(() -> {
                 FileHandle resource = QuantumClient.resource(mappedId);
-                if (!(resource instanceof ResourceFileHandle)) throw new RuntimeException("Invalid resource handle: " + resource.getClass().getName());
+                if (!(resource instanceof ResourceFileHandle)) {
+                    LOGGER.warn("Invalid resource handle: {}", resource.getClass().getName());
+                }
                 return MODEL_LOADER.loadModel(resource, fileName -> client.getTextureManager().getTexture(new NamespaceID(fileName).mapPath(path -> {
                     if (path.startsWith("models/entity/")) {
                         path = path.substring("models/entity/".length());
@@ -176,8 +179,7 @@ public class EntityModelRegistry implements ContextAwareReloadable, Disposable {
             this.finishedRegistry.put(e.getKey(), model);
         }
 
-        // Call the onRegister method of the factory in ENTITY_MODELS
-        ClientRegistrationEvents.ENTITY_MODELS.factory().onRegister();
+        EventSystem.postDefault(new RegisterEntityModelsEvent(resourceManager, context));
     }
     
     /**

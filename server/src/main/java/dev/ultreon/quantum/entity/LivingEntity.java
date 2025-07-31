@@ -1,17 +1,18 @@
 package dev.ultreon.quantum.entity;
 
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.api.ModApi;
-import dev.ultreon.quantum.api.events.entity.LivingEntityDeathEvent;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.entity.EntityEvent;
+import dev.ultreon.quantum.api.events.entity.LivingEntityEvent;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.entity.ai.Navigator;
 import dev.ultreon.quantum.entity.component.AirSupply;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.entity.player.Temperature;
-import dev.ultreon.quantum.events.EntityEvents;
-import dev.ultreon.quantum.events.api.ValueEventResult;
+import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.food.AppliedEffect;
+import dev.ultreon.quantum.item.food.StatusEffect;
 import dev.ultreon.quantum.network.packets.s2c.S2CRemoveEntityPacket;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.Vec3d;
@@ -24,7 +25,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public abstract class LivingEntity extends Entity {
     public boolean walking;
@@ -43,9 +46,9 @@ public abstract class LivingEntity extends Entity {
     protected float lastDamage;
     protected @Nullable DamageSource lastDamageSource;
     private int age;
-    private final List<AppliedEffect> appliedEffects = new ArrayList<>();
+    private final Set<AppliedEffect> appliedEffects = new LinkedHashSet<>();
     private boolean tagged;
-    private Navigator navigator;
+    private Navigator navigator = this.set(Navigator.class, new Navigator(this));
     private final AirSupply airSupply = this.set(AirSupply.class, new AirSupply(10));
     protected double temperature;
     protected double temperatureGoal;
@@ -121,6 +124,7 @@ public abstract class LivingEntity extends Entity {
         }
 
         // Check if the entity is in the void and apply damage
+        //noinspection deprecation
         if (this.isInVoid()) {
             this.hurtFromVoid();
         }
@@ -130,7 +134,7 @@ public abstract class LivingEntity extends Entity {
             this.health = 0;
 
             // Trigger entity death event if not already dead and the event is not canceled
-            if (!this.isDead && !ModApi.getGlobalEventHandler().call(new LivingEntityDeathEvent(this, lastDamageSource))) {
+            if (!this.isDead && !EventSystem.postCancelable(new LivingEntityEvent.Death(this, lastDamageSource))) {
                 this.isDead = true;
                 this.onDeath(DamageSource.NOTHING);
             }
@@ -141,6 +145,20 @@ public abstract class LivingEntity extends Entity {
 
         // Call the superclass tick method
         super.tick();
+    }
+
+    @Override
+    public Vec3d getLookVector(Vec3d direction) {
+        this.yRot = Mth.clamp(this.yRot, -89.9F, 89.9F);
+        direction.set(
+                (float) (Math.cos(Math.toRadians(this.yRot)) * Math.sin(Math.toRadians(this.xHeadRot))),
+                (float) (Math.cos(Math.toRadians(this.yRot)) * Math.cos(Math.toRadians(this.xHeadRot))),
+                (float) Math.sin(Math.toRadians(this.yRot))
+        );
+
+        // Normalize the direction vector
+        direction.nor();
+        return direction;
     }
 
     protected void tickTemperature() {
@@ -190,6 +208,7 @@ public abstract class LivingEntity extends Entity {
     }
 
     @Override
+    @Deprecated
     public Vec3d getLookVector() {
         // Calculate the direction vector
         Vec3d direction = new Vec3d();
@@ -235,14 +254,14 @@ public abstract class LivingEntity extends Entity {
      * @param source the source of the damage
      */
     public final void hurt(float damage, DamageSource source) {
-        // Check if the entity is already dead, has no health, or has temporary invincibility
-        if (this.isDead() || this.getHealth() <= 0 || (this.isInvincible() && !source.byPassInvincibility()) || (this.damageImmunity > 0))
-            return;
-
         // Trigger entity damage event
-        ValueEventResult<Float> result = EntityEvents.DAMAGE.factory().onEntityDamage(this, source, damage);
-        Float value = result.getValue();
-        if (value != null) damage = value;
+        EntityEvent.Damage event = new EntityEvent.Damage(this, source, damage);
+        if (EventSystem.postCancelable(event)) return;
+        damage = event.getDamage();
+
+        // Check if the entity is already dead, has no health, or has temporary invincibility
+        if (!event.isBypassingImmunity() && (this.isDead() || this.getHealth() <= 0 || (this.isInvincible() && !source.byPassInvincibility()) || (this.damageImmunity > 0)))
+            return;
 
         // Check if custom onHurt behavior should be executed
         if (this.onHurt(damage, source)) return;
@@ -254,7 +273,8 @@ public abstract class LivingEntity extends Entity {
         }
 
         // Ensure damage is not negative
-        damage = Math.max(damage, 0);
+        if (event.isIgnoringLimits())
+            damage = Math.max(damage, 0);
 
         // Update health and damage immunity
         this.oldHealth = this.health;
@@ -268,7 +288,7 @@ public abstract class LivingEntity extends Entity {
             this.health = 0;
 
             // Trigger entity death event and handle death
-            if (!EntityEvents.DEATH.factory().onEntityDeath(this, source).isCanceled()) {
+            if (!EventSystem.postCancelable(new LivingEntityEvent.Death(this, source))) {
                 this.isDead = true;
                 this.onDeath(source);
             }
@@ -323,8 +343,26 @@ public abstract class LivingEntity extends Entity {
         this.markRemoved();
     }
 
-    public void onDropItems(DamageSource source) {
+    public final void onDropItems(DamageSource source) {
+        List<ItemStack> drops = getDrops();
+        if (EventSystem.postCancelable(new LivingEntityEvent.DropItems(this, drops, source))) {
+            drops.clear();
+        }
 
+        for (ItemStack drop : drops) {
+            this.world.drop(drop, getPosition(tmp3D1));
+        }
+    }
+
+    /**
+     * Returns the drops for when the entity 'dies'.
+     * The result can be modified, and doesn't affect constant loot.
+     * <p>
+     * For implementation: Make sure the returned values are mutable, and do not mess with the loot.
+     * The list may be modified by third parties.
+     */
+    private List<ItemStack> getDrops() {
+        return new ArrayList<>();
     }
 
     /**
@@ -437,7 +475,7 @@ public abstract class LivingEntity extends Entity {
     }
 
     public BlockState getBuriedBlock() {
-        Vec3d add = getPosition().add(0, getEyeHeight(), 0);
+        Vec3d add = getPosition(tmp3D1).add(0, getEyeHeight(), 0);
         return world.get((int) Math.floor(add.x), (int) Math.floor(add.y), (int) Math.floor(add.z));
     }
 
@@ -468,5 +506,33 @@ public abstract class LivingEntity extends Entity {
 
     public void setLastAttacker(Entity entity) {
         this.lastAttacker = entity;
+    }
+
+    public void applyEffect(StatusEffect effect, int duration, int amplifier) {
+        this.applyEffect(new AppliedEffect(effect, duration, amplifier));
+    }
+
+    public void removeEffect(StatusEffect effect) {
+        this.appliedEffects.removeIf(appliedEffect -> appliedEffect.getEffect() == effect);
+    }
+
+    public Set<AppliedEffect> getAppliedEffects() {
+        return appliedEffects;
+    }
+
+    public boolean isTagged() {
+        return tagged;
+    }
+
+    public void setTagged(boolean tagged) {
+        this.tagged = tagged;
+    }
+
+    public Navigator getNavigator() {
+        return navigator;
+    }
+
+    public boolean isAlive() {
+        return !isDead && getHealth() > 0;
     }
 }

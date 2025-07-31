@@ -26,14 +26,27 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @param x The x coordinate.
      * @param z The z coordinate.
      */
-    @Deprecated
     public ChunkVec(int x, int y, int z) {
         this(x, y, z, ChunkVecSpace.WORLD);
     }
 
-    @Deprecated
     public ChunkVec() {
         this(ChunkVecSpace.WORLD);
+    }
+
+    @Override
+    public ChunkVec set(Vec3i vec) {
+        return (ChunkVec) set(vec.x, vec.y, vec.z);
+    }
+
+    @Override
+    public ChunkVec set(int x, int y, int z) {
+        return (ChunkVec) super.set(x, y, z);
+    }
+
+    @Override
+    public Vec3i set(int v) {
+        return (Vec3i) super.set(v);
     }
 
     public ChunkVec(int x, int y, int z, ChunkVecSpace space) {

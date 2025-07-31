@@ -101,6 +101,7 @@ public class WorldSelectionScreen extends Screen {
     }
 
     private void editWorld(TextButton button) {
+        if (this.selected == null) return;
         this.client.showScreen(new WorldEditScreen(selected));
     }
 

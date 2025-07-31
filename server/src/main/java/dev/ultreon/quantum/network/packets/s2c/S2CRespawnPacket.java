@@ -16,7 +16,7 @@ public final class S2CRespawnPacket implements Packet<InGameClientPacketHandler>
     }
 
     public static S2CRespawnPacket read(PacketIO buffer) {
-        var pos = buffer.readVec3d();
+        var pos = buffer.readVec3d(new Vec3d());
 
         return new S2CRespawnPacket(pos);
     }

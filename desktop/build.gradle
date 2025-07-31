@@ -82,6 +82,7 @@ dependencies {
     implementation api(project(":server"))
     implementation api(project(":dedicated"))
     implementation api(project(":xeox-loader"))
+    implementation api(project(":block-studio"))
     runtimeOnly project(":mixinprovider")
 
     implementation api("com.formdev:flatlaf:3.2.1")
@@ -188,7 +189,17 @@ dependencies {
 
     // ImGui
     implementation api("io.github.spair:imgui-java-binding:$imGuiVersion")
-    implementation api("io.github.spair:imgui-java-lwjgl3:$imGuiVersion")
+    implementation api("io.github.spair:imgui-java-lwjgl3:$imGuiVersion") {
+        exclude group: "org.lwjgl", module: "lwjgl"
+        exclude group: "org.lwjgl", module: "lwjgl-bom"
+        exclude group: "org.lwjgl", module: "lwjgl-glfw"
+        exclude group: "org.lwjgl", module: "lwjgl-egl"
+        exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
+        exclude group: "org.lwjgl", module: "lwjgl-openal"
+        exclude group: "org.lwjgl", module: "lwjgl-opengl"
+        exclude group: "org.lwjgl", module: "lwjgl-opengles"
+        exclude group: "org.lwjgl", module: "lwjgl-stb"
+    }
     implementation api("io.github.spair:imgui-java-natives-linux:$imGuiVersion")
     implementation api("io.github.spair:imgui-java-natives-macos:$imGuiVersion")
     implementation api("io.github.spair:imgui-java-natives-windows:$imGuiVersion")

@@ -4,7 +4,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IdentityMap;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
-import dev.ultreon.quantum.events.LoadingEvent;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.LoadingEvent;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Menu;
 import dev.ultreon.quantum.registry.Registries;
@@ -125,7 +126,7 @@ public class RecipeManager extends GameObject {
 
     public void fireRecipeModifications() {
         for (RecipeType<?> type : Registries.RECIPE_TYPE.values()) {
-            LoadingEvent.MODIFY_RECIPES.factory().onModifyRecipes(this, type, this.registryMap.get(type));
+            EventSystem.postDefault(new LoadingEvent.ModifyRecipes(this, type, this.registryMap.get(type)));
         }
     }
 
@@ -139,7 +140,7 @@ public class RecipeManager extends GameObject {
         this.registryMap.clear();
         this.registryMap = null;
 
-        LoadingEvent.UNLOAD_RECIPES.factory().onRecipeState(this);
+        EventSystem.postDefault(new LoadingEvent.UnloadRecipes(this));
     }
 
     public void reload(ReloadContext context) {

@@ -36,7 +36,7 @@ apply plugin: 'java'
 apply plugin: 'java-library'
 
 @Language("jvm-class-name")
-def mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotServer'
+def mainClass = 'dev.ultreon.xeox.impl.main.Main'
 
 group projectGroup // https://maven.apache.org/guides/mini/guide-naming-conventions.html
 

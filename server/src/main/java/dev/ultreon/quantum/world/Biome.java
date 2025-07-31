@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.world;
 
-import dev.ultreon.quantum.api.ModApi;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.WorldLifecycleEvent;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.BlockState;
-import dev.ultreon.quantum.events.WorldLifecycleEvents;
 import dev.ultreon.quantum.registry.RegistryKeys;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.ubo.types.MapType;
@@ -14,10 +14,6 @@ import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.gen.layer.GroundTerrainLayer;
 import dev.ultreon.quantum.world.gen.layer.SurfaceTerrainLayer;
 import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
-import dev.ultreon.quantum.world.gen.noise.DomainWarping;
-import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
-import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,8 +69,7 @@ public abstract class Biome {
     public final void buildLayers() {
         this.onBuildLayers(this.layers, this.surfaceFeatures);
 
-        ModApi.getGlobalEventHandler().call(new BiomeLayersBuilt(this, this.layers, this.surfaceFeatures));
-        WorldLifecycleEvents.BIOME_LAYERS_BUILT.factory().onBiomeLayersBuilt(this, this.layers, this.surfaceFeatures);
+        EventSystem.postDefault(new BiomeLayersBuilt(this, this.layers, this.surfaceFeatures));
     }
 
     protected abstract void onBuildLayers(List<TerrainLayer> layers, List<TerrainFeature> features);
@@ -87,15 +82,12 @@ public abstract class Biome {
         return height >= this.heightStart && height < this.heightEnd;
     }
 
-    public BiomeGenerator create(ServerWorld world, long seed) {
-//        WorldEvents.CREATE_BIOME.factory().onCreateBiome(world, world.getGenerator().getLayerDomain(), this.layers, this.surfaceFeatures);
+    public BiomeGenerator create(ServerWorld world) {
+        EventSystem.postDefault(new WorldLifecycleEvent.CreateBiome(world, this, world.getGenerator().getLayerDomain(), this.layers, this.surfaceFeatures));
 
         this.layers.forEach(layer -> layer.create(world));
         this.surfaceFeatures.forEach(feature -> feature.create(world));
         this.undergroundFeatures.forEach(feature -> feature.create(world));
-
-        NoiseConfigs noiseConfigs = world.getServer().getNoiseConfigs();
-        DomainWarping domainWarping = new DomainWarping(QuantumServer.get().disposeOnClose(noiseConfigs.layerX.create(seed)), QuantumServer.get().disposeOnClose(noiseConfigs.layerY.create(seed)));
 
         return new BiomeGenerator(world, this, this.layers, this.surfaceFeatures, this.undergroundFeatures);
     }
@@ -167,8 +159,6 @@ public abstract class Biome {
      * or a non-generating biome.
      */
     public static class Builder {
-        @Nullable
-        private NoiseConfig biomeNoise;
         private final List<TerrainLayer> layers = new ArrayList<>();
         private final List<TerrainFeature> surfaceFeatures = new ArrayList<>();
         private final List<TerrainFeature> undergroundFeatures = new ArrayList<>();
@@ -185,11 +175,6 @@ public abstract class Biome {
 
         private Builder() {
 
-        }
-
-        public Builder noise(NoiseConfig biomeNoise) {
-            this.biomeNoise = biomeNoise;
-            return this;
         }
 
         public Builder layer(TerrainLayer layer) {

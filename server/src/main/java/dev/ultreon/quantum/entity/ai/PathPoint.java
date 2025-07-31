@@ -5,26 +5,14 @@ import dev.ultreon.quantum.util.Vec3d;
 import java.util.Objects;
 
 public final class PathPoint {
-    private final Vec3d position;
-    private final Vec3d motion;
-    private final Vec3d look;
+    public final Vec3d position = new Vec3d();
+    public final Vec3d motion = new Vec3d();
+    public final Vec3d look = new Vec3d();
 
     public PathPoint(Vec3d position, Vec3d motion, Vec3d look) {
-        this.position = position;
-        this.motion = motion;
-        this.look = look;
-    }
-
-    public Vec3d position() {
-        return position;
-    }
-
-    public Vec3d motion() {
-        return motion;
-    }
-
-    public Vec3d look() {
-        return look;
+        this.position.set(position);
+        this.motion.set(motion);
+        this.look.set(look);
     }
 
     @Override

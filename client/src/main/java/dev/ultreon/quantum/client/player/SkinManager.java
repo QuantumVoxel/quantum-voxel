@@ -5,8 +5,9 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.Promise;
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.api.events.ClientReloadEvent;
+import dev.ultreon.quantum.client.api.events.SkinEvent;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -33,7 +34,7 @@ public class SkinManager implements Disposable {
 
             return QuantumClient.invokeAndWait(() -> {
                 Texture texture = localSkin = new Texture(pixmap, false);
-                ClientReloadEvent.SKIN_LOADED.factory().onSkinLoaded(texture, pixmap);
+                EventSystem.postDefault(new SkinEvent.SkinLoaded(texture, pixmap));
 
                 pixmap.dispose();
                 return texture;
@@ -74,7 +75,7 @@ public class SkinManager implements Disposable {
         getOrNull().dispose();
         future = loadAsync();
 
-        ClientReloadEvent.SKIN_RELOAD.factory().onSkinReload();
+        EventSystem.postDefault(new SkinEvent.SkinReload());
     }
 
     /**

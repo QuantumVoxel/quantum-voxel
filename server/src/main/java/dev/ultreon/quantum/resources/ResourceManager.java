@@ -8,7 +8,8 @@ import dev.ultreon.libs.commons.v0.util.IOUtils;
 import dev.ultreon.libs.functions.v0.misc.ThrowingSupplier;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.events.ResourceEvent;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.LoadingEvent;
 import dev.ultreon.quantum.resources.android.DeferredResourcePackage;
 import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -103,36 +104,37 @@ public abstract class ResourceManager extends GameObject implements Closeable {
         Map<String, ResourceCategory> categories = new HashMap<>();
 
         for (String file : fileList) {
-            if (file.startsWith(root + "/")) {
+            String str = GamePlatform.get().getFileSep();
+            if (file.startsWith(root + GamePlatform.get().getFileSep())) {
                 String domain = file.substring(root.length() + 1);
-                String domainId = domain.substring(0, domain.indexOf('/'));
-                String[] path = domain.substring(domain.indexOf('/') + 1).split("/");
+                String domainId = domain.substring(0, domain.indexOf(str));
+                String[] path = domain.substring(domain.indexOf(str) + 1).split("\\" + str);
                 String[] categoryParts = Arrays.copyOf(path, path.length - 1);
                 String filename = path[path.length - 1];
 
-                String categoryPath = categoryParts.length > 0 ? String.join("/", categoryParts) + "/" : "";
+                String categoryPath = categoryParts.length > 0 ? String.join(str, categoryParts) + str : "";
                 String filePath = categoryPath + filename;
 
                 StaticResource resource = new StaticResource(
-                        new NamespaceID(domainId, filePath),
+                        new NamespaceID(domainId, filePath.replace(GamePlatform.get().getFileSep(), "/")),
                         () -> Gdx.files.internal(file).read()
                 );
 
-                // Add to categories map
+                // Add to the categories' map
                 if (categoryParts.length > 0) {
                     String category = categoryParts[0];
                     categories.computeIfAbsent(category, ResourceCategory::new)
-                            .set(new NamespaceID(domainId, filePath), resource);
+                            .set(new NamespaceID(domainId, filePath.replace(GamePlatform.get().getFileSep(), "/")), resource);
                 }
 
-                // Add to resources map
-                map.put(new NamespaceID(domainId, filePath), resource);
+                // Add to resources' map
+                map.put(new NamespaceID(domainId, filePath.replace(GamePlatform.get().getFileSep(), "/")), resource);
             }
         }
 
         addImported(new ResourcePackage(map, categories));
     }
-    
+
     @SuppressWarnings({"unused"})
     private void importDirectoryPackage(FileHandle file) {
         // Check if it's a directory.
@@ -154,7 +156,7 @@ public abstract class ResourceManager extends GameObject implements Closeable {
 
             // Loop listed files.
             for (FileHandle resPackage : files != null ? files : new FileHandle[0]) {
-                // Get assets-package namespace from the name create the listed file (that's a dir).
+                // Get assets-package namespace from the name of the listed file (that's a dir).
                 String namespace = resPackage.name();
 
                 // Walk assets package.
@@ -234,17 +236,14 @@ public abstract class ResourceManager extends GameObject implements Closeable {
         // Resource categories
         Map<String, ResourceCategory> categories = new HashMap<>();
 
-        // Create jar file instance from file.
         try {
-            // Loop jar entries.
             ZipEntry entry;
             while ((entry = stream.getNextEntry()) != null) {
-                // Get name to create the jar entry.
                 String name = entry.getName();
                 byte[] bytes = IOUtils.readAllBytes(stream);
                 ThrowingSupplier<InputStream, IOException> sup = () -> new ByteArrayInputStream(bytes);
 
-                // Check if it isn't a directory, because we want a file.
+                // Check if it isn't a directory because we want a file.
                 if (!entry.isDirectory()) {
                     this.addEntry(map, categories, name, sup);
                 }
@@ -262,7 +261,7 @@ public abstract class ResourceManager extends GameObject implements Closeable {
     private void addImported(ResourcePackage pkg) {
         this.resourcePackages.add(pkg);
         this.add(pkg.getName(), pkg);
-        ResourceEvent.IMPORTED.factory().onImported(pkg);
+        EventSystem.postDefault(new LoadingEvent.ImportResourcePackage(this, pkg));
     }
 
     private void addEntry(Map<NamespaceID, StaticResource> map, Map<String, ResourceCategory> categories, String name, ThrowingSupplier<InputStream, IOException> sup) {

@@ -1,6 +1,8 @@
 package dev.ultreon.quantum.world;
 
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.chunk.ServerChunkEvent;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.BlockState;
@@ -26,7 +28,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static dev.ultreon.quantum.world.World.*;
 import static java.lang.System.currentTimeMillis;
@@ -41,13 +42,12 @@ public final class ServerChunk extends Chunk {
     private final @NotNull ServerWorld world;
     private final @NotNull ServerWorld.Region region;
     public final ChunkBuildInfo info = new ChunkBuildInfo();
-    protected boolean modified = false;
-    protected boolean original = true;
+    boolean modified = false;
+    boolean original = true;
 
     private final @NotNull PlayerTracker tracker = new PlayerTracker();
     private long lastTracked = currentTimeMillis();
     private final long trackDuration = 10000L;
-    private final AtomicInteger rTick = new AtomicInteger(0);
     private boolean scheduledSend = false;
 
     public ServerChunk(@NotNull ServerWorld world,
@@ -111,10 +111,13 @@ public final class ServerChunk extends Chunk {
     public void load(@NotNull MapType chunkData) {
         synchronized (this) {
             MapType extra = chunkData.getMap("Extra", new MapType());
+            EventSystem.postDefault(new ServerChunkEvent.LoadData(this, extra));
+
             this.original = chunkData.getBoolean("original", this.original);
 
-            if (chunkData.contains("LightMap", DataTypes.BYTE_ARRAY))
+            if (chunkData.contains("LightMap", DataTypes.BYTE_ARRAY)) {
                 this.lightMap.load(chunkData.getByteArray("LightMap"));
+            }
 
             this.modified = false;
 
@@ -124,12 +127,12 @@ public final class ServerChunk extends Chunk {
                 for (MapType data : blockEntities.getValue()) {
                     BlockVec blockVec = new BlockVec(data.getInt("x"), data.getInt("y"), data.getInt("z"));
                     BlockEntity blockEntity = BlockEntity.fullyLoad(world, blockVec, data);
-                    if (blockEntity != null)
+                    if (blockEntity != null) {
                         this.setBlockEntity(blockVec.chunkLocal(), blockEntity);
+                    }
                 }
             }
 
-//            WorldEvents.LOAD_CHUNK.factory().onLoadChunk(this, extra);
         }
     }
 
@@ -150,6 +153,7 @@ public final class ServerChunk extends Chunk {
     }
 
     public MapType save() {
+
         if (!QuantumServer.isOnServerThread()) {
             return QuantumServer.invokeAndWait(this::save);
         }
@@ -181,7 +185,7 @@ public final class ServerChunk extends Chunk {
             data.putByteArray("LightMap", this.lightMap.save());
             data.putBoolean("original", this.original);
 
-//            WorldEvents.SAVE_CHUNK.factory().onSaveChunk(this, extra);
+            EventSystem.postDefault(new ServerChunkEvent.SaveData(this, extra));
             if (!extra.getValue().isEmpty()) {
                 data.put("Extra", extra);
             }

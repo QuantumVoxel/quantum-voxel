@@ -47,7 +47,7 @@ public class MultiPrintStream extends PrintStream {
             stream.flush();
         }
     }
-    
+
     @Override
     public void close() {
         for (PrintStream stream : streams) {
@@ -58,28 +58,28 @@ public class MultiPrintStream extends PrintStream {
             }
         }
     }
-    
+
     @Override
     public void print(boolean b) {
         for (PrintStream stream : streams) {
             stream.print(b);
         }
     }
-    
+
     @Override
     public void print(char c) {
         for (PrintStream stream : streams) {
             stream.print(c);
         }
     }
-    
+
     @Override
     public void print(int i) {
         for (PrintStream stream : streams) {
             stream.print(i);
         }
     }
-    
+
     @Override
     public void print(long l) {
         for (PrintStream stream : streams) {

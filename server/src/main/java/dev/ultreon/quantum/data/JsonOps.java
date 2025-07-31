@@ -65,7 +65,7 @@ public final class JsonOps implements DataOps<JsonValue> {
         if (!data.isString()) {
             return Utils.ZEROED_UUID;
         }
-        
+
         try {
             return UUID.fromString(data.asString());
         } catch (IllegalArgumentException e) {
@@ -83,11 +83,11 @@ public final class JsonOps implements DataOps<JsonValue> {
         if (data == null) {
             return null;
         }
-        
+
         if (data.isNull()) {
             return null;
         }
-        
+
         if (data.isBoolean()) {
             return readBoolean(data);
         } else if (data.isNumber()) {

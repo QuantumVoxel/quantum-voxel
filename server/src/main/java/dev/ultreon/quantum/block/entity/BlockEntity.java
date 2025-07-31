@@ -6,10 +6,10 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.World;
-import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import lombok.Getter;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -38,7 +38,7 @@ public abstract class BlockEntity implements CapabilityHolder {
         return pos;
     }
 
-    public static BlockEntity fullyLoad(World world, BlockVec pos, MapType mapType) {
+    public static @Nullable BlockEntity fullyLoad(World world, BlockVec pos, MapType mapType) {
         NamespaceID type = NamespaceID.tryParse(mapType.getString("type"));
         if (type == null) return null;
         BlockEntityType<?> value = Registries.BLOCK_ENTITY_TYPE.get(type);

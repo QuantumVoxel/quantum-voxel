@@ -1,0 +1,8 @@
+{
+    "plugins": [
+        {
+            "type": "add",
+            "pluginName": "dev.flrp.fleet.atom"
+        }
+    ]
+}

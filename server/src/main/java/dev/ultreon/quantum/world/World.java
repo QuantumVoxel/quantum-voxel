@@ -8,9 +8,9 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.Logger;
 import dev.ultreon.quantum.LoggerFactory;
 import dev.ultreon.quantum.Promise;
-import dev.ultreon.quantum.api.ModApi;
-import dev.ultreon.quantum.api.events.block.BlockBrokenEvent;
-import dev.ultreon.quantum.api.events.block.BlockSetEvent;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.ItemStackEvent;
+import dev.ultreon.quantum.api.events.block.BlockChangeEvent;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.BlockState;
@@ -841,7 +841,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         this.checkThread();
 
-        ModApi.getGlobalEventHandler().call(new BlockSetEvent(this, new BlockVec(x, y, z), block, flags));
+        EventSystem.postDefault(new BlockChangeEvent.Set(this, new BlockVec(x, y, z), block, flags));
 
         Chunk chunk = this.getChunkAt(x, y, z);
         if (chunk == null) return false;
@@ -869,6 +869,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
 
     @Override
     public void drop(ItemStack itemStack, Vec3d position) {
+        EventSystem.postDefault(new ItemStackEvent.Drop(itemStack, position, this));
         drop(itemStack, position, new Vec3d());
     }
 
@@ -901,7 +902,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     public boolean destroyBlock(BlockVec breaking, @Nullable Player breaker) {
         BlockState blockState = get(breaking);
 
-        if (breaker != null && ModApi.getGlobalEventHandler().call(new BlockBrokenEvent(this, breaking, blockState, Blocks.AIR.getDefaultState(), null, breaker))) {
+        if (breaker != null && EventSystem.postCancelable(new BlockChangeEvent.Broken(this, breaking, blockState, Blocks.AIR.getDefaultState(), null, breaker))) {
             stopBreaking(breaking, breaker);
         }
 

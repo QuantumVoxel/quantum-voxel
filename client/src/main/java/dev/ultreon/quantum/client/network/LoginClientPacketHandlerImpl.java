@@ -1,7 +1,8 @@
 package dev.ultreon.quantum.client.network;
 
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.api.events.ClientPlayerEvents;
+import dev.ultreon.quantum.client.api.events.ClientPlayerEvent;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.client.gui.screens.world.WorldLoadScreen;
 import dev.ultreon.quantum.client.player.LocalPlayer;
@@ -46,7 +47,7 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
         this.client.connection.moveTo(PacketStages.IN_GAME, new InGameClientPacketHandlerImpl(this.connection));
 
         var player = this.client.player = new LocalPlayer(EntityTypes.PLAYER, this.client.world, uuid);
-        ClientPlayerEvents.PLAYER_JOINED.factory().onPlayerJoined(player);
+        EventSystem.postDefault(new ClientPlayerEvent.Joined(player));
 
         player.setPosition(spawnPos.x, spawnPos.y, spawnPos.z);
         player.setHealth(health);

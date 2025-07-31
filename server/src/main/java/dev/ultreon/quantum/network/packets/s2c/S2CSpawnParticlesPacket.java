@@ -30,8 +30,8 @@ public final class S2CSpawnParticlesPacket implements Packet<InGameClientPacketH
 
     public static S2CSpawnParticlesPacket read(PacketIO packetIO) {
         var particleTypeId = packetIO.readVarInt();
-        var position = packetIO.readVec3d();
-        var motion = packetIO.readVec3d();
+        var position = packetIO.readVec3d(new Vec3d());
+        var motion = packetIO.readVec3d(new Vec3d());
         var count = packetIO.readVarInt();
 
         return new S2CSpawnParticlesPacket(particleTypeId, position, motion, count);

@@ -61,7 +61,7 @@ public class BuiltinAndroidMod implements Mod {
     }
 
     @Override
-    public @NotNull Optional<String> getIconPath(int size) {
+    public @NotNull Optional<FileHandle> getIconPath(int size) {
         return Optional.empty();
     }
 }

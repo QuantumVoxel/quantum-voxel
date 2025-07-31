@@ -281,6 +281,7 @@ val publishProjects =
     project(":client"),
     project(":teavm"),
     project(":server"),
+    project(":logging"),
     project(":mixinprovider"),
     project(":quantum-api"),
     project(":kwantum-api")
@@ -491,7 +492,7 @@ tasks.register<DefaultTask>("docker-prepare") {
 
     val runScript = """
 #!/bin/bash
-java -cp ./server.jar:$classPath net.fabricmc.loader.impl.launch.knot.KnotClient
+java -cp ./server.jar:$classPath dev.ultreon.xeox.impl.main.Main
         """.trimIndent()
     if (!Files.exists(runScriptPath))
       Files.createFile(runScriptPath)

@@ -15,7 +15,7 @@ import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
-import dev.ultreon.quantum.util.SanityCheckException;
+import dev.ultreon.quantum.util.SanityCheck;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -247,7 +247,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     @SuppressWarnings("unchecked")
     protected void received(Packet<? extends OurHandler> packet, @Nullable PacketListener resultListener) {
         try {
-            if (handler == null) throw new SanityCheckException("No handler set");
+            if (handler == null) throw new SanityCheck("No handler set");
             if (ourPacketData.getId(packet) < 0) {
                 throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
             }

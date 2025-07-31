@@ -109,6 +109,7 @@ dependencies {
     runtimeOnly(project(":client"))
     runtimeOnly(project(":desktop"))
     runtimeOnly(project(":mixinprovider"))
+    runtimeOnly(project(":xeox-loader"))
 
     runtimeOnly("com.formdev:flatlaf:3.2.1")
 

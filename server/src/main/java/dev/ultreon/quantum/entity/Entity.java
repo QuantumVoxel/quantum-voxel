@@ -1,10 +1,11 @@
 package dev.ultreon.quantum.entity;
 
+import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.commands.perms.Permission;
-import dev.ultreon.quantum.api.events.entity.EntityMoveEvent;
+import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.api.events.entity.EntityEvent;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.entity.util.EntitySize;
 import dev.ultreon.quantum.network.packets.s2c.S2CEntityPipeline;
@@ -81,6 +82,13 @@ public abstract class Entity extends GameObject implements CommandSender {
     private double oDz;
     private boolean wasOnGround;
 
+    protected final Vec3d tmp3D1 = new Vec3d();
+    protected final Vec3d tmp3D2 = new Vec3d();
+    protected final Vec3d tmp3D3 = new Vec3d();
+    protected final Vec3f tmp3F = new Vec3f();
+    protected final Vec3i tmp3I = new Vec3i();
+    protected final Vector3 tmpV3 = new Vector3();
+
     /**
      * Creates a new entity.
      *
@@ -118,6 +126,9 @@ public abstract class Entity extends GameObject implements CommandSender {
         entity.id = data.getInt("id");
 
         entity.loadWithPos(data);
+
+        EventSystem.postDefault(new EntityEvent.Load(entity, data.getMap("Extra", new MapType())));
+
         return entity;
     }
 
@@ -319,8 +330,8 @@ public abstract class Entity extends GameObject implements CommandSender {
      */
     public boolean move(double deltaX, double deltaY, double deltaZ) {
         // Trigger an event to allow modification of the move
-        EntityMoveEvent event = new EntityMoveEvent(this, new Vec(deltaX, deltaY, deltaZ));
-        ModApi.getGlobalEventHandler().call(event);
+        EntityEvent.Move event = new EntityEvent.Move(this, new Vec(deltaX, deltaY, deltaZ));
+        EventSystem.postDefault(event);
         Vec modifiedValue = event.getDelta();
 
         if (event.isCanceled()) {
@@ -633,8 +644,13 @@ public abstract class Entity extends GameObject implements CommandSender {
         this.yRot = Mth.clamp(yRot, -90, 90);
     }
 
+    @Deprecated
     public Vec3d getPosition() {
         return new Vec3d(this.x, this.y, this.z);
+    }
+
+    public Vec3d getPosition(Vec3d position) {
+        return position.set(this.x, this.y, this.z);
     }
 
     @ApiStatus.Internal
@@ -690,14 +706,30 @@ public abstract class Entity extends GameObject implements CommandSender {
      *
      * @return A normalized Vec3d representing the direction in which the entity is looking.
      */
+    @Deprecated
     public Vec3d getLookVector() {
         // Calculate the direction vector
         Vec3d direction = new Vec3d();
 
         this.yRot = Mth.clamp(this.yRot, -89.9F, 89.9F);
-        direction.x = (float) (Math.cos(Math.toRadians(this.yRot)) * Math.sin(Math.toRadians(this.xRot)));
-        direction.z = (float) (Math.cos(Math.toRadians(this.yRot)) * Math.cos(Math.toRadians(this.xRot)));
-        direction.y = (float) (Math.sin(Math.toRadians(this.yRot)));
+        direction.set(
+                (float) (Math.cos(Math.toRadians(this.yRot)) * Math.sin(Math.toRadians(this.xRot))),
+                (float) (Math.cos(Math.toRadians(this.yRot)) * Math.cos(Math.toRadians(this.xRot))),
+                (float) (Math.sin(Math.toRadians(this.yRot)))
+        );
+
+        // Normalize the direction vector
+        direction.nor();
+        return direction;
+    }
+
+    public Vec3d getLookVector(Vec3d direction) {
+        this.yRot = Mth.clamp(this.yRot, -89.9F, 89.9F);
+        direction.set(
+                (float) (Math.cos(Math.toRadians(this.yRot)) * Math.sin(Math.toRadians(this.xRot))),
+                (float) (Math.cos(Math.toRadians(this.yRot)) * Math.cos(Math.toRadians(this.xRot))),
+                (float) (Math.sin(Math.toRadians(this.yRot)))
+        );
 
         // Normalize the direction vector
         direction.nor();
@@ -731,6 +763,15 @@ public abstract class Entity extends GameObject implements CommandSender {
      */
     public Vec3d getVelocity() {
         return new Vec3d(this.velocityX, this.velocityY, this.velocityZ);
+    }
+
+    /**
+     * Retrieves the current velocity vector.
+     *
+     * @return a {@link Vec3d} object representing the current velocity.
+     */
+    public Vec3d getVelocity(Vec3d velocity) {
+        return velocity.set(this.velocityX, this.velocityY, this.velocityZ);
     }
 
     /**

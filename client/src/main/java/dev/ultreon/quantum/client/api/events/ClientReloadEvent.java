@@ -1,28 +1,19 @@
 package dev.ultreon.quantum.client.api.events;
 
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import dev.ultreon.quantum.events.api.Event;
+import dev.ultreon.quantum.api.events.ReloadEvent;
+import dev.ultreon.quantum.resources.ReloadContext;
 
-public class ClientReloadEvent {
-    public static final Event<SkinLoaded> SKIN_LOADED = Event.create(listeners -> (texture, pixmap) -> {
-        for (SkinLoaded listener : listeners) {
-            listener.onSkinLoaded(texture, pixmap);
+public interface ClientReloadEvent extends ClientEvent, ReloadEvent {
+    class Reload implements ClientReloadEvent {
+        private final ReloadContext reloadContext;
+
+        public Reload(ReloadContext reloadContext) {
+            this.reloadContext = reloadContext;
         }
-    });
-    public static final Event<SkinReload> SKIN_RELOAD = Event.create(listeners -> () -> {
-        for (SkinReload listener : listeners) {
-            listener.onSkinReload();
+
+        @Override
+        public ReloadContext getReloadContext() {
+            return reloadContext;
         }
-    });
-
-    @FunctionalInterface
-    public interface SkinLoaded {
-        void onSkinLoaded(Texture texture, Pixmap pixmap);
-    }
-
-    @FunctionalInterface
-    public interface SkinReload {
-        void onSkinReload();
     }
 }

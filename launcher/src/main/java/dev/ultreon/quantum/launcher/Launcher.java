@@ -39,14 +39,17 @@ public final class Launcher {
             return;
         }
 
-        if (Files.notExists(dataPath)) {
-            try {
-                Files.createDirectories(dataPath);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(254);
-            }
-        }
+        createDirs(dataPath);
+        createDirs(dataPath.resolve("config"));
+        createDirs(dataPath.resolve("mods"));
+        createDirs(dataPath.resolve("worlds"));
+        createDirs(dataPath.resolve("resource-packages"));
+        createDirs(dataPath.resolve("logs"));
+        createDirs(dataPath.resolve("screenshots"));
+        createDirs(dataPath.resolve("game-crashes"));
+        createDirs(dataPath.resolve("cache"));
+        createDirs(dataPath.resolve("temp"));
+        createDirs(dataPath.resolve("local"));
 
         try {
             System.setOut(new PrintStream(Files.newOutputStream(dataPath.resolve("launcher.log"), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE), true));
@@ -65,6 +68,17 @@ public final class Launcher {
             System.exit(253);
         }
 
+    }
+
+    private static void createDirs(Path path) {
+        if (Files.notExists(path)) {
+            try {
+                Files.createDirectories(path);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(254);
+            }
+        }
     }
 
     private static void launch(String[] args) {
@@ -128,7 +142,7 @@ public final class Launcher {
             argsFinal.add("-Dfabric.development=false");
             argsFinal.add("-cp");
             argsFinal.add(String.join(File.pathSeparator, collect));
-            argsFinal.add("net.fabricmc.loader.launch.knot.KnotClient");
+            argsFinal.add("dev.ultreon.xeox.impl.main.Main");
             argsFinal.addAll(Arrays.asList(args));
 
             System.out.println("Launching game with command line: " + String.join(" ", argsFinal));

@@ -43,14 +43,6 @@ public interface ClientChunkAccess extends Disposable, ChunkAccess {
 
     boolean isLoaded();
 
-    default void markEmpty() {
-
-    }
-
-    default void markNotEmpty() {
-
-    }
-
     default boolean isEmpty() {
         return false;
     }

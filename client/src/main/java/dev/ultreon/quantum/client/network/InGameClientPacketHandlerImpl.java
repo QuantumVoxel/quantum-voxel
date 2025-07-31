@@ -1,12 +1,13 @@
 package dev.ultreon.quantum.client.network;
 
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.api.events.ClientChunkEvents;
-import dev.ultreon.quantum.client.api.events.ClientPlayerEvents;
+import dev.ultreon.quantum.client.api.events.ClientChunkEvent;
+import dev.ultreon.quantum.client.api.events.ClientPlayerEvent;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
@@ -163,7 +164,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
                         ref.data = new ClientChunk(world, pos, storage, biomeStorage, blockEntities);
                         QuantumClient.invoke(() -> {
-                            ClientChunkEvents.RECEIVED.factory().onClientChunkReceived(ref.data);
+                            EventSystem.postDefault(new ClientChunkEvent.Received(ref.data, info));
                             world.loadChunk(pos, ref.data);
                         });
                         return null;
@@ -213,7 +214,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     public void onDisconnect(String message) {
         LocalPlayer player = this.client.player;
         if (player != null) {
-            ClientPlayerEvents.PLAYER_LEFT.factory().onPlayerLeft(player, message);
+            EventSystem.postDefault(new ClientPlayerEvent.Left(player, message));
         }
 
         try {
@@ -520,7 +521,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public void handleTimeSync(S2CTimeSyncPacket timeSyncPacket, PacketContext ctx) {
         if (this.client.world != null) {
-            this.client.world.setDaytime(timeSyncPacket.gameTime());
+            QuantumClient.invokeAndWait(() -> this.client.world.setDaytime(timeSyncPacket.gameTime()));
         }
     }
 

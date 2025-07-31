@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.world;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -31,6 +32,8 @@ public class CelestialBody extends RenderObject {
 
     @Override
     public void getRenderables(@NotNull Array<Renderable> renderables, @NotNull Pool<Renderable> pool) {
+        update(Gdx.graphics.getDeltaTime());
+        modelInstance.transform.set(combined);
         modelInstance.getRenderables(renderables, pool);
     }
 

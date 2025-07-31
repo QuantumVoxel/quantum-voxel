@@ -22,7 +22,7 @@ public final class Path {
     }
 
     public boolean isDone(PathPoint current) {
-        return start.position().equals(end) || points.isEmpty() || current.position().equals(end);
+        return start.position.equals(end) || points.isEmpty() || current.position.equals(end);
     }
 
     @Override

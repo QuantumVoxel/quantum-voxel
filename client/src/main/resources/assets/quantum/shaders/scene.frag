@@ -144,13 +144,11 @@ void main() {
     gl_FragColor.a = 1.0;
 
     #if LOD_LEVEL < 2
-    vec3 light = vec3(2.0-u_globalSunlight) * sunLight;
+    vec3 light = vec3(1.0-u_globalSunlight) * sunLight;
     light += blockLight.rgb * (1.0 - light);
     #else
-    vec3 light = vec3(2.0-u_globalSunlight) * sunLight;
+    vec3 light = vec3(1.0-u_globalSunlight) * sunLight;
     #endif
-
-    light *= ao;
 
     vec3 emissive = vec3(0.0);
     #if LOD_LEVEL < 1
@@ -161,7 +159,7 @@ void main() {
     #endif
 
     #if LOD_LEVEL < 2
-    gl_FragColor = vec4(gl_FragColor.xyz * gamma(sh_light(v_normal, groove)).r, gl_FragColor.w);
+    gl_FragColor = vec4(gl_FragColor.rgb * gamma(sh_light(v_normal, groove)).r, gl_FragColor.w);
     #endif
     gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(u_fogColor), v_fog);
 }
