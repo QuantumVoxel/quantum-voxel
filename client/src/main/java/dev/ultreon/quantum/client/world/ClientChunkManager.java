@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.world;
 
-import com.badlogic.gdx.utils.LongMap;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.util.GameObject;
@@ -8,13 +7,11 @@ import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientChunkManager extends GameObject implements ChunkManager<ClientChunk> {
-    private final LongMap<ClientChunk> chunks = new LongMap<>();
+    private final Map<Long, ClientChunk> chunks = new ConcurrentHashMap<>();
     private final ClientWorld world;
 
     public ClientChunkManager(ClientWorld world) {
@@ -75,7 +72,7 @@ public class ClientChunkManager extends GameObject implements ChunkManager<Clien
 
     public int size() {
         synchronized (this) {
-            return this.chunks.size;
+            return this.chunks.size();
         }
     }
 
@@ -88,17 +85,15 @@ public class ClientChunkManager extends GameObject implements ChunkManager<Clien
         return (((long) x) & 0xFFFFF) | ((((long) y) & 0xFFFFF) << 20) | ((((long) z) & 0xFFFFF) << 40);
     }
 
-    public List<ClientChunk> getAllChunks() {
+    public Collection<ClientChunk> getAllChunks() {
         synchronized (this) {
-            var chunkList = new ArrayList<ClientChunk>();
-            for (var chunk : this.chunks.values()) chunkList.add(chunk);
-            return chunkList;
+            return this.chunks.values();
         }
     }
 
     public boolean contains(ClientChunk clientChunk) {
         synchronized (this) {
-            return this.chunks.containsValue(clientChunk, true);
+            return this.chunks.containsValue(clientChunk);
         }
     }
 

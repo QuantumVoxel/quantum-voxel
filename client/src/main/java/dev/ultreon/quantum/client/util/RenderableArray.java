@@ -30,7 +30,7 @@ public class RenderableArray extends Array<Renderable> {
         super(arrayType);
     }
 
-    public RenderableArray(Array<? extends Renderable> array) {
+    public RenderableArray(Array<Renderable> array) {
         super(array);
     }
 

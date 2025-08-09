@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.desktop;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
@@ -9,18 +10,24 @@ import com.badlogic.gdx.utils.Os;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.github.dgzt.gdx.lwjgl3.Lwjgl3WindowListener;
 import com.sun.jna.Pointer;
+import com.sun.jna.WString;
 import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.WinNT;
 import dev.ultreon.blockstudio.BlockStudio;
 import dev.ultreon.quantum.CrashHandler;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.GameWindow;
 import dev.ultreon.quantum.api.event.EventSystem;
+import dev.ultreon.quantum.Margins;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.WindowEvent;
 import dev.ultreon.quantum.client.input.KeyAndMouseInput;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.desktop.platform.win32.Dwmapi;
+import dev.ultreon.quantum.desktop.platform.win32.MARGINS;
+import dev.ultreon.quantum.desktop.platform.win32.RECT;
+import dev.ultreon.quantum.desktop.platform.win32.UxTheme;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import org.jetbrains.annotations.ApiStatus;
@@ -48,7 +55,10 @@ public class DesktopLauncher {
     private static DesktopWindow gameWindow;
     private static boolean windowVibrancyEnabled = false;
     private static boolean fullVibrancyEnabled = false;
+    private static boolean fullAeroEnabled = false;
     private static SafeLoadWrapper safeWrapper;
+    private static MARGINS aeroBounds;
+    private static WinDef.HWND hwnd;
 
     /**
      * Launches the game.
@@ -147,10 +157,34 @@ public class DesktopLauncher {
         boolean useAngleGraphics = launcherConfig.useAngleGraphics && SharedLibraryLoader.os == Os.Windows;
         windowVibrancyEnabled = launcherConfig.windowVibrancyEnabled;
         fullVibrancyEnabled = launcherConfig.enableFullVibrancy;
+        fullAeroEnabled = launcherConfig.enableFullAero;
+        aeroBounds = launcherConfig.aeroBounds;
 
         LauncherConfig.save();
 
-        safeWrapper = new SafeLoadWrapper(args);
+        safeWrapper = new SafeLoadWrapper(args) {
+            @Override
+            public void render() {
+                if (fullAeroEnabled) {
+                    // Open "Rebar" theme (used for insets in Explorer)
+                    WinNT.HANDLE theme = UxTheme.INSTANCE.OpenThemeData(hwnd, new WString("Rebar"));
+                    if (theme != null) {
+                        WinDef.HDC hdc = new WinDef.HDC(new Pointer(GLFWNativeWin32.glfwGetWin32Window(gameWindow.getHandle())));
+                        RECT rect = new RECT();
+                        rect.left = 50;
+                        rect.top = 50;
+                        rect.right = 250;
+                        rect.bottom = 100;
+
+                        // Part/State IDs vary — 0/0 gives base background
+                        UxTheme.INSTANCE.DrawThemeBackground(theme, hdc, 0, 0, rect, null);
+                        UxTheme.INSTANCE.CloseThemeData(theme);
+                    }
+                }
+
+                super.render();
+            }
+        };
         platform = new DesktopPlatform(useAngleGraphics, safeWrapper) {
             @Override
             public GameWindow createWindow() {
@@ -169,7 +203,7 @@ public class DesktopLauncher {
 
             @Override
             public boolean hasBackPanelRemoved() {
-                return fullVibrancyEnabled && windowVibrancyEnabled && !useAngleGraphics;
+                return ((fullVibrancyEnabled && windowVibrancyEnabled) || fullAeroEnabled) && !useAngleGraphics;
             }
 
             @Override
@@ -179,8 +213,24 @@ public class DesktopLauncher {
             }
 
             @Override
+            public void setFullAero(boolean value) {
+                LauncherConfig.get().enableFullAero = value;
+                LauncherConfig.save();
+            }
+
+            @Override
             public boolean getFullVibrancy() {
                 return fullVibrancyEnabled;
+            }
+
+            @Override
+            public boolean getFullAero() {
+                return fullAeroEnabled;
+            }
+
+            @Override
+            public @Nullable Margins getAeroBounds() {
+                return LauncherConfig.get().aeroBounds;
             }
 
             @Override
@@ -230,24 +280,6 @@ public class DesktopLauncher {
         }
     }
 
-    private static com.github.dgzt.gdx.lwjgl3.Lwjgl3ApplicationConfiguration createVulkanConfig() {
-        var config = new com.github.dgzt.gdx.lwjgl3.Lwjgl3ApplicationConfiguration();
-        config.useVsync(false);
-        config.setForegroundFPS(0);
-        config.setIdleFPS(10);
-        config.setBackBufferConfig(4, 4, 4, 4, 8, 0, 0);
-        config.setHdpiMode(HdpiMode.Pixels);
-        config.setOpenGLEmulation(com.github.dgzt.gdx.lwjgl3.Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES32, 4, 1);
-        config.setInitialVisible(false);
-        config.setTitle("Quantum Voxel (Vulkan Backend)");
-        config.setWindowIcon(QuantumClient.getIcons());
-        config.setWindowedMode(1280, 720);
-        config.setWindowListener(new WindowAdapter());
-        config.setTransparentFramebuffer(GamePlatform.get().hasBackPanelRemoved());
-
-        return config;
-    }
-
     @NotNull
     private static Lwjgl3ApplicationConfiguration createConfig() {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
@@ -260,6 +292,9 @@ public class DesktopLauncher {
         config.setWindowIcon(QuantumClient.getIcons());
         config.setWindowedMode(1280, 720);
         config.setWindowListener(new WindowAdapter());
+        if (platform.isWindows() || platform.isLinux()) {
+            config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 4, 1);
+        }
         config.setTransparentFramebuffer(GamePlatform.get().hasBackPanelRemoved());
 
         return config;
@@ -308,9 +343,29 @@ public class DesktopLauncher {
             gameWindow = new DesktopGLWindow(window);
 
             setupMacIcon();
-            setupVibrancy(window.getWindowHandle());
+
+            if (fullAeroEnabled) {
+                setupAero(window);
+            } else {
+                setupVibrancy(window.getWindowHandle());
+            }
 
             EventSystem.postDefault(new WindowEvent.Created(gameWindow));
+        }
+
+        private void setupAero(Lwjgl3Window window) {
+            if (SharedLibraryLoader.os != Os.Windows) {
+                return;
+            }
+
+            // Extend glass into client area
+            hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(window.getWindowHandle())));
+            MARGINS margins = new MARGINS();
+            margins.cxLeftWidth = aeroBounds.cxLeftWidth; // full window glass
+            margins.cxRightWidth = aeroBounds.cxRightWidth; // full window glass
+            margins.cyTopHeight = aeroBounds.cyTopHeight; // full window glass
+            margins.cyBottomHeight = aeroBounds.cyBottomHeight; // full window glass
+            Dwmapi.INSTANCE.DwmExtendFrameIntoClientArea(hwnd, margins);
         }
 
         private static void setupVibrancy(long handle) {
@@ -364,7 +419,7 @@ public class DesktopLauncher {
         @Override
         public void focusLost() {
             EventSystem.postDefault(new WindowEvent.FocusChanged(gameWindow, false));
-            
+
             QuantumClient quantumClient = QuantumClient.get();
             if (quantumClient == null) return;
             quantumClient.pause();
@@ -373,7 +428,7 @@ public class DesktopLauncher {
         @Override
         public void focusGained() {
             EventSystem.postDefault(new WindowEvent.FocusChanged(gameWindow, true));
-            
+
             QuantumClient quantumClient = QuantumClient.get();
             if (quantumClient == null) return;
         }
@@ -383,7 +438,7 @@ public class DesktopLauncher {
             if (EventSystem.postCancelable(new WindowEvent.CloseRequested(gameWindow))) {
                 return false;
             }
-            
+
             if (safeWrapper.isCrashed()) {
                 Runtime.getRuntime().halt(StatusCode.forAbort());
                 return true;
@@ -397,7 +452,7 @@ public class DesktopLauncher {
             if (EventSystem.postCancelable(new WindowEvent.FilesDropped(gameWindow, files))) {
                 return;
             }
-            
+
             QuantumClient quantumClient = QuantumClient.get();
             if (quantumClient == null) return;
             quantumClient.filesDropped(files);

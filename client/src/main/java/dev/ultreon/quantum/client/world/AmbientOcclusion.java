@@ -6,51 +6,47 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.world.Direction;
 
-public class AOUtils {
-    private AOUtils() {
-
-    }
-
+public class AmbientOcclusion {
     // AO Arrays
-    public static boolean hasAO(int[] ao) {
+    public boolean hasAO(int[] ao) {
         for (int i : ao) if (i != 0) return true;
         return false;
     }
 
-    public static int aoForSide(int[] ao, Direction direction) {
+    public int aoForSide(int[] ao, Direction direction) {
         return ao[direction.ordinal()];
     }
 
-    public static int get(int[] ao, int index) {
+    public int get(int[] ao, int index) {
         return ao[index];
     }
 
-    public static void set(int[] ao, int index, int value) {
+    public void set(int[] ao, int index, int value) {
         ao[index] = value;
     }
 
     // AO Values
-    public static boolean hasAO(int ao) {
+    public boolean hasAO(int ao) {
         return ao != 0;
     }
 
-    public static boolean hasAoCorner00(int ao) {
+    public boolean hasAoCorner00(int ao) {
         return (ao & 1) != 0;
     }
 
-    public static boolean hasAoCorner01(int ao) {
+    public boolean hasAoCorner01(int ao) {
         return (ao & 2) != 0;
     }
 
-    public static boolean hasAoCorner10(int ao) {
+    public boolean hasAoCorner10(int ao) {
         return (ao & 4) != 0;
     }
 
-    public static boolean hasAoCorner11(int ao) {
+    public boolean hasAoCorner11(int ao) {
         return (ao & 8) != 0;
     }
 
-    public static String toString(int ao) {
+    public String toString(int ao) {
         return "AO{" +
                 "[00]=" + hasAoCorner00(ao) +
                 ", [01]=" + hasAoCorner01(ao) +
@@ -59,11 +55,11 @@ public class AOUtils {
                 '}';
     }
 
-    public static int createAO(boolean corner00, boolean corner01, boolean corner10, boolean corner11) {
+    public int createAO(boolean corner00, boolean corner01, boolean corner10, boolean corner11) {
         return (corner00 ? 1 : 0) | (corner01 ? 2 : 0) | (corner10 ? 4 : 0) | (corner11 ? 8 : 0);
     }
 
-    public static int flipped(int ao) {
+    public int flipped(int ao) {
         return createAO(
                 hasAoCorner11(ao),
                 hasAoCorner10(ao),
@@ -72,7 +68,7 @@ public class AOUtils {
         );
     }
 
-    public static int[] calculate(ClientChunkAccess chunk, int x, int y, int z) {
+    public int[] calculate(ClientChunkAccess chunk, int x, int y, int z) {
         if (!getModelAt(chunk, x, y, z).hasAO()) {
             return new int[]{0, 0, 0, 0, 0, 0};
         }
@@ -88,7 +84,7 @@ public class AOUtils {
         return array;
     }
 
-    private static void calculateDirection(ClientChunkAccess chunk, Direction dir, Vector3 point, int[] array) {
+    private void calculateDirection(ClientChunkAccess chunk, Direction dir, Vector3 point, int[] array) {
         int ao;
         switch (dir.getAxis()) {
             case Y:
@@ -107,7 +103,7 @@ public class AOUtils {
         array[dir.ordinal()] = ao;
     }
 
-    private static int calculateZAxis(ClientChunkAccess chunk, Vector3 point) {
+    private int calculateZAxis(ClientChunkAccess chunk, Vector3 point) {
         int ao;
         BlockModel westUp = getModelAt(chunk, (int) point.x - 1, (int) point.y + 1, (int) point.z);
         BlockModel up1 = getModelAt(chunk, (int) point.x, (int) point.y + 1, (int) point.z);
@@ -126,7 +122,7 @@ public class AOUtils {
         return ao;
     }
 
-    private static int calculateXAxis(ClientChunkAccess chunk, Direction dir, Vector3 point) {
+    private int calculateXAxis(ClientChunkAccess chunk, Direction dir, Vector3 point) {
         int ao;
         BlockModel northUp = getModelAt(chunk, (int) point.x, (int) point.y + 1, (int) point.z + 1);
         BlockModel up = getModelAt(chunk, (int) point.x, (int) point.y + 1, (int) point.z);
@@ -154,7 +150,7 @@ public class AOUtils {
         return ao;
     }
 
-    private static int calculateYAxis(ClientChunkAccess chunk, Direction dir, Vector3 point) {
+    private int calculateYAxis(ClientChunkAccess chunk, Direction dir, Vector3 point) {
         int ao;
         BlockModel northWest = getModelAt(chunk, (int) point.x - 1, (int) point.y, (int) point.z - 1);
         BlockModel west = getModelAt(chunk, (int) point.x - 1, (int) point.y, (int) point.z);
@@ -182,7 +178,7 @@ public class AOUtils {
         return ao;
     }
 
-    private static BlockModel getModelAt(ClientChunkAccess chunk, int x, int y, int z) {
+    private BlockModel getModelAt(ClientChunkAccess chunk, int x, int y, int z) {
         BlockState state = chunk.getSafe(x, y, z);
         return QuantumClient.get().getBlockModel(state);
     }

@@ -1,12 +1,10 @@
 //file:noinspection GroovyUnusedCatchParameter
-
-
-//import dev.ultreon.gameutils.ProjectType
-
 import java.nio.file.Files
 import java.nio.file.Paths
 
+// Build script configuration block
 buildscript {
+    // Configure repositories for build script dependencies
     repositories {
         mavenCentral()
         gradlePluginPortal()
@@ -23,11 +21,12 @@ buildscript {
         google()
     }
 
+    // Build script dependencies
     dependencies {
         classpath group: 'commons-io', name: 'commons-io', version: '2.18.0'
         classpath "com.google.code.gson:gson:2.11.0"
 
-        // Shadow
+        // Shadow plugin for creating fat JARs
         classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
     }
 }
@@ -39,13 +38,20 @@ apply plugin: 'java'
 
 group projectGroup // https://maven.apache.org/guides/mini/guide-naming-conventions.html
 
+// Java configuration 
 java {
     withSourcesJar()
     withJavadocJar()
+
+    // Set Java version compatibility
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
+// This project depends on the server project evaluation
 evaluationDependsOn(":server")
 
+// Custom configuration for shadow dependencies
 configurations {
     shadow {
         transitive = false
@@ -53,10 +59,12 @@ configurations {
     }
 }
 
+// Project dependencies
 dependencies {
+    // Internal project dependencies
     api(project(":server"))
 
-    // CoreLibs
+    // CoreLibs dependencies
     api("dev.ultreon.corelibs:collections-v0:$coreLibsVersion")
     api("dev.ultreon.corelibs:commons-v0:$coreLibsVersion")
     api("dev.ultreon.corelibs:crash-v0:$coreLibsVersion")
@@ -69,121 +77,129 @@ dependencies {
     api("dev.ultreon.corelibs:translations-v1:$coreLibsVersion")
     api("dev.ultreon:ubo:$uboVersion")
 
-    shadow(compileOnly("com.jagrosh:DiscordIPC:+"))
+    // Discord integration
+    shadow(compileOnly("com.jagrosh:DiscordIPC:$discordIpcVersion"))
 
-    // LibGDX
-
+    // Graphics & Game Engine
     api("com.badlogicgames.gdx:gdx:$gdxVersion")
     api("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
-    api("com.badlogicgames.ashley:ashley:$ashleyVersion")
     api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
     api("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
-    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
-    api("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
     api("com.badlogicgames.gdx-video:gdx-video:$gdxVideoVersion")
+    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
+    api("com.badlogicgames.ashley:ashley:$ashleyVersion")
+    api("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
 
-    api("com.github.tommyettinger:textratypist:1.1.0")
-
+    // Graphics Extensions
+    api("com.github.tommyettinger:textratypist:$textraTypistVersion")
     api("com.kotcrab.vis:vis-ui:$visuiVersion")
-
-    // GDX VFX
-    api("com.crashinvaders.vfx:gdx-vfx-core:0.5.4")
-    api("com.crashinvaders.vfx:gdx-vfx-effects:0.5.4")
-
-    // GDX GLTF Models
+    api("com.crashinvaders.vfx:gdx-vfx-core:$vfxVersion")
+    api("com.crashinvaders.vfx:gdx-vfx-effects:$vfxVersion")
     api("com.github.mgsx-dev.gdx-gltf:gltf:$gltfVersion")
-
-    api("org.apache.commons:commons-lang3:3.15.0")
-    api("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
-    api("org.tukaani:xz:$tukaaniXzVersion")
-    api("com.jcraft:jzlib:1.1.3")
-    api("com.github.crykn.guacamole:gdx:v0.3.5")
-
-    // Misc. Libraries
-    api('it.unimi.dsi:fastutil:8.5.12', { exclude group: "it.unimi.dsi", module: "fastutil-core" })
-    api('com.raylabz:opensimplex:1.0.3')
-    api('org.jetbrains:annotations:24.0.1')
-
     api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
+    api("com.github.crykn.guacamole:gdx:$guacamoleVersion")
 
+    // Apache Commons
+    api("org.apache.commons:commons-lang3:$commonsLangVersion")
+    api("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
+
+    // Compression Libraries
     api("org.tukaani:xz:$tukaaniXzVersion")
+    api("com.jcraft:jzlib:$jzlibVersion")
+
+    // Utilities
+    api("it.unimi.dsi:fastutil:$fastutilVersion", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
+    api("com.raylabz:opensimplex:$raylabzOpenSimplexVersion")
+    api("org.jetbrains:annotations:$jetbrainsAnnotationsVersion")
     api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
-
-    // json.org API
-    api('org.json:json:20231013')
-
-    // OSHI
-    api("com.github.oshi:oshi-core:6.6.1")
-
+    api("org.json:json:$jsonVersion")
+    api("com.github.oshi:oshi-core:$oshiVersion")
     api("io.github.libsdl4j:libsdl4j:$libsdl4jVersion")
 }
 
+// Configure resource processing to include LICENSE file and exclude certain file types
 processResources {
+    // Copy LICENSE file from root project directory into META-INF folder of the build
     from(file("$rootProject.projectDir/LICENSE")) { into "META-INF/" }
-    exclude "*.pdn", "*.xcf", "*.ps", "*.bbmodel"
 
+    // Exclude files with specified extensions from being processed
+    exclude "*.pdn",    // Paint.NET files
+            "*.xcf",    // GIMP files
+            "*.ps",     // Photoshop files 
+            "*.bbmodel" // BlockBench model files
+
+    // Pass version property to resource processing
     inputs.property "version", version
 
+    // Handle duplicate resources by including them rather than failing
     duplicatesStrategy DuplicatesStrategy.INCLUDE
 }
 
+// JAR configuration
 jar {
-    //noinspection GroovyAssignabilityCheck
     manifest {
-        //noinspection GroovyAssignabilityCheck
-        attributes 'Implementation-Title': 'Quantum Voxel',
-                'Implementation-Vendor': 'Ultreon Studios',
-                project_version: project.version,
-                'Main-Class': 'dev.ultreon.quantum.DesktopLauncher'
+        // Define manifest attributes for the JAR file
+        attributes(
+                'Implementation-Title': 'Quantum Voxel',        // Name of the implementation
+                'Implementation-Vendor': 'Ultreon Studios',     // Vendor/creator of the implementation
+                project_version: project.version,               // Version from project properties
+                'Main-Class': 'dev.ultreon.quantum.DesktopLauncher'  // Main class to run
+        )
     }
 
-    from {
-        compileJava.outputs
-    }
+    // Include compiled Java classes
+    from compileJava.outputs
 
-    from {
-        configurations.shadow.files.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+    // Include dependencies from shadow configuration
+    // If dependency is a directory, include directly, otherwise unzip it
+    from configurations.shadow.files.collect { it.isDirectory() ? it : zipTree(it) }
 
-    from {
-        processResources.outputs
-    }
+    // Include processed resources
+    from processResources.outputs
 
+    // Enable ZIP64 format for large JARs
     zip64 true
+
+    // Strategy for handling duplicate files - include them rather than fail
     duplicatesStrategy DuplicatesStrategy.INCLUDE
 }
 
+// Create run directory for the application
 tasks.register('prepareRun', {
-    Files.createDirectories(Path.of(rootProject.projectDir.getAbsolutePath(), "run"))
+    Files.createDirectories(Paths.get(rootProject.projectDir.getAbsolutePath(), "run"))
 })
 
+// Configure duplicate handling for resource processing
 tasks.withType(ProcessResources).configureEach {
     duplicatesStrategy DuplicatesStrategy.INCLUDE
 }
 
+// Configure duplicate handling for JAR creation
 tasks.withType(Jar).configureEach {
     duplicatesStrategy DuplicatesStrategy.INCLUDE
 }
 
+// Task to copy runtime dependencies
 tasks.register('copyDependencies', Copy) {
     from(configurations.runtimeClasspath)
     into("$projectDir/build/jars")
 }
 
+// Task to copy the built JAR
 tasks.register('copyJar', Copy) {
     from(tasks.jar)
     into("$projectDir/build/jars")
 }
 
+// Test configuration
 test {
     useJUnitPlatform()
 }
 
+// Java compilation settings
 compileJava {
     options.encoding = "UTF-8"
-
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
 }
 
+// Make sourcesJar task depend on asset list generation
 sourcesJar.dependsOn(":generateAssetList")

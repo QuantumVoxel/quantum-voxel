@@ -23,8 +23,9 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.render.meshing.FaceCull;
 import dev.ultreon.quantum.client.render.meshing.Light;
-import dev.ultreon.quantum.client.world.AOUtils;
+import dev.ultreon.quantum.client.world.AmbientOcclusion;
 import dev.ultreon.quantum.client.world.OpaqueFaces;
+import dev.ultreon.quantum.di.DependencyContainer;
 import dev.ultreon.quantum.util.Axis;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Direction;
@@ -77,12 +78,13 @@ public final class ModelElement {
                     : NamespaceID.parse(texRef).mapPath(path -> path);
 
 
-            int sAo = AOUtils.aoForSide(ao, direction);
+            AmbientOcclusion ambientOcclusion = DependencyContainer.getInstance().resolve(AmbientOcclusion.class);
+            int sAo = ambientOcclusion.aoForSide(ao, direction);
             byte sLight = Light.get(light, direction);
-            v00.setCol(0f, AOUtils.hasAoCorner00(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
-            v01.setCol(0f, AOUtils.hasAoCorner01(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
-            v10.setCol(0f, AOUtils.hasAoCorner10(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
-            v11.setCol(0f, AOUtils.hasAoCorner11(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
+            v00.setCol(0f, ambientOcclusion.hasAoCorner00(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
+            v01.setCol(0f, ambientOcclusion.hasAoCorner01(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
+            v10.setCol(0f, ambientOcclusion.hasAoCorner10(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
+            v11.setCol(0f, ambientOcclusion.hasAoCorner11(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
 
             v00.setNor(direction.getNormal());
             v01.setNor(direction.getNormal());

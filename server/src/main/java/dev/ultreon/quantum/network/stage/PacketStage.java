@@ -5,8 +5,11 @@ import dev.ultreon.quantum.network.PacketData;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.network.packets.c2s.*;
+import dev.ultreon.quantum.network.packets.s2c.*;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public abstract class PacketStage {
@@ -27,7 +30,18 @@ public abstract class PacketStage {
     /**
      * Registers all packets in this packet stage.
      */
-    public abstract void registerPackets();
+    public void registerPackets() {
+        this.addServerBound(C2SDisconnectPacket::read);
+        this.addClientBound(S2CDisconnectPacket::read);
+        this.addServerBound(C2SKeepAlivePacket::read);
+        this.addClientBound(S2CKeepAlivePacket::read);
+        this.addServerBound(C2SPingPacket::read);
+        this.addClientBound(S2CPingPacket::read);
+        this.addServerBound(C2SModPacket::read);
+        this.addClientBound(S2CModPacket::read);
+        this.addServerBound(C2SBundlePacket::read, C2SBundlePacket.class);
+        this.addClientBound(S2CBundlePacket::read, S2CBundlePacket.class);
+    }
 
     /**
      * Adds a server-bound packet to this packet stage.
@@ -40,7 +54,19 @@ public abstract class PacketStage {
     @SuppressWarnings("unchecked")
     protected <T extends Packet<? extends ServerPacketHandler>> int addServerBound(Function<PacketIO, T> decoder, T... typeGetter) {
         Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
-        return this.serverBoundList.add(type, Packet::toBytes, t -> (Packet<ServerPacketHandler>) decoder.apply(t), (o, o2) -> o.handle(o2.getFirst(), o2.getSecond()));
+        return this.serverBoundList.add((Class<? extends Packet<ServerPacketHandler>>) type, Packet::toBytes, (h, t) -> (Packet<ServerPacketHandler>) decoder.apply(t), (o, o2) -> o.handle(o2.getFirst(), o2.getSecond()));
+    }
+
+    /**
+     * Adds a server-bound packet to this packet stage.
+     *
+     * @param decoder the packet decoder
+     * @param <T> the type of the packet
+     * @return the id of the packet
+     */
+    @SuppressWarnings("unchecked")
+    protected <R extends ServerPacketHandler, T extends Packet<? extends ServerPacketHandler>> int addServerBound(BiFunction<R, PacketIO, T> decoder, Class<T> type) {
+        return this.serverBoundList.add((Class<? extends Packet<ServerPacketHandler>>) type, Packet::toBytes, (h, t) -> (Packet<ServerPacketHandler>) decoder.apply((R) h, t), (o, o2) -> o.handle(o2.getFirst(), o2.getSecond()));
     }
 
     /**
@@ -54,7 +80,21 @@ public abstract class PacketStage {
     @SuppressWarnings("unchecked")
     protected <T extends Packet<?>> int addClientBound(Function<PacketIO, T> decoder, T... typeGetter) {
         Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
-        return this.clientBoundList.add(type, Packet::toBytes, t -> (Packet<ClientPacketHandler>) decoder.apply(t), (o, o2) -> o.handle(o2.getFirst(), o2.getSecond()));
+        return this.clientBoundList.add((Class<? extends Packet<ClientPacketHandler>>) type, Packet::toBytes, (h, t) -> (Packet<ClientPacketHandler>) decoder.apply(t), (o, o2) -> o.handle(o2.getFirst(), o2.getSecond()));
+    }
+
+    /**
+     * Adds a client-bound packet to this packet stage.
+     *
+     * @param decoder the packet decoder
+     * @param type the type of the packet
+     * @param <R> the type of the packet handler
+     * @param <T> the type of the packet
+     * @return the id of the packet
+     */
+    @SuppressWarnings("unchecked")
+    protected <R extends ClientPacketHandler, T extends Packet<R>> int addClientBound(BiFunction<R, PacketIO, T> decoder, Class<T> type) {
+        return this.clientBoundList.add((Class<? extends Packet<ClientPacketHandler>>) type, Packet::toBytes, (h, t) -> (Packet<ClientPacketHandler>) decoder.apply((R) h, t), (o, o2) -> o.handle(o2.getFirst(), o2.getSecond()));
     }
 
     /**

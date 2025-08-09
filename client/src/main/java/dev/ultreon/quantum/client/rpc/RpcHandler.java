@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.rpc;
 
+import java.util.List;
 import java.util.ServiceLoader;
 
 /**
@@ -10,7 +11,7 @@ import java.util.ServiceLoader;
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public interface RpcHandler {
-    Iterable<RpcHandler> HANDLERS = ServiceLoader.load(RpcHandler.class);
+    Iterable<RpcHandler> HANDLERS = List.of(new DiscordRPC());
 
     /**
      * Starts the RPC handler, initializing any necessary resources or connections.

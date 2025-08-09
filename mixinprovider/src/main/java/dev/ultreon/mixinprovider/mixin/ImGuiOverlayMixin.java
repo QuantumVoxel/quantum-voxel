@@ -22,13 +22,13 @@ public class ImGuiOverlayMixin {
         ImGuiHandler.renderPreGame();
     }
 
-    @WrapMethod(method = "captureGame")
-    private static void captureGame(Operation<Void> operation) {
+    @WrapMethod(method = "blitGameFboToTex")
+    private static void captureGame(int targetWidth, int targetHeight, Operation<Void> original) {
         if (ImGuiHandler.isPaused()) {
             return;
         }
 
-        operation.call();
+        original.call(targetWidth, targetHeight);
     }
 
     @SuppressWarnings("DiscouragedShift")

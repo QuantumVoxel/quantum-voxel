@@ -115,9 +115,11 @@ void main() {
 
     vec3 light = vec3(u_globalSunlight);
 
-    vec3 emissive;
-    emissive = vec3(0.0);
-    gl_FragColor.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
+//    vec3 emissive;
+//    emissive = vec3(0.0);
+//    gl_FragColor.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
+
+    gl_FragColor.rgb = (diffuse.rgb) * light;
 
     vec3 depthIn3Channels;
     depthIn3Channels.r = mod(depth, 1.0);

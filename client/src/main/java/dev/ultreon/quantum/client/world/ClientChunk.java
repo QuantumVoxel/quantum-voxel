@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static dev.ultreon.quantum.client.QuantumClient.PROFILER;
 import static dev.ultreon.quantum.world.World.CS;
 import static dev.ultreon.quantum.world.World.CS_2;
 
@@ -80,18 +81,16 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     private final @Nullable ClientChunk[] neighbors = new ClientChunk[6];
 
-    public ClientChunk(ClientWorld world, ChunkVec pos, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
+    public ClientChunk(ClientWorld world, ChunkVec pos, Storage<@NotNull BlockState> storage, Storage<@NotNull RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         super(world, pos, storage, biomeStorage);
 
-        QuantumClient.invokeAndWait(() -> {
-            for (Direction direction : Direction.values()) {
-                ClientChunk chunk = world.getChunk(tmpCV.set(pos).add(direction.getOffset()));
+        for (Direction direction : Direction.values()) {
+            ClientChunk chunk = world.getChunk(tmpCV.set(pos).add(direction.getOffset()));
 
-                this.neighbors[direction.ordinal()] = chunk;
-                if (chunk != null)
-                    chunk.neighbors[direction.getOpposite().ordinal()] = this;
-            }
-        });
+            this.neighbors[direction.ordinal()] = chunk;
+            if (chunk != null)
+                chunk.neighbors[direction.getOpposite().ordinal()] = this;
+        }
 
         this.clientWorld = world;
         this.active = false;
@@ -320,11 +319,16 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     public void loadCustomRendered() {
-        for (BlockEntity blockEntity : getBlockEntities()) {
-            BlockModel blockModel = BlockEntityModelRegistry.get(blockEntity.getType());
-            if (blockModel != null) {
-                blockModel.loadInto(blockEntity.pos(), this);
+        PROFILER.begin("client-chunk@load-custom-rendered");
+        try {
+            for (BlockEntity blockEntity : getBlockEntities()) {
+                BlockModel blockModel = BlockEntityModelRegistry.get(blockEntity.getType());
+                if (blockModel != null) {
+                    blockModel.loadInto(blockEntity.pos(), this);
+                }
             }
+        } finally {
+            PROFILER.end();
         }
     }
 

@@ -8,7 +8,7 @@ import dev.ultreon.quantum.network.server.ServerPacketHandler;
 
 import java.util.Objects;
 
-public final class C2SDisconnectPacket<T extends ServerPacketHandler> implements Packet<T> {
+public final class C2SDisconnectPacket implements Packet<ServerPacketHandler> {
     private final int code;
     private final String message;
 
@@ -17,11 +17,11 @@ public final class C2SDisconnectPacket<T extends ServerPacketHandler> implements
         this.message = message;
     }
 
-    public static <T extends ServerPacketHandler> C2SDisconnectPacket<T> read(PacketIO buffer) {
+    public static C2SDisconnectPacket read(PacketIO buffer) {
         var code = buffer.readShort();
         var message = buffer.readString(300);
 
-        return new C2SDisconnectPacket<>(code, message);
+        return new C2SDisconnectPacket(code, message);
     }
 
     @Override
@@ -35,7 +35,7 @@ public final class C2SDisconnectPacket<T extends ServerPacketHandler> implements
     }
 
     @Override
-    public void handle(PacketContext packetContext, T handler) {
+    public void handle(PacketContext packetContext, ServerPacketHandler handler) {
         CommonConstants.LOGGER.info("Client disconnected: {}", this.message);
         handler.onDisconnect(this.message);
     }
@@ -53,7 +53,7 @@ public final class C2SDisconnectPacket<T extends ServerPacketHandler> implements
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (C2SDisconnectPacket<?>) obj;
+        var that = (C2SDisconnectPacket) obj;
         return Objects.equals(this.message, that.message);
     }
 

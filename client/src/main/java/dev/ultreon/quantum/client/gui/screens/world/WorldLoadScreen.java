@@ -4,8 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.Logger;
-import dev.ultreon.quantum.LoggerFactory;
 import dev.ultreon.quantum.TimerTask;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -14,7 +12,6 @@ import dev.ultreon.quantum.client.gui.screens.DeathScreen;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.world.ClientWorld;
-import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.network.packets.c2s.C2SRequestChunkLoadPacket;
 import dev.ultreon.quantum.text.TextObject;
@@ -22,8 +19,6 @@ import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.WorldStorage;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import lombok.Getter;
-import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -31,18 +26,14 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class WorldLoadScreen extends Screen {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WorldLoadScreen.class);
     public static final @NotNull Color PROGRESS_BG = new Color(0xffffff80);
     public static final @NotNull Color PROGRESS_FG = new Color(0xff0040ff);
-    @Getter
     private Label titleLabel;
-    @Getter
     private Label descriptionLabel;
     private Label subTitleLabel;
     private final WorldStorage storage;
     private long nextLog;
     private ServerWorld world;
-    @Setter
     private DeathScreen closeScreen;
     private boolean done = false;
     private volatile boolean loggedIn;
@@ -54,7 +45,9 @@ public class WorldLoadScreen extends Screen {
     }
 
     @Override
-    public void build(@NotNull GuiBuilder builder) {
+    protected void init() {
+        super.init();
+
         final IntegratedServer server;
         try {
             server = new IntegratedServer(this.storage);
@@ -70,7 +63,7 @@ public class WorldLoadScreen extends Screen {
             server.init();
         } catch (IOException e) {
             server.shutdown(() -> {
-                this.client.remove(server);;
+                this.client.remove(server);
                 client.showScreen(new DisconnectedScreen("Server failed to initialize!", false));
             });
             return;
@@ -79,20 +72,26 @@ public class WorldLoadScreen extends Screen {
         this.world = server.getDimManager().getWorld(DimensionInfo.OVERWORLD);
         this.client.openedWorld = this.storage;
 
-        this.titleLabel = builder.add(Label.of(this.title)
+        this.titleLabel = Label.of(this.title)
                 .withAlignment(Alignment.CENTER)
-                .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 - 25))
-                .withScale(2));
+                .withScale(2);
 
-        this.descriptionLabel = builder.add(Label.of("Preparing")
-                .withAlignment(Alignment.CENTER)
-                .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 + 3)));
+        this.descriptionLabel = Label.of("Preparing")
+                .withAlignment(Alignment.CENTER);
 
-        this.subTitleLabel = builder.add(Label.of()
-                .withAlignment(Alignment.CENTER)
-                .withPositioning(() -> new Position(this.size.width / 2, this.size.height / 3 + 31)));
+        this.subTitleLabel = Label.of()
+                .withAlignment(Alignment.CENTER);
 
         GamePlatform.get().runAsync(this::run);
+    }
+
+    @Override
+    public void resized(int width, int height) {
+        super.resized(width, height);
+
+        this.titleLabel.setPos(this.size.width / 2, this.size.height / 3 - 25);
+        this.descriptionLabel.setPos(this.size.width / 2, this.size.height / 3 + 3);
+        this.subTitleLabel.setPos(this.size.width / 2, this.size.height / 3 + 31);
     }
 
     @Override
@@ -108,7 +107,6 @@ public class WorldLoadScreen extends Screen {
         return super.onClose(next);
     }
 
-    @SuppressWarnings("BusyWait")
     public void run() {
         try {
             assert this.world != null;
@@ -235,13 +233,56 @@ public class WorldLoadScreen extends Screen {
         this.done = true;
 
         this.client.renderWorld = true;
-        ClientWorldAccess world1 = this.client.world;
-        if (world1 instanceof ClientWorld) {
-            ClientWorld clientWorld = (ClientWorld) world1;
+        ClientWorld clientWorld = this.client.world;
+        if (clientWorld instanceof ClientWorld) {
             this.client.worldRenderer = new WorldRenderer(clientWorld);
         } else {
             throw new IllegalStateException("Unexpected world type: " + null);
         }
         this.client.showScreen(null);
+    }
+
+    public Label getTitleLabel() {
+        return titleLabel;
+    }
+
+    public Label getDescriptionLabel() {
+        return descriptionLabel;
+    }
+
+    public Label getSubTitleLabel() {
+        return subTitleLabel;
+    }
+
+    public DeathScreen getCloseScreen() {
+        return closeScreen;
+    }
+
+    public void setCloseScreen(DeathScreen closeScreen) {
+        this.closeScreen = closeScreen;
+    }
+
+    public int getChunksToLoadCount() {
+        return chunksToLoadCount;
+    }
+
+    public void setChunksToLoadCount(int chunksToLoadCount) {
+        this.chunksToLoadCount = chunksToLoadCount;
+    }
+
+    public WorldStorage getStorage() {
+        return storage;
+    }
+
+    public ServerWorld getWorld() {
+        return world;
+    }
+
+    public boolean isDone() {
+        return done;
+    }
+
+    public boolean isLoggedIn() {
+        return loggedIn;
     }
 }

@@ -1,8 +1,13 @@
 package dev.ultreon;
 
 import com.sun.jna.Pointer;
+import com.sun.jna.WString;
 import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.WinNT;
 import dev.ultreon.win32.Dwmapi;
+import dev.ultreon.win32.MARGINS;
+import dev.ultreon.win32.RECT;
+import dev.ultreon.win32.UxTheme;
 import imgui.ImFont;
 import imgui.ImGui;
 import imgui.ImGuiIO;
@@ -22,6 +27,7 @@ import java.io.InputStream;
 
 public class PermissionHelper {
     private static String type;
+    private static WinDef.HWND hwnd;
 
     private static void setupVibrancy(long handle) {
         // Check for OS and apply acrylic/mica/vibrancy
@@ -77,7 +83,18 @@ public class PermissionHelper {
             return;
         }
 
-        setupVibrancy(window);
+//        setupVibrancy(window);
+
+        // Extend glass into client area
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(window)));
+            MARGINS margins = new MARGINS();
+            margins.cxLeftWidth = -1; // full window glass
+            margins.cxRightWidth = -1;
+            margins.cyTopHeight = -1;
+            margins.cyBottomHeight = -1;
+            Dwmapi.INSTANCE.DwmExtendFrameIntoClientArea(hwnd, margins);
+        }
 
         GLFW.glfwSetWindowTitle(window, title);
         GLFW.glfwMakeContextCurrent(window);
@@ -130,11 +147,12 @@ public class PermissionHelper {
         style.setItemSpacing(8, 4);
 
         if (System.getProperty("os.name").toLowerCase().contains("win")) {
-            style.setColor(ImGuiCol.Border, 1f, 1f, 1f, 1f);
+            style.setColor(ImGuiCol.Text, 0f, 0f, 0f, 1f);
+            style.setColor(ImGuiCol.Border, 0f, 0f, 0f, 1f);
             style.setColor(ImGuiCol.Button, 0f, 0f, 0f, 0f);
             style.setColor(ImGuiCol.ButtonHovered, 0f, 0f, 0f, .2f);
             style.setColor(ImGuiCol.ButtonActive, 1f, 1f, 1f, .2f);
-            style.setColor(ImGuiCol.WindowBg, 1f, 1f, 1f, .2f);
+            style.setColor(ImGuiCol.WindowBg, 1f, 1f, 1f, .4f);
         } else {
             style.setColor(ImGuiCol.Border, 0.2f, 0.2f, 0.2f, 1f);
             style.setColor(ImGuiCol.BorderShadow, 0f, 0f, 0f, 1f);
@@ -163,6 +181,23 @@ public class PermissionHelper {
     }
 
     private static boolean render(ImGuiImplGl3 gl3, ImGuiImplGlfw glfw, String message, long window) {
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            // Open "Rebar" theme (used for insets in Explorer)
+            WinNT.HANDLE theme = UxTheme.INSTANCE.OpenThemeData(hwnd, new WString("Rebar"));
+            if (theme != null) {
+                WinDef.HDC hdc = new WinDef.HDC(new Pointer(GLFWNativeWin32.glfwGetWin32Window(window)));
+                RECT rect = new RECT();
+                rect.left = 50;
+                rect.top = 50;
+                rect.right = 250;
+                rect.bottom = 100;
+
+                // Part/State IDs vary — 0/0 gives base background
+                UxTheme.INSTANCE.DrawThemeBackground(theme, hdc, 0, 0, rect, null);
+                UxTheme.INSTANCE.CloseThemeData(theme);
+            }
+        }
+
         GL11.glClearColor(0f, 0f, 0f, 0f);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 

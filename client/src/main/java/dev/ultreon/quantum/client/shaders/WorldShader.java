@@ -6,10 +6,11 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.math.GridPoint3;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import dev.ultreon.quantum.DebugKey;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.world.ClientChunk;
@@ -19,6 +20,8 @@ import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.quantum.world.Chunk;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * The WorldShader class extends the DefaultShader to provide advanced rendering capabilities tailored
@@ -52,6 +55,7 @@ public class WorldShader extends DefaultShader {
     public final int u_cameraUp0;
     public final int u_fogColor;
     public final int u_chunkPosition;
+    public final int u_debugState;
     private int lod = -1;
     protected String log;
 
@@ -165,6 +169,7 @@ public class WorldShader extends DefaultShader {
         this.u_cameraUp0 = this.register(Inputs.cameraUp, Setters.cameraUp);
         this.u_fogColor = this.register(Inputs.fogColor, Setters.fogColor);
         this.u_chunkPosition = this.register(Inputs.chunkPosition, Setters.chunkPosition);
+        this.u_debugState = this.register(Inputs.debugState, Setters.debugState);
     }
 
     public static class Inputs extends DefaultShader.Inputs {
@@ -176,6 +181,7 @@ public class WorldShader extends DefaultShader {
         public final static Uniform cameraUp = new Uniform("u_cameraUp0");
         public final static Uniform fogColor = new Uniform("u_fogColor");
         public final static Uniform chunkPosition = new Uniform("u_chunkPosition");
+        public final static Uniform debugState = new Uniform("u_debugState");
 
     }
     public static class Setters extends DefaultShader.Setters {
@@ -253,6 +259,14 @@ public class WorldShader extends DefaultShader {
                 } else {
                     shader.set(inputID, 0, 0, 0);
                 }
+            }
+        };
+
+        public final static Setter debugState = new LocalSetter() {
+            @Override
+            public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+                Integer debugValue = GamePlatform.get().getDebugValue(DebugKey.SHADER_DEBUG_STATE);
+                shader.set(inputID, Objects.requireNonNullElse(debugValue, 0));
             }
         };
     }

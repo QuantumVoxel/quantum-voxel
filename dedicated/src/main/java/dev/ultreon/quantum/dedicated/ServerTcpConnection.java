@@ -4,16 +4,21 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Server;
 import dev.ultreon.quantum.network.PacketData;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
+import dev.ultreon.quantum.network.packets.BundlePacket;
 import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.network.packets.c2s.C2SBundlePacket;
+import dev.ultreon.quantum.network.packets.s2c.S2CBundlePacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CDisconnectPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.stage.PacketStage;
+import dev.ultreon.quantum.network.system.PacketIOSerializerFactory;
 import dev.ultreon.quantum.network.system.TcpConnection;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +43,7 @@ public class ServerTcpConnection extends TcpConnection<ServerPacketHandler, Clie
 
     @Override
     protected Packet<ClientPacketHandler> getDisconnectPacket(int code, String message) {
-        return new S2CDisconnectPacket<>(message);
+        return new S2CDisconnectPacket(message);
     }
 
     @Override
@@ -98,6 +103,11 @@ public class ServerTcpConnection extends TcpConnection<ServerPacketHandler, Clie
     @Override
     public void onPing(long ping) {
         this.ping = ping;
+    }
+
+    @Override
+    public BundlePacket<ClientPacketHandler> bundle(List<Packet<ClientPacketHandler>> packets) {
+        return new S2CBundlePacket(packets);
     }
 
     public QuantumServer getServer() {

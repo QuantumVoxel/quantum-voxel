@@ -9,21 +9,28 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 import java.util.Objects;
 
 public final class C2SUnloadChunkPacket implements Packet<InGameServerPacketHandler> {
-    private final ChunkVec vec;
+    private final ChunkVec[] vec;
 
-    public C2SUnloadChunkPacket(ChunkVec vec) {
+    public C2SUnloadChunkPacket(ChunkVec[] vec) {
         this.vec = vec;
     }
 
     public static C2SUnloadChunkPacket read(PacketIO buffer) {
-        var vec = buffer.readChunkVec();
+        int length = buffer.readVarInt();
+        ChunkVec[] vec = new ChunkVec[length];
+        for (int i = 0; i < length; i++) {
+            vec[i] = buffer.readChunkVec();
+        }
 
         return new C2SUnloadChunkPacket(vec);
     }
 
     @Override
     public void toBytes(PacketIO buffer) {
-        buffer.writeChunkVec(this.vec);
+        buffer.writeVarInt(this.vec.length);
+        for (ChunkVec chunk : this.vec) {
+            buffer.writeChunkVec(chunk);
+        }
     }
 
     @Override
@@ -31,7 +38,7 @@ public final class C2SUnloadChunkPacket implements Packet<InGameServerPacketHand
         handler.handleUnloadChunk(this);
     }
 
-    public ChunkVec vec() {
+    public ChunkVec[] vec() {
         return vec;
     }
 

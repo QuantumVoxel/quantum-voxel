@@ -123,6 +123,8 @@ dependencies {
     implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
 
     implementation(api("org.apache.commons:commons-compress:1.26.1"))
+    implementation 'org.mozilla:rhino:1.8.0'
+    implementation 'org.reflections:reflections:0.10.2'
 }
 
 processResources {
@@ -188,7 +190,7 @@ tasks.create("serverJar", Jar) {
 }
 
 tasks.register('prepareRun', {
-    Files.createDirectories(Path.of(rootProject.projectDir.getAbsolutePath(), "run"))
+    Files.createDirectories(Paths.get(rootProject.projectDir.getAbsolutePath(), "run"))
 })
 
 tasks.withType(ProcessResources).configureEach {

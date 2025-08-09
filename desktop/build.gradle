@@ -31,6 +31,10 @@ buildscript {
     }
 }
 
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '2.2.0'
+}
+
 //*****************//
 //     Plugins     //
 //*****************//
@@ -112,13 +116,16 @@ dependencies {
     implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-openal:3.3.3!!") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-opencl:3.3.3!!") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-opengles:3.3.3!!") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-openxr:3.3.3!!") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-stb:3.3.3!!") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-openal:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-openxr:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-stb:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
@@ -132,6 +139,7 @@ dependencies {
     implementation api("org.lwjgl:lwjgl-openal:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-opengles:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+    implementation api("org.lwjgl:lwjgl-openxr:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
     implementation api("org.lwjgl:lwjgl-stb:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
     implementation api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
     implementation api("com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop")
@@ -248,7 +256,7 @@ jar {
 }
 
 tasks.register('prepareRun', {
-    Files.createDirectories(Path.of(rootProject.projectDir.getAbsolutePath(), "run"))
+    Files.createDirectories(Paths.get(rootProject.projectDir.getAbsolutePath(), "run"))
 })
 
 tasks.withType(ProcessResources).configureEach {

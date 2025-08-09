@@ -1,0 +1,6 @@
+{
+    boils: 100
+    vaporizes: 300
+    hardness: Infinity
+    fluid: true
+}

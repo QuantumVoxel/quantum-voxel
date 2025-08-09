@@ -21,9 +21,9 @@ dependencies {
 test {
     useJUnitPlatform()
 }
-kotlin {
-    jvmToolchain(17)
-}
+//kotlin {
+//    jvmToolchain(17)
+//}
 
 processResources {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE

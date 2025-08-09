@@ -8,6 +8,8 @@ import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
+import dev.ultreon.quantum.platform.PlatformFeature;
+import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Suppliers;
 import org.jetbrains.annotations.NotNull;
@@ -216,6 +218,15 @@ public class TeaVMPlatform extends GamePlatform {
     }
 
     @Override
+    public void locateContentResources(ResourceManager resourceManager) {
+        try {
+            resourceManager.importPackage(Gdx.files.internal("."));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void handleCrash(ApplicationCrash crash) {
         safeWrapper.crash(crash);
     }
@@ -296,4 +307,9 @@ public class TeaVMPlatform extends GamePlatform {
         }, 0);
         return promise;
     }
+
+	@Override
+	public boolean isFeatureSupported(PlatformFeature platformFeature) {
+		return false;
+	}
 }

@@ -1,0 +1,10 @@
+{
+    melting_point: 1538
+    melts_into: quantum:molten_iron
+    magnetic: true
+    magnetic_strength: 1
+    hardness: 12
+    tool: pickaxe
+    requires_tool: true
+    requires_tool_level: 20
+}

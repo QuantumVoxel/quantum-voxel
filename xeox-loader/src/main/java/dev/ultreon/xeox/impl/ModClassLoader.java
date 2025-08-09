@@ -45,12 +45,25 @@ public class ModClassLoader extends ClassLoader implements IXeoxClassLoader {
 
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
-        return findClass(name);
+        try {
+            Class<?> aClass = findClass(name);
+            if (aClass == null) {
+                Main.LOGGER.error("The mod '{}' tried to load class '{}' which wasn't found.", mod.modId(), name);
+                throw new ClassNotFoundException(name);
+            }
+            return aClass;
+        } catch (ClassNotFoundException e) {
+            throw e;
+        } catch (Throwable t) {
+            Main.LOGGER.error("Failed to load class {}!", name, t);
+            throw t;
+        }
     }
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
         if (failedClasses.contains(name)) {
+            Main.LOGGER.error("The mod '{}' tried to load class '{}' which previously failed since the class wasn't found.", mod.modId(), name);
             throw new ClassNotFoundException();
         }
 
@@ -59,6 +72,7 @@ public class ModClassLoader extends ClassLoader implements IXeoxClassLoader {
         }
 
         if (name.startsWith("dev.ultreon.xeox.impl")) {
+            Main.LOGGER.error("The mod '{}' tried to access class '{}' which is prohibited as it's in the Xeox implementation package.", mod.modId(), name);
             throw new SecurityException("Mod '" + mod.modId() + "' tries to access class '" + name + "' which is prohibited as it's in the Xeox implementation package.");
         }
 
@@ -67,6 +81,7 @@ public class ModClassLoader extends ClassLoader implements IXeoxClassLoader {
         }
 
         if (blocked.contains(name)) {
+            Main.LOGGER.error("The mod '{}' tried to access class '{}' which is prohibited as it's in the Xeox implementation package.", mod.modId(), name);
             throw new SecurityException("Mod '" + mod.modId() + "' tries to access class '" + name + "' which is prohibited as it's blocked by the Xeox game provider.");
         }
 
@@ -93,6 +108,7 @@ public class ModClassLoader extends ClassLoader implements IXeoxClassLoader {
                         return aGameClass;
                     } catch (ClassNotFoundException e) {
                         failedClasses.add(name);
+                        Main.LOGGER.error("The mod '{}' tried to load class '{}' which failed since the class wasn't found.", mod.modId(), name);
                         throw e;
                     }
                 }
@@ -413,7 +429,8 @@ public class ModClassLoader extends ClassLoader implements IXeoxClassLoader {
             Class<?> clazz = defineClass(name, bytes, 0, bytes.length);
             loadedClasses.put(name, clazz);
             return clazz;
-        } catch (IOException e) {
+        } catch (Exception e) {
+            Main.LOGGER.error("Failed to load class {}!", name, e);
             throw new ClassNotFoundException(name, e);
         }
     }
@@ -652,10 +669,15 @@ public class ModClassLoader extends ClassLoader implements IXeoxClassLoader {
     }
 
     @Override
-    public Enumeration<URL> getResources(String name) {
+    public Enumeration<URL> getResources(String name) throws IOException {
+        if (name.startsWith("java/")) {
+            return GameClassLoader.class.getClassLoader().getResources(name);
+        }
+
         IPath path = fs.path(name);
         List<URL> urls = new ArrayList<>();
         try {
+            Main.LOGGER.trace("Loading resources from " + name);
             urls.add(new URL("xeox", mod.modId(), 69, path.path(), new XeoxURLStreamHandler(path)));
         } catch (IOException e) {
             Main.LOGGER.error("Failed to get resources for '{}'", name, e);
@@ -666,31 +688,76 @@ public class ModClassLoader extends ClassLoader implements IXeoxClassLoader {
 
     @Override
     public @Nullable URL getResource(String name) {
+        if (name.startsWith("java/")) {
+            return GameClassLoader.class.getClassLoader().getResource(name);
+        }
         IPath path = fs.path(name);
         try {
+            Main.LOGGER.trace("Loading resource from " + name);
             return new URL("xeox", mod.modId(), 69, name.substring(1), new XeoxURLStreamHandler(path));
         } catch (MalformedURLException e) {
+            Main.LOGGER.error("Failed to get resource for '{}'", name, e);
             return null;
         }
     }
 
     @Override
     public @Nullable InputStream getResourceAsStream(String name) {
+        if (name.startsWith("java/")) {
+            return GameClassLoader.class.getClassLoader().getResourceAsStream(name);
+        }
+
         IPath path = fs.path(name);
         if (!path.exists()) {
+            Main.LOGGER.warn("Resource '{}' does not exist", name);
             return null;
         }
 
         try {
+            Main.LOGGER.trace("Loading resource stream from '{}'", name);
             return path.read();
         } catch (IOException e) {
+            Main.LOGGER.error("Failed to get resource '{}' as stream", name, e);
             return null;
         }
     }
 
     public byte[] getClassBytes(String name, boolean runTransformers) throws ClassNotFoundException {
+        if (name.startsWith("java/")) {
+            return null;
+        }
+
         IPath path = fs.path(name.replace('.', '/') + ".class");
         if (!path.exists()) {
+            Enumeration<URL> resources = null;
+            try {
+                resources = getResources(name.replace('.', '/') + ".class");
+            } catch (IOException e) {
+                Main.LOGGER.error("Failed to get resources for '{}'", name, e);
+                throw new ClassNotFoundException("Failed to get resources for '" + name + "'", e);
+            }
+            if (resources.hasMoreElements()) {
+                URL url = resources.nextElement();
+                try {
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[1024];
+                    int read;
+                    if (resources.hasMoreElements()) {
+                        Main.LOGGER.warn("More than one resource for '{}' found, using first", name);
+                        throw new ClassNotFoundException("More than one resource for '" + name + "' found, using first");
+                    }
+                    try (InputStream inputStream = resources.nextElement().openStream()) {
+                        while ((read = inputStream.read(buffer)) != -1) {
+                            out.write(buffer, 0, read);
+                        }
+                    }
+                    return out.toByteArray();
+                } catch (IOException e) {
+                    Main.LOGGER.error("Failed to read class bytes for '{}'", name, e);
+                    throw new ClassNotFoundException(name, e);
+                }
+            }
+            Main.LOGGER.error("Failed to find class bytes for '{}'", name);
             throw new ClassNotFoundException(name);
         }
 
@@ -724,6 +791,7 @@ public class ModClassLoader extends ClassLoader implements IXeoxClassLoader {
 
             return bytes;
         } catch (IOException e) {
+            Main.LOGGER.error("Failed to read class bytes for '{}'", name, e);
             throw new ClassNotFoundException(name, e);
         }
     }

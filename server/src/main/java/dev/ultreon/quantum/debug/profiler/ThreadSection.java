@@ -4,13 +4,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class ThreadSection {
     private final Profiler profiler;
     @Nullable
     private Section current;
-    private final Map<String, Section> data = new HashMap<>();
+    private final Map<String, Section> data = new LinkedHashMap<>();
     long lastUpdate = System.currentTimeMillis();
 
     public ThreadSection(Profiler profiler) {
@@ -28,12 +29,11 @@ public final class ThreadSection {
 
     void end() {
         if (this.current == null) return;
-        if (this.current.hasCurrent()) {
-            this.current.end();
+        if (this.current.end()) {
             return;
         }
         this.current.endThis();
-        this.data.put(this.current.getName(), this.current);
+        this.data.put(this.current.name, this.current);
         this.current = null;
     }
 

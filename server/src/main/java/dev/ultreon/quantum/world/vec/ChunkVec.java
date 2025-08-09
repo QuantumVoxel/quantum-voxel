@@ -200,7 +200,10 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      */
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, z);
+        int result = x;
+        result = 31 * result + y;
+        result = 31 * result + z;
+        return result;
     }
 
     /**

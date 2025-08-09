@@ -6,10 +6,10 @@ import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.PacketListener;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
+import dev.ultreon.quantum.network.packets.BundlePacket;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.server.LoginServerPacketHandler;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
-import dev.ultreon.quantum.network.stage.LoginPacketStage;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.network.system.IConnection;
@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 public class ServerConnection implements IConnection<ServerPacketHandler, ClientPacketHandler> {
     private final Session session;
@@ -50,7 +51,7 @@ public class ServerConnection implements IConnection<ServerPacketHandler, Client
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             PacketIO io = new PacketIO(null, out, handle);
             io.writeShort(stage.getClientPackets().getId(packet));
-            packet.toBytes(io);
+            packet.toBytes(handler, io);
             session.getBasicRemote().sendBinary(ByteBuffer.wrap(out.toByteArray()));
         } catch (Exception e) {
             CommonConstants.LOGGER.error("Internal error:", e);
@@ -135,6 +136,16 @@ public class ServerConnection implements IConnection<ServerPacketHandler, Client
     }
 
     @Override
+    public PacketStage getStage() {
+        return stage;
+    }
+
+    @Override
+    public BundlePacket<ClientPacketHandler> bundle(List<Packet<ClientPacketHandler>> packets) {
+        return null;
+    }
+
+    @Override
     public void close() throws IOException {
         session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "The server terminated the connection"));
     }
@@ -147,7 +158,7 @@ public class ServerConnection implements IConnection<ServerPacketHandler, Client
         try {
             PacketIO io = new PacketIO(stream, null, handle);
             short id = io.readShort();
-            Packet<ServerPacketHandler> packet = stage.getServerPackets().decode(id, io);
+            Packet<ServerPacketHandler> packet = stage.getServerPackets().decode(handler, id, io);
 
             if (GamePlatform.get().isDevEnvironment())
                 CommonConstants.LOGGER.debug("Received: " + packet.getClass().getName());

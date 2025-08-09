@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Dedicated server main class.
@@ -156,7 +157,7 @@ public class Main {
         return Main.server;
     }
 
-    private static void waitForKey() {
+    private static void waitForKey(AtomicBoolean running) {
         // Check for docker
         if (System.getenv("DOCKER") != null) {
             return;
@@ -170,7 +171,7 @@ public class Main {
 
                 Thread.yield();
 
-                if (Thread.interrupted()) {
+                if (running.get()) {
                     break;
                 }
             } catch (IOException e) {
@@ -189,14 +190,15 @@ public class Main {
             Main.LOGGER.info("First-initialization finished, set up your config in server_config.quant and restart the server.");
             Main.LOGGER.info("We will wait 10 seconds so you would be able to stop the server for configuration.");
 
-            Thread thread = new Thread(Main::waitForKey);
+            AtomicBoolean running = new AtomicBoolean(true);
+            Thread thread = new Thread(() -> waitForKey(running));
             thread.setDaemon(true);
             thread.setName("WaitForKey");
             thread.start();
 
             Duration.ofSeconds(10).sleep();
 
-            thread.interrupt();
+            running.set(false);
             thread.join();
         } else {
             serverConfig.load();

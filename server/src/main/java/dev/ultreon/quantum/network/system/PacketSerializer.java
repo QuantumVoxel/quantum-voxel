@@ -7,15 +7,15 @@ import com.esotericsoftware.kryo.io.Output;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.RegistryHandle;
-import dev.ultreon.quantum.server.QuantumServer;
 
 import java.lang.reflect.InvocationTargetException;
 
 public class PacketSerializer extends Serializer<Packet<?>> {
     private final Kryo kryo;
-    private RegistryHandle registryHandle;
+    private final RegistryHandle registryHandle;
 
     public PacketSerializer(Kryo kryo, RegistryHandle registryHandle) {
+        super(false, true);
         this.kryo = kryo;
         this.registryHandle = registryHandle;
     }

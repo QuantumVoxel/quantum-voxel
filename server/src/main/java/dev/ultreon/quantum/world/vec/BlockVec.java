@@ -263,7 +263,10 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, z);
+        int hash = x;
+        hash = 31 * hash + y;
+        hash = 31 * hash + z;
+        return hash;
     }
 
     public MapType save(MapType data) {

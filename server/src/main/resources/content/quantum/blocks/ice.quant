@@ -1,0 +1,5 @@
+{
+    melting_point: 0
+    melts_into: quantum:water
+    hardness: 0.5
+}

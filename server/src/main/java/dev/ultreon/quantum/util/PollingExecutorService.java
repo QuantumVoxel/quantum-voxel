@@ -260,7 +260,8 @@ public class PollingExecutorService extends GameObject implements Executor {
      */
     public void pollAll() {
         while ((this.active = this.tasks.poll()) != null) {
-            this.profiler.section("pollTask", () -> {
+            profiler.begin("pollTask");
+            try {
                 var task = this.active;
 
                 try {
@@ -268,7 +269,9 @@ public class PollingExecutorService extends GameObject implements Executor {
                 } catch (Throwable t) {
                     PollingExecutorService.LOGGER.error("Failed to run task:", t);
                 }
-            });
+            } finally {
+                profiler.end();
+            }
         }
     }
 

@@ -8,16 +8,16 @@ import dev.ultreon.quantum.network.packets.Packet;
 
 import java.util.Objects;
 
-public final class S2CDisconnectPacket<T extends ClientPacketHandler> implements Packet<T> {
+public final class S2CDisconnectPacket implements Packet<ClientPacketHandler> {
     private final String message;
 
     public S2CDisconnectPacket(String message) {
         this.message = message;
     }
 
-    public static <T extends ClientPacketHandler> S2CDisconnectPacket<T> read(PacketIO buffer) {
+    public static S2CDisconnectPacket read(PacketIO buffer) {
         var message = buffer.readString(300);
-        return new S2CDisconnectPacket<>(message);
+        return new S2CDisconnectPacket(message);
     }
 
     @Override
@@ -26,7 +26,7 @@ public final class S2CDisconnectPacket<T extends ClientPacketHandler> implements
     }
 
     @Override
-    public void handle(PacketContext packetContext, T handler) {
+    public void handle(PacketContext packetContext, ClientPacketHandler handler) {
         CommonConstants.LOGGER.info("Server disconnected: {}", this.message);
 
         handler.onDisconnect(this.message);

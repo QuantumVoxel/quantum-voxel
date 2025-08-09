@@ -2,6 +2,7 @@ package dev.ultreon.quantum.network;
 
 import dev.ultreon.quantum.network.api.PacketDestination;
 import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.network.system.IConnection;
 
 public interface PacketHandler {
     PacketDestination destination();
@@ -23,4 +24,6 @@ public interface PacketHandler {
     boolean isDisconnected();
 
     Packet<?> reply(long sequenceId);
+
+    IConnection<?, ?> connection();
 }

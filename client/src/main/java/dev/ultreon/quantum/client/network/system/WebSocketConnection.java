@@ -60,7 +60,7 @@ public abstract class WebSocketConnection<OurHandler extends PacketHandler, Thei
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PacketIO io = new PacketIO(null, out, handle);
         io.writeShort(id);
-        packet.toBytes(io);
+        packet.toBytes(handler, io);
         socket.send(out.toByteArray(), resultListener);
     }
 
@@ -155,7 +155,7 @@ public abstract class WebSocketConnection<OurHandler extends PacketHandler, Thei
     public final boolean received(byte[] bytes) {
         PacketIO io = new PacketIO(new ByteArrayInputStream(bytes), null, handle);
         short i = io.readShort();
-        Packet<OurHandler> packet = getPackets().decode(i, io);
+        Packet<OurHandler> packet = getPackets().decode(handler, i, io);
         if (packet == null) {
             CommonConstants.LOGGER.error("Invalid packet ID: " + i);
             return false;

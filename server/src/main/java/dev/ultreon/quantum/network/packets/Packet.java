@@ -3,6 +3,7 @@ package dev.ultreon.quantum.network.packets;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketHandler;
 import dev.ultreon.quantum.network.PacketIO;
+import dev.ultreon.quantum.network.server.ServerPacketHandler;
 
 public interface Packet<T extends PacketHandler> {
     /**
@@ -19,4 +20,8 @@ public interface Packet<T extends PacketHandler> {
      * @param handler The handler specific to the packet type, responsible for executing the handling logic.
      */
     void handle(PacketContext ctx, T handler);
+
+    default void toBytes(PacketHandler handler, PacketIO buffer) {
+        this.toBytes(buffer);
+    }
 }

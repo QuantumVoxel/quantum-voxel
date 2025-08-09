@@ -6,6 +6,8 @@ import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
+import dev.ultreon.quantum.platform.PlatformFeature;
+import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
@@ -303,7 +305,13 @@ public abstract class GamePlatform {
         return 0;
     }
 
+    public abstract void locateContentResources(ResourceManager resourceManager);
+
     public abstract void handleCrash(ApplicationCrash crash);
+
+    public @Nullable Margins getAeroBounds() {
+        return null;
+    }
 
     public long totalMemory() {
         return 0;
@@ -416,6 +424,20 @@ public abstract class GamePlatform {
 
     public String getFileSep() {
         return "/";
+    }
+
+    public Integer getDebugValue(DebugKey key) {
+        return null;
+    }
+
+    public abstract boolean isFeatureSupported(PlatformFeature platformFeature);
+
+    public void setFullAero(boolean value) {
+
+    }
+
+    public boolean getFullAero() {
+        return false;
     }
 
     private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {

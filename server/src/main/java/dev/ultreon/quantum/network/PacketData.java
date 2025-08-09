@@ -11,16 +11,17 @@ public class PacketData<T extends PacketHandler> {
         this.collection = collection;
     }
 
-    public Packet<T> decode(int id, PacketIO buffer) {
+    public Packet<T> decode(T handler, int id, PacketIO buffer) {
         Timing.start("packet_decode:" + id);
-        Packet<T> decode = this.collection.decode(id, buffer);
+        Packet<T> decode = this.collection.decode(handler, id, buffer);
         Timing.end("packet_decode:" + id);
         return decode;
     }
 
-    public void encode(Packet<?> packet, PacketIO buffer) {
+    @SuppressWarnings("unchecked")
+    public void encode(PacketHandler handler, Packet<?> packet, PacketIO buffer) {
         Timing.start("packet_encode:" + packet.getClass().getName());
-        this.collection.encode(packet, buffer);
+        this.collection.encode(handler, (Packet<T>) packet, buffer);
         Timing.end("packet_encode:" + packet.getClass().getName());
     }
 

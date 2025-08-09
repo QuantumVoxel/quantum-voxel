@@ -4,6 +4,7 @@ import dev.ultreon.quantum.Logger;
 import dev.ultreon.quantum.LoggerFactory;
 import dev.ultreon.quantum.network.PacketHandler;
 import dev.ultreon.quantum.network.PacketListener;
+import dev.ultreon.quantum.network.packets.BundlePacket;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.stage.PacketStages;
@@ -14,6 +15,7 @@ import dev.ultreon.quantum.util.Result;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public interface IConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> extends Closeable {
@@ -51,6 +53,10 @@ public interface IConnection<OurHandler extends PacketHandler, TheirHandler exte
 
     boolean isMemoryConnection();
 
+    default boolean isRemoteConnection() {
+        return !isMemoryConnection();
+    }
+
     default void initiate(OurHandler handler, @Nullable Packet<? extends TheirHandler> packetToThem) {
         this.moveTo(PacketStages.LOGIN, handler);
         if (packetToThem != null)
@@ -72,4 +78,8 @@ public interface IConnection<OurHandler extends PacketHandler, TheirHandler exte
     void onPing(long ping);
 
     boolean isLoggingIn();
+
+    PacketStage getStage();
+
+    BundlePacket<TheirHandler> bundle(List<Packet<TheirHandler>> packets);
 }

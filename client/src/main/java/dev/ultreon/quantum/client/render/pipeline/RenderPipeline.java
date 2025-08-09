@@ -28,6 +28,7 @@ import java.io.PrintStream;
 import java.util.zip.Deflater;
 
 import static com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder.LRU;
+import static dev.ultreon.quantum.client.QuantumClient.PROFILER;
 
 /**
  * The rendering pipeline.
@@ -89,34 +90,39 @@ public class RenderPipeline implements Disposable {
      * @param deltaTime the delta time.
      */
     public void render(ModelBatch modelBatch, float blurScale, float deltaTime) {
-        @Nullable TerrainRenderer worldRenderer = QuantumClient.get().worldRenderer;
-        if (worldRenderer != null) ScreenUtils.clear(worldRenderer.getSkybox().bottomColor, true);
-        else ScreenUtils.clear(0F, 0F, 0F, 1F, true);
+        PROFILER.begin("render-pipeline@render");
+        try {
+            @Nullable TerrainRenderer worldRenderer = QuantumClient.get().worldRenderer;
+            if (worldRenderer != null) ScreenUtils.clear(worldRenderer.getSkybox().bottomColor, true);
+            else ScreenUtils.clear(0F, 0F, 0F, 1F, true);
 
-        QuantumClient.get().renderBuffers().begin(camera);
-        ValueTracker.resetObtainRequests();
-        ValueTracker.resetFlushed();
-        ValueTracker.resetFlushAttempts();
+            QuantumClient.get().renderBuffers().begin(camera);
+            ValueTracker.resetObtainRequests();
+            ValueTracker.resetFlushed();
+            ValueTracker.resetFlushAttempts();
 
-        var textures = new ObjectMap<String, Texture>();
-        for (RenderNode node : this.nodes.toArray(RenderNode.class)) {
-            if (node.requiresModel()) {
-                this.modelRender(modelBatch, node, textures, deltaTime);
-            } else {
-                this.plainRender(modelBatch, node, textures, deltaTime);
+            var textures = new ObjectMap<String, Texture>();
+            for (RenderNode node : this.nodes.toArray(RenderNode.class)) {
+                if (node.requiresModel()) {
+                    this.modelRender(modelBatch, node, textures, deltaTime);
+                } else {
+                    this.plainRender(modelBatch, node, textures, deltaTime);
+                }
+                modelBatch.flush();
             }
+
+            ((MainRenderNode) this.main).blur(blurScale);
+            this.main.render(textures, this.camera, deltaTime);
             modelBatch.flush();
-        }
 
-        ((MainRenderNode) this.main).blur(blurScale);
-        this.main.render(textures, this.camera, deltaTime);
-        modelBatch.flush();
-
-        for (var node : this.nodes) {
-            node.flush();
+            for (var node : this.nodes) {
+                node.flush();
+            }
+            main.flush();
+            textures.clear();
+        } finally {
+            PROFILER.end();
         }
-        main.flush();
-        textures.clear();
     }
 
     /**

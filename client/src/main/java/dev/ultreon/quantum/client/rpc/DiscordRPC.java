@@ -7,11 +7,15 @@ import com.jagrosh.discordipc.entities.RichPresence;
 import com.jagrosh.discordipc.entities.User;
 import com.jagrosh.discordipc.exceptions.NoDiscordClientException;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.OffsetDateTime;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import dev.ultreon.quantum.Promise;
 
 /**
@@ -88,10 +92,7 @@ public class DiscordRPC implements RpcHandler {
 
                 // Schedule a task to update the Rich Presence every 200 milliseconds
                 // TODO : This is not working
-//                ScheduledFuture<?> scheduledFuture = QuantumClient.get().scheduleRepeat(() -> update(client), 0, 200, TimeUnit.MILLISECONDS);
-
-                // Set up a shutdown hook to cancel the scheduled task and close the IPC client
-//                Runtime.getRuntime().addShutdownHook(new Thread(() -> scheduledFuture.cancel(false)));
+                GamePlatform.get().runAsync(() -> update(client));
             }
             /**
              * Updates the Discord Rich Presence with the current game activity.
@@ -99,6 +100,8 @@ public class DiscordRPC implements RpcHandler {
              * @param client The IPC client used to send the Rich Presence.
              */
             private void update(IPCClient client) {
+                GamePlatform.get().runAsync(() -> update(client));
+
                 // Only update if the Rich Presence has been updated since the last update.
                 if (!updated) {
                     return;

@@ -253,7 +253,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 this.client.integratedServer = null;
             }
 
-            this.client.showScreen(new DisconnectedScreen(message, !this.connection.isMemoryConnection()));
+            this.client.showScreen(new DisconnectedScreen(message, this.connection.isRemoteConnection()));
         });
     }
 
@@ -571,6 +571,11 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         if (player != null) {
             player.onMenuChanged(menuId, stack);
         }
+    }
+
+    @Override
+    public IConnection<ClientPacketHandler, ServerPacketHandler> connection() {
+        return this.connection;
     }
 
     @Override

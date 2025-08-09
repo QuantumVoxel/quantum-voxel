@@ -1,11 +1,14 @@
 package dev.ultreon.quantum.dedicated;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
+import dev.ultreon.quantum.platform.PlatformFeature;
+import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.xeox.api.IMod;
 import dev.ultreon.xeox.api.IPath;
@@ -79,6 +82,15 @@ public class ServerPlatform extends GamePlatform {
     }
 
     @Override
+    public void locateContentResources(ResourceManager resourceManager) {
+        try {
+            resourceManager.loadFromAssetsTxt(Gdx.files.internal("assets.txt"));
+        } catch (Exception e) {
+            CommonConstants.LOGGER.error("Failed to load assets.txt", e);
+        }
+    }
+
+    @Override
     public void handleCrash(ApplicationCrash crash) {
         crash.printCrash();
         crash.getCrashLog().defaultSave();
@@ -92,6 +104,16 @@ public class ServerPlatform extends GamePlatform {
     @Override
     public UUID constructUuid(long msb, long lsb) {
         return new UUID(msb, lsb);
+    }
+
+    @SuppressWarnings({"DuplicateBranchesInSwitch", "ConstantValue"})
+    @Override
+    public boolean isFeatureSupported(PlatformFeature platformFeature) {
+        return switch (platformFeature) {
+            case JsInterop -> true;
+            case ClassLoading -> true;
+            case JsBytecode -> true;
+        };
     }
 
     @Override

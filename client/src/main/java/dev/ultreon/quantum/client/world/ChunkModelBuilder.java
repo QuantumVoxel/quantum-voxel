@@ -6,12 +6,15 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.client.render.RenderPass;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ChunkModelBuilder {
     private final ModelBuilder modelBuilder = new ModelBuilder();
-    private final ObjectMap<RenderPass, MeshBuilder> builders = new ObjectMap<>();
+    private final Map<RenderPass, MeshBuilder> builders = new HashMap<>();
     private boolean started = false;
     private final ClientChunk chunk;
 
@@ -23,16 +26,16 @@ public class ChunkModelBuilder {
         started = true;
     }
 
-    public ObjectMap<RenderPass, ChunkMesh> end(ObjectMap<RenderPass, ChunkMesh> meshes) {
+    public List<ChunkMesh> end(List<ChunkMesh> meshes) {
         started = false;
 
-        for (ObjectMap.Entry<RenderPass, MeshBuilder> entry : this.builders.entries()) {
+        for (Map.Entry<RenderPass, MeshBuilder> entry : this.builders.entrySet()) {
             if (entry == null)
                 continue;
-            RenderPass pass = entry.key;
-            MeshBuilder builder = entry.value;
+            RenderPass pass = entry.getKey();
+            MeshBuilder builder = entry.getValue();
             Mesh part = builder.end();
-            meshes.put(pass, new ChunkMesh(pass, part, chunk));
+            meshes.add(new ChunkMesh(pass, part, chunk));
         }
 
         builders.clear();

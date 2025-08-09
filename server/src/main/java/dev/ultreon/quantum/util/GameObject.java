@@ -53,7 +53,7 @@ public abstract class GameObject extends GameNode implements RenderableProvider,
 
     public GameObject pop(@NotNull GameObject child) {
         synchronized (children) {
-            children.removeValue(child, true);
+            children.remove(child);
             return child;
         }
     }
@@ -61,8 +61,7 @@ public abstract class GameObject extends GameNode implements RenderableProvider,
     @Override
     public <T extends Component<?>> @Nullable T set(@NotNull Class<T> type, @Nullable T value) {
         if (value instanceof RendererComponent) {
-            RendererComponent rendererComponent = (RendererComponent) value;
-            this.renderer = rendererComponent;
+            this.renderer = (RendererComponent) value;
         }
 
         return super.set(type, value);
@@ -172,10 +171,6 @@ public abstract class GameObject extends GameNode implements RenderableProvider,
 
     public @Nullable String getDescription() {
         return null;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public void setName(String name) {

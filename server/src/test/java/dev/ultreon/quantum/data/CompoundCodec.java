@@ -24,27 +24,59 @@ public class CompoundCodec<T> implements Codec<T> {
     @Override
     public <D> DataResult<D> write(DataWriter<D> writer, T data) {
         D map = writer.createMap();
+        boolean success = true;
+        
         for (Map.Entry<String, FieldCodec<T, ?>> entry : this.codecByField.entrySet()) {
-//            writer.writeMapEntry(entry.getKey(), this.getterByField.get(entry.getKey()).apply(data));
+            String key = entry.getKey();
+            Function<T, ?> getter = this.getterByField.get(key);
+            
+            if (getter != null && writer instanceof DataOps) {
+                try {
+                    Object value = getter.apply(data);
+                    if (value != null) {
+                        @SuppressWarnings("unchecked")
+                        FieldCodec<T, Object> fieldCodec = (FieldCodec<T, Object>) entry.getValue();
+                        D encodedValue = fieldCodec.codec.encode((DataOps<D>) writer, value);
+                        writer.writeMapEntry(map, key, encodedValue);
+                    }
+                } catch (Exception e) {
+                    success = false;
+                }
+            }
         }
-        return new DataResult<>(map, true);
+        
+        return new DataResult<>(map, success);
     }
 
     @Override
     public <D> DataResult<T> read(DataReader<D> reader, D data) {
-//        if (data instanceof Map) {
-//            Map<String, D> map = (Map<String, D>) data;
-//            reader.iterate(data, d -> {
-//                String key = reader.getString(d);
-//                FieldCodec<T, ?> codec = this.codecByField.get(key);
-//                if (codec == null) {
-//                    return new DataResult<>(null, false);
-//                }
-//                return codec.codec.read(reader, d);
-//            });
-//        }
-
-        throw new UnsupportedOperationException("TODO");
+        if (!reader.isMap(data)) {
+            return new DataResult<>(null, false);
+        }
+        
+        Map<String, Object> resultMap = new HashMap<>();
+        final boolean[] success = {true};
+        
+        reader.iterate(data, entry -> {
+            if (reader.isString(entry)) {
+                String key = reader.readString(entry);
+                FieldCodec<T, ?> fieldCodec = this.codecByField.get(key);
+                if (fieldCodec != null && reader instanceof DataOps) {
+                    try {
+                        Object value = fieldCodec.codec.decode((DataOps<D>) reader, entry);
+                        resultMap.put(key, value);
+                    } catch (Exception e) {
+                        success[0] = false;
+                    }
+                }
+            }
+        });
+        
+        if (!success[0]) {
+            return new DataResult<>(null, false);
+        }
+        
+        return new DataResult<>(this.map(resultMap), true);
     }
 
     public static class Builder<T> {

@@ -163,4 +163,9 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
     public boolean isDisconnected() {
         return disconnected;
     }
+
+    @Override
+    public IConnection<ServerPacketHandler, ClientPacketHandler> connection() {
+        return connection;
+    }
 }

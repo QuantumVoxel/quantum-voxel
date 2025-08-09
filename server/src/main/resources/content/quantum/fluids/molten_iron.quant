@@ -1,0 +1,30 @@
+{
+    // Density of molten iron at ~1538°C (kg/m³)
+    "density": 6980.0,
+
+    // Dynamic viscosity of molten iron (Pa·s)
+    "viscosity": 0.006,
+
+    // Surface tension (N/m)
+    "surfaceTension": 1.9,
+
+    // Boiling point of iron (Kelvin)
+    "boilingPoint": 3134.0,
+
+    // Melting/freezing point of iron (Kelvin)
+    "freezingPoint": 1811.0,
+
+    // Molten iron is bright orange/red
+    "color": {
+        "r": 1.0,
+        "g": 0.3,
+        "b": 0.05,
+        "a": 0.95
+    },
+
+    // Custom gameplay multiplier, moderate flow for molten metal
+    "flowRate": 0.2,
+
+    // Estimated compressibility (very low, nearly incompressible)
+    "compressibility": 1e-11
+}

@@ -15,6 +15,8 @@ import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.dedicated.JavaWebSocket;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
+import dev.ultreon.quantum.platform.PlatformFeature;
+import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Result;
 
@@ -240,6 +242,11 @@ public class AndroidPlatform extends GamePlatform {
     }
 
     @Override
+    public void locateContentResources(ResourceManager resourceManager) {
+        resourceManager.importDeferredPackage(AndroidLauncher.class);
+    }
+
+    @Override
     public void handleCrash(ApplicationCrash crash) {
         crash.printCrash();
         System.exit(1);
@@ -261,5 +268,16 @@ public class AndroidPlatform extends GamePlatform {
     @Override
     public boolean isLowPowerDevice() {
         return true;
+    }
+
+    @Override
+    public boolean isFeatureSupported(PlatformFeature platformFeature) {
+        switch (platformFeature) {
+            case ClassLoading:
+            case JsBytecode:
+                return false;
+            case JsInterop:
+                return true;
+        }
     }
 }

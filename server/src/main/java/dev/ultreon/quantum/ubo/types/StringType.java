@@ -49,8 +49,9 @@ public class StringType implements DataType<String> {
 
     @Override
     public void write(DataOutput output) throws IOException {
-        output.writeShort(obj.length());
-        for (byte aByte : obj.getBytes(StandardCharsets.UTF_8)) {
+        byte[] bytes = obj.getBytes(StandardCharsets.UTF_8);
+        output.writeShort(bytes.length);
+        for (byte aByte : bytes) {
             output.writeByte(aByte);
         }
     }

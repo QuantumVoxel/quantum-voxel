@@ -12,12 +12,10 @@ import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.container.BlastFurnaceContainer;
 import dev.ultreon.quantum.world.container.FuelRegistry;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-@Getter
 public class BlastFurnaceBlockEntity
         extends RecipeBlockEntity<BlastFurnaceMenu, BlastingRecipe>
         implements BlastFurnaceContainer {
@@ -173,4 +171,60 @@ public class BlastFurnaceBlockEntity
         updateData.putInt("maxBurnTime", maxBurnTime);
         return updateData;
     }
+
+	/**
+	 * @return the cookTime
+	 */
+	public int getCookTime() {
+		return cookTime;
+	}
+
+	/**
+	 * @param cookTime the cookTime to set
+	 */
+	public void setCookTime(int cookTime) {
+		this.cookTime = cookTime;
+	}
+
+	/**
+	 * @return the maxCookTime
+	 */
+	public int getMaxCookTime() {
+		return maxCookTime;
+	}
+
+	/**
+	 * @param maxCookTime the maxCookTime to set
+	 */
+	public void setMaxCookTime(int maxCookTime) {
+		this.maxCookTime = maxCookTime;
+	}
+
+	/**
+	 * @return the burnTime
+	 */
+	public int getBurnTime() {
+		return burnTime;
+	}
+
+	/**
+	 * @param burnTime the burnTime to set
+	 */
+	public void setBurnTime(int burnTime) {
+		this.burnTime = burnTime;
+	}
+
+	/**
+	 * @return the maxBurnTime
+	 */
+	public int getMaxBurnTime() {
+		return maxBurnTime;
+	}
+
+	/**
+	 * @param maxBurnTime the maxBurnTime to set
+	 */
+	public void setMaxBurnTime(int maxBurnTime) {
+		this.maxBurnTime = maxBurnTime;
+	}
 }

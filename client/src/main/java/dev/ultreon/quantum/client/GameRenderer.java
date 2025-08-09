@@ -8,10 +8,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.DevFlag;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.event.EventSystem;
@@ -43,6 +45,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static dev.ultreon.quantum.client.QuantumClient.LOGGER;
+import static dev.ultreon.quantum.client.QuantumClient.PROFILER;
 import static dev.ultreon.quantum.world.World.CS;
 
 /**
@@ -68,6 +71,7 @@ public class GameRenderer implements Disposable {
     private final Vec3f tmp3F2 = new Vec3f();
     private final Vec3d tmp3D1 = new Vec3d();
     private final Vec3d tmp3D2 = new Vec3d();
+    private final Vec3d pos = new Vec3d();
 
     /**
      * Constructs a new GameRenderer with the specified client, model batch, and render pipeline.
@@ -161,7 +165,6 @@ public class GameRenderer implements Disposable {
 
     private void renderWorld(float deltaTime, ClientWorld world, WorldRenderer worldRenderer) {
         if (this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed()) {
-
             try (var ignored = QuantumClient.PROFILER.start("world")) {
                 EventSystem.postDefault(new RenderWorldEvent.Pre(world, worldRenderer, deltaTime));
 
@@ -284,66 +287,117 @@ public class GameRenderer implements Disposable {
      * @param deltaTime The time elapsed since the last frame.
      */
     void renderWorld(float deltaTime) {
+        PROFILER.begin("game-renderer@render-world");
+        try {
+            if (renderWorldBuffers(deltaTime)) return;
+
+            // Cursor
+            renderCursor();
+        } finally {
+            PROFILER.end();
+        }
+    }
+
+    private void renderCursor() {
+        PROFILER.begin("game-renderer@render-cursor");
+        try {
+            if (client.cursor instanceof BlockHit) {
+                BlockHit blockHit = (BlockHit) client.cursor;
+
+                Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+                Gdx.gl.glEnable(GL20.GL_BLEND);
+                Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+                Gdx.gl.glDepthMask(false);
+                drawBlockOutline(client.shapeRenderer, client.camera.relative(blockHit.getBlockVec().d(), tmpV3), 1f, 3.5f);
+                Gdx.gl.glDepthMask(true);
+            }
+        } finally {
+            PROFILER.end();
+        }
+    }
+
+    private boolean renderWorldBuffers(float deltaTime) {
         RenderBufferSource bufferSource = this.client.renderBuffers();
-        bufferSource.begin(this.client.camera);
+        PROFILER.begin("game-renderer@render-world-buffers");
+        try {
+            bufferSource.begin(this.client.camera);
 
-        // Background
-        @Nullable ClientWorldAccess world = this.client.world;
-        @Nullable TerrainRenderer worldRenderer = this.client.worldRenderer;
-        LocalPlayer localPlayer = this.client.player;
+            // Background
+            @Nullable ClientWorldAccess world = this.client.world;
+            @Nullable TerrainRenderer worldRenderer = this.client.worldRenderer;
+            LocalPlayer localPlayer = this.client.player;
 
-        // World
-        if (localPlayer == null || worldRenderer == null || world == null) {
-            LOGGER.warn("worldRenderer or localPlayer is null");
-            return;
-        }
-        if (this.client.renderWorld) {
-            worldRenderer.renderBackground(bufferSource, Gdx.graphics.getDeltaTime());
-        }
+            // World
+            if (localPlayer == null || worldRenderer == null || world == null) {
+                LOGGER.warn("worldRenderer or localPlayer is null");
+                return true;
+            }
+            if (this.client.renderWorld) {
+                worldRenderer.renderBackground(bufferSource, Gdx.graphics.getDeltaTime());
+            }
 
-        bufferSource.getBuffer(RenderPass.SKYBOX).flush();
-        bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).flush();
+            bufferSource.getBuffer(RenderPass.SKYBOX).flush();
+            bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).flush();
 
-        var position = localPlayer.getPosition(client.partialTick);
-        Array<Entity> toSort = new Array<>(world.getAllEntities());
-        worldRenderer.render(client.renderBuffers(), deltaTime);
-        toSort.sort((e1, e2) -> {
-            var d1 = e1.getPosition(tmp3D1).dst(position);
-            var d2 = e2.getPosition(tmp3D2).dst(position);
-            return Double.compare(d1, d2);
-        });
-        for (Entity entity : toSort.toArray(Entity.class)) {
-            if (entity instanceof LocalPlayer) continue;
-            worldRenderer.collectEntity(entity, client.renderBuffers());
-        }
+            var position = localPlayer.getPosition(client.partialTick);
+            Array<Entity> toSort = new Array<>(world.getAllEntities());
+            worldRenderer.render(client.renderBuffers(), deltaTime);
+            for (Entity entity : toSort.toArray(Entity.class)) {
+                if (entity instanceof LocalPlayer) continue;
+                worldRenderer.collectEntity(entity, client.renderBuffers());
+            }
 
-        // Particles
-        ParticleSystem particleSystem = worldRenderer.getParticleSystem();
-        particleSystem.begin();
-        particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
-        particleSystem.end();
+            // Particles
+            ParticleSystem particleSystem = worldRenderer.getParticleSystem();
+            particleSystem.begin();
+            particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
+            particleSystem.end();
 //        modelBatch.render(particleSystem);
-        // TODO add particle system
+            // TODO add particle system
 
-        // Foreground
-        worldRenderer.renderForeground(client.renderBuffers(), deltaTime);
+            // Foreground
+            worldRenderer.renderForeground(client.renderBuffers(), deltaTime);
 
-        // Extract textures
-        if (vignetteTex == null) {
-            vignetteTex = client.getTextureManager().getTexture(new NamespaceID("textures/gui/vignette.png"));
+            // Extract textures
+            if (vignetteTex == null) {
+                vignetteTex = client.getTextureManager().getTexture(new NamespaceID("textures/gui/vignette.png"));
+            }
+
+            bufferSource.end();
+        } finally {
+            PROFILER.end();
         }
+        return false;
+    }
 
-        bufferSource.end();
+    public void drawBlockOutline(ShapeRenderer renderer, Vector3 relativeBlockPos, float size, float lineWidth) {
+        // Slightly inflate the cube to avoid z-fighting
+        PROFILER.begin("game-renderer@draw-block-outline");
+        try {
+            float inflate = 0.002f;
 
-        // Cursor
-        if (client.cursor instanceof BlockHit) {
-            BlockHit blockHit = (BlockHit) client.cursor;
-            BlockVec blockVec = blockHit.getBlockVec();
-            BlockVec next = blockHit.getNext();
-            BoundingBox boundingBox = blockHit.getBlockMeta().getBoundingBox(blockVec.x, blockVec.y, blockVec.z);
-            Vec3f vec = blockVec.f();
-            Vec3f nextVec = next.f();
-            lineRenderer.renderBox(client.camera, boundingBox, new Vector3((float) blockHit.getNormal().x, (float) blockHit.getNormal().y, (float) blockHit.getNormal().z), 6, Color.WHITE);
+            // Set line width (constant pixel size)
+            Gdx.gl.glLineWidth(lineWidth);
+
+            renderer.setProjectionMatrix(client.camera.combined);
+            renderer.begin(ShapeRenderer.ShapeType.Line);
+            renderer.setColor(0f, 0f, 0f, 0.2f);
+
+            renderer.box(relativeBlockPos.x - inflate, relativeBlockPos.y - inflate, relativeBlockPos.z + 1 - inflate, size + inflate * 2, size + inflate * 2, size + inflate * 2);
+            renderer.box(relativeBlockPos.x + inflate, relativeBlockPos.y - inflate, relativeBlockPos.z + 1 - inflate, size + inflate * 2, size + inflate * 2, size + inflate * 2);
+            renderer.box(relativeBlockPos.x - inflate, relativeBlockPos.y + inflate, relativeBlockPos.z + 1 - inflate, size + inflate * 2, size + inflate * 2, size + inflate * 2);
+            renderer.box(relativeBlockPos.x + inflate, relativeBlockPos.y + inflate, relativeBlockPos.z + 1 - inflate, size + inflate * 2, size + inflate * 2, size + inflate * 2);
+            renderer.box(relativeBlockPos.x - inflate, relativeBlockPos.y - inflate, relativeBlockPos.z + 1 + inflate, size + inflate * 2, size + inflate * 2, size + inflate * 2);
+            renderer.box(relativeBlockPos.x + inflate, relativeBlockPos.y - inflate, relativeBlockPos.z + 1 + inflate, size + inflate * 2, size + inflate * 2, size + inflate * 2);
+            renderer.box(relativeBlockPos.x - inflate, relativeBlockPos.y + inflate, relativeBlockPos.z + 1 + inflate, size + inflate * 2, size + inflate * 2, size + inflate * 2);
+            renderer.box(relativeBlockPos.x + inflate, relativeBlockPos.y + inflate, relativeBlockPos.z + 1 + inflate, size + inflate * 2, size + inflate * 2, size + inflate * 2);
+
+            renderer.end();
+
+            // Reset line width
+            Gdx.gl.glLineWidth(1f);
+        } finally {
+            PROFILER.end();
         }
     }
 

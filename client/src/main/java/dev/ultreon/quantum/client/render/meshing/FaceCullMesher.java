@@ -5,7 +5,7 @@ import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
 import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.world.AOUtils;
+import dev.ultreon.quantum.client.world.AmbientOcclusion;
 import dev.ultreon.quantum.client.world.ChunkModelBuilder;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.OpaqueFaces;
@@ -23,10 +23,11 @@ public class FaceCullMesher implements Mesher {
     public boolean buildMesh(BoundingBox bounds, OpaqueFaces opaqueFaces, UseCondition condition, ChunkModelBuilder builder1) {
         // Part 1: Default world
         boolean flag = false;
+        AmbientOcclusion ambientOcclusion = chunk.getClient().ambientOcclusion;
         for (int x = 0; x < CS; x++) {
             for (int y = 0; y < CS; y++) {
                 for (int z = 0; z < CS; z++) {
-                    flag |= loadBlockInto(bounds, opaqueFaces, builder1, x, y, z);
+                    flag |= loadBlockInto(bounds, opaqueFaces, builder1, x, y, z, ambientOcclusion);
                 }
             }
         }
@@ -36,9 +37,7 @@ public class FaceCullMesher implements Mesher {
 
     private boolean loadBlockInto(
             BoundingBox bounds, OpaqueFaces opaqueFaces, ChunkModelBuilder meshPartBuilder,
-            int x,
-            int y,
-            int z
+            int x, int y, int z, AmbientOcclusion ambientOcclusion
     ) {
         final var block = chunk.getSafe(x, y, z);
         if (!block.isAir()) {
@@ -67,7 +66,7 @@ public class FaceCullMesher implements Mesher {
                             shouldMerge(block, right),
                             shouldMerge(block, back),
                             shouldMerge(block, left)
-                    ), AOUtils.calculate(chunk, x, y, z), light);
+                    ), ambientOcclusion.calculate(chunk, x, y, z), light);
             return true;
         }
         return false;

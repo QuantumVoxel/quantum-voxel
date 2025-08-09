@@ -1,0 +1,31 @@
+{
+    // TODO: Add fluids into the game, this is a placeholder.
+
+    // kg/m³
+    "density": 3100.0,
+
+    // Pa·s
+    "viscosity": 100.0,
+
+    // N/m
+    "surfaceTension": 0.370,
+
+    // Kelvin (1200°C)
+    "boilingPoint": 1473.15,
+
+    // Kelvin (700°C)
+    "freezingPoint": 973.15,
+
+    "color": {
+        "r": 0.9,
+        "g": 0.3,
+        "b": 0.1,
+        "a": 0.95
+    },
+
+    // Base flow rate multiplier
+    "flowRate": 0.3,
+
+    // Bulk modulus inverse in 1/Pa
+    "compressibility": 0.00001
+}

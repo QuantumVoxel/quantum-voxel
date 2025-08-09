@@ -18,14 +18,14 @@ import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
-import org.apache.commons.collections4.queue.SynchronizedQueue;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> extends Listener implements IConnection<OurHandler, TheirHandler>, Closeable {
@@ -37,13 +37,14 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
             return next++;
         }
     };
-    private final Queue<Packet<? extends TheirHandler>> packetQueue = SynchronizedQueue.synchronizedQueue(new ArrayDeque<>());
+    private final List<Packet<TheirHandler>> packetQueue = new CopyOnWriteArrayList<>();
     private final Thread senderThread;
     private final com.esotericsoftware.kryonet.Connection connection;
     private final Executor executor;
     private boolean compressed;
     private PacketData<OurHandler> ourPacketData;
     private PacketData<TheirHandler> theirPacketData;
+    private PacketStage stage;
     private OurHandler handler;
     private boolean readOnly;
     protected long ping = 0;
@@ -81,11 +82,13 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
 
     private void sender() throws IOException {
         while (connection.isConnected() && isRunning()) {
-            Packet<?> packet = packetQueue.poll();
-            if (isReadOnly()) return;
-            if (packet != null) {
-                this.connection.sendTCP(packet);
+            List<Packet<TheirHandler>> packet;
+            synchronized (packetQueue) {
+                packet = new ArrayList<>(packetQueue);
+                packetQueue.clear();
             }
+            if (isReadOnly()) return;
+            this.connection.sendTCP(bundle(packet));
         }
     }
 
@@ -105,7 +108,10 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
             throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
 
         if (handler.isAsync()) {
-            this.packetQueue.add(packet);
+            synchronized (packetQueue) {
+                //noinspection unchecked
+                this.packetQueue.add((Packet<TheirHandler>) packet);
+            }
         } else {
             this.connection.sendTCP(packet);
         }
@@ -119,8 +125,10 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
         if (theirPacketData.getId(packet) < 0)
             throw new IllegalArgumentException("Invalid packet: " + packet.getClass().getName());
 
-
-        this.packetQueue.add(packet);
+        synchronized (packetQueue) {
+            //noinspection unchecked
+            this.packetQueue.add((Packet<TheirHandler>) packet);
+        }
     }
 
     public void setCompressed(boolean compressed) {
@@ -201,6 +209,7 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
         this.theirPacketData = this.getTheirData(stage);
 
         this.loggingIn = stage == PacketStages.LOGIN;
+        this.stage = stage;
 
         this.handler = handler;
     }
@@ -247,6 +256,11 @@ public abstract class TcpConnection<OurHandler extends PacketHandler, TheirHandl
     @Override
     public boolean isLoggingIn() {
         return loggingIn;
+    }
+
+    @Override
+    public PacketStage getStage() {
+        return stage;
     }
 
     public boolean isReadOnly() {

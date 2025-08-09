@@ -50,7 +50,9 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     }
 
     public BlockModel get(BlockState meta) {
-        for (Map.Entry<BlockState, Supplier<BlockModel>> p : this.customRegistry.getOrDefault(meta.getBlock(), Collections.emptyMap()).entrySet()) {
+        Map<BlockState, Supplier<BlockModel>> orDefault = this.customRegistry.get(meta.getBlock());
+        if (orDefault == null) return null;
+        for (Map.Entry<BlockState, Supplier<BlockModel>> p : orDefault.entrySet()) {
             if (p.getKey().equals(meta)) {
                 return p.getValue().get();
             }

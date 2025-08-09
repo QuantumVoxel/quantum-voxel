@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import dev.ultreon.quantum.CommonConstants;
@@ -25,9 +24,9 @@ import dev.ultreon.quantum.client.render.ModelManager;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.meshing.FaceCull;
 import dev.ultreon.quantum.client.render.meshing.Light;
-import dev.ultreon.quantum.client.world.AOUtils;
-import dev.ultreon.quantum.client.world.ChunkModelBuilder;
+import dev.ultreon.quantum.client.world.AmbientOcclusion;
 import dev.ultreon.quantum.client.world.OpaqueFaces;
+import dev.ultreon.quantum.di.DependencyContainer;
 import dev.ultreon.quantum.util.LazyValue;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
@@ -301,12 +300,13 @@ public final class BakedCubeModel extends BakedModel implements BlockModel, Item
                 continue;
             }
 
-            int sAo = AOUtils.aoForSide(ao, direction);
+            AmbientOcclusion ambientOcclusion = DependencyContainer.getInstance().resolve(AmbientOcclusion.class);
+            int sAo = ambientOcclusion.aoForSide(ao, direction);
             byte sLight = Light.get(light, direction);
-            v00.setCol(0f, AOUtils.hasAoCorner00(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
-            v01.setCol(0f, AOUtils.hasAoCorner01(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
-            v10.setCol(0f, AOUtils.hasAoCorner10(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
-            v11.setCol(0f, AOUtils.hasAoCorner11(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
+            v00.setCol(0f, ambientOcclusion.hasAoCorner00(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
+            v01.setCol(0f, ambientOcclusion.hasAoCorner01(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
+            v10.setCol(0f, ambientOcclusion.hasAoCorner10(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
+            v11.setCol(0f, ambientOcclusion.hasAoCorner11(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);
 
             v00.setNor(direction.getNormal());
             v01.setNor(direction.getNormal());

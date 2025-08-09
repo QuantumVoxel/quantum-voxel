@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import dev.ultreon.libs.collections.v0.tables.HashTable;
@@ -31,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class JsonModel implements BlockModel, ItemModel {
     public final Map<String, NamespaceID> textureElements;
@@ -102,7 +104,7 @@ public class JsonModel implements BlockModel, ItemModel {
     @Override
     public void load(QuantumClient client) {
         if (model != null) return;
-        this.model = ModelManager.INSTANCE.generateModel(id, modelBuilder -> {
+        this.model = ModelManager.INSTANCE.generateModel(id, (Consumer<ModelBuilder>) modelBuilder -> {
             for (int i = 0, modelElementsSize = modelElements.size(); i < modelElementsSize; i++) {
                 ModelElement modelElement = modelElements.get(i);
                 modelElement.bake(i,

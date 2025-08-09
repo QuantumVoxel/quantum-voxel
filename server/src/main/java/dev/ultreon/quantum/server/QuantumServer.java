@@ -397,9 +397,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
             //* Main-loop.
             while (this.running) {
-                if (Thread.interrupted()) {
-                    break;
-                }
                 var canTick = false;
 
                 double time2 = System.currentTimeMillis();
@@ -528,7 +525,6 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         // Set running flag to make server stop.
         this.finalizer = finalizer;
         this.running = false;
-        this.thread.interrupt();
 
         // Shut down the parent executor service.
         super.shutdownNow();
@@ -753,8 +749,23 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @return the player, or null if the player is not in the cache.
      */
     public @Nullable CachedPlayer getCachedPlayer(UUID uuid) {
-//        return this.cachedPlayers.get(name, () -> new CachedPlayer(uuid, null));
-        return null;
+        // Search through cached players to find one with matching UUID
+        for (CachedPlayer cachedPlayer : this.cachedPlayers.values()) {
+            if (uuid.equals(cachedPlayer.getUuid())) {
+                return cachedPlayer;
+            }
+        }
+
+        // If we have a name for this UUID, add it to the cache by name
+        ServerPlayer onlinePlayer = this.getPlayer(uuid);
+        if (onlinePlayer != null) {
+            // If not found, create a new cached player with the UUID
+            CachedPlayer newPlayer = new CachedPlayer(uuid, onlinePlayer.getName());
+            this.cachedPlayers.put(onlinePlayer.getName(), newPlayer);
+        }
+
+        // If not found, create a new cached player with the UUID
+        return new CachedPlayer(uuid, null);
     }
 
     /**

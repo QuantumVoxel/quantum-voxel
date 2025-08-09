@@ -75,7 +75,7 @@ public class ServerWorld extends World implements Audience {
     private final QuantumServer server;
     private final RegionStorage regionStorage = new RegionStorage();
     private final AsyncExecutor saveExecutor = new AsyncExecutor(1, "ServerWorld-Save");
-    private final AsyncExecutor executor = new AsyncExecutor(4, "World-Executor");
+    private final AsyncExecutor executor = new AsyncExecutor(Runtime.getRuntime().availableProcessors(), "World-Executor");
     private static long chunkUnloads;
 
     private final Queue<ChunkVec> chunksToLoad = this.createSyncQueue();

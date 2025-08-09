@@ -32,6 +32,7 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.NamespaceID;
+import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.BreakResult;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -48,6 +49,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     private final IConnection<ServerPacketHandler, ClientPacketHandler> connection;
     private final PacketContext context;
     private boolean disconnected;
+    private final Vec3d tmpPos = new Vec3d();
 
     public InGameServerPacketHandler(QuantumServer server, ServerPlayer player, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
         this.server = server;
@@ -96,6 +98,11 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     @Override
     public boolean isDisconnected() {
         return this.disconnected;
+    }
+
+    @Override
+    public IConnection<ServerPacketHandler, ClientPacketHandler> connection() {
+        return connection;
     }
 
     @Override
@@ -200,7 +207,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
             ItemStack stack = this.player.getSelectedItem();
             BlockState block = world.get(pos);
 
-            if (Math.abs(pos.vec().d().add(1).dst(this.player.getPosition())) > this.player.getAttributes().get(Attribute.BLOCK_REACH)
+            if (Math.abs(pos.vec().d().add(1).dst(this.player.getPosition(tmpPos))) > this.player.getAttributes().get(Attribute.BLOCK_REACH)
                     || this.player.blockBrokenTick
                     || EventSystem.postCancelable(new BlockChangeEvent.AttemptBreak(world, pos, original, block, stack, this.player))) {
                 world.stopBreaking(pos, this.player);
@@ -295,8 +302,8 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
         this.player.onAttack(id);
     }
 
-    public void handleUnloadChunk(C2SUnloadChunkPacket c2SUnloadChunkPacket) {
-        this.server.execute(() -> this.player.stopTracking(c2SUnloadChunkPacket.vec()));
+    public void handleUnloadChunk(C2SUnloadChunkPacket packet) {
+        this.server.execute(() -> this.player.stopTracking(packet.vec()));
     }
 
     public void onItemSpawn(ItemStack stack) {

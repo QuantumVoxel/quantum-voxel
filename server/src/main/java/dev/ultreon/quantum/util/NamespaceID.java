@@ -154,8 +154,9 @@ public final class NamespaceID {
      */
     @Override
     public int hashCode() {
-        // Use Objects.hash() method to calculate the hash code
-        return Objects.hash(this.domain, this.path);
+        int result = this.domain.hashCode();
+        result = 31 * result + this.path.hashCode();
+        return result;
     }
 
     /**

@@ -8,8 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class Section {
+    final String name;
+
     private long start;
-    private final String name;
     private long end;
     private final Map<String, Section> data = new LinkedHashMap<>();
     private final Profiler profiler;
@@ -49,20 +50,18 @@ public final class Section {
             return;
         }
         this.current = this.data.computeIfAbsent(name, this::createSection);
-
-        if (this.current == null) return;
         this.current.startThis();
     }
 
-    void end() {
-        if (this.current == null) return;
-        if (this.current.hasCurrent()) {
-            this.current.end();
-            return;
+    boolean end() {
+        if (this.current == null) return false;
+        if (this.current.end()) {
+            return true;
         }
         this.current.endThis();
-        this.data.put(this.name, this.current);
+        this.data.put(this.current.name, this.current);
         this.current = null;
+        return true;
     }
 
     public Map<String, Section> getData() {

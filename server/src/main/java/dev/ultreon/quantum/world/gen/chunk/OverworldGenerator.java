@@ -168,7 +168,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
         }
 
         if (biomeGen == null) {
-            CommonConstants.LOGGER.warn("No biome generator found for height: {}, humid: {}, temp: {}, variation: {}", height, humid, temp, variation);
+            CommonConstants.LOGGER.trace("No biome generator found for height: {}, humid: {}, temp: {}, variation: {}", height, humid, temp, variation);
             return this.biomeGenData.get(0).biomeGen();
         }
 

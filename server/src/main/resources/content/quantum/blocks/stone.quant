@@ -1,0 +1,8 @@
+{
+    melting_point: 900
+    melts_into: quantum:lava
+    hardness: 6
+    tool: pickaxe
+    requires_tool: true
+    requires_tool_level: 10
+}

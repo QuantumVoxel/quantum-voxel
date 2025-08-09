@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.network.system;
 
-import com.badlogic.gdx.utils.Queue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.TimerTask;
@@ -22,6 +21,9 @@ import org.jetbrains.annotations.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> implements IConnection<OurHandler, TheirHandler> {
@@ -31,10 +33,11 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     private PacketData<OurHandler> ourPacketData;
     private PacketData<TheirHandler> theirPacketData;
+    private PacketStage stage;
     private boolean readOnly;
 
-    private final Queue<PacketInstance<@NotNull Packet<? extends TheirHandler>>> sendQueue = new Queue<>();
-    private final Queue<@NotNull Packet<? extends OurHandler>> receiveQueue = new Queue<>();
+    private final List<PacketInstance<@NotNull Packet<? extends TheirHandler>>> sendQueue = new CopyOnWriteArrayList<>();
+    private final List<@NotNull Packet<? extends OurHandler>> receiveQueue = new CopyOnWriteArrayList<>();
     private boolean loggingIn = true;
     protected boolean connected = false;
     private boolean closed;
@@ -105,42 +108,64 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             return;
         }
 
-        PacketInstance<@NotNull Packet<? extends TheirHandler>> instance;
+        ArrayList<PacketInstance<Packet<? extends TheirHandler>>> instance;
         synchronized (sendQueue) {
             if (sendQueue.isEmpty()) return;
-            instance = this.sendQueue.removeFirst();
+            instance = new ArrayList<>(sendQueue);
+            sendQueue.clear();
         }
 
         try {
+            if (instance.isEmpty()) return;
+            if (instance.size() > 5000) {
+                CommonConstants.LOGGER.warn("Too many packets in send queue");
+            }
+            List<Packet<TheirHandler>> packets = new ArrayList<>(instance.size());
+            for (PacketInstance<@NotNull Packet<? extends TheirHandler>> packetInstance : instance) {
+                //noinspection unchecked
+                packets.add((Packet<TheirHandler>) packetInstance.packet());
+            }
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             PacketIO io = new PacketIO(null, bos, handle);
-            Packet<? extends TheirHandler> packet = instance.packet();
-            packet.toBytes(io);
+            Packet<? extends TheirHandler> packet = bundle(packets);
+            packet.toBytes(handler, io);
             bos.close();
 
-            theirPacketData.encode(packet, io);
+            theirPacketData.encode(handler, packet, io);
 
             int id = theirPacketData.getId(packet);
 
-            if (instance.listener() != null) {
-                instance.listener().onSent();
-            }
+            instance.forEach(packetPacketInstance -> {
+                PacketListener listener = packetPacketInstance.listener();
+                if (listener != null) {
+                    listener.onSent();
+                }
+            });
 
             this.otherSide.receive(id, bos.toByteArray());
 
-            if (instance.listener() != null) {
-                instance.listener().onSuccess();
-            }
+            instance.forEach(packetPacketInstance -> {
+                PacketListener listener = packetPacketInstance.listener();
+                if (listener != null) {
+                    listener.onSuccess();
+                }
+            });
         } catch (IOException e) {
-            if (instance.listener() != null) {
-                instance.listener().onFailure();
+            for (PacketInstance<Packet<? extends TheirHandler>> packetInstance : instance) {
+                PacketListener listener = packetInstance.listener();
+                if (listener != null) {
+                    listener.onFailure();
+                }
             }
             CommonConstants.LOGGER.error("Failed to send packet", e);
             disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getMessage());
             if (!GamePlatform.get().isWeb()) throw new RuntimeException(e);
         } catch (Throwable e) {
-            if (instance.listener() != null) {
-                instance.listener().onFailure();
+            for (PacketInstance<Packet<? extends TheirHandler>> packetInstance : instance) {
+                PacketListener listener = packetInstance.listener();
+                if (listener != null) {
+                    listener.onFailure();
+                }
             }
             CommonConstants.LOGGER.error("Failed to send packet", e);
             disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getClass().getName() + ":\n" + e.getMessage());
@@ -157,7 +182,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         Packet<? extends OurHandler> packet;
         synchronized (receiveQueue) {
             if (receiveQueue.isEmpty()) return;
-            packet = this.receiveQueue.removeFirst();
+            packet = this.receiveQueue.remove(0);
         }
 
         this.received(packet, null);
@@ -183,14 +208,14 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         rx.incrementAndGet();
         ByteArrayInputStream bis = new ByteArrayInputStream(ourPacket);
         PacketIO io = new PacketIO(bis, null, handle);
-        Packet<? extends OurHandler> packet = ourPacketData.decode(id, io);
+        Packet<? extends OurHandler> packet = ourPacketData.decode(handler, id, io);
         if (packet == null) {
             CommonConstants.LOGGER.warn("Unknown packet ID: " + id);
             rx.decrementAndGet();
             return;
         }
         if (handler.isAsync()) {
-            this.receiveQueue.addLast(packet);
+            this.receiveQueue.add(packet);
         } else {
             received(packet, null);
         }
@@ -208,6 +233,11 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     @Override
     public boolean isLoggingIn() {
         return loggingIn;
+    }
+
+    @Override
+    public PacketStage getStage() {
+        return stage;
     }
 
     @Override
@@ -229,12 +259,12 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
         tx.incrementAndGet();
         synchronized (sendQueue) {
-            this.sendQueue.addLast(new PacketInstance<>(packet, resultListener));
+            this.sendQueue.add(new PacketInstance<>(packet, resultListener));
         }
 
-        if (sendQueue.size >= 5000) {
+        if (sendQueue.size() >= 5000) {
             CrashLog crashLog = new CrashLog("Too many packets in send queue", new Throwable(":("));
-            crashLog.add("Send queue size", sendQueue.size);
+            crashLog.add("Send queue size", sendQueue.size());
             throw new ApplicationCrash(crashLog);
         }
     }
@@ -299,13 +329,31 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             throw new IllegalStateException("Cannot start connection without the other side");
         }
 
-        // TODO: Implement
+        // Ensure connection is marked as connected
+        this.connected = true;
+        
+        // Initialize packet data for initial stage if not already set
+        if (this.ourPacketData == null) {
+            this.ourPacketData = this.getOurData(PacketStages.LOGIN);
+        }
+        
+        if (this.theirPacketData == null) {
+            this.theirPacketData = this.getTheirData(PacketStages.LOGIN);
+        }
+        
+        // Ensure other side is also connected
+        if (otherSide != null && !otherSide.isConnected()) {
+            otherSide.connected = true;
+        }
+        
+        CommonConstants.LOGGER.info("Memory connection started");
     }
 
     @Override
     public void moveTo(PacketStage stage, OurHandler handler) {
         this.ourPacketData = this.getOurData(stage);
         this.theirPacketData = this.getTheirData(stage);
+        this.stage = stage;
 
         if (stage == PacketStages.IN_GAME) {
             loggingIn = false;

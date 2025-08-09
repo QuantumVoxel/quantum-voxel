@@ -8,12 +8,8 @@ public class InGamePacketStage extends PacketStage {
     @SuppressWarnings("unchecked")
     @Override
     public void registerPackets() {
-        this.addServerBound(C2SDisconnectPacket::read);
-        this.addClientBound(S2CDisconnectPacket::read);
+        super.registerPackets();
 
-        this.addServerBound(C2SKeepAlivePacket::read);
-        this.addServerBound(C2SPingPacket::read);
-        this.addServerBound(C2SModPacket::read);
         this.addServerBound(C2SRespawnPacket::read);
         this.addServerBound(C2SPlayerMovePacket::read);
         this.addServerBound(C2SPlayerMoveAndRotatePacket::read);
@@ -41,9 +37,6 @@ public class InGamePacketStage extends PacketStage {
         this.addServerBound(C2SItemDeletePacket::read);
         this.addServerBound(C2SItemUpdatePacket::read);
 
-        this.addClientBound(S2CKeepAlivePacket::read);
-        this.addClientBound(S2CPingPacket::read);
-        this.addClientBound(S2CModPacket::read);
         this.addClientBound(S2CChunkDataPacket::read);
         this.addClientBound(S2CChunkCancelPacket::read);
         this.addClientBound(S2CRespawnPacket::read);

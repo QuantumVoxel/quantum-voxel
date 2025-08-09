@@ -10,6 +10,7 @@ import dev.ultreon.xeox.impl.fs.isolated.IsolatedFileSystem;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -110,6 +111,7 @@ public class GameClassLoader extends ClassLoader implements IXeoxClassLoader {
         }
 
         if (exclusions.contains(name)) {
+            LOGGER.warn("Attempted to load excluded class {}", name);
             throw new ClassNotFoundException(name);
         }
 
@@ -117,14 +119,26 @@ public class GameClassLoader extends ClassLoader implements IXeoxClassLoader {
             return loadedClasses.get(name);
         }
 
-        Class<?> aClass = findClass(name);
-        loadedClasses.put(name, aClass);
-        return aClass;
+        try {
+            Class<?> aClass = findClass(name);
+            loadedClasses.put(name, aClass);
+            return aClass;
+        } catch (ClassNotFoundException e) {
+            LOGGER.warn("Could not find class {}", name);
+            throw e;
+        } catch (SecurityException e) {
+            LOGGER.warn("Could not load class {} due to security restrictions", name);
+            throw e;
+        } catch (Throwable t) {
+            LOGGER.error("Failed to load class {}", name, t);
+            throw new ClassNotFoundException(name, t);
+        }
     }
 
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
         if (name.startsWith("dev.ultreon.xeox.impl")) {
+            LOGGER.warn("Attempted to load internal class {}", name);
             throw new SecurityException("Attempted to load Xeox internal class " + name);
         }
 
@@ -154,7 +168,7 @@ public class GameClassLoader extends ClassLoader implements IXeoxClassLoader {
                     Class<?> aClass = this.defineClass(name, bytes, 0, bytes.length);
                     loadedClasses.put(name, aClass);
                     return aClass;
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LOGGER.error("Failed to load class {} from mod {}", name, modFs, e);
                     throw new ClassNotFoundException(name, e);
                 }
@@ -178,9 +192,17 @@ public class GameClassLoader extends ClassLoader implements IXeoxClassLoader {
         }
 
         if (name.startsWith("java.") || name.startsWith("javax.") || name.startsWith("sun.")) {
-            Class<?> aClass = getClass().getClassLoader().loadClass(name);
-            if (aClass != null) {
+            try {
+                Class<?> aClass = super.loadClass(name);
+                if (aClass != null) {
+                    loadedClasses.put(name, aClass);
+                    LOGGER.trace("Loaded class {} from system class loader", name);
+                    return aClass;
+                }
+            } catch (ClassNotFoundException e) {
+                Class<?> aClass = GameClassLoader.class.getClassLoader().loadClass(name);
                 loadedClasses.put(name, aClass);
+                LOGGER.trace("Loaded class {} from system class loader", name);
                 return aClass;
             }
         }
@@ -243,6 +265,25 @@ public class GameClassLoader extends ClassLoader implements IXeoxClassLoader {
     }
 
     public byte[] getClassBytes(String name, boolean runTransformers) throws ClassNotFoundException {
+        if (name.startsWith("java/")) {
+            try (InputStream stream = GameClassLoader.class.getClassLoader().getResourceAsStream(name.replace('.', '/') + ".class")) {
+                if (stream == null) {
+                    LOGGER.warn("Could not find class {}", name);
+                    throw new ClassNotFoundException(name);
+                }
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = stream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, length);
+                }
+                return outputStream.toByteArray();
+            } catch (IOException e) {
+                LOGGER.error("Failed to read class {} from system class loader", name, e);
+                throw new ClassNotFoundException(name, e);
+            }
+        }
+
         for (IFileSystem modFs : this.fileSystems) {
             IPath path = modFs.path(name.replace('.', '/') + ".class");
             if (path.exists()) {
@@ -315,7 +356,7 @@ public class GameClassLoader extends ClassLoader implements IXeoxClassLoader {
     }
 
     @Override
-    public Enumeration<URL> getResources(String name) {
+    public Enumeration<URL> getResources(String name) throws IOException {
         List<URL> urls = new ArrayList<>();
         List<IFileSystem> systems = this.fileSystems;
         for (int i = 0; i < systems.size(); i++) {

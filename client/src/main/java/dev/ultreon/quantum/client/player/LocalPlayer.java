@@ -5,8 +5,11 @@ import java.util.stream.Stream;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.LoggerFactory;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.api.events.ClientPlayerEvent;
+import dev.ultreon.quantum.client.util.RenderableArray;
 import dev.ultreon.quantum.util.SanityCheck;
 import dev.ultreon.quantum.world.Direction;
 import org.jetbrains.annotations.NotNull;
@@ -98,6 +101,8 @@ public class LocalPlayer extends ClientPlayer {
     private final Queue<ChunkVec> sendQueue = new ArrayDeque<>();
     private boolean isLoading;
     private final Vec3d vel = new Vec3d();
+    private boolean refreshing;
+    private final List<ChunkVec> unloading = new ArrayList<>();
 
     /**
      * Constructs a new LocalPlayer.
@@ -222,9 +227,11 @@ public class LocalPlayer extends ClientPlayer {
 
         movedLastFrame = x != ox || y != oy || z != oz;
 
-        ChunkVec toLoad = this.sendQueue.poll();
-        if (toLoad != null && connection != null) {
-            connection.send(new C2SRequestChunkLoadPacket(toLoad));
+        for (int i = 0; i < 9; i++) {
+            ChunkVec toLoad = this.sendQueue.poll();
+            if (toLoad != null && connection != null) {
+                connection.send(new C2SRequestChunkLoadPacket(toLoad));
+            }
         }
     }
 
@@ -288,55 +295,65 @@ public class LocalPlayer extends ClientPlayer {
         if (!this.client.renderWorld) {
             return;
         }
-        if (lastRefresh + 1000 > System.currentTimeMillis()) {
+        if (lastRefresh + 1000 > System.currentTimeMillis() || refreshing) {
             return;
         }
+        refreshing = true;
         lastRefresh = System.currentTimeMillis();
+        GamePlatform.get().runAsync(() -> {
+            IConnection<ClientPacketHandler, ServerPacketHandler> connection = this.client.connection;
+            ChunkVec chunkVec = this.getChunkVec();
 
-        IConnection<ClientPacketHandler, ServerPacketHandler> connection = this.client.connection;
-        ChunkVec chunkVec = this.getChunkVec();
-
-        if (connection == null) {
-            return;
-        }
-        int renderDistance = Math.max(2, ClientConfiguration.renderDistance.getValue() / CS);
-
-        for (ClientChunkAccess chunk : this.clientWorld.getLoadedChunks()) {
-            if (chunk.getVec().dst(chunkVec) > renderDistance) {
-                this.unloadChunk(chunk);
-                this.client.connection.send(new C2SUnloadChunkPacket(chunk.getVec()));
+            if (connection == null) {
+                return;
             }
-        }
+            int renderDistance = Math.max(2, ClientConfiguration.renderDistance.getValue() / CS);
 
-        Set<ChunkVec> loadingChunks = this.chunksToLoad;
-        loadingChunks.clear();
-        int renderDistanceSquared = renderDistance * renderDistance;
-        for (int deltaX = -renderDistance; deltaX <= renderDistance; deltaX++) {
-            for (int deltaY = -renderDistance; deltaY <= renderDistance; deltaY++) {
-                for (int deltaZ = -renderDistance; deltaZ <= renderDistance; deltaZ++) {
-                    int distanceSquared = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
-                    if (distanceSquared > renderDistanceSquared) {
-                        continue;
-                    }
-
-                    ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + deltaX, chunkVec.getIntY() + deltaY, chunkVec.getIntZ() + deltaZ, ChunkVecSpace.WORLD);
-                    if (this.clientWorld.getChunk(relativePos) != null || this.pendingChunks.contains(relativePos)) {
-                        continue;
-                    }
-
-                    loadingChunks.add(relativePos);
+            unloading.clear();
+            for (ClientChunkAccess chunk : this.clientWorld.getLoadedChunks()) {
+                if (chunk.getVec().dst(chunkVec) > renderDistance) {
+                    unloading.add(chunkVec);
+                    this.unloadChunk(chunk);
                 }
             }
-        }
-        if (!this.chunksToLoad.isEmpty()) {
-            Stream<ChunkVec> sorted = loadingChunks.stream().sorted(Comparator.comparing(chunkVec1 -> this.tmp2I.set(chunkVec1.getIntX(), chunkVec1.getIntZ()).dst(chunkVec.getIntX(), chunkVec.getIntZ())));
-            sorted.forEachOrdered(e -> {
-                this.pendingChunks.add(e);
-                this.sendQueue.add(e);
-            });
-        }
+            this.client.connection.send(new C2SUnloadChunkPacket(unloading.toArray(new ChunkVec[0])));
 
-        this.isLoading = false;
+            Set<ChunkVec> loadingChunks = this.chunksToLoad;
+            loadingChunks.clear();
+            int renderDistanceSquared = renderDistance * renderDistance;
+            for (int deltaX = -renderDistance; deltaX <= renderDistance; deltaX++) {
+                for (int deltaY = -renderDistance; deltaY <= renderDistance; deltaY++) {
+                    for (int deltaZ = -renderDistance; deltaZ <= renderDistance; deltaZ++) {
+                        int distanceSquared = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+                        if (distanceSquared > renderDistanceSquared) {
+                            continue;
+                        }
+
+                        ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + deltaX, chunkVec.getIntY() + deltaY, chunkVec.getIntZ() + deltaZ, ChunkVecSpace.WORLD);
+                        if (this.clientWorld.getChunk(relativePos) != null || this.pendingChunks.contains(relativePos)) {
+                            continue;
+                        }
+
+                        loadingChunks.add(relativePos);
+                    }
+                }
+            }
+            if (!this.chunksToLoad.isEmpty()) {
+                Stream<ChunkVec> sorted = loadingChunks.stream().sorted(Comparator.comparing(chunkVec1 -> this.tmp2I.set(chunkVec1.getIntX(), chunkVec1.getIntZ()).dst(chunkVec.getIntX(), chunkVec.getIntZ())));
+                sorted.forEachOrdered(e -> {
+                    this.pendingChunks.add(e);
+                    this.sendQueue.add(e);
+                });
+            }
+
+            this.isLoading = false;
+        }).thenRun(() -> {
+            refreshing = false;
+        }).exceptionally(throwable -> {
+            CommonConstants.LOGGER.error("Failed to refresh chunks", throwable);
+            refreshing = false;
+            return null;
+        });
     }
 
     /**
@@ -440,8 +457,8 @@ public class LocalPlayer extends ClientPlayer {
         this.velocityY = this.jumpVel;
 
         if (this.isRunning()) {
-            this.velocityX *= 1.2;
-            this.velocityZ *= 1.2;
+            this.velocityX *= 1.3;
+            this.velocityZ *= 1.3;
         }
     }
 

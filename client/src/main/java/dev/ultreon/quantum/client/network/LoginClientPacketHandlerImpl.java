@@ -97,7 +97,7 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
             IConnection.LOGGER.error("Failed to close connection", e);
         }
 
-        this.client.showScreen(new DisconnectedScreen(message, !this.connection.isMemoryConnection()));
+        this.client.showScreen(new DisconnectedScreen(message, this.connection.isRemoteConnection()));
     }
 
     @Override
@@ -118,5 +118,10 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
     @Override
     public boolean isDisconnected() {
         return disconnected;
+    }
+
+    @Override
+    public IConnection<ClientPacketHandler, ServerPacketHandler> connection() {
+        return this.connection;
     }
 }

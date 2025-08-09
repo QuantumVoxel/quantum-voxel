@@ -339,13 +339,6 @@ public class TouchInput extends GameInput implements InputProcessor {
         // If pressed, navigate to the previous page in debug GUI
         if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) this.client.debugGui.prevPage();
         else this.client.debugGui.nextPage();
-
-        // Check if debug HUD is not shown
-        // Disable profiling
-        if (!this.client.isShowDebugHud()) QuantumClient.PROFILER.setProfiling(false);
-        else // Enable profiling if debug HUD is shown and specific conditions are met
-            if (ClientConfiguration.enableDebugUtils.getValue() && Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
-                QuantumClient.PROFILER.setProfiling(true);
     }
 
     /**

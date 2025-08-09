@@ -6,7 +6,9 @@ import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketData;
 import dev.ultreon.quantum.network.PacketListener;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
+import dev.ultreon.quantum.network.packets.BundlePacket;
 import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.network.packets.c2s.C2SBundlePacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.system.MemoryConnection;
@@ -14,6 +16,8 @@ import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class ClientMemoryConnection extends MemoryConnection<ClientPacketHandler, ServerPacketHandler> {
     private final QuantumClient client;
@@ -39,6 +43,11 @@ public class ClientMemoryConnection extends MemoryConnection<ClientPacketHandler
         this.connected = false;
         this.client.onDisconnect(message, true);
         return null;
+    }
+
+    @Override
+    public BundlePacket<ServerPacketHandler> bundle(List<Packet<ServerPacketHandler>> packets) {
+        return new C2SBundlePacket(packets);
     }
 
     @Override

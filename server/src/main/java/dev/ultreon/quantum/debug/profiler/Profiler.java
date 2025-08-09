@@ -16,6 +16,7 @@ public final class Profiler implements Disposable {
     private final ConcurrentMap<Thread, ThreadSection.FinishedThreadSection> finished = new ConcurrentHashMap<>();
     private boolean profiling;
 
+    @Deprecated
     public @Nullable ProfilerSection start(String name) {
         if (!profiling) {
             return null;
@@ -26,7 +27,12 @@ public final class Profiler implements Disposable {
         return new ProfilerSection(this, name);
     }
 
-    void end() {
+    public void begin(String name) {
+        var threadSection = this.threads.computeIfAbsent(Thread.currentThread(), thread -> new ThreadSection(this));
+        threadSection.start(name);
+    }
+
+    public void end() {
         var cur = Thread.currentThread();
         if (this.threads.containsKey(cur)) this.threads.get(cur).end();
         else this.threads.put(cur, new ThreadSection(this));

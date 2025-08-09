@@ -3,10 +3,8 @@ package dev.ultreon.quantum.desktop.imgui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.GLTexture;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -17,8 +15,8 @@ import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.TextureDescriptor;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.utils.ScreenUtils;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.DevFlag;
 import dev.ultreon.quantum.GameInsets;
@@ -35,6 +33,10 @@ import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.Skybox;
 import dev.ultreon.quantum.component.Component;
 import dev.ultreon.quantum.component.GameComponent;
+import dev.ultreon.quantum.debug.profiler.ProfileData;
+import dev.ultreon.quantum.debug.profiler.Profiler;
+import dev.ultreon.quantum.debug.profiler.Section;
+import dev.ultreon.quantum.debug.profiler.ThreadSection;
 import dev.ultreon.quantum.desktop.DesktopLauncher;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.registry.Registries;
@@ -92,6 +94,7 @@ public class ImGuiOverlay {
     public static final ImInt U_ATLAS_SIZE = new ImInt(512);
     public static final ImInt MODEL_VIEWER_LIST_INDEX = new ImInt(0);
     public static final ImBoolean SHOW_RENDER_PIPELINE = new ImBoolean(false);
+    public static final ImInt SHADER_DEBUG_STATE = new ImInt(0);
     private static final ImBoolean SHOW_IM_GUI = new ImBoolean(false);
     private static final ImBoolean SHOW_PLAYER_UTILS = new ImBoolean(false);
     private static final ImBoolean SHOW_GUI_UTILS = new ImBoolean(false);
@@ -132,7 +135,6 @@ public class ImGuiOverlay {
     private static Object selected = null;
     private static final GameInsets bounds = new GameInsets();
     private static final ImInt rotType = new ImInt(0);
-    private static TextureRegion frameBufferPixels;
     public static final Map<NamespaceID, TextEditor> textEditors = new HashMap<>();
     public static TextEditorLanguageDefinition glsl;
     public static final Map<NamespaceID, TextEditorCoordinates> textEditorPos = new HashMap<>();
@@ -146,6 +148,9 @@ public class ImGuiOverlay {
     private static boolean focusInput;
     private static final List<String> filteredClasses = new ArrayList<>();
     private static Class<?> selectedClass;
+    private static long nextProfilerCollect;
+    private static ProfileData profilerData;
+    private static List<Thread> threads;
 
     public static void setupImGui() {
         if (GamePlatform.get().isAngleGLES() || GamePlatform.get().isMacOSX()) return;
@@ -233,8 +238,6 @@ public class ImGuiOverlay {
     }
 
     private static void process(QuantumClient client) {
-        captureGame();
-
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_STENCIL_BUFFER_BIT);
 
@@ -293,11 +296,6 @@ public class ImGuiOverlay {
         ImGui.end();
 
         ImGuiOverlay.handleTriggers();
-    }
-
-    private static void captureGame() {
-        if (frameBufferPixels != null) frameBufferPixels.getTexture().dispose();
-        frameBufferPixels = ScreenUtils.getFrameBufferTexture(0, QuantumClient.get().getHeight() - bounds.bottom, bounds.right, bounds.bottom);
     }
 
     private static void renderDisplay() {
@@ -480,8 +478,7 @@ public class ImGuiOverlay {
             bounds.right = (int) (contentRegionAvailX * ImGui.getWindowDpiScale());
             bounds.bottom = (int) (contentRegionAvailY * ImGui.getWindowDpiScale());
 
-            TextureRegion gameTex = frameBufferPixels;
-            ImGui.image(gameTex.getTexture().getTextureObjectHandle(), contentRegionAvailX, contentRegionAvailY, frameBufferPixels.getU(), frameBufferPixels.getV(), frameBufferPixels.getU2(), frameBufferPixels.getV2(), 1, 1, 1, 1);
+            ImGui.image(QuantumClient.get().targetFbo.getColorBufferTexture().getTextureObjectHandle(), contentRegionAvailX, contentRegionAvailY, 0, 1, 1, 0, 1, 1, 1, 1);
         }
         ImGui.end();
 
@@ -1227,6 +1224,14 @@ public class ImGuiOverlay {
                 renderGameNode(QuantumClient.get().mainCat);
                 ImGui.treePop();
             }
+            if (ImGui.treeNode(System.identityHashCode(QuantumClient.get().profiler), "Profiler")) {
+                QuantumClient.get().profiler.setProfiling(true);
+                renderProfiler(QuantumClient.get().profiler);
+                ImGui.treePop();
+            } else {
+                QuantumClient.get().profiler.setProfiling(false);
+            }
+
 
             if (ImGui.treeNode(1, "Foreground")) {
                 if (QuantumClient.get().screen != null) {
@@ -1243,8 +1248,55 @@ public class ImGuiOverlay {
             }
 
             ImGui.getWindowSizeX();
+        } else {
+            QuantumClient.get().profiler.setProfiling(false);
         }
         ImGui.end();
+    }
+
+    private static void renderProfiler(Profiler profiler) {
+        if (nextProfilerCollect < System.currentTimeMillis()) {
+            profilerData = profiler.collect();
+            threads = profilerData.getThreads().stream().sorted(Comparator.comparing(Thread::getName)).toList();
+            nextProfilerCollect = System.currentTimeMillis() + 1000;
+        }
+        for (Thread thread : threads) {
+            if (ImGui.treeNode("ProfilerThread." + thread.getId(), thread.getName())) {
+                ThreadSection.FinishedThreadSection threadSection = profilerData.getThreadSection(thread);
+                if (threadSection != null) {
+                    extracted(thread, threadSection);
+                }
+                ImGui.treePop();
+            }
+        }
+    }
+
+    private static void extracted(Thread thread, ThreadSection.FinishedThreadSection threadSection) {
+        for (Map.Entry<String, Section.FinishedSection> section : threadSection.getData().entrySet()) {
+            String strId = "ProfilerThread." + thread.getId() + "/" + section.getKey();
+            if (ImGui.treeNode(strId, section.getKey() + " (" + section.getValue().getNanos() + "ms)")) {
+                for (Map.Entry<String, Integer> info : section.getValue().getStats().entrySet()) {
+                    ImGuiEx.editInt(info.getKey(), strId + ":" + info.getKey(), info::getValue, v -> {});
+                }
+                Section.FinishedSection finishedSection = section.getValue();
+                extracted(strId, thread, finishedSection);
+                ImGui.treePop();
+            }
+        }
+    }
+
+    private static void extracted(String parentId, Thread thread, Section.FinishedSection threadSection) {
+        for (Map.Entry<String, Section.FinishedSection> section : threadSection.getData().entrySet()) {
+            String strId = parentId + "/" + section.getKey();
+            if (ImGui.treeNode(strId, section.getKey() + " (" + section.getValue().getNanos() / 1000000L + "ms)")) {
+                for (Map.Entry<String, Integer> info : section.getValue().getStats().entrySet()) {
+                    ImGuiEx.editInt(info.getKey(), strId + ":" + info.getKey(), info::getValue, v -> {});
+                }
+                Section.FinishedSection finishedSection = section.getValue();
+                extracted(strId, thread, finishedSection);
+                ImGui.treePop();
+            }
+        }
     }
 
     private static final ImVec2 rectMin = new ImVec2();
@@ -1537,7 +1589,7 @@ public class ImGuiOverlay {
 
             ImGui.text(" FPS: " + Gdx.graphics.getFramesPerSecond() + " ");
             ImGui.sameLine();
-            ImGui.text(" Client TPS: " + Gdx.graphics.getFramesPerSecond() + " ");
+            ImGui.text(" Client TPS: " + QuantumClient.get().getCurrentTps() + " ");
             ImGui.sameLine();
             QuantumServer server = QuantumServer.get();
             if (server != null) {
@@ -1555,6 +1607,10 @@ public class ImGuiOverlay {
         if (ImGui.begin("Shader Editor", ImGuiOverlay.getDefaultFlags())) {
             if (ImGui.treeNode("Shader::SSAO", "SSAO")) {
                 ImGuiEx.editFloat("iGamma", "Shader::SSAO::iGamma", ImGuiOverlay.I_GAMMA::get, ImGuiOverlay.I_GAMMA::set);
+                ImGui.treePop();
+            }
+            if (ImGui.treeNode("Shader::Debug", "Debugging")) {
+                ImGuiEx.editInt("State", "Shader::Debug::State", ImGuiOverlay.SHADER_DEBUG_STATE::get, ImGuiOverlay.SHADER_DEBUG_STATE::set);
                 ImGui.treePop();
             }
 

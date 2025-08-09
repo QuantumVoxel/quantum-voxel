@@ -36,6 +36,10 @@ public class Logger {
      */
     public void log(long time, LogLevel level, LogCategory category, String msg, Throwable exc, boolean fromReplay, boolean wasSuppressed) {
         if (!isEnabled(level)) return;
+        if (msg == null) {
+            doLog(time, level, category, null, exc, fromReplay, wasSuppressed);
+            return;
+        }
         for (String line : msg.lines().collect(Collectors.toList())) {
             doLog(time, level, category, line, exc, fromReplay, wasSuppressed);
             exc = null; //? Prevent exception log spam
@@ -52,7 +56,8 @@ public class Logger {
             sb.append("/").append(category.getName());
         }
         sb.append(") ");
-        sb.append(RESET).append(msg);
+        if (msg != null)
+            sb.append(RESET).append(msg);
         if (wasSuppressed) {
             sb.append(RED + " (suppressed)" + RESET);
         }
@@ -73,7 +78,9 @@ public class Logger {
     }
 
     private PrintStream outFor(LogLevel level) {
-        if (level.ordinal() < LogLevel.INFO.ordinal()) {
+        if (level.ordinal() < LogLevel.DEBUG.ordinal()) {
+            return System.out;
+        } else if (level.ordinal() < LogLevel.INFO.ordinal()) {
             return manager.debugOut;
         } else {
             return manager.out;

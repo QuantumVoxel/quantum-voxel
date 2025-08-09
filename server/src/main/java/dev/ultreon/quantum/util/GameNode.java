@@ -19,7 +19,7 @@ public abstract class GameNode implements Disposable {
     private static int allActiveCount;
 
     final @NotNull Map<Class<?>, Component<?>> components = new ConcurrentHashMap<>();
-    final @NotNull Array<GameNode> children = new Array<>();
+    final @NotNull List<GameNode> children = new ArrayList<>();
 
     public boolean enabled = true;
     public String name;
@@ -196,18 +196,18 @@ public abstract class GameNode implements Disposable {
 
     public void remove(GameNode node) {
         synchronized (children) {
-            children.removeValue(node, true);
+            children.remove(node);
         }
     }
 
-    public Array<GameNode> getChildren() {
+    public @NotNull List<GameNode> getChildren() {
         synchronized (children) {
             return children;
         }
     }
 
     public int getChildCount() {
-        return children.size;
+        return children.size();
     }
 
     public int getActiveChildCount() {

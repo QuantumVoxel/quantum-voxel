@@ -162,7 +162,7 @@ public class ImGuiEx {
         }
     }
 
-    public static void editColor3(String color, String s, Supplier<@NotNull RgbColor> getter, Consumer<@NotNull RgbColor> setter) {
+    public static void editColor3(String color, String s, Supplier<RgbColor> getter, Consumer<RgbColor> setter) {
         ImGui.text(color);
         ImGui.sameLine();
         try {
@@ -176,7 +176,7 @@ public class ImGuiEx {
         }
     }
 
-    public static void editColor3Gdx(String color, String s, Supplier<@NotNull Color> getter) {
+    public static void editColor3Gdx(String color, String s, Supplier<Color> getter) {
         ImGui.text(color);
         ImGui.sameLine();
         try {

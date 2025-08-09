@@ -218,7 +218,13 @@ public class WorldSelectionScreen extends Screen {
         var worlds = new ArrayList<WorldStorage>();
         FileHandle[] worldPaths = WorldSelectionScreen.WORLDS_DIR.list();
         if (worldPaths != null) {
-            worlds = Arrays.stream(worldPaths).map(WorldStorage::new).sorted(Comparator.comparing(o -> o.getDirectory().name())).collect(Collectors.toCollection(ArrayList::new));
+            ArrayList<WorldStorage> worldStorages = new ArrayList<>();
+            for (FileHandle worldPath : worldPaths) {
+                WorldStorage worldStorage = new WorldStorage(worldPath);
+                worldStorages.add(worldStorage);
+            }
+            worldStorages.sort(Comparator.comparing(o -> o.getDirectory().name()));
+            worlds = worldStorages;
             worlds.sort((o1, o2) -> {
                 if (!o1.exists("info.ubo") && !o2.exists("info.ubo")) {
                     long millis1 = o1.getDirectory().lastModified();

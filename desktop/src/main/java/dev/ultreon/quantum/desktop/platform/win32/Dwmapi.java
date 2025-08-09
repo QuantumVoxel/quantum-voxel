@@ -32,4 +32,6 @@ public interface Dwmapi extends Library {
     static void setBorderColor(HWND hwnd, long color) {
         INSTANCE.DwmSetWindowAttribute(hwnd, new WinDef.UINT(DWMWA_BORDER_COLOR), new WinDef.UINTByReference(new WinDef.UINT(color)), 4);
     }
+
+    int DwmExtendFrameIntoClientArea(HWND hWnd, MARGINS pMarInset);
 }

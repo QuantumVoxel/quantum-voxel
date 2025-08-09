@@ -7,7 +7,9 @@ import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.network.LoginClientPacketHandlerImpl;
 import dev.ultreon.quantum.network.PacketData;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
+import dev.ultreon.quantum.network.packets.BundlePacket;
 import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.network.packets.c2s.C2SBundlePacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SDisconnectPacket;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.stage.PacketStage;
@@ -18,6 +20,7 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class ClientTcpConnection extends TcpConnection<ClientPacketHandler, ServerPacketHandler> {
@@ -36,9 +39,9 @@ public class ClientTcpConnection extends TcpConnection<ClientPacketHandler, Serv
             kryoClient.setName("Quantum:Multiplayer");
             kryoClient.getKryo().setReferences(false);
             kryoClient.getKryo().setRegistrationRequired(false);
+            ClientTcpConnection connection = new ClientTcpConnection(kryoClient, QuantumClient.get());
             kryoClient.getKryo().setDefaultSerializer(new PacketIOSerializerFactory(QuantumClient.get().registries));
             kryoClient.start();
-            ClientTcpConnection connection = new ClientTcpConnection(kryoClient, QuantumClient.get());
             connection.moveTo(PacketStages.LOGIN, new LoginClientPacketHandlerImpl(connection));
             kryoClient.connect(ClientConfiguration.networkTimeout.getValue(), address, port);
             success.run();
@@ -74,7 +77,7 @@ public class ClientTcpConnection extends TcpConnection<ClientPacketHandler, Serv
 
     @Override
     protected Packet<ServerPacketHandler> getDisconnectPacket(int code, String message) {
-        return new C2SDisconnectPacket<>(code, message);
+        return new C2SDisconnectPacket(code, message);
     }
 
     @Override
@@ -99,6 +102,11 @@ public class ClientTcpConnection extends TcpConnection<ClientPacketHandler, Serv
     @Override
     public void onPing(long ping) {
         this.ping = ping;
+    }
+
+    @Override
+    public BundlePacket<ServerPacketHandler> bundle(List<Packet<ServerPacketHandler>> packets) {
+        return new C2SBundlePacket(packets);
     }
 
     @Override

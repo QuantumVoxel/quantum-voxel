@@ -11,10 +11,8 @@ import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
@@ -59,7 +57,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.badlogic.gdx.graphics.GL20.*;
 import static dev.ultreon.quantum.client.QuantumClient.*;
@@ -76,8 +74,6 @@ import static dev.ultreon.quantum.world.World.CS;
 @SuppressWarnings("GDXJavaUnsafeIterator")
 public final class WorldRenderer implements DisposableContainer, TerrainRenderer {
     public static final float SCALE = 1;
-    private static final Vec3d TMP_3D_A = new Vec3d();
-    private static final Vec3d TMp_3D_B = new Vec3d();
     public static final String OUTLINE_CURSOR_ID = CommonConstants.strId("outline_cursor");
     public static final int QV_CHUNK_ATTRS = VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal;
     public static final NamespaceID MOON_ID = NamespaceID.of("generated/moon");
@@ -103,8 +99,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private CelestialBody sun = null;
     @Nullable
     private CelestialBody moon = null;
-    @Nullable
-    private BlockHit lastHitResult;
 
     private boolean disposed = false;
     private final Vector3 tmp = new Vector3();
@@ -113,18 +107,16 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private final Int2ObjectMap<QVModel> qvModels = new Int2ObjectOpenHashMap<>();
     private final List<Disposable> disposables = new ArrayList<>();
     private final Skybox skybox = new Skybox();
-    private final Map<ChunkVec, ChunkModel> chunkModels = new HashMap<>();
+    private final Map<ChunkVec, ChunkModel> chunkModels = new ConcurrentHashMap<>();
     private boolean wasSunMoonShown = true;
     private final Vector3 sunDirection = new Vector3();
     private final Vector3 tmp2 = new Vector3();
     private final BlendingAttribute attribute = new BlendingAttribute(0.5f);
-    private final Array<RenderBuffer> buffers = new Array<>(RenderBuffer.class);
     private final Color fogColor = new Color(0.6F, 0.7F, 1.0F, 1.0F);
     private final Vector3 tmpFrust = new Vector3();
     private final Vector3 tmpFrust2 = new Vector3();
     private final BoundingBox tmpBounds = new BoundingBox();
     private static final Vec3d TMP_3D1 = new Vec3d();
-    private static final Vec3d TMP_3D2 = new Vec3d();
     private static final Vec3d TMP_3D3 = new Vec3d();
 
     /**
@@ -132,7 +124,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      *
      * @param world the client world to be rendered, must not be null
      */
-    public WorldRenderer(@NotNull ClientWorld world) {
+    public WorldRenderer(ClientWorld world) {
         this.world = world;
         this.setup();
         world.add("Skybox", skybox);
@@ -352,17 +344,22 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      */
     @Override
     public void renderBackground(RenderBufferSource bufferSource, float deltaTime) {
-        updateBackground();
+        PROFILER.begin("world-renderer@render-background");
+        try {
+            updateBackground();
 
-        this.skybox.render0(bufferSource);
+            this.skybox.render0(bufferSource);
 
-        CelestialBody sun = this.sun;
-        if (sun != null) {
-            bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).render(sun);
-        }
-        CelestialBody moon = this.moon;
-        if (moon != null) {
-            bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).render(moon);
+            CelestialBody sun = this.sun;
+            if (sun != null) {
+                bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).render(sun);
+            }
+            CelestialBody moon = this.moon;
+            if (moon != null) {
+                bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).render(moon);
+            }
+        } finally {
+            PROFILER.end();
         }
     }
 
@@ -374,116 +371,83 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      */
     @Override
     public void render(RenderBufferSource batch, float deltaTime) {
-        var player = this.client.player;
-        if (player == null) return;
-        if (this.disposed) return;
+        PROFILER.begin("world-renderer@render");
+        try {
+            var player = this.client.player;
+            if (player == null) return;
+            if (this.disposed) return;
 
-        // Update the skybox and environment.
-        this.skybox.update(this.world.getDaytime());
-        this.fogColor.set(this.skybox.bottomColor);
+            // Update the skybox and environment.
+            this.skybox.update(this.world.getDaytime());
+            this.fogColor.set(this.skybox.bottomColor);
 
-        // Get the loaded chunks and sort them by distance from the player.
-        var chunks = WorldRenderer.chunksInViewSorted(world.getLoadedChunks(), player);
-        this.loadedChunks = chunks.size();
-        this.visibleChunks = 0;
+            // Get the loaded chunks and sort them by distance from the player.
+            var chunks = WorldRenderer.chunksInViewSorted(getRayVisibleChunks(), player);
+            this.loadedChunks = chunks.size();
+            this.visibleChunks = 0;
 
-        // Create a new ChunkRenderRef and an array of ChunkVec.
-        var ref = new ChunkRenderRef();
+            // Create a new ChunkRenderRef and an array of ChunkVec.
+            var ref = new ChunkRenderRef();
 
-        batch.getBuffer(RenderPass.OPAQUE);
-        batch.getBuffer(RenderPass.WATER);
-        batch.getBuffer(RenderPass.TRANSPARENT);
-        batch.getBuffer(RenderPass.CUTOUT);
+            batch.getBuffer(RenderPass.OPAQUE);
+            batch.getBuffer(RenderPass.WATER);
+            batch.getBuffer(RenderPass.TRANSPARENT);
+            batch.getBuffer(RenderPass.CUTOUT);
 
-        // Collect the chunks to render.
-        try (var ignored = QuantumClient.PROFILER.start("chunks")) {
+            // Collect the chunks to render.
             this.collectChunks(batch, chunks, player, ref);
+
+            renderSelf(batch);
+            renderGizmos(deltaTime);
+        } finally {
+            PROFILER.end();
         }
-
-        // Render the cursor.
-        @Nullable Hit gameCursor = null;
-        if (this.client.cursor != null) gameCursor = this.client.cursor;
-        if (gameCursor instanceof BlockHit && gameCursor.isCollide() && !this.client.hideHud && !player.isSpectator()) {
-            BlockHit blockHit = (BlockHit) gameCursor;
-            renderCursor(blockHit, player);
-        }
-
-        renderSelf(batch);
-        renderGizmos(deltaTime);
-    }
-
-    private void renderCursor(BlockHit blockHit, LocalPlayer player) {
-        try (var ignored = QuantumClient.PROFILER.start("cursor")) {
-            // Block outline.
-            Vec3i pos = blockHit.getBlockVec();
-            Vec3f renderOffsetC = pos.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f();
-            var boundingBox = blockHit.getBlock().getBoundingBox(0, 0, 0, blockHit.getBlockMeta());
-            renderOffsetC.add((float) boundingBox.min.x, (float) boundingBox.min.y, (float) boundingBox.min.z);
-
-            // Render the outline.
-            if (lastHitResult != null && this.lastHitResult.equals(blockHit)) {
-                ModelManager.INSTANCE.unloadModel(NamespaceID.of("generated/selection_outline"));
-                cursor = null;
-            }
-
-            this.lastHitResult = blockHit;
-
-            if (this.cursor != null) ModelManager.INSTANCE.unloadModel(NamespaceID.of("generated/selection_outline"));
-
-            Model model = ModelManager.INSTANCE.generateModel(NamespaceID.of("generated/selection_outline"), modelBuilder -> {
-                Material material = new Material();
-                material.id = NamespaceID.of("generated/selection_outline_material").toString();
-                material.set(ColorAttribute.createDiffuse(1f, 1f, 1f, 1f));
-                material.set(IntAttribute.createCullFace(GL_FRONT));
-
-
-                var sizeX = (float) (boundingBox.max.x - boundingBox.min.x);
-                var sizeY = (float) (boundingBox.max.y - boundingBox.min.y);
-                var sizeZ = (float) (boundingBox.max.z - boundingBox.min.z);
-
-                WorldRenderer.buildOutlineBox(sizeX + 0.1f, sizeY + 0.1f, sizeZ + 0.1f, modelBuilder.part("outline", GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorPacked, material));
-            });
-
-            this.cursor = new ModelInstance(model, renderOffsetC.x - 0.05f, renderOffsetC.y - 0.05f, renderOffsetC.z - 0.05f);
-            this.cursor.userData = Shaders.DEFAULT.get();
-        }
-
-        attribute.opacity = MathUtils.sinDeg((System.currentTimeMillis() % 360) / 1000f) / 90f + 0.5f;
-        Objects.requireNonNull(material).set(attribute);
     }
 
     private void renderSelf(RenderBufferSource batch) {
-        drawSelf:
-        try (var ignored = QuantumClient.PROFILER.start("(Local Player)")) {
+        PROFILER.begin("local-player");
+        try {
             LocalPlayer localPlayer = this.client.player;
             if (localPlayer == null || !this.client.isInThirdPerson() && !ClientConfiguration.firstPersonPlayerModel.getValue()) {
                 if (localPlayer != null) modelInstances.remove(localPlayer.getId());
-                break drawSelf;
+                return;
             }
 
             this.collectEntity(localPlayer, batch);
+        } finally {
+            PROFILER.end();
         }
     }
 
     private void renderGizmos(float deltaTime) {
-        for (String category : world.getEnabledGizmoCategories()) {
-            Gizmo[] gizmos = world.getGizmos(category);
-            gizmoSort.clear();
-            for (Gizmo gizmo1 : gizmos) if (gizmo1 != null) gizmoSort.add(gizmo1);
-            gizmoSort.sort((o1, o2) -> {
-                double dst1 = 0;
-                double dst2 = 0;
-                if (client.player != null) {
-                    dst1 = o1.position.dst(client.player.getPosition(deltaTime));
-                    dst2 = o2.position.dst(client.player.getPosition(deltaTime));
-                }
-                return Double.compare(dst2, dst1);
-            });
+        PROFILER.begin("gizmos");
+        try {
+            for (String category : world.getEnabledGizmoCategories()) {
+                Gizmo[] gizmos = world.getGizmos(category);
+                gizmoSort.clear();
+                for (Gizmo gizmo1 : gizmos) if (gizmo1 != null) gizmoSort.add(gizmo1);
+                gizmoSort.sort((o1, o2) -> {
+                    double dst1 = 0;
+                    double dst2 = 0;
+                    if (client.player != null) {
+                        dst1 = o1.position.dst(client.player.getPosition(deltaTime));
+                        dst2 = o2.position.dst(client.player.getPosition(deltaTime));
+                    }
+                    return Double.compare(dst2, dst1);
+                });
+            }
+        } finally {
+            PROFILER.end();
         }
     }
 
     public void renderForeground(RenderBufferSource batch, float deltaTime) {
-        Gdx.gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        PROFILER.begin("foreground");
+        try {
+            Gdx.gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        } finally {
+            PROFILER.end();
+        }
     }
 
     @Override
@@ -493,51 +457,57 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     @SuppressWarnings("t")
     private void collectChunks(RenderBufferSource bufferSource, List<ClientChunk> chunks, LocalPlayer player, ChunkRenderRef ref) {
-        occlusionBounds.clear();
-        for (int i = chunks.size() - 1; i >= 0; i--) {
-            var chunk = chunks.get(i);
-            if (chunk.isDisposed()) {
-                unload(chunk);
-                continue;
+        PROFILER.begin("collect-chunks");
+        try {
+            occlusionBounds.clear();
+            for (int i = chunks.size() - 1; i >= 0; i--) {
+                var chunk = chunks.get(i);
+                if (chunk.isDisposed()) {
+                    unload(chunk);
+                    continue;
+                }
+
+                if (chunk.isEmpty() || chunk.isSubmerged()) {
+                    chunk.enabled = false;
+                    continue;
+                }
+
+                Vec3i chunkOffset = chunk.getOffset();
+                Vec3f renderOffsetC = chunkOffset.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f().div(WorldRenderer.SCALE);
+                chunk.renderOffset.set(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z).add(chunk.deltaOffset);
+                BoundingBox boundingBox = chunk.getBoundingBox();
+                boundingBox.set(tmpFrust.set(chunk.renderOffset), tmpFrust2.set(chunk.renderOffset).add(CS));
+
+                if (frustumCulling(chunk)) continue;
+
+                ChunkModel model = this.chunkModels.get(chunk.vec);
+                if (chunk.immediateRebuild || !chunk.initialized) {
+                    model = revalidateChunk(ref, chunk, model);
+                } else if (model == null) {
+                    if (ref.chunkRendered || this.shouldIgnoreRebuild()) continue;
+                    model = buildChunk(ref, chunk);
+                } else if (model.needsRebuild(world) && !(ref.chunkRendered || this.shouldIgnoreRebuild())) {
+                    rebuildChunk(ref, chunk, model);
+                    continue;
+                }
+
+                model.render(client.camera, bufferSource);
+
+                this.renderBlockBreaking(bufferSource, chunk);
+
+                Vector3 renderOffset = chunk.renderOffset;
+                model.setTranslation(renderOffset.x, renderOffset.y, renderOffset.z);
+
+                this.visibleChunks++;
             }
-
-            if (chunk.isEmpty() || chunk.isSubmerged()) {
-                chunk.enabled = false;
-                continue;
-            }
-
-            Vec3i chunkOffset = chunk.getOffset();
-            Vec3f renderOffsetC = chunkOffset.d().sub(player.getPosition(client.partialTick).add(0, player.getEyeHeight(), 0)).f().div(WorldRenderer.SCALE);
-            chunk.renderOffset.set(renderOffsetC.x, renderOffsetC.y, renderOffsetC.z).add(chunk.deltaOffset);
-            BoundingBox boundingBox = chunk.getBoundingBox();
-            boundingBox.set(tmpFrust.set(chunk.renderOffset), tmpFrust2.set(chunk.renderOffset).add(CS));
-
-            if (frustumCulling(chunk)) continue;
-
-            ChunkModel model = this.chunkModels.get(chunk.vec);
-            if (chunk.immediateRebuild || !chunk.initialized) {
-                model = revalidateChunk(ref, chunk, model);
-            } else if (model == null) {
-                if (ref.chunkRendered || this.shouldIgnoreRebuild()) continue;
-                model = buildChunk(ref, chunk);
-            } else if (model.needsRebuild(world) && !(ref.chunkRendered || this.shouldIgnoreRebuild())) {
-                rebuildChunk(ref, chunk, model);
-                continue;
-            }
-
-            model.render(client.camera, bufferSource);
-
-            this.renderBlockBreaking(bufferSource, chunk);
-
-            Vector3 renderOffset = chunk.renderOffset;
-            model.setTranslation(renderOffset.x, renderOffset.y, renderOffset.z);
-
-            this.visibleChunks++;
+        } finally {
+            PROFILER.end();
         }
     }
 
     private boolean occlusionCulling(ClientChunk chunk, Set<Rectangle> occlusionBounds) {
-        try (var ignored = PROFILER.start("occlusion-culling")) {
+        PROFILER.begin("occlusion-culling");
+        try {
             Rectangle rect = chunk.occlusionBounds
                     .set(chunk.tightBounds)
                     .project(client.camera.combined).rect(new Rectangle());
@@ -550,45 +520,50 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             }
 
             occlusionBounds.add(rect);
+            return false;
+        } finally {
+            PROFILER.end();
         }
-
-        return false;
     }
 
     public Set<ClientChunk> getRayVisibleChunks() {
-        Set<ClientChunk> visible = new HashSet<>();
-        Queue<ClientChunk> queue = new ArrayDeque<>();
-        Set<ChunkVec> visited = new HashSet<>();
+        try {
+            Set<ClientChunk> visible = new HashSet<>();
+            Queue<ClientChunk> queue = new ArrayDeque<>();
+            Set<ChunkVec> visited = new HashSet<>();
 
-        LocalPlayer player = client.player;
-        if (player == null) return visible;
-        ClientChunk origin = world.getChunk(player.getChunkVec());
-        if (origin == null) return visible;
-        queue.add(origin);
-        visited.add(origin.vec);
+            LocalPlayer player = client.player;
+            if (player == null) return visible;
+            ClientChunk origin = world.getChunk(player.getChunkVec());
+            if (origin == null) return visible;
+            queue.add(origin);
+            visited.add(origin.vec);
 
-        while (!queue.isEmpty()) {
-            ClientChunk chunk = queue.poll();
-            if (chunk == null) continue;
+            while (!queue.isEmpty()) {
+                ClientChunk chunk = queue.poll();
+                if (chunk == null) continue;
 
-            visible.add(chunk);
+                visible.add(chunk);
 
-            for (Direction dir : Direction.values()) {
-                ClientChunk neighbor = chunk.relative(dir);
-                if (neighbor == null
-                        || visited.contains(neighbor.vec)
-                        || distance(origin, neighbor) > world.getRenderDistance())
-                    continue;
+                for (Direction dir : Direction.values()) {
+                    ClientChunk neighbor = chunk.relative(dir);
+                    if (neighbor == null
+                            || visited.contains(neighbor.vec)
+                            || distance(origin, neighbor) > world.getRenderDistance())
+                        continue;
 
 
-                if (hasVisiblePath(chunk, dir)) {
-                    queue.add(neighbor);
-                    visited.add(neighbor.vec);
+                    if (hasVisiblePath(chunk, dir)) {
+                        queue.add(neighbor);
+                        visited.add(neighbor.vec);
+                    }
                 }
             }
-        }
 
-        return visible;
+            return visible;
+        } finally {
+            PROFILER.end();
+        }
     }
 
     private double distance(ClientChunk origin, ClientChunk neighborPos) {
@@ -620,7 +595,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     private boolean frustumCulling(ClientChunk chunk) {
-        try (var ignored = PROFILER.start("frustum-culling")) {
+        PROFILER.begin("frustum-culling");
+        try {
             this.tmpBounds.set(tmpFrust.set(chunk.renderOffset), tmpFrust2.set(chunk.renderOffset).add(CS));
             boolean inFrustum = this.client.camera.frustum.boundsInFrustum(tmpBounds);
             if (chunk.enabled && !inFrustum) {
@@ -628,6 +604,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             } else if (!chunk.enabled && inFrustum) {
                 chunk.enabled = true;
             }
+        } finally {
+            PROFILER.end();
         }
 
         return !chunk.enabled;
@@ -642,12 +620,13 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      * @param chunk the client chunk for which the model is to be built
      * @return the created chunk model
      */
-    private @NotNull ChunkModel buildChunk(ChunkRenderRef ref, ClientChunk chunk) {
+    private ChunkModel buildChunk(ChunkRenderRef ref, ClientChunk chunk) {
         ChunkModel model;
-        try (var ignoredRebuildSection = this.client.profiler.start("build-chunk")) {
+        this.client.profiler.begin("build-chunk");
+        try {
             chunk.dirty = false;
             model = new ChunkModel(chunk.vec, chunk, this);
-            BoundingBox build = model.build();
+            BoundingBox build = model.buildSync();
             if (build != null) {
                 chunk.tightBounds.set(build);
             }
@@ -655,6 +634,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             chunk.dirty = false;
             chunk.initialized = true;
             this.chunkModels.put(chunk.vec, model);
+        } finally {
+            this.client.profiler.end();
         }
         return model;
     }
@@ -670,12 +651,17 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      * @param model the existing chunk model, or null if a new model needs to be created
      * @return the validated chunk model, either reused or newly built
      */
-    private @NotNull ChunkModel revalidateChunk(ChunkRenderRef ref, ClientChunk chunk, @Nullable ChunkModel model) {
-        if (model == null) {
-            return buildChunk(ref, chunk);
-        }
-        if (!(client.screen instanceof WorldLoadScreen || ref.chunkRendered || this.shouldIgnoreRebuild())) {
-            rebuildChunk(ref, chunk, model);
+    private ChunkModel revalidateChunk(ChunkRenderRef ref, ClientChunk chunk, @Nullable ChunkModel model) {
+        client.profiler.begin("revalidate-chunk");
+        try {
+            if (model == null) {
+                return buildChunk(ref, chunk);
+            }
+            if (!(client.screen instanceof WorldLoadScreen || ref.chunkRendered || this.shouldIgnoreRebuild())) {
+                rebuildChunk(ref, chunk, model);
+            }
+        } finally {
+            client.profiler.end();
         }
         return model;
     }
@@ -691,7 +677,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      *              which will be rebuilt during this method
      */
     private void rebuildChunk(ChunkRenderRef ref, ClientChunk chunk, ChunkModel model) {
-        try (var ignoredRebuildSection = this.client.profiler.start("rebuild")) {
+        PROFILER.begin("rebuild-chunk");
+        try {
             chunk.dirty = false;
             model.rebuild();
             ref.chunkRendered = true;
@@ -699,6 +686,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             chunk.onUpdated();
             chunk.initialized = true;
+        } finally {
+            PROFILER.end();
         }
     }
 
@@ -819,18 +808,13 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         }
     }
 
-    public static void buildOutlineBox(float width, float height, float depth, MeshPartBuilder meshBuilder) {
-        BoxShapeBuilder.build(meshBuilder, new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, height, depth)));
-    }
-
-    @NotNull
     private static List<ClientChunk> chunksInViewSorted(Collection<ClientChunk> chunks, Player player) {
         List<ClientChunk> list = new ArrayList<>(chunks);
-        list = list.stream().sorted((o1, o2) -> {
-            Vec3d mid1 = WorldRenderer.TMP_3D_A.set(o1.getOffset().x + (float) CS, o1.getOffset().y + (float) CS, o1.getOffset().z + (float) CS);
-            Vec3d mid2 = WorldRenderer.TMp_3D_B.set(o2.getOffset().x + (float) CS, o2.getOffset().y + (float) CS, o2.getOffset().z + (float) CS);
-            return Double.compare(mid1.dst(player.getPosition(TMP_3D1)), mid2.dst(player.getPosition(TMP_3D2)));
-        }).collect(Collectors.toList());
+//        list = list.stream().sorted((o1, o2) -> {
+//            Vec3d mid1 = WorldRenderer.TMP_3D_A.set(o1.getOffset().x + (float) CS, o1.getOffset().y + (float) CS, o1.getOffset().z + (float) CS);
+//            Vec3d mid2 = WorldRenderer.TMp_3D_B.set(o2.getOffset().x + (float) CS, o2.getOffset().y + (float) CS, o2.getOffset().z + (float) CS);
+//            return Double.compare(mid1.dst(player.getPosition(TMP_3D1)), mid2.dst(player.getPosition(TMP_3D2)));
+//        }).collect(Collectors.toList());
         return list;
     }
 
@@ -1072,7 +1056,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     @Override
-    public @NotNull ParticleSystem getParticleSystem() {
+    public ParticleSystem getParticleSystem() {
         return particleSystem;
     }
 
@@ -1115,10 +1099,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     public void setBreakingTex(Texture breakingTex) {
         this.breakingTex = breakingTex;
-    }
-
-    public RenderBuffer[] buffers() {
-        return this.buffers.toArray(RenderBuffer.class);
     }
 
     public Color getFogColor() {

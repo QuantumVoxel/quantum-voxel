@@ -218,6 +218,7 @@ public final class ServerChunk extends Chunk {
     public void sendChunk() {
         scheduledSend = false;
         if (!isBeingTracked() && lastTracked + trackDuration < System.currentTimeMillis()) {
+            CommonConstants.LOGGER.debug("Already unloaded!");
             this.world.unloadChunk(this, this.vec);
             return;
         }

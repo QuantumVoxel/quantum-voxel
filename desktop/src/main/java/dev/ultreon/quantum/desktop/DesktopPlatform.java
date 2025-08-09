@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import dev.ultreon.quantum.*;
@@ -17,6 +18,8 @@ import dev.ultreon.quantum.dedicated.JavaWebSocket;
 import dev.ultreon.quantum.dedicated.XeoxFileHandle;
 import dev.ultreon.quantum.dedicated.XeoxMod;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
+import dev.ultreon.quantum.platform.PlatformFeature;
+import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
@@ -37,7 +40,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.ConnectException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.http.WebSocketHandshakeException;
 import java.nio.channels.ClosedChannelException;
@@ -570,6 +572,35 @@ public abstract class DesktopPlatform extends GamePlatform {
     }
 
     @Override
+    public void locateContentResources(ResourceManager resourceManager) {
+        if (IXeoxLoader.get() == null) {
+            resourceManager.loadFromAssetsTxt(Gdx.files.internal("assets.txt"));
+            return;
+        }
+        IFileSystem filesystem = IXeoxLoader.get().getMod(CommonConstants.NAMESPACE).filesystem();
+        if (filesystem == null) {
+            CommonConstants.LOGGER.warn("Quantum Voxel resources unavailable!");
+            return;
+        }
+        IPath rootPath = filesystem.path("/");
+        try {
+            resourceManager.importPackage(new XeoxFileHandle(rootPath));
+        } catch (IOException ex) {
+            throw new GdxRuntimeException("Failed to import resources!", ex);
+        }
+        for (IMod iMod : IXeoxLoader.get().getMods()) {
+            IFileSystem modFilesystem = iMod.filesystem();
+            if (modFilesystem == null) continue;
+            IPath modRootPath = modFilesystem.path("/");
+            try {
+                resourceManager.importPackage(new XeoxFileHandle(modRootPath));
+            } catch (IOException e) {
+                CommonConstants.LOGGER.warn("Importing resources failed for mod {}", iMod.name(), e);
+            }
+        }
+    }
+
+    @Override
     public long freeMemory() {
         return Runtime.getRuntime().freeMemory();
     }
@@ -706,6 +737,23 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public String getFileSep() {
         return File.separator;
+    }
+
+    @Override
+    public Integer getDebugValue(DebugKey key) {
+        return switch (key) {
+            case SHADER_DEBUG_STATE -> ImGuiOverlay.SHADER_DEBUG_STATE.get();
+        };
+    }
+
+    @SuppressWarnings({"DuplicateBranchesInSwitch", "ConstantValue"})
+    @Override
+    public boolean isFeatureSupported(PlatformFeature platformFeature) {
+        return switch (platformFeature) {
+            case JsBytecode -> true;
+            case ClassLoading -> true;
+            case JsInterop -> true;
+        };
     }
 
     @Override
