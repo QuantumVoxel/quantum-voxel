@@ -84,10 +84,6 @@ public final class Launcher {
     private static void launch(String[] args) {
         List<String> argv = new ArrayList<>(Arrays.asList(args));
 
-        if (argv.remove("--debug")) System.setProperty("fabric.log.level", "debug");
-        if (argv.remove("--server")) System.setProperty("fabric.side", "server");
-        else System.setProperty("fabric.side", "client");
-
         System.setProperty("log4j2.formatMsgNoLookups", "true");
         System.setProperty("fabric.log.disableAnsi", "true");
 
@@ -133,21 +129,23 @@ public final class Launcher {
 
 
             List<String> argsFinal = new ArrayList<>();
-            argsFinal.add(javaPath.toAbsolutePath().toString());
             argsFinal.add("-XX:+UnlockExperimentalVMOptions");
             argsFinal.add("-XX:+UseZGC");
-            argsFinal.add("-Djava.library.path=" + jarPath.getParent().resolveSibling("natives").toAbsolutePath());
-            argsFinal.add("-Dfabric.log.disableAnsi=true");
-            argsFinal.add("-Dfabric.skipMcProvider=true");
-            argsFinal.add("-Dfabric.development=false");
+            argsFinal.add("-Djava.library.path=" + jarPath.getParent() + File.pathSeparator + String.join(File.pathSeparator, collect) + File.pathSeparator + jarPath.getParent().resolveSibling("natives").toAbsolutePath() + File.pathSeparator + System.getProperty("java.library.path"));
             argsFinal.add("-cp");
             argsFinal.add(String.join(File.pathSeparator, collect));
-            argsFinal.add("dev.ultreon.xeox.impl.main.Main");
-            argsFinal.addAll(Arrays.asList(args));
+            argsFinal.add(argv.contains("--xeox-loader") ? "dev.ultreon.xeox.impl.main.Main" : "dev.ultreon.quantum.desktop.DesktopLauncher");
 
-            System.out.println("Launching game with command line: " + String.join(" ", argsFinal));
+            String collected = argsFinal.stream().map(s -> s.contains(" ") ? "\"" + s + "\"" : s).collect(Collectors.joining(" "));
+            System.out.println("Launching game with command line: " + collected);
 
-            Process exec = new ProcessBuilder(argsFinal.toArray(String[]::new))
+            Files.writeString(dataPath.resolve("args.txt"), collected);
+
+            List<String> finalArgs = new ArrayList<>();
+            finalArgs.add(javaPath.toAbsolutePath().toString());
+            finalArgs.add("@args.txt");
+            finalArgs.addAll(Arrays.asList(args));
+            Process exec = new ProcessBuilder(finalArgs)
                     .directory(dataPath.toFile())
                     .inheritIO()
                     .start();
