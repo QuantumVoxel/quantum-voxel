@@ -40,4 +40,8 @@ public class CommonConstants {
     public static NamespaceID id(String path) {
         return new NamespaceID(NAMESPACE, path);
     }
+
+    public static String getGameVersion() {
+        return VERSION;
+    }
 }

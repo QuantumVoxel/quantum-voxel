@@ -191,21 +191,15 @@ public class GameRenderer implements Disposable {
                 if (Gdx.input.isTouched()) {
                     float dx = -Gdx.input.getDeltaX() * ClientConfiguration.cameraSensitivity.getValue();
                     float dy = -Gdx.input.getDeltaY() * ClientConfiguration.cameraSensitivity.getValue();
-                    dx *= Gdx.graphics.getDeltaTime() * 150;
-                    dy *= Gdx.graphics.getDeltaTime() * 150;
                     player.rotateHead(dx, dy);
                 }
             } else if (GamePlatform.get().isWeb()) {
                 float dx = -Gdx.input.getDeltaX() * ClientConfiguration.cameraSensitivity.getValue();
                 float dy = -Gdx.input.getDeltaY() * ClientConfiguration.cameraSensitivity.getValue();
-                dx *= Gdx.graphics.getDeltaTime() * 150;
-                dy *= Gdx.graphics.getDeltaTime() * 150;
                 player.rotateHead(dx, dy);
             } else if (GamePlatform.get().isDesktop()) {
                 float dx = -(Gdx.input.getX() - centerX) * ClientConfiguration.cameraSensitivity.getValue();
                 float dy = -(Gdx.input.getY() - centerY) * ClientConfiguration.cameraSensitivity.getValue();
-                dx *= Math.min(Gdx.graphics.getDeltaTime() * 150, Gdx.graphics.getBackBufferScale());
-                dy *= Math.min(Gdx.graphics.getDeltaTime() * 150, Gdx.graphics.getBackBufferScale());
                 player.rotateHead(dx, dy);
             }
 

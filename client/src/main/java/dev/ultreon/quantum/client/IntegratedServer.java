@@ -86,7 +86,7 @@ public class IntegratedServer extends QuantumServer {
         super.init();
 
         ServerWorld overworld = getOverworld();
-        ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, overworld, UUID.nameUUIDFromBytes(("QVPlay:" + client.getUser().name()).getBytes()), client.getUser().name(), null);
+        ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, overworld, UUID.randomUUID(), client.getUser().name(), null);
         // Load player data from storage
         if (!this.getStorage().exists("player.ubo")) {
             QuantumServer.invoke(() -> {

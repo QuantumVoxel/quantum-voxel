@@ -20,6 +20,7 @@ import org.teavm.jso.core.JSError;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -86,20 +87,12 @@ public class TeaVMPlatform extends GamePlatform {
 
     @Override
     public void locateResources() {
-        try {
-            QuantumClient.get().getResourceManager().importPackage(Gdx.files.internal("."));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        QuantumClient.get().resourceManager.importWebPackage(Gdx.files.internal("."));
     }
 
     @Override
     public void locateServerResources(QuantumServer server) {
-        try {
-            server.getResourceManager().importPackage(Gdx.files.internal("."));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        server.getResourceManager().importWebPackage(Gdx.files.internal("."));
     }
 
     @Override
@@ -312,4 +305,14 @@ public class TeaVMPlatform extends GamePlatform {
 	public boolean isFeatureSupported(PlatformFeature platformFeature) {
 		return false;
 	}
+
+    @Override
+    public void load(ResourceManager resourceManager) {
+        // Nope!
+    }
+
+    @Override
+    public <T> List<T> createSyncList() {
+        return new CopyOnWriteArrayList<>();
+    }
 }

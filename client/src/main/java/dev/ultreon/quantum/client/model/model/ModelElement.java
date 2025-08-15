@@ -25,7 +25,6 @@ import dev.ultreon.quantum.client.render.meshing.FaceCull;
 import dev.ultreon.quantum.client.render.meshing.Light;
 import dev.ultreon.quantum.client.world.AmbientOcclusion;
 import dev.ultreon.quantum.client.world.OpaqueFaces;
-import dev.ultreon.quantum.di.DependencyContainer;
 import dev.ultreon.quantum.util.Axis;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Direction;
@@ -78,7 +77,7 @@ public final class ModelElement {
                     : NamespaceID.parse(texRef).mapPath(path -> path);
 
 
-            AmbientOcclusion ambientOcclusion = DependencyContainer.getInstance().resolve(AmbientOcclusion.class);
+            AmbientOcclusion ambientOcclusion = QuantumClient.get().ambientOcclusion;
             int sAo = ambientOcclusion.aoForSide(ao, direction);
             byte sLight = Light.get(light, direction);
             v00.setCol(0f, ambientOcclusion.hasAoCorner00(sAo) ? .5f : 1f, (sLight >> 4 | 0xf) / 15f, (sLight | 0xf) / 15f);

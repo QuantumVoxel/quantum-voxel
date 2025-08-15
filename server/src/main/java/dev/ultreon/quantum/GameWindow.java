@@ -1,6 +1,7 @@
 package dev.ultreon.quantum;
 
 import com.badlogic.gdx.Gdx;
+import dev.ultreon.quantum.text.TextObject;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -114,5 +115,19 @@ public abstract class GameWindow {
             this.dragX = Gdx.input.getX();
             this.dragY = Gdx.input.getY();
         }
+    }
+
+    /**
+     * Sets the title of the game window.
+     *
+     * @param title         The title of the game window. If null or blank, the default title will be used.
+     */
+    public void setWindowTitle(TextObject title) {
+        String text = title == null ? null : title.getText();
+        if (text != null && !text.isBlank()) {
+            setTitle(String.format("Quantum Voxel %s - %s", CommonConstants.getGameVersion().split("\\+")[0], text));
+            return;
+        }
+        setTitle(String.format("Quantum Voxel %s", CommonConstants.getGameVersion().split("\\+")[0]));
     }
 }

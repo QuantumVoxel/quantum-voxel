@@ -6,10 +6,8 @@ import java.util.stream.Stream;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.LoggerFactory;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.api.events.ClientPlayerEvent;
-import dev.ultreon.quantum.client.util.RenderableArray;
 import dev.ultreon.quantum.util.SanityCheck;
 import dev.ultreon.quantum.world.Direction;
 import org.jetbrains.annotations.NotNull;
@@ -310,7 +308,8 @@ public class LocalPlayer extends ClientPlayer {
             int renderDistance = Math.max(2, ClientConfiguration.renderDistance.getValue() / CS);
 
             unloading.clear();
-            for (ClientChunkAccess chunk : this.clientWorld.getLoadedChunks()) {
+            Collection<? extends ClientChunkAccess> loadedChunks = List.copyOf(this.clientWorld.getLoadedChunks());
+            for (ClientChunkAccess chunk : loadedChunks) {
                 if (chunk.getVec().dst(chunkVec) > renderDistance) {
                     unloading.add(chunkVec);
                     this.unloadChunk(chunk);

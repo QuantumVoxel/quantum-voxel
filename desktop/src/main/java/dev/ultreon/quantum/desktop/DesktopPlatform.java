@@ -3,14 +3,19 @@ package dev.ultreon.quantum.desktop;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
+import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
+import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.ModInitializer;
+import dev.ultreon.quantum.client.FontManager;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
+import dev.ultreon.quantum.client.rpc.GameActivity;
+import dev.ultreon.quantum.client.rpc.RpcHandler;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -20,6 +25,7 @@ import dev.ultreon.quantum.dedicated.XeoxMod;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
+import dev.ultreon.quantum.scripting.ScriptLoader;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
@@ -44,10 +50,7 @@ import java.net.URL;
 import java.net.http.WebSocketHandshakeException;
 import java.nio.channels.ClosedChannelException;
 import java.util.*;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
@@ -58,6 +61,7 @@ public abstract class DesktopPlatform extends GamePlatform {
     private final boolean angleGLES;
     private final SafeLoadWrapper safeWrapper;
     private final LuaJit luaJit;
+    private final ScriptLoader scriptLoader = new ScriptLoader();
 
     DesktopPlatform(boolean angleGLES, SafeLoadWrapper safeWrapper) {
         super();
@@ -269,7 +273,7 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public void locateResources() {
         if (IXeoxLoader.get() == null) {
-            QuantumClient.get().getResourceManager().loadFromAssetsTxt(Gdx.files.internal("assets.txt"));
+            QuantumClient.get().resourceManager.loadFromAssetsTxt(Gdx.files.internal("assets.txt"));
             return;
         }
         IFileSystem filesystem = IXeoxLoader.get().getMod(CommonConstants.NAMESPACE).filesystem();
@@ -279,7 +283,7 @@ public abstract class DesktopPlatform extends GamePlatform {
         }
         IPath rootPath = filesystem.root();
         try {
-            QuantumClient.get().getResourceManager().importPackage(new XeoxFileHandle(rootPath));
+            QuantumClient.get().resourceManager.importPackage(new XeoxFileHandle(rootPath));
         } catch (IOException ex) {
             throw new GdxRuntimeException("Failed to import resources!", ex);
         }
@@ -333,7 +337,7 @@ public abstract class DesktopPlatform extends GamePlatform {
         IXeoxLoader iXeoxLoader = IXeoxLoader.get();
         if (iXeoxLoader == null) {
             try {
-                QuantumClient.get().getResourceManager().importPackage(Gdx.files.internal("."));
+                QuantumClient.get().resourceManager.importPackage(Gdx.files.internal("."));
             } catch (IOException e) {
                 CommonConstants.LOGGER.warn("Importing resources failed for internal", e);
             }
@@ -345,7 +349,7 @@ public abstract class DesktopPlatform extends GamePlatform {
             if (filesystem == null) continue;
             IPath rootPath = filesystem.path("/");
             try {
-                QuantumClient.get().getResourceManager().importPackage(new XeoxFileHandle(rootPath));
+                QuantumClient.get().resourceManager.importPackage(new XeoxFileHandle(rootPath));
             } catch (IOException e) {
                 CommonConstants.LOGGER.warn("Importing resources failed for mod {}", iMod.name(), e);
             }
@@ -485,6 +489,11 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public boolean hasBackPanelRemoved() {
+        return false;
+    }
+
+    @Override
+    public boolean isWeb() {
         return false;
     }
 
@@ -754,6 +763,56 @@ public abstract class DesktopPlatform extends GamePlatform {
             case ClassLoading -> true;
             case JsInterop -> true;
         };
+    }
+
+    @Override
+    public void load(ResourceManager resourceManager) {
+        scriptLoader.reload(resourceManager);
+    }
+
+    @Override
+    public void enableRpc() {
+        super.enableRpc();
+        RpcHandler.enable();
+    }
+
+    @Override
+    public void disableRpc() {
+        super.disableRpc();
+        RpcHandler.disable();
+    }
+
+    @Override
+    public boolean cancelControllerVibration() {
+        super.cancelControllerVibration();
+
+        Controller current = Controllers.getCurrent();
+        if (current == null) return false;
+        current.cancelVibration();
+        return true;
+    }
+
+    @Override
+    public void setActivity(Object activity) {
+        super.setActivity(activity);
+        if (activity instanceof GameActivity) {
+            RpcHandler.newActivity((GameActivity) activity);
+        }
+    }
+
+    @Override
+    public boolean startControllerVibration(int duration, float strength) {
+        super.startControllerVibration(duration, strength);
+
+        Controller current = Controllers.getCurrent();
+        if (current == null) return false;
+        current.startVibration(duration, Mth.clamp(strength, 0.0F, 1.0F));
+        return true;
+    }
+
+    @Override
+    public <T> List<T> createSyncList() {
+        return new CopyOnWriteArrayList<>();
     }
 
     @Override

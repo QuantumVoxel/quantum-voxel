@@ -25,6 +25,7 @@ dependencies {
 
     runtimeOnly 'com.badlogicgames.gdx:gdx-platform:1.13.1:natives-desktop'
 
+    implementation 'org.mozilla:rhino:1.8.0'
     implementation api('org.glassfish.tyrus:tyrus-server:2.1.5')
     implementation api('org.glassfish.tyrus:tyrus-container-grizzly-server:2.1.5')
     implementation api('org.glassfish.tyrus:tyrus-container-grizzly-server:2.1.5')

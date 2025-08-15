@@ -154,7 +154,6 @@ public class DesktopLauncher {
         }
 
         LauncherConfig launcherConfig = LauncherConfig.get();
-        boolean useAngleGraphics = launcherConfig.useAngleGraphics && SharedLibraryLoader.os == Os.Windows;
         windowVibrancyEnabled = launcherConfig.windowVibrancyEnabled;
         fullVibrancyEnabled = launcherConfig.enableFullVibrancy;
         fullAeroEnabled = launcherConfig.enableFullAero;
@@ -185,7 +184,7 @@ public class DesktopLauncher {
                 super.render();
             }
         };
-        platform = new DesktopPlatform(useAngleGraphics, safeWrapper) {
+        platform = new DesktopPlatform(false, safeWrapper) {
             @Override
             public GameWindow createWindow() {
                 return gameWindow;
@@ -203,7 +202,7 @@ public class DesktopLauncher {
 
             @Override
             public boolean hasBackPanelRemoved() {
-                return ((fullVibrancyEnabled && windowVibrancyEnabled) || fullAeroEnabled) && !useAngleGraphics;
+                return fullVibrancyEnabled && windowVibrancyEnabled || fullAeroEnabled;
             }
 
             @Override
@@ -247,6 +246,11 @@ public class DesktopLauncher {
             @Override
             public boolean getWindowVibrancy() {
                 return windowVibrancyEnabled;
+            }
+
+            @Override
+            public boolean isWeb() {
+                return false;
             }
         };
 

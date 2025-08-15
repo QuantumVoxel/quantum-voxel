@@ -2,6 +2,7 @@ package dev.ultreon.quantum;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.platform.Device;
@@ -11,10 +12,14 @@ import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
+import dev.ultreon.quantum.world.data.MemoryRegionChannel;
+import dev.ultreon.quantum.world.data.RegionChannelLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -252,9 +257,7 @@ public abstract class GamePlatform {
         return false;
     }
 
-    public boolean isWeb() {
-        return false;
-    }
+    public abstract boolean isWeb();
 
     public void yield() {
         Thread.yield();
@@ -439,6 +442,41 @@ public abstract class GamePlatform {
     public boolean getFullAero() {
         return false;
     }
+
+    public RegionChannelLike openRegion(FileHandle file) throws IOException {
+        try {
+            return new MemoryRegionChannel(file);
+        } catch (GdxRuntimeException e) {
+            if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+
+            throw new IOException(e);
+        }
+    }
+    public abstract void load(ResourceManager resourceManager);
+
+    public void enableRpc() {
+
+    }
+
+    public void disableRpc() {
+
+    }
+
+    public boolean cancelControllerVibration() {
+        return false;
+    }
+
+    public void setActivity(Object activity) {
+
+    }
+
+    public boolean startControllerVibration(int duration, float strength) {
+        return false;
+    }
+
+    public abstract <T> List<T> createSyncList();
 
     private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {
         private boolean done = false;

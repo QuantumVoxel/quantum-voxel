@@ -489,7 +489,7 @@ public class ImGuiOverlay {
     private static void showAssetView(QuantumClient client) {
         if (ImGui.begin("Asset View", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove)) {
             // Show a list of all assets
-            ResourceManager resourceManager = client.getResourceManager();
+            ResourceManager resourceManager = client.resourceManager;
             if (ImGui.treeNodeEx("Assets", ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.OpenOnArrow | (resourceManager == null ? ImGuiTreeNodeFlags.Leaf : 0)) && resourceManager != null) {
                 for (ResourceCategory category : resourceManager.getResourceCategories()) {
                     if (ImGui.treeNodeEx(category.getName(), ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.OpenOnArrow)) {

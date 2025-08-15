@@ -2,6 +2,9 @@ package dev.ultreon.quantum.world;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.GdxRuntimeException;
+import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.ubo.DataIo;
 import dev.ultreon.quantum.ubo.types.DataType;
 import dev.ultreon.quantum.ubo.types.MapType;
@@ -118,10 +121,31 @@ public final class WorldStorage {
      * @throws IOException if an I/O error occurs.
      */
     public boolean delete() throws IOException {
-        if (!this.getDirectory().exists()) return false;
-        this.getDirectory().emptyDirectory(false);
-        this.getDirectory().deleteDirectory();
+        try {
+            if (!this.getDirectory().exists()) return false;
+            if (GamePlatform.get().isWeb()) {
+                deleteDir(this.getDirectory());
+                this.getDirectory().deleteDirectory();
+                return false;
+            }
+            this.getDirectory().emptyDirectory(false);
+            this.getDirectory().deleteDirectory();
+        } catch (GdxRuntimeException e) {
+            CommonConstants.LOGGER.error("Failed to delete world directory: " + this.getDirectory().path() + " (" + e.getMessage() + ")");
+            return false;
+        }
         return true;
+    }
+
+    private void deleteDir(FileHandle directory) throws IOException {
+        for (FileHandle file : directory.list()) {
+            if (file.isDirectory()) {
+                deleteDir(file);
+                file.deleteDirectory();
+            } else {
+                file.delete();
+            }
+        }
     }
 
     /**

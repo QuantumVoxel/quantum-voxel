@@ -53,7 +53,7 @@ public class JsonModelLoader {
      * from the QuantumClient.
      */
     public JsonModelLoader() {
-        this(QuantumClient.get().getResourceManager());
+        this(QuantumClient.get().resourceManager);
     }
 
     /**

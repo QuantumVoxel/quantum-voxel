@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
@@ -447,7 +446,7 @@ public class TouchInput extends GameInput implements InputProcessor {
 
             // Check if the cursor is not caught and there is a current screen
             if (!Gdx.input.isCursorCatched() && currentScreen != null) {
-                client.mousePress(adjustedX, adjustedY, button);
+                client.inputManager.mousePress(adjustedX, adjustedY, button, client);
             }
         });
         return false;
@@ -524,7 +523,7 @@ public class TouchInput extends GameInput implements InputProcessor {
 
             // Stop breaking action
             this.client.stopBreaking();
-            this.client.mouseRelease(adjustedX, adjustedY, button);
+            this.client.inputManager.mouseRelease(adjustedX, adjustedY, button, this.client);
         });
         return false;
     }

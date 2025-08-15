@@ -1,3 +1,4 @@
+/*
 package dev.ultreon.quantum.client.network.system;
 
 import com.esotericsoftware.kryonet.Client;
@@ -119,3 +120,4 @@ public class ClientTcpConnection extends TcpConnection<ClientPacketHandler, Serv
         return stage.getServerPackets();
     }
 }
+*/

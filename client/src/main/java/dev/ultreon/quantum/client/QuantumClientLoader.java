@@ -195,7 +195,7 @@ class QuantumClientLoader implements Runnable {
         registerMenuScreens();
         RenderingRegistration.registerRendering(client);
 
-        client.j5ModelLoader = new JsonModelLoader(client.getResourceManager());
+        client.j5ModelLoader = new JsonModelLoader(client.resourceManager);
 
         QuantumClient.LOGGER.info("Reloading resources");
         client.reloadResources();
@@ -317,7 +317,7 @@ class QuantumClientLoader implements Runnable {
         var s = id.getPath().split("_", 2);
         var locale = s.length == 1 ? new Locale(s[0]) : new Locale(s[0], s[1]);
         LanguageManager.INSTANCE.register(locale, id);
-        LanguageManager.INSTANCE.load(locale, id, quantumClient.getResourceManager());
+        LanguageManager.INSTANCE.load(locale, id, quantumClient.resourceManager);
     }
 
     /**

@@ -165,19 +165,14 @@ public abstract class GameInput implements Disposable {
     }
 
     public static boolean cancelVibration() {
-        Controller current = Controllers.getCurrent();
-        if (current == null) return false;
-        current.cancelVibration();
+        GamePlatform.get().cancelControllerVibration();
         return true;
     }
 
     public static boolean startVibration(int duration, float strength) {
         if (!ClientConfiguration.vibration.getValue()) return false;
 
-        Controller current = Controllers.getCurrent();
-        if (current == null) return false;
-        current.startVibration(duration, Mth.clamp(strength, 0.0F, 1.0F));
-        return true;
+        return GamePlatform.get().startControllerVibration(duration, strength);
     }
 
     @Override

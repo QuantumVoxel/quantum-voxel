@@ -54,13 +54,11 @@ public abstract class WebSocketConnection<OurHandler extends PacketHandler, Thei
 
     @Override
     public void send(Packet<? extends TheirHandler> packet, @Nullable PacketListener resultListener) {
-        if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Sending: " + packet.getClass().getName());;
-        int id = getOtherSidePackets().getId(packet);
-        if (resultListener != null) resultListener.onSent();
+        if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Sending: " + packet.getClass().getName());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PacketIO io = new PacketIO(null, out, handle);
-        io.writeShort(id);
-        packet.toBytes(handler, io);
+        io.writeShort(getOtherSidePackets().getId(packet));
+        packet.toBytes(io);
         socket.send(out.toByteArray(), resultListener);
     }
 
@@ -150,7 +148,7 @@ public abstract class WebSocketConnection<OurHandler extends PacketHandler, Thei
 
     protected abstract ServerPlayer getPlayer();
 
-    protected abstract Packet<ServerPacketHandler> getDisconnectPacket(int code, String message);
+    protected abstract Packet<ServerPacketHandler> getDisconnectPacket(String message);
 
     public final boolean received(byte[] bytes) {
         PacketIO io = new PacketIO(new ByteArrayInputStream(bytes), null, handle);
@@ -160,7 +158,7 @@ public abstract class WebSocketConnection<OurHandler extends PacketHandler, Thei
             CommonConstants.LOGGER.error("Invalid packet ID: " + i);
             return false;
         }
-        if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Received: " + packet.getClass().getName());;
+        if (GamePlatform.get().isDevEnvironment()) CommonConstants.LOGGER.debug("Received: " + packet.getClass().getName());
         try {
             packet.handle(new PacketContext(getPlayer(), this, env), handler);
             return true;
@@ -173,5 +171,10 @@ public abstract class WebSocketConnection<OurHandler extends PacketHandler, Thei
 
     public void setStage(PacketStage stage) {
         this.stage = stage;
+    }
+
+    @Override
+    public PacketStage getStage() {
+        return stage;
     }
 }

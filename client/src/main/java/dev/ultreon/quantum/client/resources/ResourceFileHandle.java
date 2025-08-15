@@ -35,12 +35,12 @@ public class ResourceFileHandle extends FileHandle {
     public ResourceFileHandle(NamespaceID id) {
         super(id.toString());
         this.id = id;
-        this.resource = QuantumClient.get().getResourceManager().getResource(id);
+        this.resource = QuantumClient.get().resourceManager.getResource(id);
 
         if (this.resource != null) {
             this.subResources = List.of();
         } else {
-            this.subResources = QuantumClient.get().getResourceManager().getResourcePackages().stream()
+            this.subResources = QuantumClient.get().resourceManager.getResourcePackages().stream()
                     .flatMap(it -> it.entries().stream())
                     .filter(it -> it.getPath().startsWith(id.getPath()))
                     .collect(Collectors.toList());

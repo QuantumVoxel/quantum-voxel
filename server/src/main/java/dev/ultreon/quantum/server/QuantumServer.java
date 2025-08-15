@@ -2,6 +2,7 @@ package dev.ultreon.quantum.server;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.async.AsyncExecutor;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.api.commands.CommandSender;
@@ -119,11 +120,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @ShowInNodeView
     protected long seed;
     private Runnable finalizer;
-    private final ScheduledExecutorService service = Executors.newScheduledThreadPool(1, r -> {
-        Thread thread = new Thread(r, "Quantum Timer");
-        thread.setDaemon(false);
-        return thread;
-    });
+    private final AsyncExecutor service = new AsyncExecutor(1, "QuantumTimer");
 
     /**
      * Creates a new {@link QuantumServer} instance.
@@ -667,7 +664,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.players.clear();
         this.resourceManager.close();
 
-        this.service.shutdown();
+        this.service.dispose();
     }
 
     /**
@@ -1113,7 +1110,4 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         CommonConstants.LOGGER.warn("SAVE [" + type + "] @ " + Arrays.stream(args).mapToObj(Integer::toString).collect(Collectors.joining(", ")));
     }
 
-    public ScheduledExecutorService getService() {
-        return this.service;
-    }
 }

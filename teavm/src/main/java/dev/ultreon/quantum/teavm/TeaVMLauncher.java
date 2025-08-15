@@ -15,7 +15,6 @@ public class TeaVMLauncher {
     public static void main(String[] args) {
         TeaApplicationConfiguration config = new TeaApplicationConfiguration("canvas");
 
-
         config.width = 0;
         config.height = 0;
         config.usePhysicalPixels = true;

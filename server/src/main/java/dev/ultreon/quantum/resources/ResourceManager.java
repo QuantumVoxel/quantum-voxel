@@ -135,6 +135,10 @@ public abstract class ResourceManager extends GameObject implements Closeable {
         addImported(new ResourcePackage(map, categories));
     }
 
+    public void importWebPackage(FileHandle internal) {
+        importDirectoryPackage(internal);
+    }
+
     @SuppressWarnings({"unused"})
     private void importDirectoryPackage(FileHandle file) {
         // Check if it's a directory.

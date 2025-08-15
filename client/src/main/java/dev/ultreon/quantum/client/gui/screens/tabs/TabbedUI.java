@@ -56,7 +56,7 @@ public abstract class TabbedUI extends Screen {
         this.tabs = tabbedUIBuilder.tabs;
         this.tab = this.tabs.isEmpty() ? null : tabbedUIBuilder.tabs.get(0);
 
-        this.client.setWindowTitle(getTitle());
+        this.client.window.setWindowTitle(getTitle());
 
         for (Tab tab : this.tabs) {
             this.defineRoot(tab);
@@ -157,7 +157,7 @@ public abstract class TabbedUI extends Screen {
         this.tab = this.tabs.get(selected);
         this.bottomSelected = this.tabs.get(selected).bottom();
 
-        this.client.setWindowTitle(getTitle());
+        this.client.window.setWindowTitle(getTitle());
     }
 
     public final void setSelected(TextObject name) {
@@ -282,7 +282,7 @@ public abstract class TabbedUI extends Screen {
                 this.bottomSelected = tab.bottom();
                 this.tab = tab;
 
-                this.client.setWindowTitle(getTitle());
+                this.client.window.setWindowTitle(getTitle());
             }
             if (tab == this.tab && tab.content().mouseRelease(mouseX, mouseY, button)) flag = true;
         }

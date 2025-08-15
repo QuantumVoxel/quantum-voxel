@@ -8,6 +8,7 @@ import dev.ultreon.quantum.network.PacketListener;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.BundlePacket;
 import dev.ultreon.quantum.network.packets.Packet;
+import dev.ultreon.quantum.network.packets.s2c.S2CBundlePacket;
 import dev.ultreon.quantum.network.server.LoginServerPacketHandler;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.stage.PacketStage;
@@ -51,7 +52,7 @@ public class ServerConnection implements IConnection<ServerPacketHandler, Client
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             PacketIO io = new PacketIO(null, out, handle);
             io.writeShort(stage.getClientPackets().getId(packet));
-            packet.toBytes(handler, io);
+            packet.toBytes(io);
             session.getBasicRemote().sendBinary(ByteBuffer.wrap(out.toByteArray()));
         } catch (Exception e) {
             CommonConstants.LOGGER.error("Internal error:", e);
@@ -142,7 +143,7 @@ public class ServerConnection implements IConnection<ServerPacketHandler, Client
 
     @Override
     public BundlePacket<ClientPacketHandler> bundle(List<Packet<ClientPacketHandler>> packets) {
-        return null;
+        return new S2CBundlePacket(packets);
     }
 
     @Override

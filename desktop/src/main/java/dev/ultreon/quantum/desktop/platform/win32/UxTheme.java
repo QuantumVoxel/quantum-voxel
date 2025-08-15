@@ -5,7 +5,6 @@ import com.sun.jna.WString;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.win32.StdCallLibrary;
-import dev.ultreon.quantum.desktop.AeroInsetDemo;
 
 // UxTheme API
 public interface UxTheme extends StdCallLibrary {

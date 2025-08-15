@@ -57,6 +57,7 @@ tasks.register('buildJavaScript', JavaExec) {
             .findAll { it != null }
 
     environment 'SOURCE_JARS', sourceJarPaths.join(File.pathSeparator)
+    environment 'DEBUG', System.getenv("DEBUG")
   }
 }
 build.dependsOn buildJavaScript

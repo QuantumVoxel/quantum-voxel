@@ -3,25 +3,31 @@ package dev.ultreon.quantum.teavm;
 import com.github.xpenatan.gdx.backends.teavm.config.AssetFileHandle;
 import com.github.xpenatan.gdx.backends.teavm.config.TeaBuildConfiguration;
 import com.github.xpenatan.gdx.backends.teavm.config.TeaBuilder;
-import com.github.xpenatan.gdx.backends.teavm.gen.SkipClass;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
 
 import org.teavm.tooling.TeaVMSourceFilePolicy;
 import org.teavm.tooling.TeaVMTargetType;
 import org.teavm.tooling.TeaVMTool;
-import org.teavm.tooling.TeaVMToolLog;
 import org.teavm.tooling.sources.DirectorySourceFileProvider;
 import org.teavm.tooling.sources.JarSourceFileProvider;
 import org.teavm.vm.TeaVMOptimizationLevel;
 
 /** Builds the TeaVM/HTML application. */
-@SkipClass
 public class TeaVMBuilder {
+
+    public static final boolean DEBUG = Objects.equals(System.getenv("TEAVM_DEBUG"), "true") || System.getProperty("gdx.teavm.debug", "true").equals("true");
+
     public static void main(String[] args) throws IOException {
         TeaBuildConfiguration teaBuildConfiguration = new TeaBuildConfiguration();
         teaBuildConfiguration.assetsPath.add(new AssetFileHandle("../client/src/main/resources"));
+        teaBuildConfiguration.assetsPath.add(new AssetFileHandle("../server/src/main/resources"));
         teaBuildConfiguration.webappPath = new File("build/dist").getCanonicalPath();
+        teaBuildConfiguration.useDefaultHtmlIndex = false;
 
         // Register any extra classpath assets here:
         // teaBuildConfiguration.additionalAssetsClasspathFiles.add("dev/ultreon/asset.extension");
@@ -32,14 +38,14 @@ public class TeaVMBuilder {
         TeaVMTool tool = TeaBuilder.config(teaBuildConfiguration);
         tool.setMainClass(TeaVMLauncher.class.getName());
         // For many (or most) applications, using the highest optimization won't add much to build time.
-        // If your builds take too long, and runtime performance doesn't matter, you can change FULL to SIMPLE .
+        // If your builds take too long, and runtime performance doesn't matter, you can change FULL to SIMPLE.
         tool.setOptimizationLevel(TeaVMOptimizationLevel.SIMPLE);
-        tool.setTargetType(TeaVMTargetType.WEBASSEMBLY_GC);
+        tool.setTargetType(TeaVMTargetType.JAVASCRIPT);
         tool.setMaxDirectBuffersSize(536870912);
-        tool.setObfuscated(true);
-        tool.setShortFileNames(false);
-        tool.setSourceMapsFileGenerated(true);
-        tool.setDebugInformationGenerated(true);
+        tool.setObfuscated(!DEBUG);
+        tool.setShortFileNames(!DEBUG);
+        tool.setSourceMapsFileGenerated(DEBUG);
+        tool.setDebugInformationGenerated(DEBUG);
         tool.setSourceFilePolicy(TeaVMSourceFilePolicy.COPY);
         tool.addSourceFileProvider(new DirectorySourceFileProvider(new File("../client/src/main/java")));
         tool.addSourceFileProvider(new DirectorySourceFileProvider(new File("../server/src/main/java")));
@@ -60,5 +66,11 @@ public class TeaVMBuilder {
             tool.getLog().info("No source jars found");
         }
         TeaBuilder.build(tool);
+
+        Path path = Paths.get("build/dist/webapp/index.html");
+        if (Files.exists(path)) {
+            Files.delete(path);
+        }
+        Files.copy(Paths.get("src/main/index.html"), path);
     }
 }

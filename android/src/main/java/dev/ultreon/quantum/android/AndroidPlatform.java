@@ -6,10 +6,14 @@ import android.os.Looper;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import com.badlogic.gdx.Version;
+import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.IntSet;
+import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.android.log.AndroidLogger;
+import dev.ultreon.quantum.client.FontManager;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.dedicated.JavaWebSocket;
@@ -17,10 +21,12 @@ import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
+import dev.ultreon.quantum.scripting.ScriptLoader;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Result;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 public class AndroidPlatform extends GamePlatform {
@@ -33,6 +39,7 @@ public class AndroidPlatform extends GamePlatform {
     private final IntMap<MouseDevice> motions = new IntMap<MouseDevice>();
     private AndroidMouseDevice mouseDevice;
     private final Map<Integer, Device> gameDevices = new HashMap<>();
+    private final ScriptLoader scriptLoader = new ScriptLoader();
 
     AndroidPlatform(AndroidLauncher launcher) {
         super();
@@ -107,7 +114,7 @@ public class AndroidPlatform extends GamePlatform {
 
     @Override
     public void locateResources() {
-        QuantumClient.get().getResourceManager().importDeferredPackage(QuantumClient.class);
+        QuantumClient.get().resourceManager.importDeferredPackage(QuantumClient.class);
     }
 
     @Override
@@ -237,6 +244,11 @@ public class AndroidPlatform extends GamePlatform {
     }
 
     @Override
+    public boolean isWeb() {
+        return false;
+    }
+
+    @Override
     public int cpuCores() {
         return Runtime.getRuntime().availableProcessors();
     }
@@ -279,5 +291,35 @@ public class AndroidPlatform extends GamePlatform {
             case JsInterop:
                 return true;
         }
+    }
+
+    @Override
+    public void load(ResourceManager resourceManager) {
+        scriptLoader.reload(resourceManager);
+    }
+
+    @Override
+    public boolean cancelControllerVibration() {
+        super.cancelControllerVibration();
+
+        Controller current = Controllers.getCurrent();
+        if (current == null) return false;
+        current.cancelVibration();
+        return true;
+    }
+
+    @Override
+    public boolean startControllerVibration(int duration, float strength) {
+        super.startControllerVibration(duration, strength);
+
+        Controller current = Controllers.getCurrent();
+        if (current == null) return false;
+        current.startVibration(duration, Mth.clamp(strength, 0.0F, 1.0F));
+        return true;
+    }
+
+    @Override
+    public <T> List<T> createSyncList() {
+        return new CopyOnWriteArrayList<>();
     }
 }

@@ -503,7 +503,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
             // Check if the cursor is not caught and there is a current screen
             if (!Gdx.input.isCursorCatched() && currentScreen != null) {
-                client.mousePress(adjustedX, adjustedY, button);
+                client.inputManager.mousePress(adjustedX, adjustedY, button, client);
             }
         });
         return false;
@@ -581,7 +581,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
             // Stop breaking action
             this.client.stopBreaking();
-            this.client.mouseRelease(adjustedX, adjustedY, button);
+            this.client.inputManager.mouseRelease(adjustedX, adjustedY, button, this.client);
         });
         return false;
     }

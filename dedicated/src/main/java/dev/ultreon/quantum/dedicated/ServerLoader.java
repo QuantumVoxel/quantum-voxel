@@ -2,9 +2,7 @@ package dev.ultreon.quantum.dedicated;
 
 import dev.ultreon.quantum.CommonLoader;
 import dev.ultreon.quantum.CommonRegistries;
-import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.neocommand.CommandRegistration;
-import dev.ultreon.quantum.di.DependencyContainer;
 import dev.ultreon.quantum.registry.Registries;
 
 /**
@@ -17,7 +15,7 @@ public class ServerLoader {
      */
     public void load() {
         // Initialize configuration entry points
-        CommonLoader resolve = DependencyContainer.getInstance().resolve(CommonLoader.class);
+        CommonLoader resolve = CommonLoader.get();
         resolve.init();
 
         // Initialize registries

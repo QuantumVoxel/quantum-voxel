@@ -1,28 +1,24 @@
-package dev.ultreon.quantum.world.data;
+package dev.ultreon.quantum.desktop.platform.region;
 
+import com.badlogic.gdx.files.FileHandle;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.ubo.types.MapType;
-import dev.ultreon.quantum.world.World;
+import dev.ultreon.quantum.world.data.RegionChannelLike;
+import dev.ultreon.quantum.world.data.UboObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 
-public class RegionChannel implements AutoCloseable {
-    private static final int HEADER_SIZE = 4096;
-
-    private static final int CHUNK_GRID = World.REGION_SIZE;
-    private static final int CHUNK_COUNT = CHUNK_GRID * CHUNK_GRID * CHUNK_GRID;
-    private static final int INDEX_ENTRY_SIZE = 12;
-    private static final int INDEX_TABLE_SIZE = CHUNK_COUNT * INDEX_ENTRY_SIZE;
-    private static final int INDEX_OFFSET = HEADER_SIZE;
-
+public class RegionChannel implements RegionChannelLike {
     private final RegionDataChannel channel;
     private final ByteBuffer[] allChunkInfo = new ByteBuffer[32];
 
-    public RegionChannel(File path) throws IOException {
-        if (Files.notExists(path.toPath().getParent())) {
-            Files.createDirectories(path.toPath().getParent());
+    public RegionChannel(FileHandle path) throws IOException {
+        if (Files.notExists(path.file().toPath().getParent())) {
+            Files.createDirectories(path.file().toPath().getParent());
         }
 
         boolean exists = path.exists();
@@ -36,11 +32,12 @@ public class RegionChannel implements AutoCloseable {
         flush();
     }
 
-    private int getChunkIndex(int cx, int cy, int cz) {
+    public int getChunkIndex(int cx, int cy, int cz) {
         return (cy * CHUNK_GRID + cz) * CHUNK_GRID + cx;
     }
 
-    public void saveChunk(int cx, int cy, int cz, MapType chunk) throws IOException {
+    @Override
+    public void saveChunk(int cx, int cy, int cz, @NotNull MapType chunk) throws IOException {
         if (cx < 0 || cx >= CHUNK_GRID || cy < 0 || cy >= CHUNK_GRID || cz < 0 || cz >= CHUNK_GRID)
             throw new IndexOutOfBoundsException("Chunk coordinates out of bounds: " + cx + ", " + cy + ", " + cz);
 
@@ -55,7 +52,8 @@ public class RegionChannel implements AutoCloseable {
         }
     }
 
-    public MapType loadChunk(int cx, int cy, int cz) throws IOException {
+    @Override
+    public @Nullable MapType loadChunk(int cx, int cy, int cz) throws IOException {
         if (cx < 0 || cx >= CHUNK_GRID || cy < 0 || cy >= CHUNK_GRID || cz < 0 || cz >= CHUNK_GRID)
             throw new IndexOutOfBoundsException("Chunk coordinates out of bounds: " + cx + ", " + cy + ", " + cz);
 
@@ -66,6 +64,11 @@ public class RegionChannel implements AutoCloseable {
             byte[] decompress = decompress(input);
             return UboObject.fromBytes(decompress);
         }
+    }
+
+    @Override
+    public FileHandle getTarget() {
+        return channel.getTarget();
     }
 
     private void putLength(int cx, int cy, int cz, int length) {
@@ -96,7 +99,7 @@ public class RegionChannel implements AutoCloseable {
         return input;
     }
 
-    private byte[] decompress(byte[] input) throws IOException {
+    private byte[] decompress(byte[] input) {
 //        Inflater inflater = new Inflater();
 //        inflater.setInput(input);
 //        ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -114,11 +117,13 @@ public class RegionChannel implements AutoCloseable {
         return input;
     }
 
+    @Override
     public void close() throws IOException {
         flush();
         channel.close();
     }
 
+    @Override
     public void flush() throws IOException {
         synchronized (this) {
             channel.writeSectorReferenceMap();

@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.dedicated;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.*;
@@ -9,6 +8,7 @@ import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
+import dev.ultreon.quantum.scripting.ScriptLoader;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.xeox.api.IMod;
 import dev.ultreon.xeox.api.IPath;
@@ -21,10 +21,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ServerPlatform extends GamePlatform {
     private final Map<String, XeoxMod> mods = new IdentityHashMap<>();
+    private final ScriptLoader scriptLoader = new ScriptLoader();
 
     @Override
     public WebSocket newWebSocket(String location, Consumer<Throwable> onError, WebSocket.InitializeListener initializeListener, WebSocket.ConnectedListener connectedListener) {
@@ -77,17 +80,18 @@ public class ServerPlatform extends GamePlatform {
     }
 
     @Override
+    public boolean isWeb() {
+        return false;
+    }
+
+    @Override
     public int cpuCores() {
         return Runtime.getRuntime().availableProcessors();
     }
 
     @Override
     public void locateContentResources(ResourceManager resourceManager) {
-        try {
-            resourceManager.loadFromAssetsTxt(Gdx.files.internal("assets.txt"));
-        } catch (Exception e) {
-            CommonConstants.LOGGER.error("Failed to load assets.txt", e);
-        }
+
     }
 
     @Override
@@ -106,14 +110,19 @@ public class ServerPlatform extends GamePlatform {
         return new UUID(msb, lsb);
     }
 
-    @SuppressWarnings({"DuplicateBranchesInSwitch", "ConstantValue"})
     @Override
     public boolean isFeatureSupported(PlatformFeature platformFeature) {
-        return switch (platformFeature) {
-            case JsInterop -> true;
-            case ClassLoading -> true;
-            case JsBytecode -> true;
-        };
+        return false;
+    }
+
+    @Override
+    public void load(ResourceManager resourceManager) {
+        scriptLoader.reload(resourceManager);
+    }
+
+    @Override
+    public <T> List<T> createSyncList() {
+        return new CopyOnWriteArrayList<>();
     }
 
     @Override
@@ -164,32 +173,33 @@ public class ServerPlatform extends GamePlatform {
 
     @Override
     public Optional<Mod> getMod(String id) {
-        IMod iMod = IXeoxLoader.get().getMod(id);
-        if (iMod == null) {
-            XeoxMod mod = this.mods.get(id);
-            if (mod != null) {
-                return Optional.of(mod);
-            }
-            return Optional.empty();
+        IMod mod = IXeoxLoader.get().getMod(id);
+        if (mod != null) {
+            XeoxMod value = new XeoxMod(mod);
+            this.mods.put(id, value);
+            return Optional.of(value);
         }
-        return Optional.of(new XeoxMod(iMod));
+        return Optional.empty();
+
     }
 
     @Override
     public boolean isModLoaded(String id) {
-        return IXeoxLoader.get().getMod(id) != null || this.mods.containsKey(id);
+        return IXeoxLoader.get().isModLoaded(id);
     }
 
     @Override
     public Collection<? extends Mod> getMods() {
-        return new ArrayList<>(this.mods.values());
+        var list = new ArrayList<Mod>();
+        list.addAll(IXeoxLoader.get().getMods().stream().map(container -> this.mods.computeIfAbsent(container.modId(), v -> new XeoxMod(container))).collect(Collectors.toList()));
+        return list;
     }
 
     @Override
     public void initMods() {
         CommonConstants.LOGGER.info("Initializing mods...");
 
-        IXeoxLoader.get().invokeEntrypoints("common", ModInitializer.class, ModInitializer::onInitialize);
+        IXeoxLoader.get().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
         IXeoxLoader.get().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
     }
 
@@ -219,26 +229,12 @@ public class ServerPlatform extends GamePlatform {
 
             server.getResourceManager().importPackage(new FileHandle(new File(new URI(path))));
         } catch (Exception e) {
-            IPath path = IXeoxLoader.get().getMod(CommonConstants.NAMESPACE).filesystem().path("/");
+            IPath rootPath = IXeoxLoader.get().getMod(CommonConstants.NAMESPACE).filesystem().path("/");
             try {
-                server.getResourceManager().importPackage(new XeoxFileHandle(path));
+                server.getResourceManager().importPackage(new XeoxFileHandle(rootPath));
             } catch (IOException ex) {
-                CommonConstants.LOGGER.error("Failed to import resources!", ex);
-                throw new GdxRuntimeException("Quantum Voxel resources unavailable!");
+                throw new GdxRuntimeException("Failed to import resources!", ex);
             }
-        }
-    }
-
-    @Override
-    public void locateModResources() {
-        for (IMod mod : IXeoxLoader.get().getMods()) {
-            IPath path = mod.filesystem().path("/");
-            try {
-                QuantumServer.get().getResourceManager().importPackage(new XeoxFileHandle(path));
-            } catch (IOException ex) {
-                CommonConstants.LOGGER.error("Failed to import resources!", ex);
-            }
-            this.mods.put(mod.modId(), new XeoxMod(mod));
         }
     }
 }

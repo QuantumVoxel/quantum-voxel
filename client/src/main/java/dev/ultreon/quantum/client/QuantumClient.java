@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -60,7 +58,7 @@ import dev.ultreon.quantum.client.model.item.ItemModelRegistry;
 import dev.ultreon.quantum.client.model.model.JsonModelLoader;
 import dev.ultreon.quantum.client.multiplayer.MultiplayerData;
 import dev.ultreon.quantum.client.network.LoginClientPacketHandlerImpl;
-import dev.ultreon.quantum.client.network.system.ClientTcpConnection;
+import dev.ultreon.quantum.client.network.system.ClientWebSocketConnection;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.SkinManager;
 import dev.ultreon.quantum.client.registry.ClientSyncRegistries;
@@ -88,7 +86,6 @@ import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.debug.profiler.Profiler;
 import dev.ultreon.quantum.debug.timing.Timing;
-import dev.ultreon.quantum.di.DependencyContainer;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.Item;
@@ -155,18 +152,12 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     @SuppressWarnings("GDXJavaStaticResource")
     public static final Profiler PROFILER = new Profiler();
 
-    // Maximize offset for custom window border
-    public static final GridPoint2 MAXIMIZE_OFF = new GridPoint2(18, 0);
-
     // Constants
 
     // Maximum-scaled size before automatic resize.
     // This is used for the "Automatic" gui scale.
     private static final int MINIMUM_WIDTH = 550;
     private static final int MINIMUM_HEIGHT = 300;
-
-    // Zero, what else could it be? :thinking:
-    private static final GridPoint2 ZERO = new GridPoint2();
 
     // Client instance
     @UnknownNullability
@@ -204,7 +195,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public Vector3 detachedPos = new Vector3();
     public Vector2 detachedRot = new Vector2();
     public final ShapeRenderer shapeRenderer = new ShapeRenderer();
-    public AmbientOcclusion ambientOcclusion = DependencyContainer.getInstance().resolve(AmbientOcclusion.class);
+    public AmbientOcclusion ambientOcclusion = new AmbientOcclusion();
     public FrameBuffer targetFbo;
 
     ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
@@ -213,6 +204,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final Cursor normalCursor;
     private final Cursor clickCursor;
     private Cursor cursor0;
+
+    public final InputManager inputManager = new InputManager(this);
 
     /**
      * The clipboard for the game.
@@ -228,9 +221,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final AssetManager assetManager = new AssetManager(fileName -> new ResourceFileHandle(NamespaceID.parse(fileName)));
 
     // Window buttons
-    private final ControlButton closeButton;
-    private final ControlButton maximizeButton;
-    private final ControlButton minimizeButton;
+    final ControlButton closeButton;
+    final ControlButton maximizeButton;
+    final ControlButton minimizeButton;
 
     // Input
     public TouchPoint motionPointer = null;
@@ -242,9 +235,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final Map<String, ConfigScreenFactory> cfgScreenFactories = new HashMap<>();
 
     // Window vibrancy
-    private final boolean windowVibrancyEnabled = false;
     private final Rectangle gameBounds = new Rectangle();
-    private long lastCBPress;
+    long lastCBPress;
 
     // G3D model loader (libGDX 3D models)
     public final G3dModelLoader modelLoader;
@@ -281,9 +273,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final Texture libGDXLogoTex;
     private final Resizer resizer;
     private boolean showUltreonSplash = false;
-    private boolean showLibGDXSplash = true;
-    private VideoPlayer ultreonSplashVideo;
-    private VideoPlayer libgdxSplashVideo;
+    private boolean showLibGDXSplash = false;
+//    private final VideoPlayer ultreonSplashVideo;
+//    private final VideoPlayer libgdxSplashVideo;
 
     // File handles
     public FileHandle configDir;
@@ -320,7 +312,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public ShapeDrawer shapes;
     public Renderer renderer;
 
-    private float guiScale = this.calcMaxGuiScale();
+    float guiScale = this.calcMaxGuiScale();
 
     // Notifications
     public Notifications notifications = new Notifications(this);
@@ -342,14 +334,14 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public final PlayerInput playerInput = new PlayerInput();
 
     // Managers
-    private final TextureManager textureManager;
-    private final CubemapManager cubemapManager;
-    private final ResourceManager resourceManager;
-    private final SkinManager skinManager = new SkinManager();
-    private final MaterialManager materialManager;
-    private final ShaderProviderManager shaderProviderManager;
-    private final ShaderProgramManager shaderProgramManager;
-    private final TextureAtlasManager textureAtlasManager;
+    public final TextureManager textureManager;
+    public final CubemapManager cubemapManager;
+    public final ResourceManager resourceManager;
+    public final SkinManager skinManager = new SkinManager();
+    public final MaterialManager materialManager;
+    public final ShaderProviderManager shaderProviderManager;
+    public final ShaderProgramManager shaderProgramManager;
+    public final TextureAtlasManager textureAtlasManager;
 
     @HiddenNode
     public final FontManager fontManager = new FontManager();
@@ -401,16 +393,13 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     Texture windowTex;
 
     @ShowInNodeView
-    private final GameWindow window;
+    public final GameWindow window;
 
     // Frames and ticking
     private int currentTps;
-    private float tickTime = 0f;
     public float partialTick = 0f;
     public float frameTime = 0f;
     private int ticksPassed = 0;
-
-    double time = System.currentTimeMillis();
 
     // Debug
     public DebugOverlay debugGui;
@@ -450,12 +439,12 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final GridPoint2 offset = new GridPoint2(0, 0);
     private final GameInsets insets = new GameInsets(0, 0, 0, 0);
     private boolean hovered = false;
-    private int clicks;
-    private long lastPress;
+    int clicks;
+    long lastPress;
     private final RenderBufferSource renderBuffers = new RenderBufferSource();
     private int cachedWidth;
     private int cachedHeight;
-    private boolean debugOverlayShown = GamePlatform.get().isDevEnvironment();
+    private final boolean debugOverlayShown = GamePlatform.get().isDevEnvironment();
 
     // Misc
     GameEnvironment gameEnv;
@@ -474,6 +463,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private long lastClientTick;
     private long nextTpsCheck;
     private int targetWidth, targetHeight;
+    private long lastUnpause;
 
     /**
      * Initializer for the Quantum Voxel Client.
@@ -489,7 +479,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     QuantumClient(String[] argv) {
         super(QuantumClient.PROFILER);
 
-        VideoLoader.VideoParameter param = new VideoLoader.VideoParameter();
+        /*VideoLoader.VideoParameter param = new VideoLoader.VideoParameter();
         param.looping = false;
         param.volume = 1f;
         param.minFilter = TextureFilter.Linear;
@@ -525,7 +515,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             this.showLibGDXSplash = false;
             this.showUltreonSplash = true;
             libgdxSplashVideo.dispose();
-        });
+        });*/
 
         if (QuantumClient.instance != null)
             throw new AssertionError("Double Loading!");
@@ -573,9 +563,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         KnownFonts.addEmoji(font);
 
-        unifont = new GameFont(loadFontTTF(id("pixel_sans"), p -> {
-            p.size = 9;
-        }), Font.DistanceFieldType.STANDARD, 0, 0, 0, -1, true);
+        unifont = new GameFont(loadFontTTF(id("pixel_sans"), p -> p.size = 9), Font.DistanceFieldType.STANDARD, 0, 0, 0, -1, true);
         unifont.useIntegerPositions(true);
         unifont.setBoldStrength(0.33f);
         unifont.lineHeight = 9f;
@@ -643,7 +631,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.devWorld = QuantumClient.arguments.getFlags().contains("devWorld");
 
         // Create a new user
-        RpcHandler.enable();
+        GamePlatform.get().enableRpc();
 
         // Initialize ImGui if necessary
         this.imGui = GamePlatform.get().isImGuiSupported();
@@ -699,22 +687,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.maximizeButton = new ControlButton(ControlIcon.Maximize);
         this.minimizeButton = new ControlButton(ControlIcon.Minimize);
 
-        if (ClientConfiguration.skipSplashScreen.getValue()) {
-            this.startLoading();
-        }
-    }
-
-    private BitmapFont loadFontTTF(NamespaceID id) {
-        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(resource(id.mapPath(s -> "font/" + s + ".ttf")));
-        FreeTypeFontParameter param = new FreeTypeFontParameter();
-        param.minFilter = TextureFilter.Nearest;
-        param.magFilter = TextureFilter.Nearest;
-        param.characters = genUnicode();
-        param.kerning = false;
-        param.mono = false;
-        param.flip = false;
-        param.hinting = Hinting.None;
-        return fontGen.generateFont(param);
+//        if (ClientConfiguration.skipSplashScreen.getValue()) {
+        this.startLoading();
+//        }
     }
 
     private BitmapFont loadFontTTF(NamespaceID id, Consumer<FreeTypeFontParameter> config) {
@@ -960,7 +935,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         EventSystem.postDefault(new ClientLifecycleEvent.SetupModIcons());
 
-        CommonLoader resolve = DependencyContainer.getInstance().resolve(CommonLoader.class);
+        CommonLoader resolve = CommonLoader.get();
         resolve.init();
     }
 
@@ -1187,6 +1162,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public void resume() {
         if (this.screen instanceof PauseScreen && this.world != null) {
+            lastUnpause = System.currentTimeMillis();
+            Gdx.input.setCursorCatched(true);
             this.showScreen(null);
         }
     }
@@ -1243,7 +1220,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         // Handle null screen cases
         if (next == null) {
             Gdx.input.setCursorPosition(QuantumClient.get().getWidth() / 2, QuantumClient.get().getHeight() / 2);
-            this.setWindowTitle(TextObject.literal("Playing in a world!"));
+            this.window.setWindowTitle(TextObject.literal("Playing in a world!"));
             LOGGER.warn("Next screen is null, showing null screen");
             return cur == null || this.closeScreen(cur);
         }
@@ -1268,7 +1245,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (next == null) {
             LOGGER.warn("Next screen is null, cancelling");
             Gdx.input.setCursorPosition(QuantumClient.get().getWidth() / 2, QuantumClient.get().getHeight() / 2);
-            this.setWindowTitle(TextObject.literal("Playing in a world!"));
+            this.window.setWindowTitle(TextObject.literal("Playing in a world!"));
             return false; // The next screen is null, cancelling.
         }
 
@@ -1289,7 +1266,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         KeyAndMouseInput.setCursorCaught(false);
 
         // Update window title
-        this.setWindowTitle(this.screen.getTitle());
+        this.window.setWindowTitle(this.screen.getTitle());
 
         return true;
     }
@@ -1350,6 +1327,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public void render() {
         int backBufferWidth = getWidth();
         int backBufferHeight = getHeight();
+        if (backBufferHeight <= 0 || backBufferWidth <= 0) return; // We don't need to render to a zero buffer.
+
         if (targetWidth != backBufferWidth || targetHeight != backBufferHeight || targetFbo == null) {
             if (targetFbo != null) targetFbo.dispose();
             targetWidth = backBufferWidth;
@@ -1358,102 +1337,12 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             targetFbo.getColorBufferTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         }
 
+        // Render to the target framebuffer
         targetFbo.begin();
 
         // Handle music based on world and screen state
         try {
-            if (world != null) {
-                if (screen == null) {
-                    // If in web platform and cursor not caught, show pause screen
-                    if (!Gdx.input.isCursorCatched() && GamePlatform.get().isWeb()) {
-                        showScreen(new PauseScreen());
-                        MusicManager.get().pause();
-                    } else {
-                        MusicManager.get().resume();
-                        MusicManager.get().update();
-                    }
-                } else {
-                    MusicManager.get().pause();
-                }
-            } else {
-                MusicManager.get().stop();
-            }
-
-            // Handle memory connection updates for web platform
-            IConnection<ClientPacketHandler, ServerPacketHandler> connection1 = connection;
-            if (connection1 instanceof MemoryConnection) {
-                MemoryConnection<ClientPacketHandler, ServerPacketHandler> connection2 = (MemoryConnection<ClientPacketHandler, ServerPacketHandler>) connection1;
-                if (GamePlatform.get().isWeb()) {
-                    connection2.update();
-                    connection2.getOtherSide().update();
-                }
-            }
-
-            float deltaTime = Gdx.graphics.getDeltaTime();
-
-            // Handle window resize if dimensions changed
-            if (this.cachedWidth != this.getWidth() || this.cachedHeight != this.getHeight()) {
-                this.cachedWidth = this.getWidth();
-                this.cachedHeight = this.getHeight();
-                this.resize(this.getWidth(), this.getHeight());
-            }
-
-            // Set OpenGL viewport
-            Gdx.gl.glViewport(0, 0, this.getWidth(), this.getHeight());
-
-            // Clean up any pending disposables
-            Disposable disposable;
-            while ((disposable = this.disposalQueue.poll()) != null) {
-                try {
-                    cleanUp(disposable);
-                } catch (Exception e) {
-                    QuantumClient.crash(new Throwable("Failed to dispose " + disposable + " during render", e));
-                }
-            }
-
-            try {
-                // Update profiler
-                QuantumClient.PROFILER.update();
-
-                // Update debug GUI if enabled
-                if (this.debugGui != null && !this.loading) {
-                    if (this.isShowDebugHud()) this.debugGui.updateProfiler();
-                    this.debugGui.update();
-                }
-
-                // Do main rendering
-                try (var ignored = PROFILER.start("render")) {
-                    this.doRender(deltaTime);
-                }
-                this.renderer.actuallyEnd();
-            } catch (OutOfMemoryError e) {
-                // Try to free memory and show the OOM screen
-                System.gc();
-                try {
-                    if (this.integratedServer != null) {
-                        this.integratedServer.shutdownNow();
-                        this.remove(integratedServer);
-                        this.integratedServer = null;
-                    }
-
-                    if (this.worldRenderer != null) {
-                        this.worldRenderer.dispose();
-                    }
-                    System.gc();
-
-                    this.showScreen(new OutOfMemoryScreen());
-                } catch (OutOfMemoryError | Exception t) {
-                    QuantumClient.crash(t);
-                }
-            } catch (Exception t) {
-                QuantumClient.crash(t);
-            }
-
-            // Disable face culling
-            Gdx.gl.glDisable(GL_CULL_FACE);
-
-            // Finish rendering
-            renderer.finish();
+            doRender();
         } finally {
             // End the frame
             targetFbo.end();
@@ -1469,6 +1358,101 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             spriteBatch.draw(targetFbo.getColorBufferTexture(), 0, 0, targetWidth, targetHeight);
             spriteBatch.end();
         }
+    }
+
+    private void doRender() {
+        if (world != null) {
+            if (screen == null) {
+                // If in web platform and cursor not caught, show pause screen
+                if (!Gdx.input.isCursorCatched() && GamePlatform.get().isWeb() && lastUnpause + 1000 < System.currentTimeMillis()) {
+                    showScreen(new PauseScreen());
+                    MusicManager.get().pause();
+                } else {
+                    MusicManager.get().resume();
+                    MusicManager.get().update();
+                }
+            } else {
+                MusicManager.get().pause();
+            }
+        } else {
+            MusicManager.get().stop();
+        }
+
+        // Handle memory connection updates for web platform
+        IConnection<ClientPacketHandler, ServerPacketHandler> connection1 = connection;
+        if (connection1 instanceof MemoryConnection) {
+            MemoryConnection<ClientPacketHandler, ServerPacketHandler> connection2 = (MemoryConnection<ClientPacketHandler, ServerPacketHandler>) connection1;
+            if (GamePlatform.get().isWeb()) {
+                connection2.update();
+                connection2.getOtherSide().update();
+            }
+        }
+
+        float deltaTime = Gdx.graphics.getDeltaTime();
+
+        // Handle window resize if dimensions changed
+        if (this.cachedWidth != this.getWidth() || this.cachedHeight != this.getHeight()) {
+            this.cachedWidth = this.getWidth();
+            this.cachedHeight = this.getHeight();
+            this.resize(this.getWidth(), this.getHeight());
+        }
+
+        // Set OpenGL viewport
+        Gdx.gl.glViewport(0, 0, this.getWidth(), this.getHeight());
+
+        // Clean up any pending disposables
+        Disposable disposable;
+        while ((disposable = this.disposalQueue.poll()) != null) {
+            try {
+                cleanUp(disposable);
+            } catch (Exception e) {
+                QuantumClient.crash(new Throwable("Failed to dispose " + disposable + " during render", e));
+            }
+        }
+
+        try {
+            // Update profiler
+            QuantumClient.PROFILER.update();
+
+            // Update debug GUI if enabled
+            if (this.debugGui != null && !this.loading) {
+                if (this.isShowDebugHud()) this.debugGui.updateProfiler();
+                this.debugGui.update();
+            }
+
+            // Do main rendering
+            try (var ignored = PROFILER.start("render")) {
+                this.doRender(deltaTime);
+            }
+            this.renderer.actuallyEnd();
+        } catch (OutOfMemoryError e) {
+            // Try to free memory and show the OOM screen
+            System.gc();
+            try {
+                if (this.integratedServer != null) {
+                    this.integratedServer.shutdownNow();
+                    this.remove(integratedServer);
+                    this.integratedServer = null;
+                }
+
+                if (this.worldRenderer != null) {
+                    this.worldRenderer.dispose();
+                }
+                System.gc();
+
+                this.showScreen(new OutOfMemoryScreen());
+            } catch (OutOfMemoryError | Exception t) {
+                QuantumClient.crash(t);
+            }
+        } catch (Exception t) {
+            QuantumClient.crash(t);
+        }
+
+        // Disable face culling
+        Gdx.gl.glDisable(GL_CULL_FACE);
+
+        // Finish rendering
+        renderer.finish();
     }
 
     /**
@@ -1816,10 +1800,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private void renderLibGDXSplash(Renderer renderer) {
         try (var ignored = QuantumClient.PROFILER.start("libgdxSplash")) {
             // Initialize splash screen timing and play sound on the first render
-            if (!this.libgdxSplashVideo.isPlaying())
-                this.libgdxSplashVideo.play();
-            libgdxSplashVideo.update();
-            videoTexture = this.libgdxSplashVideo.getTexture();
+//            if (!this.libgdxSplashVideo.isPlaying())
+//                this.libgdxSplashVideo.play();
+//            libgdxSplashVideo.update();
+//            videoTexture = this.libgdxSplashVideo.getTexture();
 
             // Clear screen to black
             ScreenUtils.clear(0, 0, 0, 1, true);
@@ -1852,10 +1836,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private void renderUltreonSplash(Renderer renderer) {
         try (var ignored = QuantumClient.PROFILER.start("ultreonSplash")) {
             // Initialize splash screen timing and play sound on the first render
-            if (!this.ultreonSplashVideo.isPlaying())
-                this.ultreonSplashVideo.play();
-            ultreonSplashVideo.update();
-            videoTexture = this.ultreonSplashVideo.getTexture();
+//            if (!this.ultreonSplashVideo.isPlaying())
+//                this.ultreonSplashVideo.play();
+//            ultreonSplashVideo.update();
+//            videoTexture = this.ultreonSplashVideo.getTexture();
 
             // Clear screen to black
             ScreenUtils.clear(0, 0, 0, 1, true);
@@ -1920,7 +1904,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             if (this.nextTpsCheck < System.currentTimeMillis()) {
                 this.currentTps = this.ticksPassed;
                 this.ticksPassed = 0;
-                this.tickTime = 0;
                 nextTpsCheck = System.currentTimeMillis() + 1000L;
             }
         } finally {
@@ -1935,7 +1918,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         if (this.activity != this.oldActivity) {
             this.oldActivity = this.activity;
 
-            RpcHandler.newActivity(this.activity);
+            GamePlatform.get().setActivity(activity);
         }
     }
 
@@ -1988,16 +1971,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.minimizeButton.render(renderer, 0);
 
         this.window.update();
-    }
-
-    /**
-     * Gets the window offset.
-     *
-     * @return the window offset.
-     */
-    private GridPoint2 getWindowOffset() {
-        if (window.isMaximized()) return MAXIMIZE_OFF;
-        return ZERO;
     }
 
     /**
@@ -2642,6 +2615,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      *
      * @return the resource manager.
      */
+    @Deprecated
     public ResourceManager getResourceManager() {
         return this.resourceManager;
     }
@@ -2982,7 +2956,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public void startIntegratedServer() {
         // Connect to the local server and unwrap the connection object
-        var mem = ClientTcpConnection.connectToLocalServer().unwrap();
+        var mem = ClientWebSocketConnection.connectToLocalServer().unwrap();
         this.connection = mem;
         MemoryConnectionContext.set(mem);
 
@@ -3014,7 +2988,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Establish connection to the server
         String[] split = location.split(":");
-        this.connection = ClientTcpConnection.connectToServer(split[0], Integer.parseInt(split[1]), () -> {
+        this.connection = ClientWebSocketConnection.connectToServer(this, location, () -> {
             var conn = this.connection;
             if (conn == null) return;
 
@@ -3466,6 +3440,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      *
      * @return the cubemap manager.
      */
+    @Deprecated
     public CubemapManager getCubemapManager() {
         return cubemapManager;
     }
@@ -3475,131 +3450,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      *
      * @return whether the window vibrancy is enabled.
      */
+    @Deprecated
     public boolean isWindowVibrancyEnabled() {
-        return windowVibrancyEnabled;
-    }
-
-    /**
-     * Checks if a mouse button is pressed.
-     *
-     * @param mouseX the mouse X coordinate.
-     * @param mouseY the mouse Y coordinate.
-     * @param button the button.
-     * @return whether the button is pressed.
-     */
-    public boolean mousePress(int mouseX, int mouseY, int button) {
-        if (mouseX < 0 || mouseY < 0 || mouseX > getWidth() || mouseY > getHeight()) return false;
-
-        Screen scr = screen;
-        if (scr != null) {
-            interactScreen(mouseX, mouseY, scr);
-        }
-
-        this.lastPress = System.currentTimeMillis();
-
-        // Close, maximize, and minimize buttons
-        if (isCustomBorderShown() && mouseY < 44 && button == Input.Buttons.LEFT) {
-            if (closeButton.isWithinBounds(mouseX - 18, mouseY - 22))
-                return closeButton.mousePress(mouseX - 18, mouseY - 22, button);
-            if (maximizeButton.isWithinBounds(mouseX - 18, mouseY - 22))
-                return maximizeButton.mousePress(mouseX - 18, mouseY - 22, button);
-            if (minimizeButton.isWithinBounds(mouseX - 18, mouseY - 22))
-                return minimizeButton.mousePress(mouseX - 18, mouseY - 22, button);
-
-            if (this.lastCBPress - System.currentTimeMillis() + 1000L > 0) {
-                lastCBPress = 0;
-                window.setResizable(true);
-                if (isMac) {
-                    window.maximize();
-                } else {
-                    if (window.isMaximized())
-                        window.restore();
-                    else
-                        window.maximize();
-                }
-            } else {
-                this.window.setDragging(true);
-            }
-            this.lastCBPress = System.currentTimeMillis();
-            return true;
-        }
-
-        // Handle mouse press events for the current screen
-        if (scr != null) {
-            GridPoint2 mouse = getMousePos();
-            scr.mousePress((int) (mouse.x / guiScale), (int) (mouse.y / guiScale), button);
-        }
-
-        return false;
-    }
-
-    /**
-     * Handles mouse release events.
-     *
-     * @param mouseX the mouse X coordinate.
-     * @param mouseY the mouse Y coordinate.
-     * @param button the button.
-     * @return whether the button was released.
-     */
-    public boolean mouseRelease(int mouseX, int mouseY, int button) {
-        // Check if the mouse is outside the window
-        if (mouseX < 0 || mouseY < 0 || mouseX > getWidth() || mouseY > getHeight()) return false;
-
-        Screen scr = screen;
-        if (scr != null) {
-            interactScreen(Integer.MIN_VALUE, Integer.MIN_VALUE, scr);
-        }
-
-        // Scale mouse coordinates
-        mouseX /= 2;
-        mouseY /= 2;
-
-        // Close, maximize, and minimize buttons
-        if (isCustomBorderShown() && mouseY < 44) {
-            closeButton.mouseRelease(mouseX, mouseY, button);
-            maximizeButton.mouseRelease(mouseX, mouseY, button);
-            minimizeButton.mouseRelease(mouseX, mouseY, button);
-            if (closeButton.isWithinBounds(mouseX, mouseY))
-                this.window.close();
-            if (maximizeButton.isWithinBounds(mouseX, mouseY)) {
-                if (!this.window.isMaximized()) this.window.maximize();
-                else this.window.restore();
-            }
-            if (minimizeButton.isWithinBounds(mouseX, mouseY))
-                this.window.minimize();
-
-            this.window.setDragging(false);
-        }
-
-        // Handle mouse release events for the current screen
-        if (scr != null) {
-            GridPoint2 mouse = getMousePos();
-            if (lastPress - System.currentTimeMillis() < 1000L) {
-                clicks++;
-            } else {
-                clicks = 1;
-            }
-
-            EventSystem.postDefault(new InputEvent.MouseClicked(button, mouse.x, mouse.y, clicks));
-            scr.mouseClick((int) (mouse.x / guiScale), (int) (mouse.y / guiScale), button, clicks);
-            scr.mouseRelease((int) (mouse.x / guiScale), (int) (mouse.y / guiScale), button);
-        }
-
-        return false;
-    }
-
-    /**
-     * Sets the title of the game window.
-     *
-     * @param title The title of the game window. If null or blank, the default title will be used.
-     */
-    public void setWindowTitle(TextObject title) {
-        String text = title == null ? null : title.getText();
-        if (text != null && !text.isBlank()) {
-            this.window.setTitle(String.format("Quantum Voxel %s - %s", QuantumClient.getGameVersion().split("\\+")[0], text));
-            return;
-        }
-        this.window.setTitle(String.format("Quantum Voxel %s", QuantumClient.getGameVersion().split("\\+")[0]));
+        return GamePlatform.get().getWindowVibrancy();
     }
 
     /**
@@ -3641,7 +3494,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         CommonConstants.LOGGER.info("Shutting down RPC handler");
-        RpcHandler.disable();
+        GamePlatform.get().disableRpc();
 
         LOGGER.info("Shutting down Quantum Client");
         Gdx.app.exit();
@@ -3708,7 +3561,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
     }
 
-    private void interactScreen(int screenX, int screenY, Screen scr) {
+    void interactScreen(int screenX, int screenY, Screen scr) {
         if (scr != null) {
             if (screenX < 0 || screenY < 0 || screenX > getWidth() || screenY > getHeight()) {
                 if (hovered) {

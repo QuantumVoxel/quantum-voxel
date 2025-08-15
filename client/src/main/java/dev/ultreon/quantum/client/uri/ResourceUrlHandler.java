@@ -37,7 +37,7 @@ public class ResourceUrlHandler extends URLStreamHandlerProvider {
                         if (quantumClient == null)
                             throw new IOException("Connection opened before game initialization");
 
-                        this.resourceManager = quantumClient.getResourceManager();
+                        this.resourceManager = quantumClient.resourceManager;
 
                         if (this.resourceManager == null)
                             throw new IOException("Connection opened before game initialization");

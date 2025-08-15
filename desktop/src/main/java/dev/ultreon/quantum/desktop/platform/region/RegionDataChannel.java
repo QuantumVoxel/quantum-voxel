@@ -1,4 +1,6 @@
-package dev.ultreon.quantum.world.data;
+package dev.ultreon.quantum.desktop.platform.region;
+
+import com.badlogic.gdx.files.FileHandle;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -15,11 +17,11 @@ public class RegionDataChannel {
     private final BitSet usedSectors = new BitSet();
     private final Map<Integer, Integer> chunkSectorMap = new HashMap<>();
     private final RandomAccessFile file;
-    private final File target;
+    private final FileHandle target;
 
-    public RegionDataChannel(File target) throws IOException {
+    public RegionDataChannel(FileHandle target) throws IOException {
         this.target = target;
-        this.file = new RandomAccessFile(target, "rw");
+        this.file = new RandomAccessFile(target.file(), "rw");
         usedSectors.set(0, HEADER_SECTORS); // Reserve header
     }
 
@@ -153,7 +155,7 @@ public class RegionDataChannel {
     // Demo
     public static void main(String[] args) throws IOException {
         File file = new File("chunks4096.dat");
-        RegionDataChannel cf = new RegionDataChannel(file);
+        RegionDataChannel cf = new RegionDataChannel(new FileHandle(file));
 
         for (int i = 0; i < 4096; i++) {
             cf.writeChunk(i, testData(200 + i % 100));
@@ -162,7 +164,7 @@ public class RegionDataChannel {
         cf.writeSectorReferenceMap();
         cf.close();
 
-        RegionDataChannel reader = new RegionDataChannel(file);
+        RegionDataChannel reader = new RegionDataChannel(new FileHandle(file));
         reader.readSectorReferenceMap();
 
         byte[] data = reader.readChunk(4095, 200 + 4095 % 100);
@@ -197,7 +199,7 @@ public class RegionDataChannel {
         return getChunkData(index);
     }
 
-    public File getTarget() {
+    public FileHandle getTarget() {
         return target;
     }
 }

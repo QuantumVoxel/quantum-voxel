@@ -23,7 +23,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHandler extends PacketHandler> implements IConnection<OurHandler, TheirHandler> {
@@ -33,15 +32,15 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     private PacketData<OurHandler> ourPacketData;
     private PacketData<TheirHandler> theirPacketData;
-    private PacketStage stage;
     private boolean readOnly;
 
-    private final List<PacketInstance<@NotNull Packet<? extends TheirHandler>>> sendQueue = new CopyOnWriteArrayList<>();
-    private final List<@NotNull Packet<? extends OurHandler>> receiveQueue = new CopyOnWriteArrayList<>();
+    private final List<PacketInstance<@NotNull Packet<? extends TheirHandler>>> sendQueue = GamePlatform.get().createSyncList();
+    private final List<@NotNull Packet<? extends OurHandler>> receiveQueue = GamePlatform.get().createSyncList();
     private boolean loggingIn = true;
     protected boolean connected = false;
     private boolean closed;
     private final RegistryHandle handle;
+    private PacketStage stage;
 
     public MemoryConnection(@Nullable MemoryConnection<TheirHandler, OurHandler> otherSide, Executor executor, @NotNull Env env, RegistryHandle handle) {
         this.handle = handle;
@@ -108,7 +107,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             return;
         }
 
-        ArrayList<PacketInstance<Packet<? extends TheirHandler>>> instance;
+        ArrayList<PacketInstance<@NotNull Packet<? extends TheirHandler>>> instance;
         synchronized (sendQueue) {
             if (sendQueue.isEmpty()) return;
             instance = new ArrayList<>(sendQueue);
@@ -151,7 +150,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
                 }
             });
         } catch (IOException e) {
-            for (PacketInstance<Packet<? extends TheirHandler>> packetInstance : instance) {
+            for (PacketInstance<@NotNull Packet<? extends TheirHandler>> packetInstance : instance) {
                 PacketListener listener = packetInstance.listener();
                 if (listener != null) {
                     listener.onFailure();
@@ -161,7 +160,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getMessage());
             if (!GamePlatform.get().isWeb()) throw new RuntimeException(e);
         } catch (Throwable e) {
-            for (PacketInstance<Packet<? extends TheirHandler>> packetInstance : instance) {
+            for (PacketInstance<@NotNull Packet<? extends TheirHandler>> packetInstance : instance) {
                 PacketListener listener = packetInstance.listener();
                 if (listener != null) {
                     listener.onFailure();
@@ -233,11 +232,6 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     @Override
     public boolean isLoggingIn() {
         return loggingIn;
-    }
-
-    @Override
-    public PacketStage getStage() {
-        return stage;
     }
 
     @Override
@@ -329,31 +323,14 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             throw new IllegalStateException("Cannot start connection without the other side");
         }
 
-        // Ensure connection is marked as connected
-        this.connected = true;
-        
-        // Initialize packet data for initial stage if not already set
-        if (this.ourPacketData == null) {
-            this.ourPacketData = this.getOurData(PacketStages.LOGIN);
-        }
-        
-        if (this.theirPacketData == null) {
-            this.theirPacketData = this.getTheirData(PacketStages.LOGIN);
-        }
-        
-        // Ensure other side is also connected
-        if (otherSide != null && !otherSide.isConnected()) {
-            otherSide.connected = true;
-        }
-        
-        CommonConstants.LOGGER.info("Memory connection started");
+        // TODO: Implement
     }
 
     @Override
     public void moveTo(PacketStage stage, OurHandler handler) {
+        this.stage = stage;
         this.ourPacketData = this.getOurData(stage);
         this.theirPacketData = this.getTheirData(stage);
-        this.stage = stage;
 
         if (stage == PacketStages.IN_GAME) {
             loggingIn = false;
@@ -404,5 +381,10 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     public PacketData<TheirHandler> getTheirPacketData() {
         return theirPacketData;
+    }
+
+    @Override
+    public PacketStage getStage() {
+        return stage;
     }
 }

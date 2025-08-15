@@ -3,7 +3,6 @@ package dev.ultreon.quantum.scripting;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CommonLoader;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.di.DependencyContainer;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.Resource;
 import dev.ultreon.quantum.resources.ResourceCategory;
@@ -70,7 +69,7 @@ public class ScriptLoader implements Closeable, ErrorReporter {
 
     public void evaluate(NamespaceID location) {
         try {
-            ResourceManager contentResources = DependencyContainer.getInstance().resolve(CommonLoader.class).getContentResources();
+            ResourceManager contentResources = CommonLoader.get().getContentResources();
             Resource resource = contentResources.getResource(location);
             if (resource == null) {
                 error("Failed to load script " + location.toString() + ": Resource not found", location.toString(), 1, null, 0);
