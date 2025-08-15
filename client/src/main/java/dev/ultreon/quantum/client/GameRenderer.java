@@ -13,7 +13,6 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.DevFlag;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.event.EventSystem;
@@ -31,7 +30,6 @@ import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
-import dev.ultreon.quantum.client.render.pipeline.RenderPipeline;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
@@ -40,7 +38,6 @@ import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.World;
-import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -276,8 +273,7 @@ public class GameRenderer implements Disposable {
 
     /**
      * Renders the world with the given blur scale (for when a screen is open) and delta time.
-     * This uses the {@link RenderPipeline} to render the world.
-     * 
+     *
      * @param deltaTime The time elapsed since the last frame.
      */
     void renderWorld(float deltaTime) {

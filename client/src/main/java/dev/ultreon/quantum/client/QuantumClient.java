@@ -26,6 +26,7 @@ import com.badlogic.gdx.video.VideoPlayerCreator;
 import com.badlogic.gdx.video.assets.VideoLoader;
 import com.github.tommyettinger.textra.Font;
 import com.github.tommyettinger.textra.KnownFonts;
+import de.damios.guacamole.gdx.graphics.NestableFrameBuffer;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.*;
@@ -196,7 +197,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public Vector2 detachedRot = new Vector2();
     public final ShapeRenderer shapeRenderer = new ShapeRenderer();
     public AmbientOcclusion ambientOcclusion = new AmbientOcclusion();
-    public FrameBuffer targetFbo;
+    public NestableFrameBuffer targetFbo;
 
     ManualCrashOverlay crashOverlay; // MANUALLY_INITIATED_CRASH
 
@@ -1333,31 +1334,35 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             if (targetFbo != null) targetFbo.dispose();
             targetWidth = backBufferWidth;
             targetHeight = backBufferHeight;
-            targetFbo = new FrameBuffer(Pixmap.Format.RGBA8888, targetWidth, targetHeight, true);
+            targetFbo = new NestableFrameBuffer(Pixmap.Format.RGBA8888, targetWidth, targetHeight, true);
             targetFbo.getColorBufferTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         }
 
         // Render to the target framebuffer
-        targetFbo.begin();
+        if (GamePlatform.get().isShowingImGui())
+            targetFbo.begin();
 
         // Handle music based on world and screen state
-        try {
-            doRender();
-        } finally {
-            // End the frame
-            targetFbo.end();
-        }
+        if (GamePlatform.get().isShowingImGui())
+            try {
+                doRender();
+            } finally {
+                // End the frame
+                targetFbo.end();
+            }
+        else doRender();
 
         // If the ImGui flag is true, render the ImGui.
-        if (this.imGui) {
+        if (GamePlatform.get().isShowingImGui()) {
             GamePlatform.get().renderImGui();
-        } else {
-            // Otherwise, render the target FBO
-            ScreenUtils.clear(0, 0, 0, 0);
-            spriteBatch.begin();
-            spriteBatch.draw(targetFbo.getColorBufferTexture(), 0, 0, targetWidth, targetHeight);
-            spriteBatch.end();
         }
+    }
+
+    private void renderTargetBuffer() {
+        ScreenUtils.clear(0, 0, 0, 0);
+        spriteBatch.begin();
+        spriteBatch.draw(targetFbo.getColorBufferTexture(), 0, 0, targetWidth, targetHeight);
+        spriteBatch.end();
     }
 
     private void doRender() {

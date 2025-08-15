@@ -665,7 +665,10 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public boolean isImGuiSupported() {
         IXeoxLoader iXeoxLoader = IXeoxLoader.get();
-        return isWindows() && iXeoxLoader != null && iXeoxLoader.isDevEnvironment();
+        if (iXeoxLoader == null) {
+            return false;
+        }
+        return isWindows() && iXeoxLoader.isDevEnvironment();
     }
 
     @Override
