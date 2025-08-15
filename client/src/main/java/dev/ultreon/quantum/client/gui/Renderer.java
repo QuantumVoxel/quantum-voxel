@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Disposable;
 import com.github.tommyettinger.textra.Font;
 import com.github.tommyettinger.textra.Layout;
+import de.damios.guacamole.gdx.graphics.NestableFrameBuffer;
 import dev.ultreon.libs.commons.v0.Anchor;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
@@ -80,8 +81,8 @@ public class Renderer implements Disposable {
     private int scissorOffsetY;
     private boolean blurred;
 
-    private FrameBuffer blurTargetA = GamePlatform.get().isWeb() ? null : new FrameBuffer(Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), false);
-    private FrameBuffer blurTargetB = GamePlatform.get().isWeb() ? null : new FrameBuffer(Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), false);
+    private FrameBuffer blurTargetA = GamePlatform.get().isWeb() ? null : new NestableFrameBuffer(Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), false);
+    private FrameBuffer blurTargetB = GamePlatform.get().isWeb() ? null : new NestableFrameBuffer(Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), false);
 
     public static final int FBO_SIZE = 1024;
 
@@ -3103,103 +3104,103 @@ public class Renderer implements Disposable {
 
     @ApiStatus.Experimental
     public void blurred(float overlayOpacity, float radius, boolean grid, int guiScale, Runnable block) {
-        if (GamePlatform.get().isLowPowerDevice() || !ClientConfiguration.blurEnabled.getValue() || this.blurred) {
+//        if (GamePlatform.get().isLowPowerDevice() || !ClientConfiguration.blurEnabled.getValue() || this.blurred) {
             block.run();
             return;
-        }
-
-        this.blurred = true;
-        try {
-
-            if (blurTargetA != null) blurTargetA.dispose();
-            if (blurTargetB != null) blurTargetB.dispose();
-
-            blurTargetA = new FrameBuffer(Format.RGBA8888, client.getWidth(), client.getHeight(), false);
-            blurTargetB = new FrameBuffer(Format.RGBA8888, client.getWidth(), client.getHeight(), false);
-
-            TextureRegion fboRegion = new TextureRegion(blurTargetA.getColorBufferTexture());
-
-            //Start rendering to an offscreen color buffer
-            blurTargetA.begin();
-            Gdx.gl.glViewport(0, 0, client.getWidth(), client.getHeight());
-            clearColor(0x00000000);
-            clear();
-
-            //before rendering, ensure we are using the default shader
-            batch.setShader(null);
-
-            batch.flush();
-
-            //render the batch contents to the offscreen buffer
-            this.flush();
-
-            block.run();
-
-            //finish rendering to the offscreen buffer
-            batch.flush();
-
-            //finish rendering to the offscreen buffer
-            blurTargetA.end();
-            Gdx.gl.glViewport(0, 0, client.getWidth(), client.getWidth());
-
-            //now let's start blurring the offscreen image
-            batch.setShader(blurShader);
-
-            //since we never called batch.end(), we should still be drawing
-            //which means are blurShader should now be in use
-
-            // set the shader uniforms
-            blurShader.setUniformf("iBlurDirection", 1f, 0f);
-            blurShader.setUniformf("iResolution", QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
-            blurShader.setUniformf("iBlurRadius", radius / guiScale);
-            blurShader.setUniformf("iTime", iTime);
-
-            //our first blur pass goes to target B
-            blurTargetB.begin();
-            Gdx.gl.glViewport(0, 0, client.getWidth(), client.getHeight());
-            clear();
-
-            //we want to render FBO target A into target B
-            fboRegion.setTexture(blurTargetA.getColorBufferTexture());
-
-            //draw the scene to target B with a horizontal blur effect
-            this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-            batch.draw(fboRegion, 0, 0);
-
-            //flush the batch before ending the FBO
-            batch.flush();
-
-            //finish rendering target B
-            blurTargetB.end();
-            Gdx.gl.glViewport(0, 0, client.getWidth(), client.getHeight());
-
-            //now we can render to the screen using the vertical blur shader
-
-            //update the blur only along Y-axis
-            blurShader.setUniformf("iBlurDirection", 0f, 1f);
-
-            //update the resolution of the blur along Y-axis
-            blurShader.setUniformf("iResolution", QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
-
-            //update the Y-axis blur radius
-            blurShader.setUniformf("radius", radius);
-
-            //draw target B to the screen with a vertical blur effect
-            fboRegion.setTexture(blurTargetB.getColorBufferTexture());
-            this.batch.setColor(1f, 1f, 1f, overlayOpacity);
-            batch.draw(fboRegion, 0, 0, client.getWidth() * client.getGuiScale(), client.getHeight() * client.getGuiScale());
-
-            //reset to default shader without blurs
-            batch.setShader(null);
-
-            this.flush();
-
-            this.batch.setColor(1, 1, 1, 1);
-            this.batch.setColor(1f, 1f, 1f, 1f);
-        } finally {
-            this.batch.setColor(1, 1, 1, 1);
-            this.blurred = false;
-        }
+//        }
+//
+//        this.blurred = true;
+//        try {
+//
+//            if (blurTargetA != null) blurTargetA.dispose();
+//            if (blurTargetB != null) blurTargetB.dispose();
+//
+//            blurTargetA = new NestableFrameBuffer(Format.RGBA8888, client.getWidth(), client.getHeight(), false);
+//            blurTargetB = new NestableFrameBuffer(Format.RGBA8888, client.getWidth(), client.getHeight(), false);
+//
+//            TextureRegion fboRegion = new TextureRegion(blurTargetA.getColorBufferTexture());
+//
+//            //Start rendering to an offscreen color buffer
+//            blurTargetA.begin();
+//            Gdx.gl.glViewport(0, 0, client.getWidth(), client.getHeight());
+//            clearColor(0x00000000);
+//            clear();
+//
+//            //before rendering, ensure we are using the default shader
+//            batch.setShader(null);
+//
+//            batch.flush();
+//
+//            //render the batch contents to the offscreen buffer
+//            this.flush();
+//
+//            block.run();
+//
+//            //finish rendering to the offscreen buffer
+//            batch.flush();
+//
+//            //finish rendering to the offscreen buffer
+//            blurTargetA.end();
+//            Gdx.gl.glViewport(0, 0, client.getWidth(), client.getWidth());
+//
+//            //now let's start blurring the offscreen image
+//            batch.setShader(blurShader);
+//
+//            //since we never called batch.end(), we should still be drawing
+//            //which means are blurShader should now be in use
+//
+//            // set the shader uniforms
+//            blurShader.setUniformf("iBlurDirection", 1f, 0f);
+//            blurShader.setUniformf("iResolution", QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
+//            blurShader.setUniformf("iBlurRadius", radius / guiScale);
+//            blurShader.setUniformf("iTime", iTime);
+//
+//            //our first blur pass goes to target B
+//            blurTargetB.begin();
+//            Gdx.gl.glViewport(0, 0, client.getWidth(), client.getHeight());
+//            clear();
+//
+//            //we want to render FBO target A into target B
+//            fboRegion.setTexture(blurTargetA.getColorBufferTexture());
+//
+//            //draw the scene to target B with a horizontal blur effect
+//            this.batch.setColor(1f, 1f, 1f, overlayOpacity);
+//            batch.draw(fboRegion, 0, 0);
+//
+//            //flush the batch before ending the FBO
+//            batch.flush();
+//
+//            //finish rendering target B
+//            blurTargetB.end();
+//            Gdx.gl.glViewport(0, 0, client.getWidth(), client.getHeight());
+//
+//            //now we can render to the screen using the vertical blur shader
+//
+//            //update the blur only along Y-axis
+//            blurShader.setUniformf("iBlurDirection", 0f, 1f);
+//
+//            //update the resolution of the blur along Y-axis
+//            blurShader.setUniformf("iResolution", QuantumClient.get().getWidth(), QuantumClient.get().getHeight());
+//
+//            //update the Y-axis blur radius
+//            blurShader.setUniformf("radius", radius);
+//
+//            //draw target B to the screen with a vertical blur effect
+//            fboRegion.setTexture(blurTargetB.getColorBufferTexture());
+//            this.batch.setColor(1f, 1f, 1f, overlayOpacity);
+//            batch.draw(fboRegion, 0, 0, client.getWidth() * client.getGuiScale(), client.getHeight() * client.getGuiScale());
+//
+//            //reset to default shader without blurs
+//            batch.setShader(null);
+//
+//            this.flush();
+//
+//            this.batch.setColor(1, 1, 1, 1);
+//            this.batch.setColor(1f, 1f, 1f, 1f);
+//        } finally {
+//            this.batch.setColor(1, 1, 1, 1);
+//            this.blurred = false;
+//        }
     }
 
     public void resize(int width, int height) {

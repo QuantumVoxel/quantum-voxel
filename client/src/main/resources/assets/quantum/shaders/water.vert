@@ -36,13 +36,14 @@ void main() {
     vec3 position = a_position;
 
     // Distortion using only local coordinates and small offsets
-    float waveStrength = 0.1;
+    float waveStrength = 0.04;
     float waveSpeed = 1.5;
     float waveFrequency = 2.0;
 
     float phaseX = ((float(u_chunkPosition.x) * 16.0) + position.x) * waveFrequency + u_time * waveSpeed;
     float phaseZ = ((float(u_chunkPosition.z) * 16.0) + position.z) * waveFrequency + u_time * waveSpeed;
 
+    position.y -= 2.0 / 16.0;
     position.y -= waveStrength * 2.0;
     position.y += sin(phaseX) * waveStrength;
     position.y += cos(phaseZ) * waveStrength;
