@@ -61,7 +61,6 @@ public class GameRenderer implements Disposable {
     private float blurScale = 0.0f;
     private @Nullable Texture vignetteTex;
     private boolean disposed;
-    private final LineRenderer lineRenderer = new LineRenderer();
     private final float[] mouseVec = new float[2];
     private final Vector3 tmpV3 = new Vector3();
     private final Vec3f tmp3F1 = new Vec3f();
@@ -481,7 +480,6 @@ public class GameRenderer implements Disposable {
         if (disposed) return;
         disposed = true;
 
-        lineRenderer.dispose();
         if (vignetteTex != null) vignetteTex.dispose();
     }
 }
