@@ -837,26 +837,54 @@ extensions.configure<ButlerExtension>("butler") {
 
 val butlerPushWindows = tasks.register<PushTask>("butlerPushWindows") {
   dependsOn(tasks.build, ":launcher:packageWinX64")
-  binDirectory = file("$projectDir/launcher/build/construo/winX64/roast")
+  binDirectory = file("$projectDir/launcher/build/butler/windows")
   channel = "windows"
+
+  doFirst {
+    copy {
+      from("$projectDir/launcher/build/construo/winX64/roast")
+      into("$projectDir/build/butler/windows")
+    }
+  }
 }
 
 val butlerPushLinux = tasks.register<PushTask>("butlerPushLinux") {
   dependsOn(tasks.build, ":launcher:packageLinuxX64")
-  binDirectory = file("$projectDir/launcher/build/construo/linuxX64/roast")
+  binDirectory = file("$projectDir/launcher/build/butler/linux")
   channel = "linux"
+
+  doFirst {
+    copy {
+      from("$projectDir/launcher/build/construo/linuxX64/roast")
+      into("$projectDir/build/butler/linux")
+    }
+  }
 }
 
 val butlerPushMacX64 = tasks.register<PushTask>("butlerPushMacX64") {
   dependsOn(tasks.build, ":launcher:packageMacX64")
-  binDirectory = file("$projectDir/launcher/build/construo/macX64/roast")
+  binDirectory = file("$projectDir/launcher/build/butler/mac")
   channel = "mac"
+
+  doFirst {
+    copy {
+      from("$projectDir/launcher/build/construo/macX64/Quantum Voxel.app")
+      into("$projectDir/build/butler/mac")
+    }
+  }
 }
 
 val butlerPushMacM1 = tasks.register<PushTask>("butlerPushMacM1") {
   dependsOn(tasks.build, ":launcher:packageMacM1")
-  binDirectory = file("$projectDir/launcher/build/construo/macM1/roast")
+  binDirectory = file("$projectDir/launcher/build/butler/mac-m1")
   channel = "mac-m1"
+
+  doFirst {
+    copy {
+      from("$projectDir/launcher/build/construo/macM1/Quantum Voxel.app")
+      into("$projectDir/build/butler/mac-m1")
+    }
+  }
 }
 
 tasks.register("butlerPushAll") {
