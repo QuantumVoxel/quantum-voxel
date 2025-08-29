@@ -35,6 +35,7 @@ public final class ServerInfo {
         MapType data = new MapType();
         data.putString("name", this.name);
         data.putString("address", this.address);
+        data.putBoolean("secure", this.secure);
         return data;
     }
 
@@ -66,9 +67,11 @@ public final class ServerInfo {
 
     @Override
     public String toString() {
-        return "ServerInfo[" +
-               "name=" + name + ", " +
-               "address=" + address + ']';
+        if (this.secure) {
+            return String.format("wss://%s", this.address);
+        } else {
+            return String.format("ws://%s", this.address);
+        }
     }
 
 }

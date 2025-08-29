@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@ServerEndpoint("/server")
+@ServerEndpoint("/quantum-server")
 public class JavaWebSocketServer implements Networker {
     private final DedicatedServer server;
     private final Map<Session, ServerConnection> connections = new ConcurrentHashMap<>();

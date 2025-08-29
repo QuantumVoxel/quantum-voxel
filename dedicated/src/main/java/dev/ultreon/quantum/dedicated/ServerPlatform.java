@@ -111,6 +111,12 @@ public class ServerPlatform extends GamePlatform {
     }
 
     @Override
+    public Mod getGameMod() {
+        if (IXeoxLoader.get() == null) return GameMod.INSTANCE;
+        return new XeoxMod(IXeoxLoader.get().getMod(CommonConstants.NAMESPACE));
+    }
+
+    @Override
     public boolean isFeatureSupported(PlatformFeature platformFeature) {
         return false;
     }
@@ -173,6 +179,10 @@ public class ServerPlatform extends GamePlatform {
 
     @Override
     public Optional<Mod> getMod(String id) {
+        if (this.mods.containsKey(id)) {
+            return Optional.of(this.mods.get(id));
+        }
+        if (IXeoxLoader.get() == null) return Optional.empty();
         IMod mod = IXeoxLoader.get().getMod(id);
         if (mod != null) {
             XeoxMod value = new XeoxMod(mod);
@@ -199,12 +209,15 @@ public class ServerPlatform extends GamePlatform {
     public void initMods() {
         CommonConstants.LOGGER.info("Initializing mods...");
 
+        if (IXeoxLoader.get() == null) return;
+
         IXeoxLoader.get().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
         IXeoxLoader.get().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
     }
 
     @Override
     public boolean isDevEnvironment() {
+        if (IXeoxLoader.get() == null) return false;
         return IXeoxLoader.get().isDevEnvironment();
     }
 

@@ -59,7 +59,7 @@ public class Main {
 
             }, createConfig());
 
-            ModLoadingContext.withinContext(GamePlatform.get().getMod(CommonConstants.NAMESPACE).orElseThrow(), Main::initConfig);
+            ModLoadingContext.withinContext(GamePlatform.get().getGameMod(), Main::initConfig);
 
             setupMods();
 

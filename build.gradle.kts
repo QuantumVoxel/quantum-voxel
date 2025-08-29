@@ -796,8 +796,8 @@ tasks.register<Exec>("runServer") {
 
   // Combine classpaths manually
   val cp = files(
-    project(":desktop").configurations.runtimeClasspath.get().files,
-    project(":desktop").sourceSets.main.get().output
+    project(":dedicated").configurations.runtimeClasspath.get().files,
+    project(":dedicated").sourceSets.main.get().output
   )
 
   executable = javaToolchains.launcherFor {
@@ -808,18 +808,14 @@ tasks.register<Exec>("runServer") {
 
   doFirst {
     Paths.get(workingDir.path, "vmargs").toFile().writeText("""
-      -Xmx4g
-      -Xms4g
-      ${if ("Mac" in System.getProperty("os.name")) "-XstartOnFirstThread" else ""}
-      -Dfabric.development=true
-      -Dlog4j2.formatMsgNoLookups=true
-      -Dfabric.log.disableAnsi=false
-      -Dfabric.skipMcProvider=true
-      -Dfabric.zipfs.use_temp_file=false
-      -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
-      -cp "${cp.asPath}"
-      ${project.properties["serverMainClass"] ?: ""}
-      --gameDir=.
+    -Xmx4g
+    -Xms4g
+    ${if ("Mac" in System.getProperty("os.name")) "-XstartOnFirstThread" else ""}
+    -Dxeox.development=true
+    -Dlog4j2.formatMsgNoLookups=true
+    -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
+    -cp "${cp.asPath}"
+    dev.ultreon.xeox.impl.main.Main
     """.trimIndent())
   }
 

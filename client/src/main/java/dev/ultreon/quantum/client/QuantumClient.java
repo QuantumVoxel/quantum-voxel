@@ -2992,7 +2992,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.world = new ClientWorld(this, DimensionInfo.OVERWORLD);
 
         // Establish connection to the server
-        String[] split = location.split(":");
         this.connection = ClientWebSocketConnection.connectToServer(this, location, () -> {
             var conn = this.connection;
             if (conn == null) return;

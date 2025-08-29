@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.gui.screens;
 
 import com.badlogic.gdx.graphics.Color;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.ServerInfo;
 import dev.ultreon.quantum.client.gui.DialogBuilder;
@@ -40,12 +41,8 @@ public class MultiplayerScreen extends Screen {
         super.init();
 
         listPlatform = add(Platform.create());
-        listPlatform.setPos(0, 0);
-        listPlatform.setSize(200, size.height - 27);
 
         listButtonPlatform = add(Platform.create());
-        listButtonPlatform.setPos(0, size.height - 327);
-        listButtonPlatform.setSize(200, 30);
 
         selectionList = add(new SelectionList<>());
         selectionList.setPos(2, 0);
@@ -72,33 +69,30 @@ public class MultiplayerScreen extends Screen {
         client.localData.servers.forEach(info -> selectionList.entry(new ServerEntry(info)));
 
         platform = add(Platform.create());
-        platform.setPos(200 + (this.size.width - 200) / 2 - 55, this.size.height / 2 - 61);
-        platform.setSize(110, 122);
 
         joinButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.join"), 98));
-        joinButton.setPos(platform.getPos().x + 5, platform.getPos().y + 5);
         joinButton.withType(Button.Type.DARK_EMBED);
         joinButton.withCallback(this::joinServer);
         joinButton.disable();
 
         removeButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.remove"), 98));
-        removeButton.setPos(platform.getPos().x + 5, platform.getPos().y + 35);
         removeButton.withType(Button.Type.DARK_EMBED);
         removeButton.withCallback(this::removeServer);
 
         editButton = add(TextButton.of(TextObject.translation("quantum.screen.multiplayer.edit"), 98));
-        editButton.setPos(platform.getPos().x + 5, platform.getPos().y + 65);
         editButton.withType(Button.Type.DARK_EMBED);
         editButton.withCallback(this::editServer);
 
         backButton = add(TextButton.of(UITranslations.BACK, 98));
-        backButton.setPos(platform.getPos().x + 5, platform.getPos().y + 95);
         backButton.withType(Button.Type.DARK_EMBED);
         backButton.withCallback(this::back);
     }
 
     private void editServer(TextButton textButton) {
-        client.showScreen(new EditServerScreen(this, selectionList.getSelected(), server));
+        ServerEntry selected = selectionList.getSelected();
+        ServerInfo server = this.server;
+        if (selected == null || server == null) return;
+        client.showScreen(new EditServerScreen(this, selected, server));
     }
 
     private void removeServer(TextButton textButton) {
@@ -133,23 +127,24 @@ public class MultiplayerScreen extends Screen {
     public void resized(int width, int height) {
         super.resized(width, height);
 
-        listPlatform.setPos(0, 0);
+        listPlatform.setPos(getX(), getY());
         listPlatform.setSize(200, size.height - 30);
 
-        listButtonPlatform.setPos(0, size.height - 30);
-        listButtonPlatform.setSize(200, 30);
+        listButtonPlatform.setPos(0, size.height - 60);
+        listButtonPlatform.setSize(200, 60);
 
-        selectionList.setPos(2, 0);
+        selectionList.setPos(getX(), getY());
         selectionList.setSize(196, size.height - 30);
 
         addButton.setPos(5, this.size.height - 26);
 
         platform.setPos(200 + (this.size.width - 200) / 2 - 55, this.size.height / 2 - 47);
-        platform.setSize(110, 92);
+        platform.setSize(110, 127);
 
         joinButton.setPos(platform.getPos().x + 5, platform.getPos().y + 5);
-        removeButton.setPos(platform.getPos().x + 5, platform.getPos().y + 35);
-        backButton.setPos(platform.getPos().x + 5, platform.getPos().y + 65);
+        editButton.setPos(platform.getPos().x + 5, platform.getPos().y + 35);
+        removeButton.setPos(platform.getPos().x + 5, platform.getPos().y + 65);
+        backButton.setPos(platform.getPos().x + 5, platform.getPos().y + 95);
     }
 
     private void back(TextButton textButton) {
@@ -170,7 +165,9 @@ public class MultiplayerScreen extends Screen {
 
         try {
             this.client.serverInfo = selected.info;
-            this.client.connectToServer(selected.info.address());
+            String location = selected.info + "/quantum-server";
+            CommonConstants.LOGGER.info("Connecting to server: " + location);
+            this.client.connectToServer(location);
         } catch (Exception e) {
             QuantumClient.LOGGER.error("Can't connect to server", e);
         }
@@ -226,14 +223,19 @@ public class MultiplayerScreen extends Screen {
 
         private void validateServerIp(TextEntry caller) {
             var text = caller.getValue();
-            boolean matches = text.matches("[^:]+:\\d{1,5}(/[^@:]+)?");
+            boolean matches = text.matches("[^:]+(:\\d{1,5})?(/[^@:]+)?");
             if (!matches) {
                 this.addButton.isEnabled = false;
                 return;
             }
             var hostSplitOff = text.split(":", 2);
-            String[] portSplitOff = hostSplitOff[1].split("/", 2);
-            var port = Integer.parseInt(portSplitOff[0]);
+            int port;
+            if (hostSplitOff.length < 2) {
+                port = 443;
+            } else {
+                String[] portSplitOff = hostSplitOff[1].split("/", 2);
+                port = Integer.parseInt(portSplitOff[0]);
+            }
 
             if (port != 80 && port != 443 && !(port >= 1000 && port <= 65535)) {
                 this.addButton.isEnabled = false;
