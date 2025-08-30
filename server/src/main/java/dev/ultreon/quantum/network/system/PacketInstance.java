@@ -31,7 +31,7 @@ public final class PacketInstance<T extends @NotNull Packet<?>> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (PacketInstance) obj;
+        PacketInstance that = (PacketInstance) obj;
         return Objects.equals(this.packet, that.packet) &&
                Objects.equals(this.listener, that.listener);
     }

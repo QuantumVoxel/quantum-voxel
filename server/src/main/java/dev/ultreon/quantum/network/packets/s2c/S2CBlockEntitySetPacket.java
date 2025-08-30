@@ -19,8 +19,8 @@ public final class S2CBlockEntitySetPacket implements Packet<InGameClientPacketH
     }
 
     public static S2CBlockEntitySetPacket read(PacketIO buffer) {
-        var pos = buffer.readBlockVec();
-        var blockEntityId = buffer.readVarInt();
+        BlockVec pos = buffer.readBlockVec();
+        int blockEntityId = buffer.readVarInt();
 
         return new S2CBlockEntitySetPacket(pos, blockEntityId);
     }
@@ -56,7 +56,7 @@ public final class S2CBlockEntitySetPacket implements Packet<InGameClientPacketH
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CBlockEntitySetPacket) obj;
+        S2CBlockEntitySetPacket that = (S2CBlockEntitySetPacket) obj;
         return Objects.equals(this.pos, that.pos) &&
                this.blockEntityId == that.blockEntityId;
     }

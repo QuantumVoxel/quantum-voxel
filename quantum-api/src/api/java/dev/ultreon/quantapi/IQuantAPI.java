@@ -3,23 +3,25 @@ package dev.ultreon.quantapi;
 import dev.ultreon.quantapi.networking.api.INetwork;
 import dev.ultreon.quantapi.networking.api.INetworkFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.stream.Collectors;
 
 public interface IQuantAPI {
     static IQuantAPI get() {
         if (QuantAPIHolder.api != null) return QuantAPIHolder.api;
         ServiceLoader<IQuantAPI> serviceLoader = ServiceLoader.load(IQuantAPI.class);
-        List<ServiceLoader.Provider<IQuantAPI>> first = serviceLoader.stream().collect(Collectors.toList());
-
-        if (first.isEmpty())
+        List<IQuantAPI> implementations = new ArrayList<>();
+        for (IQuantAPI implementation : serviceLoader) {
+            implementations.add(implementation);
+        }
+        if (implementations == null)
             throw new IllegalStateException("No IQuantAPI implementation found!");
 
-        if (first.size() > 1)
+        if (implementations.size() > 1)
             throw new IllegalStateException("Multiple implementations of IQuantAPI found!");
 
-        QuantAPIHolder.api = first.get(0).get();
+        QuantAPIHolder.api = implementations.get(0);
         return QuantAPIHolder.api;
     }
 

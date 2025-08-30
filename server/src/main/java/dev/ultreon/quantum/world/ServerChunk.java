@@ -26,6 +26,7 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.NotThreadSafe;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -69,8 +70,8 @@ public final class ServerChunk extends Chunk {
             LOGGER.debug("Loading chunk at {}", pos);
         }
 
-        var storage = new PaletteStorage<>(CS_3, Blocks.AIR.getDefaultState());
-        var biomeStorage = new PaletteStorage<>(CS_2, world.getServer().getBiomes().getDefaultKey());
+        PaletteStorage<@NotNull BlockState> storage = new PaletteStorage<>(CS_3, Blocks.AIR.getDefaultState());
+        PaletteStorage<RegistryKey<Biome>> biomeStorage = new PaletteStorage<>(CS_2, world.getServer().getBiomes().getDefaultKey());
 
         MapType blockData = chunkData.getMap("Blocks");
         storage.load(blockData, BlockState::load);
@@ -241,7 +242,7 @@ public final class ServerChunk extends Chunk {
                 lastTracked = System.currentTimeMillis();
             }
 
-            blockEntities = List.copyOf(this.getBlockEntities());
+            blockEntities = new ArrayList<>(this.getBlockEntities());
         }
 
         for (BlockEntity blockEntity : blockEntities) {

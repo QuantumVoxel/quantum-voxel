@@ -285,7 +285,9 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     }
 
     public SelectionList<T> addEntries(Collection<? extends T> values) {
-        values.forEach(this::entry);
+        for (T value : values) {
+            entry(value);
+        }
         return this;
     }
 

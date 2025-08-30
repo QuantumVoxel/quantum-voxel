@@ -1,6 +1,5 @@
 package dev.ultreon.mixinprovider.mixin;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.mixinprovider.GdxRegistries;

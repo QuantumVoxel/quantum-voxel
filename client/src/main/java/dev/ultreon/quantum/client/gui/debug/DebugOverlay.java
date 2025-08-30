@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.client.ClientRegistries;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.debug.profiler.Profiler;
 import dev.ultreon.quantum.text.TextObject;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +40,7 @@ public class DebugOverlay {
     }
 
     public void nextPage() {
-        var page = this.page + 1;
+        int page = this.page + 1;
         if (!this.client.isShowDebugHud()) {
             page = 0;
             this.client.setShowDebugHud(true);
@@ -52,7 +53,7 @@ public class DebugOverlay {
     }
 
     public void prevPage() {
-        var page = this.page - 1;
+        int page = this.page - 1;
         if (!this.client.isShowDebugHud()) {
             page = ClientRegistries.DEBUG_PAGE.size() - 1;
             this.client.setShowDebugHud(true);
@@ -184,7 +185,7 @@ public class DebugOverlay {
     public void updateProfiler() {
         if (this.getPage() instanceof ProfilerDebugPage) {
             ProfilerDebugPage profilerPage = (ProfilerDebugPage) this.getPage();
-            var profiler = this.client.profiler;
+            Profiler profiler = this.client.profiler;
             profilerPage.profile = profiler.collect();
         }
     }

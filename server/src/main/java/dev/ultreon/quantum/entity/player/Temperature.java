@@ -103,7 +103,7 @@ public final class Temperature {
      * @since 0.1.0
      */
     public Range getType() {
-        var celsius = convertTo(TemperatureUnit.CELSIUS);
+        double celsius = convertTo(TemperatureUnit.CELSIUS);
         if (celsius >= 40.0) return Range.TOO_HOT; // This is >= 104 "F
         if (celsius >= 30.0) return Range.HOT; // This is >= 86 "F
         else if (celsius >= 22.0) return Range.WARM; // This is >= 71 °F
@@ -119,7 +119,7 @@ public final class Temperature {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        var that = (Temperature) o;
+        Temperature that = (Temperature) o;
         return Double.compare(that.temperature, temperature) == 0;
     }
 
@@ -160,18 +160,18 @@ public final class Temperature {
 
     private static double getTimeBasedTemp(ServerWorld world, int x, int z, double temperature) {
         // Get the time, used for temperature change over day.
-        var time = (int) (world.getTime() % 24000L);
+        int time = (int) (world.getTime() % 24000L);
 
         // Calculate temperature based on day.
         if (time > 15000) {
             // Night
-            var timeTempModifier = getNightTempSub(world, x, z, temperature);
+            double timeTempModifier = getNightTempSub(world, x, z, temperature);
 
             temperature -= timeTempModifier;
         } else if (time < 4000) {
             // Morning
-            var upRise = 1 - (double) time / 4000;
-            var timeTempModifier = getNightTempSub(world, x, z, temperature);
+            double upRise = 1 - (double) time / 4000;
+            double timeTempModifier = getNightTempSub(world, x, z, temperature);
 
             temperature -= timeTempModifier * upRise;
         } else if (time <= 11000) {
@@ -179,8 +179,8 @@ public final class Temperature {
             temperature += 0;
         } else {
             // Afternoon
-            var downFall = (time - 11000.0) / 4000.0;
-            var timeTempModifier = getNightTempSub(world, x, z, temperature);
+            double downFall = (time - 11000.0) / 4000.0;
+            double timeTempModifier = getNightTempSub(world, x, z, temperature);
 
             temperature -= timeTempModifier * downFall;
         }
@@ -188,10 +188,10 @@ public final class Temperature {
     }
 
     private static double getNightTempSub(ServerWorld world, int x, int z, double temperature) {
-        var funcA = temperature + 1;
-        var funcB = Mth.clamp(funcA, 0, 3);
-        var funcC = 2.5 - funcB;
-        var clamp = Mth.clamp(funcC, 0, 3);
+        double funcA = temperature + 1;
+        double funcB = Mth.clamp(funcA, 0, 3);
+        double funcC = 2.5 - funcB;
+        double clamp = Mth.clamp(funcC, 0, 3);
         double baseTemperature = getBiomeTemp(world, x, z);
         return clamp / 1.5 * ((Math.pow(Math.max(baseTemperature - 1.0, 0.1), 1.25)) / 2.0);
     }

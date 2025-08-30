@@ -130,7 +130,7 @@ public class Commands {
             }
         }
 
-        return List.copyOf(list);
+        return new ArrayList<>(list);
     }
 
     public static CommandRegistrant getCommand(String cmd) {

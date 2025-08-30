@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.teavm;
 
-import com.badlogic.gdx.Gdx;
 import org.teavm.jso.JSBody;
 import org.teavm.jso.browser.Window;
-import org.teavm.jso.core.JSError;
 import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLElement;
 

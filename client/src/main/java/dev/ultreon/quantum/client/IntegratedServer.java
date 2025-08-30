@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client;
 
 import java.io.IOException;
-import java.nio.channels.ClosedChannelException;
 import java.util.*;
 
 import com.badlogic.gdx.utils.GdxRuntimeException;
@@ -100,7 +99,7 @@ public class IntegratedServer extends QuantumServer {
             });
             return;
         }
-        var playerData = this.getStorage().<MapType>read("player.ubo");
+        MapType playerData = this.getStorage().<MapType>read("player.ubo");
         BlockVec spawnPoint = overworld.getSpawnPoint();
         player.setPosition(spawnPoint.d().add(0.5, 0.0, 0.5));
         player.loadWithWorldPos(playerData);
@@ -307,8 +306,6 @@ public class IntegratedServer extends QuantumServer {
 
         try {
             this.getNetworker().close();
-        } catch (ClosedChannelException e) {
-            // Ignore
         } catch (IOException e) {
             throw new GdxRuntimeException(e);
         }

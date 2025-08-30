@@ -254,7 +254,9 @@ public abstract class GameNode implements Disposable {
 
     public void clearChildren() {
         synchronized (children) {
-            children.forEach(GameNode::dispose);
+            for (GameNode child : children) {
+                child.dispose();
+            }
             children.clear();
         }
     }
@@ -280,7 +282,11 @@ public abstract class GameNode implements Disposable {
 
     public void clearComponents() {
         synchronized (components) {
-            components.forEach((type, value) -> value.onRemoved(this));
+            for (Map.Entry<Class<?>, Component<?>> entry : components.entrySet()) {
+                Class<?> type = entry.getKey();
+                Component<?> value = entry.getValue();
+                value.onRemoved(this);
+            }
             components.clear();
         }
     }

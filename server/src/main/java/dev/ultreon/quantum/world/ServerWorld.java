@@ -51,7 +51,6 @@ import dev.ultreon.quantum.world.loot.LootGenerator;
 import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.vec.*;
-import org.apache.commons.collections4.queue.SynchronizedQueue;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.*;
 
@@ -59,11 +58,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The ServerWorld class represents a server-side world.
@@ -79,9 +75,9 @@ public class ServerWorld extends World implements Audience {
     private final AsyncExecutor executor = new AsyncExecutor(Runtime.getRuntime().availableProcessors(), "World-Executor");
     private static long chunkUnloads;
 
-    private final Queue<ChunkVec> chunksToLoad = this.createSyncQueue();
-    private final Queue<ChunkVec> chunksToUnload = this.createSyncQueue();
-    private final Queue<Runnable> tasks = this.createSyncQueue();
+    private final List<ChunkVec> chunksToLoad = this.createSyncQueue();
+    private final List<ChunkVec> chunksToUnload = this.createSyncQueue();
+    private final List<Runnable> tasks = this.createSyncQueue();
 
     private int playTime;
     private final Set<RecordedChange> recordedChanges = Collections.synchronizedSet(new LinkedHashSet<>());
@@ -176,8 +172,8 @@ public class ServerWorld extends World implements Audience {
         return this.chunksToLoadCount;
     }
 
-    private <T> Queue<T> createSyncQueue() {
-        return SynchronizedQueue.synchronizedQueue(new ArrayDeque<>());
+    private <T> List<T> createSyncQueue() {
+        return Collections.synchronizedList(new ArrayList<>());
     }
 
     @Override
@@ -339,7 +335,7 @@ public class ServerWorld extends World implements Audience {
     }
 
     public void sendAllTracking(int x, int y, int z, Packet<? extends ClientPacketHandler> packet) {
-        for (var player : this.server.getPlayers()) {
+        for (ServerPlayer player : this.server.getPlayers()) {
             if (player.getWorld() != this) continue;
 
             if (player.isChunkActive(new BlockVec(x, y, z).chunk())) {
@@ -353,7 +349,7 @@ public class ServerWorld extends World implements Audience {
     }
 
     public void sendAllTrackingExcept(int x, int y, int z, Packet<? extends ClientPacketHandler> packet, @NotNull ServerPlayer except) {
-        for (var player : this.server.getPlayers()) {
+        for (ServerPlayer player : this.server.getPlayers()) {
             if (player == except) continue;
 
             if (player.getWorld() != this) continue;
@@ -415,12 +411,12 @@ public class ServerWorld extends World implements Audience {
         this.checkThread();
 
         // Calculate global and local chunk positions
-        var globalVec = new ChunkVec(x, y, z, ChunkVecSpace.WORLD);
-        var localVec = World.toLocalChunkVec(x, y, z);
+        ChunkVec globalVec = new ChunkVec(x, y, z, ChunkVecSpace.WORLD);
+        ChunkVec localVec = World.toLocalChunkVec(x, y, z);
 
         try {
             // Check if there's an existing chunk at the global position
-            var oldChunk = this.getChunk(globalVec);
+            ServerChunk oldChunk = this.getChunk(globalVec);
             if (!overwrite) {
                 Region regionAt = this.regionStorage.getRegionAt(globalVec);
                 if (regionAt == null) {
@@ -435,8 +431,8 @@ public class ServerWorld extends World implements Audience {
             }
 
             // Get or open the region at the global position
-            var region = this.getOrOpenRegionAt(globalVec);
-            var chunk = region.openChunk(globalVec);
+            Region region = this.getOrOpenRegionAt(globalVec);
+            Promise<@NotNull ServerChunk> chunk = region.openChunk(globalVec);
 
             return chunk.thenApply(serverChunk -> {
                 if (serverChunk.active) {
@@ -497,15 +493,15 @@ public class ServerWorld extends World implements Audience {
         this.checkThread();
 
         // Calculate global and local positions
-        var globalVec = new ChunkVec(x, y, z, ChunkVecSpace.WORLD);
-        var localVec = globalVec.regionLocal();
+        ChunkVec globalVec = new ChunkVec(x, y, z, ChunkVecSpace.WORLD);
+        ChunkVec localVec = globalVec.regionLocal();
 
         try {
             // Get or open the region at the global position
-            var region = this.getOrOpenRegionAt(globalVec);
+            Region region = this.getOrOpenRegionAt(globalVec);
 
             // Open the chunk at the local position within the region
-            var chunk = region.openChunkNow(localVec, globalVec);
+            ServerChunk chunk = region.openChunkNow(localVec, globalVec);
             if (chunk.active) {
                 throw new IllegalChunkStateException("Chunk is already active.");
             }
@@ -542,11 +538,11 @@ public class ServerWorld extends World implements Audience {
             }
         }
 
-        for (var entity : array) {
+        for (Entity entity : array) {
             entity.tick();
         }
 
-        var poll = this.tasks.poll();
+        Runnable poll = this.tasks.isEmpty() ? null : this.tasks.remove(0);
         if (poll != null) poll.run();
 
         this.regionStorage.tick();
@@ -564,16 +560,16 @@ public class ServerWorld extends World implements Audience {
     }
 
     private void pollChunkQueues() {
-        var unload = this.chunksToUnload.poll();
+        ChunkVec unload = this.chunksToUnload.isEmpty() ? null : this.chunksToUnload.remove(0);
         if (unload != null) {
             Debugger.log("Unloading chunk " + unload);
-            var region = this.regionStorage.getRegionAt(unload);
+            Region region = this.regionStorage.getRegionAt(unload);
             if (region != null && region.getActiveChunk(unload.regionLocal()) != null) {
                 this.unloadChunk(unload);
             }
         }
 
-        var load = this.chunksToLoad.poll();
+        ChunkVec load = this.chunksToLoad.remove(0);
         if (load != null) {
             this.loadChunk(load);
         }
@@ -633,7 +629,7 @@ public class ServerWorld extends World implements Audience {
 
         if (shouldStayLoaded(chunkVec)) return;
 
-        var region = this.regionStorage.getRegionAt(chunkVec);
+        Region region = this.regionStorage.getRegionAt(chunkVec);
         if (region == null) {
             if (DebugFlags.CHUNK_LOADER_DEBUG.isEnabled()) {
                 LOGGER.debug("Region is unloaded while unloading chunk " + chunkVec);
@@ -648,7 +644,7 @@ public class ServerWorld extends World implements Audience {
             return;
         }
 
-        var chunk = region.deactivate(localChunkVec);
+        ServerChunk chunk = region.deactivate(localChunkVec);
         if (chunk == null) {
             return;
         }
@@ -701,10 +697,10 @@ public class ServerWorld extends World implements Audience {
 
     public @Nullable ServerChunk getChunkNoLoad(ChunkVec pos) {
         // Get the region at the specified position
-        var region = this.getOrOpenRegionAt(pos);
+        Region region = this.getOrOpenRegionAt(pos);
 
         // Get the chunk from the region
-        var chunk = region.getChunk(pos.regionLocal());
+        ServerChunk chunk = region.getChunk(pos.regionLocal());
 
         // If the chunk is found, verify its position matches the expected position
         if (chunk != null && DebugFlags.CHUNK_LOADER_DEBUG.isEnabled()) {
@@ -731,10 +727,10 @@ public class ServerWorld extends World implements Audience {
     @Override
     public @NotNull ServerChunk getChunk(@NotNull ChunkVec globalVec) {
         // Get the region at the specified position
-        var region = this.getOrOpenRegionAt(globalVec);
+        Region region = this.getOrOpenRegionAt(globalVec);
 
         // Get the chunk from the region
-        var chunk = region.getChunk(globalVec.regionLocal());
+        ServerChunk chunk = region.getChunk(globalVec.regionLocal());
 
         // If the chunk is found, verify its position matches the expected position
         if (chunk != null && DebugFlags.CHUNK_LOADER_DEBUG.isEnabled()) {
@@ -764,8 +760,14 @@ public class ServerWorld extends World implements Audience {
     @Override
     public Collection<ServerChunk> getLoadedChunks() {
         synchronized (regionStorage.regions) {
-            var regions = this.regionStorage.regions.values();
-            return regions.stream().flatMap(value -> value.getChunks().stream()).collect(Collectors.toList());
+            Collection<Region> regions = this.regionStorage.regions.values();
+            List<ServerChunk> list = new ArrayList<>();
+            for (Region value : regions) {
+                for (ServerChunk serverChunk : value.getChunks()) {
+                    list.add(serverChunk);
+                }
+            }
+            return list;
         }
     }
 
@@ -828,7 +830,7 @@ public class ServerWorld extends World implements Audience {
     @Override
     public void playSound(@NotNull SoundEvent sound, double x, double y, double z) {
         float range = sound.getRange();
-        var playersWithinRange = this.getPlayersWithinRange(x, y, z, range);
+        List<ServerPlayer> playersWithinRange = this.getPlayersWithinRange(x, y, z, range);
         for (Player player : playersWithinRange) {
             player.playSound(sound, (float) ((range - player.getPosition(tmp3D).dst(x, y, z)) / range));
         }
@@ -847,18 +849,18 @@ public class ServerWorld extends World implements Audience {
      * @return the players within the chance of the XYZ coordinates.
      */
     public List<ServerPlayer> getPlayersWithinRange(double x, double y, double z, float range) {
-        var withinRange = new ArrayList<ServerPlayer>();
+        ArrayList<ServerPlayer> withinRange = new ArrayList<>();
 
         // Assuming you have a list of Player objects with their coordinates
-        var allPlayers = this.server.getPlayers();
+        Collection<ServerPlayer> allPlayers = this.server.getPlayers();
 
-        for (var player : allPlayers) {
-            var playerX = player.getX();
-            var playerY = player.getY();
-            var playerZ = player.getZ();
+        for (ServerPlayer player : allPlayers) {
+            double playerX = player.getX();
+            double playerY = player.getY();
+            double playerZ = player.getZ();
 
             // Calculate the distance between the given point (x, y, z) and the player's coordinates
-            var distance = Math.sqrt(Math.pow(playerX - x, 2) + Math.pow(playerY - y, 2) + Math.pow(playerZ - z, 2));
+            double distance = Math.sqrt(Math.pow(playerX - x, 2) + Math.pow(playerY - y, 2) + Math.pow(playerZ - z, 2));
 
             // Check if the distance is within the specified chance
             if (distance <= range) {
@@ -896,8 +898,8 @@ public class ServerWorld extends World implements Audience {
         //<editor-fold defaultstate="collapsed" desc="<<Loading: entities.ubo>>">
         if (this.storage.exists("entities.ubo")) {
             ListType<MapType> entityListData = this.storage.read("entities.ubo");
-            for (var entityData : entityListData.getValue()) {
-                var entity = Entity.loadFrom(this, entityData);
+            for (MapType entityData : entityListData.getValue()) {
+                Entity entity = Entity.loadFrom(this, entityData);
                 this.entitiesById.put(entity.getId(), entity);
             }
         }
@@ -951,14 +953,14 @@ public class ServerWorld extends World implements Audience {
         if (!silent) World.LOGGER.info("Saving world: " + dimPath.name());
 
         // Save entities data
-        var entitiesData = new ListType<MapType>();
+        ListType<MapType> entitiesData = new ListType<>();
 
         //noinspection GDXJavaUnsafeIterator
         Array<Entity> entityArray = this.entitiesById.values().toArray();
-        for (var entity : entityArray.toArray(Entity.class)) {
+        for (Entity entity : entityArray.toArray(Entity.class)) {
             if (entity instanceof Player) continue;
 
-            var entityData = entity.save(new MapType());
+            MapType entityData = entity.save(new MapType());
             entitiesData.add(entityData);
         }
         this.storage.write(entitiesData, "entities.ubo");
@@ -969,14 +971,14 @@ public class ServerWorld extends World implements Audience {
 
         // Save regions data
         synchronized (regionStorage.regions) {
-            for (var region : this.regionStorage.regions.values()) {
+            for (Region region : this.regionStorage.regions.values()) {
                 try {
                     if (region.isDirty())
                         this.saveRegion(region, false);
                 } catch (Exception e) {
                     World.LOGGER.warn("Failed to save region {}:", e, region.getPos());
                     synchronized (regionStorage.regions) {
-                        var remove = this.regionStorage.regions.remove(region.getPos());
+                        Region remove = this.regionStorage.regions.remove(region.getPos());
                         if (remove != region)
                             this.server.crash(new ValidationError("Removed region is not the region that got saved."));
                         region.dispose();
@@ -1061,14 +1063,14 @@ public class ServerWorld extends World implements Audience {
      * @return the region at the specified chunk position
      */
     private @NotNull Region getOrOpenRegionAt(ChunkVec chunkVec) {
-        var regionVec = chunkVec.region();
+        RegionVec regionVec = chunkVec.region();
 
         // Get the map of regions
         synchronized (regionStorage.regions) {
-            var regions = this.regionStorage.regions;
+            Map<RegionVec, Region> regions = this.regionStorage.regions;
 
             // Check if the region already exists at the calculated position
-            var oldRegion = regions.get(regionVec);
+            Region oldRegion = regions.get(regionVec);
             if (oldRegion != null) {
                 return oldRegion;
             }
@@ -1106,7 +1108,7 @@ public class ServerWorld extends World implements Audience {
      * @throws IOException If an I/O error occurs.
      */
     private @NotNull Region openRegion(int rx, int ry, int rz) throws IOException {
-        var fileHandle = this.storage.regionFile(rx, ry, rz);
+        FileHandle fileHandle = this.storage.regionFile(rx, ry, rz);
         return this.regionStorage.load(this, new RegionVec(rx, ry, rz), GamePlatform.get().openRegion(fileHandle));
     }
 
@@ -1192,7 +1194,7 @@ public class ServerWorld extends World implements Audience {
         this.checkThread();
         this.unloadChunk(globalVec);
         Region region = this.getOrOpenRegionAt(globalVec);
-        var localVec = World.toLocalChunkVec(globalVec);
+        ChunkVec localVec = World.toLocalChunkVec(globalVec);
         region.chunks.remove(localVec);
         region.chunkCount--;
         regionStorage.chunkCount--;
@@ -1270,12 +1272,16 @@ public class ServerWorld extends World implements Audience {
         }
     }
 
-    public Stream<Vec3d> getCavePointsFor(@NotNull ChunkVec vec) {
-        return getOrOpenRegionAt(vec).caveCache.stream().filter(vec3d -> {
+    public List<Vec3d> getCavePointsFor(@NotNull ChunkVec vec) {
+        List<Vec3d> list = new ArrayList<>();
+        for (Vec3d d : getOrOpenRegionAt(vec).caveCache) {
             BlockVec start = vec.start().regionLocal();
-            return vec3d.x >= start.x && vec3d.y >= start.y && vec3d.z >= start.z &&
-                    vec3d.x < start.x + CS && vec3d.y < start.y + CS && vec3d.z < start.z + CS;
-        });
+            if (d.x >= start.x && d.y >= start.y && d.z >= start.z &&
+                    d.x < start.x + CS && d.y < start.y + CS && d.z < start.z + CS) {
+                list.add(d);
+            }
+        }
+        return list;
     }
 
     public String executorStatus() {
@@ -1389,7 +1395,13 @@ public class ServerWorld extends World implements Audience {
          * @return all loaded chunks within the region.
          */
         public Collection<ServerChunk> getChunks() {
-            return this.chunks.values().stream().filter(chunk -> chunks.containsKey(chunk.vec)).collect(Collectors.toList());
+            List<ServerChunk> list = new ArrayList<>();
+            for (ServerChunk chunk : this.chunks.values()) {
+                if (chunks.containsKey(chunk.vec)) {
+                    list.add(chunk);
+                }
+            }
+            return list;
         }
 
         /**
@@ -1614,20 +1626,20 @@ public class ServerWorld extends World implements Audience {
 
             this.world.server.onChunkBuilt(ref.builtChunk);
 
-            var players = this.world.getServer().getPlayersInChunk(globalVec);
-            players.forEach(player -> {
+            Iterable<ServerPlayer> players = this.world.getServer().getPlayersInChunk(globalVec);
+            for (ServerPlayer player : players) {
                 try {
                     BlockVec globalTpPos = player.getBlockVec();
                     BlockVec localTpPos = globalTpPos.chunkLocal();
                     int x = localTpPos.getIntX();
                     int z = localTpPos.getIntZ();
                     Integer ascend = ref.builtChunk.ascend(x, (int) player.getY(), z);
-                    if (ascend == null) return;
+                    if (ascend == null) continue;
                     player.teleportTo(globalTpPos.getIntX(), ascend, globalTpPos.getIntZ());
                 } catch (Exception e) {
                     World.LOGGER.error("Failed to teleport player outside unloaded chunk:", e);
                 }
-            });
+            }
 
             if (ref.builtChunk == null) {
                 throw new IllegalChunkStateException("Chunk not built!");
@@ -1688,20 +1700,20 @@ public class ServerWorld extends World implements Audience {
 
         private @Nullable ServerChunk handleChunkBuildError(ChunkVec globalVec, ServerChunk builtChunk) {
             try {
-                var players = this.world.getServer().getPlayersInChunk(globalVec);
-                players.forEach(player -> {
+                Iterable<ServerPlayer> players = this.world.getServer().getPlayersInChunk(globalVec);
+                for (ServerPlayer player : players) {
                     try {
                         BlockVec globalTpVec = player.getBlockVec();
                         BlockVec localTpVec = globalTpVec.chunkLocal();
                         int x = localTpVec.getIntX();
                         int z = localTpVec.getIntZ();
                         Integer ascend = builtChunk.ascend(x, (int) player.getY(), z);
-                        if (ascend == null) return;
+                        if (ascend == null) continue;
                         player.teleportTo(globalTpVec.getIntX(), ascend, globalTpVec.getIntZ());
                     } catch (Exception e) {
                         World.LOGGER.error("Failed to teleport player outside unloaded chunk:", e);
                     }
-                });
+                }
 
                 if (!globalVec.equals(builtChunk.vec)) {
                     World.LOGGER.error(String.format("Failed to build chunk at {} as it was generated at {} instead of " + globalVec, globalVec, builtChunk.vec));
@@ -1718,7 +1730,7 @@ public class ServerWorld extends World implements Audience {
         private @NotNull ServerChunk buildChunk(ChunkVec globalVec) {
             if (globalVec.getSpace() != ChunkVecSpace.WORLD)
                 throw new IllegalArgumentException("Chunk vector must be in world space");
-            var chunk = new BuilderChunk(this.world, Thread.currentThread(), globalVec, this);
+            BuilderChunk chunk = new BuilderChunk(this.world, Thread.currentThread(), globalVec, this);
 
             synchronized (this) {
                 if (this.chunks.containsKey(globalVec.regionLocal()))
@@ -1726,7 +1738,7 @@ public class ServerWorld extends World implements Audience {
 
                 // Generate terrain using the terrain generator.
                 List<RecordedChange> changes;
-                changes = List.copyOf(world.recordedChanges);
+                changes = new ArrayList<>(world.recordedChanges);
 
                 if (!EventSystem.postCancelable(new WorldGenerationEvent.Generate(chunk, changes))) {
                     this.world.generator.generate(world, chunk, changes);
@@ -1772,7 +1784,7 @@ public class ServerWorld extends World implements Audience {
                 return this.generateChunk(globalVec);
             }
 
-            var loadedAt = loadedChunk.vec;
+            ChunkVec loadedAt = loadedChunk.vec;
             if (!loadedAt.equals(globalVec)) {
                 throw new IllegalChunkStateException(String.format("Chunk requested to load at %s got loaded at %s instead", globalVec, loadedAt));
             }
@@ -1784,7 +1796,7 @@ public class ServerWorld extends World implements Audience {
         public void tick() {
             List<ServerChunk> serverChunks;
             synchronized (this) {
-                serverChunks = List.copyOf(this.chunks.values());
+                serverChunks = new ArrayList<>(this.chunks.values());
             }
             for (ServerChunk chunk : serverChunks) {
                 chunk.tick();
@@ -1806,7 +1818,7 @@ public class ServerWorld extends World implements Audience {
 
             this.world.server.onChunkLoaded(loadedChunk);
 
-            var loadedAt = loadedChunk.vec;
+            ChunkVec loadedAt = loadedChunk.vec;
             if (!loadedAt.equals(globalVec)) {
                 throw new IllegalChunkStateException(String.format("Chunk requested to load at %s got loaded at %s instead", localVec, loadedAt));
             }
@@ -1900,23 +1912,28 @@ public class ServerWorld extends World implements Audience {
         @ApiStatus.Internal
         public void save(Region region, boolean dispose) throws IOException {
             synchronized (this.regions) {
-                var pos = region.pos();
+                RegionVec pos = region.pos();
 
                 Map<ChunkVec, ServerChunk> chunkMap = region.chunks;
                 region.world.server.onSaveEvent(SaveEventType.REGION_START, chunkMap.size());
 
                 // Write chunks to the region file.
-                var chunks = chunkMap.values().stream().filter(chunk -> !(chunk.original || !chunk.modified)).collect(Collectors.toList());
-                var idx = 0;
+                ArrayList<ServerChunk> chunks = new ArrayList<>();
+                for (ServerChunk serverChunk : chunkMap.values()) {
+                    if (!(serverChunk.original || !serverChunk.modified)) {
+                        chunks.add(serverChunk);
+                    }
+                }
+                int idx = 0;
                 CommonConstants.LOGGER.info("Saving {} chunks in region {}", chunks.size(), pos);
                 int errorCount = 0;
-                for (var chunk : chunks) {
+                for (ServerChunk chunk : chunks) {
                     region.world.server.onSaveEvent(SaveEventType.CHUNK_START);
                     try {
                         if (idx >= World.REGION_SIZE * World.REGION_SIZE * World.REGION_SIZE)
                             throw new IllegalArgumentException("Too many chunks in region!");
                         if (!chunk.modified || chunk.original) continue;
-                        var vec = World.toLocalChunkVec(chunk.vec);
+                        ChunkVec vec = World.toLocalChunkVec(chunk.vec);
                         region.channel.saveChunk(vec.x, vec.y, vec.z, chunk.save());
                         chunk.modified = false;
                         idx++;
@@ -1944,7 +1961,9 @@ public class ServerWorld extends World implements Audience {
 
         public void tick() {
             synchronized (regions) {
-                List.copyOf(this.regions.values()).forEach(Region::tick);
+                for (Region region : new ArrayList<>(this.regions.values())) {
+                    region.tick();
+                }
             }
         }
 
@@ -1958,11 +1977,11 @@ public class ServerWorld extends World implements Audience {
         public Region load(ServerWorld world, RegionVec regionVec, RegionChannelLike channel) throws IOException {
             // Read chunks from the region file.
             Map<ChunkVec, ServerChunk> chunkMap = new HashMap<>();
-            var region = new Region(world, regionVec, chunkMap, channel);
+            Region region = new Region(world, regionVec, chunkMap, channel);
 
             synchronized (this.regions) {
                 // Check if a region already exists, if so, then throw an error.
-                var oldRegion = this.regions.get(regionVec);
+                Region oldRegion = this.regions.get(regionVec);
                 if (oldRegion != null) {
                     throw new OverwriteError(String.format("Tried to overwrite region %s", regionVec));
                 }
@@ -1996,9 +2015,10 @@ public class ServerWorld extends World implements Audience {
 
         public void dispose() {
             synchronized (this.regions) {
-                List<Region> regions = new ArrayList<>();
-                regions.addAll(this.regions.values());
-                regions.forEach(Region::dispose);
+                List<Region> regions = new ArrayList<>(this.regions.values());
+                for (Region region : regions) {
+                    region.dispose();
+                }
                 this.regions.clear();
             }
         }

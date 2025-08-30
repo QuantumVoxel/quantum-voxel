@@ -4,7 +4,7 @@
     <module name="quantum-voxel.desktop.main" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="dev.ultreon.quantum.desktop.*" />
+        <option name="PATTERN" value="dev.ultreon.quantum.desktop.bridge.gen.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

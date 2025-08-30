@@ -34,7 +34,11 @@ public class ResourceCategory {
     }
 
     public void forEach(BiConsumer<NamespaceID, StaticResource> consumer) {
-        this.resourceMap.forEach(consumer);
+        for (Map.Entry<NamespaceID, StaticResource> entry : this.resourceMap.entrySet()) {
+            NamespaceID key = entry.getKey();
+            StaticResource value = entry.getValue();
+            consumer.accept(key, value);
+        }
     }
 
     public Set<NamespaceID> entries() {
@@ -46,6 +50,6 @@ public class ResourceCategory {
     }
 
     public List<StaticResource> resources() {
-        return List.copyOf(this.resourceMap.values());
+        return new ArrayList<>(this.resourceMap.values());
     }
 }

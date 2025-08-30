@@ -61,7 +61,7 @@ public final class GenericIcon implements Icon {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (GenericIcon) obj;
+        GenericIcon that = (GenericIcon) obj;
         return this.width == that.width &&
                this.height == that.height &&
                this.u == that.u &&

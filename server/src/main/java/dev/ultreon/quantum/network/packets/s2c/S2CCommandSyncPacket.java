@@ -16,7 +16,7 @@ public final class S2CCommandSyncPacket implements Packet<InGameClientPacketHand
     }
 
     public static S2CCommandSyncPacket read(PacketIO buffer) {
-        var commands = buffer.readList(buf -> buf.readString(64));
+        List<String> commands = buffer.readList(buf -> buf.readString(64));
 
         return new S2CCommandSyncPacket(commands);
     }
@@ -46,7 +46,7 @@ public final class S2CCommandSyncPacket implements Packet<InGameClientPacketHand
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CCommandSyncPacket) obj;
+        S2CCommandSyncPacket that = (S2CCommandSyncPacket) obj;
         return Objects.equals(this.commands, that.commands);
     }
 

@@ -10,9 +10,9 @@ import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.text.TextObject;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 public class LanguageScreen extends Screen {
     private Label titleLabel;
@@ -25,7 +25,11 @@ public class LanguageScreen extends Screen {
 
     @Override
     public void build(@NotNull GuiBuilder builder) {
-        List<Locale> locales = LanguageManager.INSTANCE.getLocales().stream().sorted((a, b) -> a.getDisplayLanguage().compareToIgnoreCase(b.getDisplayLanguage())).collect(Collectors.toList());
+        List<Locale> locales = new ArrayList<>();
+        for (Locale locale : LanguageManager.INSTANCE.getLocales()) {
+            locales.add(locale);
+            locales.sort((a, b) -> a.toString().compareToIgnoreCase(b.toString()));
+        }
 
         this.titleLabel = builder.add(Label.of(this.title)
                 .withAlignment(Alignment.CENTER)
@@ -64,8 +68,7 @@ public class LanguageScreen extends Screen {
             return;
         }
 
-        String text = locale.getDisplayLanguage(new Locale("en")) + " (" + locale.getDisplayCountry(new Locale("en")) + ")";
-        text += " - " + locale.getDisplayLanguage(locale) + " (" + locale.getDisplayCountry(locale) + ")";
+        String text = locale.getLanguage() + " (" + locale.getCountry() + ")";
 
         renderer.textCenter(text, this.list.getX() + this.list.getWidth() / 2f, y + 4f);
     }

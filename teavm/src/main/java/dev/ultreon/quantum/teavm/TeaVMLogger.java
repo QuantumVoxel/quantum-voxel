@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.teavm;
 
 import dev.ultreon.quantum.Logger;
-import org.teavm.jso.JSBody;
 
 public class TeaVMLogger implements Logger {
     private final String name;

@@ -106,7 +106,7 @@ public final class RegionVec extends Vec3i {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (RegionVec) obj;
+        RegionVec that = (RegionVec) obj;
         return this.x == that.x &&
                this.y == that.y &&
                this.z == that.z;

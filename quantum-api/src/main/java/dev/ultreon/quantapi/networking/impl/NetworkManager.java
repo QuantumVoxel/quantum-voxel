@@ -21,6 +21,8 @@ public class NetworkManager {
     }
 
     public static void init() {
-        NetworkManager.NETWORKS.values().forEach(Network::init);
+        for (Network network : NetworkManager.NETWORKS.values()) {
+            network.init();
+        }
     }
 }

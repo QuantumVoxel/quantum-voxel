@@ -19,7 +19,7 @@ public final class C2SPingPacket implements Packet<InGameServerPacketHandler> {
     }
 
     public static C2SPingPacket read(PacketIO buffer) {
-        var time = buffer.readLong();
+        long time = buffer.readLong();
 
         return new C2SPingPacket(time);
     }
@@ -49,7 +49,7 @@ public final class C2SPingPacket implements Packet<InGameServerPacketHandler> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (C2SPingPacket) obj;
+        C2SPingPacket that = (C2SPingPacket) obj;
         return this.time == that.time;
     }
 

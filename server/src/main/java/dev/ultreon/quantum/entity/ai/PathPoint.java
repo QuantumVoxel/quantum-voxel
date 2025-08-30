@@ -19,7 +19,7 @@ public final class PathPoint {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (PathPoint) obj;
+        PathPoint that = (PathPoint) obj;
         return Objects.equals(this.position, that.position) &&
                Objects.equals(this.motion, that.motion) &&
                Objects.equals(this.look, that.look);

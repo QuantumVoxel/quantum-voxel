@@ -56,7 +56,7 @@ public abstract class Network implements INetwork {
 
     @Override
     public <T extends Packet<T> & IClientEndpoint> void sendAll(T packet, ServerPlayer player) {
-        this.channel.sendToClients(List.copyOf(player.getWorld().getServer().getPlayers()), packet);
+        this.channel.sendToClients(new ArrayList<>(player.getWorld().getServer().getPlayers()), packet);
     }
 
     @Override

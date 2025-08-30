@@ -11,8 +11,6 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import dev.ultreon.libs.collections.v0.tables.HashTable;
-import dev.ultreon.libs.collections.v0.tables.Table;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.block.property.BlockDataEntry;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -29,6 +27,7 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Direction;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +40,6 @@ public class JsonModel implements BlockModel, ItemModel {
     public final Display display;
     private final NamespaceID id;
     private Model model;
-    private final Table<String, BlockDataEntry<?>, JsonModel> overrides;
     private static final Vector3 SCALE = new Vector3(0.0625f, 0.0625f, 0.0625f);
     private ModelInstance modelInstance;
     private BlockState block;
@@ -50,12 +48,11 @@ public class JsonModel implements BlockModel, ItemModel {
     private final Vector3 scale = new Vector3(1, 1.155f, 1);
     private ModelInstance instance;
 
-    public JsonModel(NamespaceID id, Map<String, NamespaceID> textureElements, List<ModelElement> modelElements, boolean ambientOcclusion, Display display, Table<String, BlockDataEntry<?>, JsonModel> overrides) {
+    public JsonModel(NamespaceID id, Map<String, NamespaceID> textureElements, List<ModelElement> modelElements, boolean ambientOcclusion, Display display) {
         this.textureElements = textureElements;
         this.modelElements = modelElements;
         this.ambientOcclusion = ambientOcclusion;
         this.display = display;
-        this.overrides = overrides;
         this.id = id;
     }
 
@@ -71,9 +68,9 @@ public class JsonModel implements BlockModel, ItemModel {
         return new JsonModel(
                 model.resourceId(),
                 elements,
-                List.of(
+                Arrays.asList(
                         new ModelElement(
-                                Map.of(
+                                dev.ultreon.quantum.MapUtils.of(
                                         Direction.UP, new FaceElement("#top", new UVs(0, 0, 16, 16), 0, 0, "up"),
                                         Direction.DOWN, new FaceElement("#bottom", new UVs(0, 0, 16, 16), 0, 0, "down"),
                                         Direction.NORTH, new FaceElement("#front", new UVs(0, 0, 16, 16), 0, 0, "north"),
@@ -88,8 +85,7 @@ public class JsonModel implements BlockModel, ItemModel {
                         )
                 ),
                 true,
-                new Display(model.pass() == null ? "opaque" : model.pass()),
-                new HashTable<>()
+                new Display(model.pass() == null ? "opaque" : model.pass())
         );
     }
 
@@ -201,10 +197,6 @@ public class JsonModel implements BlockModel, ItemModel {
             batch.end();
             Gdx.gl.glDepthMask(true);
         });
-    }
-
-    public Table<String, BlockDataEntry<?>, JsonModel> getOverrides() {
-        return this.overrides;
     }
 
     public void setBlock(BlockState block) {

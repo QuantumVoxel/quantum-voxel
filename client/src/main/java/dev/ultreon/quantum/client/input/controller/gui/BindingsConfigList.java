@@ -87,7 +87,7 @@
 //
 //        @NotNull
 //        public List<? extends Widget> children() {
-//            return List.of(this.widget, this.resetBtn);
+//            return Arrays.asList(this.widget, this.resetBtn);
 //        }
 //    }
 //}

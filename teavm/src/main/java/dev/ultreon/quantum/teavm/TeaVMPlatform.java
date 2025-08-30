@@ -52,7 +52,7 @@ public class TeaVMPlatform extends GamePlatform {
 
     @Override
     public Collection<Device> getGameDevices() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override
@@ -152,7 +152,7 @@ public class TeaVMPlatform extends GamePlatform {
 
     @Override
     public Collection<? extends Mod> getMods() {
-        return List.of(value.get());
+        return Arrays.asList(value.get());
     }
 
     @Override
@@ -315,4 +315,5 @@ public class TeaVMPlatform extends GamePlatform {
     public <T> List<T> createSyncList() {
         return new CopyOnWriteArrayList<>();
     }
+
 }

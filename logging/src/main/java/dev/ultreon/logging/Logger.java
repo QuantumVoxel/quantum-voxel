@@ -1,20 +1,14 @@
 package dev.ultreon.logging;
 
 import java.io.PrintStream;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 import static dev.ultreon.logging.AnsiColors.*;
 
 public class Logger {
-    private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
+//    private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
     private final LoggerManager manager;
     private final String name;
 
@@ -48,8 +42,8 @@ public class Logger {
 
     private void doLog(long time, LogLevel level, LogCategory category, String msg, Throwable exc, boolean fromReplay, boolean wasSuppressed) {
         StringBuilder sb = new StringBuilder();
-        String format = LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()).format(FORMAT);
-        sb.append(BLUE).append(format).append(" ");
+//        String format = LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()).format(FORMAT);
+//        sb.append(BLUE).append(format).append(" ");
         sb.append(colorFor(level)).append("[").append(Thread.currentThread().getName()).append("/").append(level).append("] ");
         sb.append(CYAN).append("(").append(name);
         if (category != null && category != LogCategory.DEFAULT) {
@@ -127,7 +121,7 @@ public class Logger {
 
     private static Collection<? extends StackTraceElement> removeLast(StackTraceElement[] stackTrace, StackTraceElement[] lastStack) {
         if (lastStack.length == 0) {
-            return List.of(stackTrace);
+            return Arrays.asList(stackTrace);
         }
 
         int i = 0;
@@ -145,7 +139,7 @@ public class Logger {
             i++;
         }
 
-        return List.of(stackTrace).subList(0, stackTrace.length - i);
+        return Arrays.asList(stackTrace).subList(0, stackTrace.length - i);
     }
 
     /**

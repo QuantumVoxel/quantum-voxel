@@ -1,8 +1,6 @@
 package dev.ultreon.xeox;
 
 import dev.ultreon.xeox.api.*;
-import dev.ultreon.xeox.impl.EntryPoint;
-import dev.ultreon.xeox.impl.IPermissionProvider;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
@@ -121,7 +119,7 @@ public class XeoxLoaderProvider {
                     mods.put(mod.modId(), newMod);
                 }
 
-                return List.copyOf(mods.values());
+                return new ArrayList<>(mods.values());
             }
 
             @Override

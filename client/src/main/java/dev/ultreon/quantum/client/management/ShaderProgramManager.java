@@ -8,8 +8,8 @@ import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -64,16 +64,18 @@ public class ShaderProgramManager implements Manager<ShaderProgram> {
 
     @Override
     public void reload(ReloadContext context) {
-        for (ShaderProgram shader : List.copyOf(this.programs.values())) {
+        for (ShaderProgram shader : new ArrayList<>(this.programs.values())) {
             context.submit(shader::dispose);
         }
 
         this.programs.clear();
 
-        this.factories.forEach((id, factory) -> {
+        for (Map.Entry<NamespaceID, Supplier<ShaderProgram>> entry : this.factories.entrySet()) {
+            NamespaceID id = entry.getKey();
+            Supplier<ShaderProgram> factory = entry.getValue();
             ShaderProgram program = factory.get();
             this.programs.put(id, program);
             context.submit(program::dispose);
-        });
+        }
     }
 }

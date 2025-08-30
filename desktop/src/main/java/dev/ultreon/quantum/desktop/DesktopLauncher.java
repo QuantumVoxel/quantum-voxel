@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.desktop;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
@@ -34,14 +33,12 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWNativeWin32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
@@ -92,7 +89,7 @@ public class DesktopLauncher {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
                 try {
-                    if (List.of(argv).contains("--studio")) {
+                    if (Arrays.asList(argv).contains("--studio")) {
                         LoggerFactory.getLogger("Quantum:Studio").error("Failed to launch game", e);
                         defaultUncaughtExceptionHandler.uncaughtException(t, e);
                         return;
@@ -133,7 +130,7 @@ public class DesktopLauncher {
     private static void launch(String[] args) {
         if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS
 
-        if (List.of(args).contains("--studio")) {
+        if (Arrays.asList(args).contains("--studio")) {
             Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
             config.useVsync(false);
             config.setForegroundFPS(0);
@@ -197,7 +194,7 @@ public class DesktopLauncher {
 
             @Override
             public Collection<Device> getGameDevices() {
-                return List.of();
+                return Arrays.asList();
             }
 
             @Override
@@ -271,7 +268,7 @@ public class DesktopLauncher {
         QuantumClient.logDebug();
 
         // Before initializing LibGDX or creating a window:
-        try (var ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: {}", description))) {
+        try (GLFWErrorCallback ignored = GLFW.glfwSetErrorCallback((error, description) -> QuantumClient.LOGGER.error("GLFW Error: {}", description))) {
             try {
                 new Lwjgl3Application(safeWrapper, DesktopLauncher.createConfig());
             } catch (ApplicationCrash e) {
@@ -396,28 +393,7 @@ public class DesktopLauncher {
         }
 
         private void setupMacIcon() {
-            if (!SharedLibraryLoader.isMac && Taskbar.isTaskbarSupported()) {
-                Taskbar taskbar = Taskbar.getTaskbar();
-
-                if (taskbar != null) {
-                    try {
-                        if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
-                            InputStream res = DesktopLauncher.class.getResourceAsStream("/icon.png");
-                            if (res != null) {
-                                taskbar.setIconImage(ImageIO.read(res));
-                            } else {
-                                LOGGER.warn("Failed to extract icon.png");
-                            }
-                        }
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    if (taskbar.isSupported(Taskbar.Feature.ICON_BADGE_TEXT)) {
-                        taskbar.setIconBadge("?");
-                    }
-                }
-            }
+            // No
         }
 
         @Override

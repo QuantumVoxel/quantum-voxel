@@ -12,9 +12,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Objects;
+import java.util.*;
 
 public class EnergyNode implements Capability<EnergyConnection>, Iterable<EnergyNode> {
     private EnergyConnection self = null;
@@ -100,7 +98,14 @@ public class EnergyNode implements Capability<EnergyConnection>, Iterable<Energy
     }
 
     public @NotNull Iterator<EnergyNode> iterator() {
-        return Arrays.asList(north, south, east, west, up, down).stream().filter(Objects::nonNull).iterator();
+        List<EnergyNode> nodes = Arrays.asList(north, south, east, west, up, down);
+        List<EnergyNode> result = new ArrayList<>();
+        for (EnergyNode node : nodes) {
+            if (node != null) {
+                result.add(node);
+            }
+        }
+        return result.iterator();
     }
 
     public void onRevalidate(EnergyNetwork energyNetwork) {

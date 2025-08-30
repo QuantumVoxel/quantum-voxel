@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ClientRecipeManager {
@@ -25,7 +24,7 @@ public class ClientRecipeManager {
 
     @SuppressWarnings("GDXJavaUnsafeIterator")
     public <T extends Recipe> void onPacket(S2CRecipeSyncPacket<T> packet) {
-        var namespaceIDRecipeMap = this.recipes.computeIfAbsent(packet.type(), k -> new ObjectMap<>());
+        ObjectMap<NamespaceID, Recipe> namespaceIDRecipeMap = this.recipes.computeIfAbsent(packet.type(), k -> new ObjectMap<>());
         for (ObjectMap.Entry<NamespaceID, ? extends T> entry : packet.recipes()) {
             namespaceIDRecipeMap.put(entry.key, entry.value);
         }
@@ -58,8 +57,8 @@ public class ClientRecipeManager {
     }
 
     public NamespaceID getId(RecipeType<?> type, Recipe recipe) {
-        var orDefault = recipes.getOrDefault(type, new ObjectMap<>());
-        var key = orDefault.findKey(recipe, false);
+        ObjectMap<NamespaceID, Recipe> orDefault = recipes.getOrDefault(type, new ObjectMap<>());
+        NamespaceID key = orDefault.findKey(recipe, false);
         if (key == null)
             throw new IllegalArgumentException("Fabricated recipe");
 

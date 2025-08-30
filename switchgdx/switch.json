@@ -1,0 +1,26 @@
+{
+  "mainClass": "dev.ultreon.quantum.switchgdx.SwitchLauncher",
+  "reflective": [
+    "dev.ultreon.entity.**",
+    "com.artemis.**"
+  ],
+  "nonOptimized": [
+    "dev.ultreon.entity.**",
+    "com.artemis.BaseSystem",
+    "com.artemis.utils.BitVector",
+    "com.artemis.utils.Bag",
+    "com.artemis.Aspect.Builder",
+    "com.artemis.WildBag",
+    "com.artemis.EntityEdit",
+    "com.artemis.EntityTransmuter.TransmuteOperation",
+    "com.artemis.ComponentRemover",
+    "com.artemis.ComponentTypeFactory.ComponentTypeListener",
+    "com.artemis.EntitySubscription",
+    "com.artemis.Component",
+    "com.artemis.Aspect",
+    "com.artemis.Entity"
+  ],
+  "useStackTraces": true,
+  "useLineNumbers": true,
+  "useValueChecks": true
+}

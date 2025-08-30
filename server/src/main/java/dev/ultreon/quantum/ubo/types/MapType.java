@@ -13,7 +13,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class MapType implements DataType<Map<String, DataType<?>>> {
     private Map<String, DataType<?>> obj;
@@ -499,7 +498,11 @@ public class MapType implements DataType<Map<String, DataType<?>>> {
 
     @Override
     public MapType copy() {
-        return new MapType(obj.entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().copy(), (a, b) -> b)));
+        Map<String, DataType<?>> map = new HashMap<>();
+        for (Entry<String, DataType<?>> entry : obj.entrySet()) {
+            map.put(entry.getKey(), entry.getValue().copy());
+        }
+        return new MapType(map);
     }
 
     public <R> Map<String, R> mapTo(Function<DataType<?>, R> mapper) {

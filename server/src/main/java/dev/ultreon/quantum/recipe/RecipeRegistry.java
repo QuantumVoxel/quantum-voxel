@@ -9,9 +9,8 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.PagedList;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("GDXJavaUnsafeIterator")
 public class RecipeRegistry<T extends Recipe> implements RegistryMap<NamespaceID, T> {
@@ -83,6 +82,12 @@ public class RecipeRegistry<T extends Recipe> implements RegistryMap<NamespaceID
     }
 
     public List<T> findRecipe(Menu menu) {
-        return Arrays.stream(this.registry.values().toArray().items).filter(t -> t.canCraft(menu)).collect(Collectors.toList());
+        List<T> list = new ArrayList<>();
+        for (T t : this.registry.values().toArray().items) {
+            if (t.canCraft(menu)) {
+                list.add(t);
+            }
+        }
+        return list;
     }
 }

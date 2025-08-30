@@ -110,7 +110,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
 
     public void removeGizmo(Gizmo gizmo) {
         String category = gizmo.category;
-        var gizmos = this.gizmos.get(category);
+        Array<Gizmo> gizmos = this.gizmos.get(category);
         if (gizmos != null) {
             gizmos.removeValue(gizmo, true);
         }

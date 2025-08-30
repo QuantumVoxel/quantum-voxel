@@ -13,7 +13,10 @@ import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.c2s.C2SRequestChunkLoadPacket;
+import dev.ultreon.quantum.network.server.ServerPacketHandler;
+import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -130,7 +133,7 @@ public class WorldLoadScreen extends Screen {
     }
 
     private void waitUntilLoggedIn() {
-        var connection = client.connection;
+        IConnection<ClientPacketHandler, ServerPacketHandler> connection = client.connection;
         if (loggedIn && client.player != null && connection != null && connection.isConnected()) {
             completeRun();
         } else {

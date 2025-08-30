@@ -23,7 +23,9 @@ public class LanguageRegistry {
      */
     @ApiStatus.Internal
     public static void doRegistration(Consumer<NamespaceID> consumer) {
-        LanguageRegistry.REGISTRY.forEach(consumer);
+        for (NamespaceID namespaceID : LanguageRegistry.REGISTRY) {
+            consumer.accept(namespaceID);
+        }
     }
 
     /**

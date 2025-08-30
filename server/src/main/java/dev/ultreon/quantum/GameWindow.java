@@ -124,7 +124,7 @@ public abstract class GameWindow {
      */
     public void setWindowTitle(TextObject title) {
         String text = title == null ? null : title.getText();
-        if (text != null && !text.isBlank()) {
+        if (text != null && !StringUtils.isBlank(text)) {
             setTitle(String.format("Quantum Voxel %s - %s", CommonConstants.getGameVersion().split("\\+")[0], text));
             return;
         }

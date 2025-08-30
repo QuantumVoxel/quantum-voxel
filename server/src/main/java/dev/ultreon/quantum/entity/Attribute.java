@@ -20,7 +20,7 @@ public final class Attribute {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (Attribute) obj;
+        Attribute that = (Attribute) obj;
         return Objects.equals(this.key, that.key);
     }
 

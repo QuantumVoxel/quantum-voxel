@@ -6,22 +6,19 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
-import dev.ultreon.quantum.client.gui.widget.components.UIComponent;
-import dev.ultreon.quantum.component.Component;
-import dev.ultreon.quantum.util.NamespaceID;
 import imgui.ImGui;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 public class GuiEditor {
     public void render(QuantumClient client) {
-        var currentScreen = client.screen;
+        Screen currentScreen = client.screen;
 
         ImGuiEx.text("Classname:", () -> currentScreen == null ? null : currentScreen.getClass().getSimpleName());
         if (currentScreen != null) {
-            var widgets = currentScreen.getWidgetsAt((int) (Gdx.input.getX() / client.getGuiScale()), (int) (Gdx.input.getY() / client.getGuiScale()));
-            for (var widget : widgets) {
+            List<Widget> widgets = currentScreen.getWidgetsAt((int) (Gdx.input.getX() / client.getGuiScale()), (int) (Gdx.input.getY() / client.getGuiScale()));
+            for (Widget widget : widgets) {
                 if (widget != null) {
                     client.shapes.getBatch().begin();
                     if (widget instanceof UIContainer<?>) {
@@ -35,7 +32,12 @@ public class GuiEditor {
                     client.shapes.getBatch().end();
                 }
             }
-            ImGuiEx.text("Widget:", () -> widgets.stream().findFirst().map(widget -> widget.path().toString()).orElse(null));
+            ImGuiEx.text("Widget:", () -> {
+                for (Widget widget1 : widgets) {
+                    return Optional.of(widget1).map(widget -> widget.path().toString()).orElse(null);
+                }
+                return Optional.<Widget>empty().map(widget -> widget.path().toString()).orElse(null);
+            });
         }
 
         if (currentScreen != null) {
@@ -52,9 +54,9 @@ public class GuiEditor {
         if (ImGui.collapsingHeader("Widgets")) {
             ImGui.treePush();
 
-            var children = screen.children();
+            List<? extends Widget> children = screen.children();
             for (int i = 0, childrenSize = children.size(); i < childrenSize; i++) {
-                var component = children.get(i);
+                Widget component = children.get(i);
                 if (component == null) continue;
 
                 GuiEditor.renderWidgetTools(i, component);
@@ -67,7 +69,7 @@ public class GuiEditor {
     private static void renderWidgetTools(int index, Widget widget) {
         if (ImGui.collapsingHeader("Widget #" + index + ": " + widget.path().toString())) {
             ImGui.treePush();
-            var path = widget.path().toString();
+            String path = widget.path().toString();
 
             ImGuiEx.text("Package: ", () -> widget.getClass().getPackageName());
             ImGuiEx.text("Classname: ", () -> widget.getClass().getSimpleName());
@@ -92,7 +94,7 @@ public class GuiEditor {
                 ImGui.treePush();
                 List<? extends Widget> children = container.children();
                 for (int i = 0, childrenSize = children.size(); i < childrenSize; i++) {
-                    var child = children.get(i);
+                    Widget child = children.get(i);
                     if (child == null) continue;
 
                     GuiEditor.renderWidgetTools(i, child);

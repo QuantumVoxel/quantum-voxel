@@ -42,7 +42,7 @@ public final class S2CChatPacket implements Packet<InGameClientPacketHandler> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CChatPacket) obj;
+        S2CChatPacket that = (S2CChatPacket) obj;
         return Objects.equals(this.message, that.message);
     }
 

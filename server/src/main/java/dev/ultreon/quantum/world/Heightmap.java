@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.world;
 
-import java.util.BitSet;
-
 public class Heightmap {
     private short[] map;
     private final int width;

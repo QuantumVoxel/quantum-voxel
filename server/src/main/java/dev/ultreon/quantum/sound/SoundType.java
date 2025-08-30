@@ -5,6 +5,7 @@ import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.rng.RNG;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,7 +37,7 @@ public class SoundType {
      * @param sounds A variable number of SoundEvent objects representing different step sounds.
      */
     public SoundType(SoundEvent... sounds) {
-        this.stepSounds = List.of(sounds);
+        this.stepSounds = Arrays.asList(sounds);
     }
 
     /**

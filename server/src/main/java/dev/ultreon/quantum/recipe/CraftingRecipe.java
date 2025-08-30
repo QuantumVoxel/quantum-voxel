@@ -9,7 +9,6 @@ import dev.ultreon.quantum.util.NamespaceID;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public final class CraftingRecipe implements Recipe {
     private final List<ItemStack> ingredients;
@@ -28,8 +27,12 @@ public final class CraftingRecipe implements Recipe {
 
     @Override
     public ItemStack craft(Inventory inventory) {
-        var result = this.result.copy();
-        var ingredients = this.ingredients.stream().map(ItemStack::copy).collect(Collectors.toList());
+        ItemStack result = this.result.copy();
+        ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
+        for (ItemStack ingredient : this.ingredients) {
+            ItemStack copy = ingredient.copy();
+            ingredients.add(copy);
+        }
 
         for (ItemSlot slot : inventory.slots) {
             if (slot.isEmpty()) {
@@ -106,7 +109,7 @@ public final class CraftingRecipe implements Recipe {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (CraftingRecipe) obj;
+        CraftingRecipe that = (CraftingRecipe) obj;
         return Objects.equals(this.ingredients, that.ingredients) &&
                Objects.equals(this.result, that.result);
     }
@@ -132,7 +135,11 @@ public final class CraftingRecipe implements Recipe {
         }
         if (!(inventory instanceof ContainerMenu)) return false;
         ContainerMenu menu = (ContainerMenu) inventory;
-        var ingredients = this.ingredients.stream().map(ItemStack::copy).collect(Collectors.toList());
+        ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
+        for (ItemStack ingredient : this.ingredients) {
+            ItemStack copy = ingredient.copy();
+            ingredients.add(copy);
+        }
 
         for (ItemSlot slot : menu.slots) {
             if (slot.isEmpty()) {

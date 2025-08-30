@@ -52,7 +52,7 @@ public final class C2SCraftRecipePacket implements Packet<InGameServerPacketHand
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (C2SCraftRecipePacket) obj;
+        C2SCraftRecipePacket that = (C2SCraftRecipePacket) obj;
         return this.typeId == that.typeId &&
                Objects.equals(this.recipeId, that.recipeId);
     }

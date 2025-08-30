@@ -8,9 +8,9 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.util.NamespaceID;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public final class S2COpenMenuPacket implements Packet<InGameClientPacketHandler> {
     private final NamespaceID menuType;
@@ -23,18 +23,21 @@ public final class S2COpenMenuPacket implements Packet<InGameClientPacketHandler
     }
 
     public static S2COpenMenuPacket of(NamespaceID menuType, List<ItemSlot> slots) {
-        var stacks = slots.stream().map(itemSlot -> {
-            if (itemSlot == null) return ItemStack.empty();
-            if (itemSlot.isEmpty()) return ItemStack.empty();
-            return itemSlot.getItem();
-        }).collect(Collectors.toList());
+        List<ItemStack> stacks = new ArrayList<>();
+        for (ItemSlot itemSlot : slots) {
+            if (itemSlot == null || itemSlot.isEmpty()) {
+                stacks.add(ItemStack.empty());
+            } else {
+                stacks.add(itemSlot.getItem());
+            }
+        }
 
         return new S2COpenMenuPacket(menuType, stacks);
     }
 
     public static S2COpenMenuPacket read(PacketIO buffer) {
-        var menuType = buffer.readId();
-        var items = buffer.readList(PacketIO::readItemStack);
+        NamespaceID menuType = buffer.readId();
+        List<ItemStack> items = buffer.readList(PacketIO::readItemStack);
 
         return new S2COpenMenuPacket(menuType, items);
     }
@@ -67,7 +70,7 @@ public final class S2COpenMenuPacket implements Packet<InGameClientPacketHandler
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2COpenMenuPacket) obj;
+        S2COpenMenuPacket that = (S2COpenMenuPacket) obj;
         return Objects.equals(this.menuType, that.menuType) &&
                Objects.equals(this.items, that.items);
     }

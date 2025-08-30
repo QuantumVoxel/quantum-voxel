@@ -43,7 +43,7 @@ public class IsolatedPath implements IPath {
 
     @Override
     public String path() {
-        return "/" + String.join("/", this.path);
+        return "/" + dev.ultreon.quantum.StringUtils.join("/", this.path);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class IsolatedPath implements IPath {
         } else {
             String[] parentPath = new String[this.path.length - 1];
             System.arraycopy(this.path, 0, parentPath, 0, parentPath.length);
-            return new IsolatedPath(this.fs, String.join("/", parentPath));
+            return new IsolatedPath(this.fs, dev.ultreon.quantum.StringUtils.join("/", parentPath));
         }
     }
 
@@ -87,7 +87,7 @@ public class IsolatedPath implements IPath {
             String[] childPath = new String[this.path.length + 1];
             System.arraycopy(this.path, 0, childPath, 0, this.path.length);
             childPath[childPath.length - 1] = name;
-            return new IsolatedPath(this.fs, String.join("/", childPath));
+            return new IsolatedPath(this.fs, dev.ultreon.quantum.StringUtils.join("/", childPath));
         }
     }
 
@@ -99,7 +99,7 @@ public class IsolatedPath implements IPath {
             String[] paths = new String[more.length + 1];
             paths[0] = first;
             System.arraycopy(more, 0, paths, 1, more.length);
-            return child(String.join("/", paths));
+            return child(dev.ultreon.quantum.StringUtils.join("/", paths));
         }
     }
 

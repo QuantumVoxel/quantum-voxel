@@ -27,9 +27,9 @@ public final class S2CModPacket implements Packet<InGameClientPacketHandler> {
     }
 
     public static S2CModPacket read(PacketIO buffer) {
-        var channelId = buffer.readId();
-        var channel = NetworkChannel.getChannel(channelId);
-        var packet = channel.getDecoder(buffer.readUnsignedShort()).apply(buffer);
+        NamespaceID channelId = buffer.readId();
+        NetworkChannel channel = NetworkChannel.getChannel(channelId);
+        ModPacket<? extends ModPacket<?>> packet = channel.getDecoder(buffer.readUnsignedShort()).apply(buffer);
 
         return new S2CModPacket(channel, channelId, packet);
     }
@@ -71,7 +71,7 @@ public final class S2CModPacket implements Packet<InGameClientPacketHandler> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CModPacket) obj;
+        S2CModPacket that = (S2CModPacket) obj;
         return Objects.equals(this.channel, that.channel) &&
                Objects.equals(this.channelId, that.channelId) &&
                Objects.equals(this.packet, that.packet);

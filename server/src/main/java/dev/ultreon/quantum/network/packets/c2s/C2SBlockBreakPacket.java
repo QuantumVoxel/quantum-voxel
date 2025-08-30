@@ -23,7 +23,7 @@ public final class C2SBlockBreakPacket implements Packet<InGameServerPacketHandl
     }
 
     public static C2SBlockBreakPacket read(PacketIO buffer) {
-        var pos = buffer.readBlockVec();
+        BlockVec pos = buffer.readBlockVec();
 
         return new C2SBlockBreakPacket(pos);
     }
@@ -53,7 +53,7 @@ public final class C2SBlockBreakPacket implements Packet<InGameServerPacketHandl
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (C2SBlockBreakPacket) obj;
+        C2SBlockBreakPacket that = (C2SBlockBreakPacket) obj;
         return Objects.equals(this.pos, that.pos);
     }
 

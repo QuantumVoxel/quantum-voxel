@@ -34,19 +34,19 @@ public class PlayerTracker implements Audience {
 
     @Override
     public void sendPacket(Packet<? extends ClientPacketHandler> packet) {
-        for (var player : this.players)
+        for (ServerPlayer player : this.players)
             if (player.connection != null) player.connection.send(packet);
     }
 
     @Override
     public void sendMessage(String message) {
-        for (var player : this.players)
+        for (ServerPlayer player : this.players)
             player.sendMessage(message);
     }
 
     @Override
     public void sendMessage(TextObject message) {
-        for (var player : this.players)
+        for (ServerPlayer player : this.players)
             player.sendMessage(message);
     }
 }

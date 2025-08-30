@@ -6,10 +6,11 @@ import dev.ultreon.quantum.api.neocommand.Parameter;
 import dev.ultreon.quantum.api.neocommand.SuggestionProvider;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class BooleanArgumentType implements ArgumentType<Boolean> {
-    private final List<@NotNull String> examples = List.of("true", "false", "0", "1", "yes", "no", "enabled", "disabled");
+    private final List<@NotNull String> examples = Arrays.asList("true", "false", "0", "1", "yes", "no", "enabled", "disabled");
 
     private BooleanArgumentType() {}
 

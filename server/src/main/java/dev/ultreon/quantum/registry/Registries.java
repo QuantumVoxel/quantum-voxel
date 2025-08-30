@@ -53,7 +53,9 @@ public final class Registries {
     }
 
     public static void unload() {
-        REGISTRY.values().forEach(Registry::unload);
+        for (Registry<?> registry : REGISTRY.values()) {
+            registry.unload();
+        }
         REGISTRY.unload();
     }
 }

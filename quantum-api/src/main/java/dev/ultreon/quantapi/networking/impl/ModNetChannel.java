@@ -13,10 +13,6 @@ import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.NamespaceID;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 
 import java.util.HashMap;
 import java.util.List;

@@ -40,7 +40,7 @@ public final class StructureInstance {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (StructureInstance) obj;
+        StructureInstance that = (StructureInstance) obj;
         return Objects.equals(this.pos, that.pos) &&
                Objects.equals(this.structure, that.structure);
     }

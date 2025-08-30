@@ -13,7 +13,6 @@ import com.badlogic.gdx.utils.IntSet;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.android.log.AndroidLogger;
-import dev.ultreon.quantum.client.FontManager;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.dedicated.JavaWebSocket;
@@ -45,14 +44,14 @@ public class AndroidPlatform extends GamePlatform {
         super();
         this.launcher = launcher;
 
-        this.mods.put(CommonConstants.NAMESPACE, new BuiltinAndroidMod(CommonConstants.NAMESPACE, "Quantum Voxel", BuildConfig.VERSION_NAME, "The game you are now playing", List.of("Ultreon Studios")));
-        this.mods.put("gdx", new BuiltinAndroidMod("gdx", "libGDX", Version.VERSION, "The game framework used to make Quantum Voxel", List.of("libGDX")));
-        this.mods.put("xeox", new BuiltinAndroidMod("xeox", "Xeox Loader", "0.1.0", "The modloader for Quantum Voxel on Android", List.of("Ultreon Studios")));
+        this.mods.put(CommonConstants.NAMESPACE, new BuiltinAndroidMod(CommonConstants.NAMESPACE, "Quantum Voxel", BuildConfig.VERSION_NAME, "The game you are now playing", Arrays.asList("Ultreon Studios")));
+        this.mods.put("gdx", new BuiltinAndroidMod("gdx", "libGDX", Version.VERSION, "The game framework used to make Quantum Voxel", Arrays.asList("libGDX")));
+        this.mods.put("xeox", new BuiltinAndroidMod("xeox", "Xeox Loader", "0.1.0", "The modloader for Quantum Voxel on Android", Arrays.asList("Ultreon Studios")));
     }
 
     @Override
     public Collection<? extends Mod> getMods() {
-        var list = new ArrayList<Mod>();
+        ArrayList<Mod> list = new ArrayList<Mod>();
         list.addAll(super.getMods());
         list.addAll(this.mods.values());
         return list;
@@ -322,4 +321,5 @@ public class AndroidPlatform extends GamePlatform {
     public <T> List<T> createSyncList() {
         return new CopyOnWriteArrayList<>();
     }
+
 }

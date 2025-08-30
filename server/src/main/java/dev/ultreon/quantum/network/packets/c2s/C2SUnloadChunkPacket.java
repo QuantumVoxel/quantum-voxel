@@ -46,7 +46,7 @@ public final class C2SUnloadChunkPacket implements Packet<InGameServerPacketHand
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (C2SUnloadChunkPacket) obj;
+        C2SUnloadChunkPacket that = (C2SUnloadChunkPacket) obj;
         return Objects.equals(this.vec, that.vec);
     }
 

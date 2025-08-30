@@ -19,8 +19,8 @@ public final class C2SChunkStatusPacket implements Packet<InGameServerPacketHand
     }
 
     public static C2SChunkStatusPacket read(PacketIO buffer) {
-        var pos = buffer.readChunkVec();
-        var status = Chunk.Status.values()[buffer.readUnsignedShort()];
+        ChunkVec pos = buffer.readChunkVec();
+        Chunk.Status status = Chunk.Status.values()[buffer.readUnsignedShort()];
 
         return new C2SChunkStatusPacket(pos, status);
     }
@@ -57,7 +57,7 @@ public final class C2SChunkStatusPacket implements Packet<InGameServerPacketHand
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (C2SChunkStatusPacket) obj;
+        C2SChunkStatusPacket that = (C2SChunkStatusPacket) obj;
         return Objects.equals(this.pos, that.pos) &&
                Objects.equals(this.status, that.status);
     }

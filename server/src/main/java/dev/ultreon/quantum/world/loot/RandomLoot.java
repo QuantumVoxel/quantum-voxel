@@ -1,12 +1,13 @@
 package dev.ultreon.quantum.world.loot;
 
+import dev.ultreon.quantum.block.IntegerRange;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.world.rng.RNG;
-import org.apache.commons.lang3.IntegerRange;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,14 +15,14 @@ public class RandomLoot implements LootGenerator {
     private final List<LootEntry> entries;
 
     public RandomLoot(LootEntry... entries) {
-        this.entries = List.of(entries);
+        this.entries = Arrays.asList(entries);
     }
 
     @Override
     public Iterable<ItemStack> generate(RNG random) {
-        var items = new ArrayList<ItemStack>();
+        ArrayList<ItemStack> items = new ArrayList<ItemStack>();
 
-        for (var entry : this.entries) {
+        for (LootEntry entry : this.entries) {
             int count = entry.randomCount(random);
             items.add(new ItemStack(entry.item(), count, entry.data()));
         }
@@ -80,7 +81,7 @@ public class RandomLoot implements LootGenerator {
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (CountLootEntry) obj;
+            CountLootEntry that = (CountLootEntry) obj;
             return Objects.equals(this.range, that.range) &&
                    Objects.equals(this.item, that.item) &&
                    Objects.equals(this.data, that.data);
@@ -140,7 +141,7 @@ public class RandomLoot implements LootGenerator {
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (ChanceLootEntry) obj;
+            ChanceLootEntry that = (ChanceLootEntry) obj;
             return Float.floatToIntBits(this.chance) == Float.floatToIntBits(that.chance) &&
                    Objects.equals(this.item, that.item) &&
                    Objects.equals(this.data, that.data);

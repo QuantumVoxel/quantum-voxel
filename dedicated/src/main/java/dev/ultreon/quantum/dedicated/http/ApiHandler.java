@@ -11,6 +11,7 @@ import dev.ultreon.xeox.api.IXeoxLoader;
 import org.intellij.lang.annotations.Language;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -84,7 +85,7 @@ public class ApiHandler implements HttpHandler {
                 return true;
             }
             exchange.sendResponseHeaders(HttpCodes.OK, 0);
-            try (var is = path.read()) {
+            try (InputStream is = path.read()) {
                 is.transferTo(exchange.getResponseBody());
             }
             exchange.close();
@@ -95,7 +96,7 @@ public class ApiHandler implements HttpHandler {
 
     private static boolean version(HttpExchange exchange, String[] args) throws IOException {
         if (args.length == 1) {
-//            exchange.getResponseBody().write(FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE).orElseThrow().getMetadata().getVersion().getFriendlyString().getBytes());
+//            exchange.getResponseBody().write(FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE).get().getMetadata().getVersion().getFriendlyString().getBytes());
             exchange.getResponseBody().write(IXeoxLoader.get().getMod(CommonConstants.NAMESPACE).version().getBytes());
             exchange.sendResponseHeaders(HttpCodes.OK, 0);
             exchange.close();

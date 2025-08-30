@@ -72,7 +72,7 @@ public class AppliedEffect {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (AppliedEffect) obj;
+        AppliedEffect that = (AppliedEffect) obj;
         return this.effect.equals(that.effect);
     }
 

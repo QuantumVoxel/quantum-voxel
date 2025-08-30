@@ -2,11 +2,11 @@ package dev.ultreon.quantum.api.commands;
 
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.api.neocommand.Commands;
+import dev.ultreon.quantum.collection.ArrayUtils;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.text.Formatter;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.Location;
-import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,7 +84,7 @@ public interface CommandSender {
      */
     default @NotNull dev.ultreon.quantum.api.neocommand.CommandResult runCommand(String input, boolean sendToChat) {
         // Trim the input to remove any leading or trailing whitespace
-        var commandline = input.trim();
+        String commandline = input.trim();
 
         // If the input is empty, do nothing
         if (commandline.isEmpty()) {

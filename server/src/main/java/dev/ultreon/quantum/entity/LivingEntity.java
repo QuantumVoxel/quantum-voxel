@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.entity;
 
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.ListUtils;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.api.events.entity.EntityEvent;
 import dev.ultreon.quantum.api.events.entity.LivingEntityEvent;
@@ -513,7 +514,7 @@ public abstract class LivingEntity extends Entity {
     }
 
     public void removeEffect(StatusEffect effect) {
-        this.appliedEffects.removeIf(appliedEffect -> appliedEffect.getEffect() == effect);
+        ListUtils.removeIf(this.appliedEffects, appliedEffect -> appliedEffect.getEffect() == effect);
     }
 
     public Set<AppliedEffect> getAppliedEffects() {

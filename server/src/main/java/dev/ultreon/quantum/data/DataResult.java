@@ -3,7 +3,6 @@ package dev.ultreon.quantum.data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 public class DataResult<T> {

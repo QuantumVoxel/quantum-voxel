@@ -16,7 +16,7 @@ public final class C2SRequestTabComplete implements Packet<InGameServerPacketHan
     }
 
     public static C2SRequestTabComplete read(PacketIO buffer) {
-        var input = buffer.readString(32768);
+        String input = buffer.readString(32768);
 
         return new C2SRequestTabComplete(input);
     }
@@ -49,7 +49,7 @@ public final class C2SRequestTabComplete implements Packet<InGameServerPacketHan
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (C2SRequestTabComplete) obj;
+        C2SRequestTabComplete that = (C2SRequestTabComplete) obj;
         return Objects.equals(this.input, that.input);
     }
 

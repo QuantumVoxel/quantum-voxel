@@ -6,13 +6,12 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
+import dev.ultreon.quantum.client.world.LazyInitializer;
 import dev.ultreon.quantum.util.GameObject;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
 
 public class BoxGizmo extends Gizmo {
-    private static final LazyInitializer<Model> model = LazyInitializer.<Model>builder().setInitializer(BoxGizmo::createModel).get();
-    private static final LazyInitializer<Model> outlineModel = LazyInitializer.<Model>builder().setInitializer(BoxGizmo::createOutlineModel).get();
+    private static final LazyInitializer<Model> model = new LazyInitializer<>(BoxGizmo::createModel);
+    private static final LazyInitializer<Model> outlineModel = new LazyInitializer<>(BoxGizmo::createOutlineModel);
 
     public BoxGizmo(GameObject attach, String name, String category) {
         super(category);
@@ -32,10 +31,6 @@ public class BoxGizmo extends Gizmo {
 
     @Override
     protected ModelInstance createInstance() {
-        try {
-            return new ModelInstance(outline ? outlineModel.get() : model.get(), new Matrix4());
-        } catch (ConcurrentException e) {
-            throw new RuntimeException(e);
-        }
+        return new ModelInstance(outline ? outlineModel.get() : model.get(), new Matrix4());
     }
 }

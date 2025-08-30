@@ -20,7 +20,7 @@ public final class S2CBundlePacket implements BundlePacket<ClientPacketHandler> 
 
     public static S2CBundlePacket read(ClientPacketHandler handler, PacketIO buffer) {
         ArrayList<Packet<ClientPacketHandler>> packets = new ArrayList<>();
-        var count = buffer.readVarInt();
+        int count = buffer.readVarInt();
         for (int i = 0; i < count; i++) {
             int packetId = buffer.readVarInt();
             packets.add(handler.connection().getStage().getClientPackets().decode(handler, packetId, buffer));

@@ -16,13 +16,7 @@ import dev.ultreon.quantum.world.WorldStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class WorldSelectionScreen extends Screen {
     public static final FileHandle WORLDS_DIR = Gdx.files.local("worlds");
@@ -139,7 +133,7 @@ public class WorldSelectionScreen extends Screen {
             return;
         }
         String lowerCase = worldSaveInfo.gamemode().name().toLowerCase(Locale.ROOT);
-        renderer.textLeft(lowerCase + " - " + LocalDateTime.ofEpochSecond(worldSaveInfo.lastSave().toEpochSecond(), 0, ZoneOffset.UTC).format(CommonConstants.DATE_FORMAT) + " - Gen " + worldSaveInfo.generatorVersion(), 10, y + 30, RgbColor.rgb(0x808080));
+//        renderer.textLeft(lowerCase + " - " + LocalDateTime.ofEpochSecond(worldSaveInfo.lastSave().toEpochSecond(), 0, ZoneOffset.UTC).format(CommonConstants.DATE_FORMAT) + " - Gen " + worldSaveInfo.generatorVersion(), 10, y + 30, RgbColor.rgb(0x808080));
     }
 
     private void deleteWorld(TextButton caller) {
@@ -206,7 +200,7 @@ public class WorldSelectionScreen extends Screen {
             worldInfo.currentPic = new Texture(child);
             worldInfo.currentPicFile = child;
             worldInfo.info = selected.loadInfo();
-            worldInfo.lastSave = worldInfo.info.lastSave().toLocalDateTime().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
+//            worldInfo.lastSave = worldInfo.info.lastSave().toLocalDateTime().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
         }
         int scaledHeight = (size.width - 4) * worldInfo.currentPic.getHeight() / worldInfo.currentPic.getWidth();
         int displayHeight = Math.min(scaledHeight, size.height / 2);
@@ -215,7 +209,7 @@ public class WorldSelectionScreen extends Screen {
     }
 
     public List<WorldStorage> locateWorlds() {
-        var worlds = new ArrayList<WorldStorage>();
+        ArrayList<WorldStorage> worlds = new ArrayList<WorldStorage>();
         FileHandle[] worldPaths = WorldSelectionScreen.WORLDS_DIR.list();
         if (worldPaths != null) {
             ArrayList<WorldStorage> worldStorages = new ArrayList<>();
@@ -234,9 +228,10 @@ public class WorldSelectionScreen extends Screen {
                 if (!o1.exists("info.ubo")) return 1;
                 if (!o2.exists("info.ubo")) return -1;
 
-                long millis1 = o1.loadInfo().lastSave().toLocalDateTime().toInstant(ZoneOffset.UTC).toEpochMilli();
-                long millis2 = o2.loadInfo().lastSave().toLocalDateTime().toInstant(ZoneOffset.UTC).toEpochMilli();
-                return Long.compare(millis2, millis1);
+//                long millis1 = o1.loadInfo().lastSave().toLocalDateTime().toInstant(ZoneOffset.UTC).toEpochMilli();
+//                long millis2 = o2.loadInfo().lastSave().toLocalDateTime().toInstant(ZoneOffset.UTC).toEpochMilli();
+//                return Long.compare(millis2, millis1);
+                return 0;
             });
         }
 
@@ -294,7 +289,7 @@ public class WorldSelectionScreen extends Screen {
                 currentPic = new Texture(child);
                 currentPicFile = child;
                 info = selected.loadInfo();
-                lastSave = info.lastSave().toLocalDateTime().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
+//                lastSave = info.lastSave().toLocalDateTime().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
             }
             int scaledHeight = (size.width - 4) * currentPic.getHeight() / currentPic.getWidth();
             int displayHeight = Math.min(scaledHeight, size.height / 2);
@@ -319,7 +314,7 @@ public class WorldSelectionScreen extends Screen {
             renderer.textLeft("[gold]Seed: [white]" + info.seed(), pos.x + 10, pos.y + displayHeight + 52);
             renderer.textLeft("[gold]Gamemode: [white]" + info.gamemode(), pos.x + 10, pos.y + displayHeight + 62);
             renderer.textLeft("[gold]Last Gamemode: [white]" + info.lastPlayedInMode(), pos.x + 10, pos.y + displayHeight + 72);
-            renderer.textLeft("[gold]Last Saved: [white]" + lastSave, pos.x + 10, pos.y + displayHeight + 82);
+//            renderer.textLeft("[gold]Last Saved: [white]" + lastSave, pos.x + 10, pos.y + displayHeight + 82);
             renderer.textLeft("[gold]Generator: [white]v" + info.generatorVersion(), pos.x + 10, pos.y + displayHeight + 92);
         }
 

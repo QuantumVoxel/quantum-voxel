@@ -42,7 +42,7 @@ public final class UVs {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (UVs) obj;
+        UVs that = (UVs) obj;
         return Float.floatToIntBits(this.x1) == Float.floatToIntBits(that.x1) &&
                Float.floatToIntBits(this.y1) == Float.floatToIntBits(that.y1) &&
                Float.floatToIntBits(this.x2) == Float.floatToIntBits(that.x2) &&

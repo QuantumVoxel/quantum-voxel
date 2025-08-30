@@ -66,7 +66,9 @@ public class MultiplayerScreen extends Screen {
         addButton.withType(Button.Type.DARK_EMBED);
         addButton.withCallback(this::addServer);
 
-        client.localData.servers.forEach(info -> selectionList.entry(new ServerEntry(info)));
+        for (ServerInfo info : client.localData.servers) {
+            selectionList.entry(new ServerEntry(info));
+        }
 
         platform = add(Platform.create());
 
@@ -222,13 +224,13 @@ public class MultiplayerScreen extends Screen {
         }
 
         private void validateServerIp(TextEntry caller) {
-            var text = caller.getValue();
+            String text = caller.getValue();
             boolean matches = text.matches("[^:]+(:\\d{1,5})?(/[^@:]+)?");
             if (!matches) {
                 this.addButton.isEnabled = false;
                 return;
             }
-            var hostSplitOff = text.split(":", 2);
+            String[] hostSplitOff = text.split(":", 2);
             int port;
             if (hostSplitOff.length < 2) {
                 port = 443;
@@ -307,15 +309,15 @@ public class MultiplayerScreen extends Screen {
         }
 
         private void validateServerIp(TextEntry caller) {
-            var text = caller.getValue();
+            String text = caller.getValue();
             boolean matches = text.matches("[^:]+:\\d{1,5}(/[^@:]+)?");
             if (!matches) {
                 this.addButton.isEnabled = false;
                 return;
             }
-            var hostSplitOff = text.split(":", 2);
+            String[] hostSplitOff = text.split(":", 2);
             String[] portSplitOff = hostSplitOff[1].split("/", 2);
-            var port = Integer.parseInt(portSplitOff[0]);
+            int port = Integer.parseInt(portSplitOff[0]);
 
             if (port != 80 && port != 443 && !(port >= 1000 && port <= 65535)) {
                 this.addButton.isEnabled = false;

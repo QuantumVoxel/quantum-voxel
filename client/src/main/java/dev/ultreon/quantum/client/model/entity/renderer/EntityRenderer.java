@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.model.entity.renderer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DepthTestAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
@@ -44,12 +45,12 @@ public abstract class EntityRenderer<E extends Entity> implements Disposable {
 
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
-        instance.getModel().getInstance().materials.forEach(m -> {
+        for (Material m : instance.getModel().getInstance().materials) {
             m.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
             m.set(new DepthTestAttribute(GL20.GL_LEQUAL, true));
             m.set(IntAttribute.createCullFace(GL20.GL_BACK));
             m.set(FloatAttribute.createAlphaTest(0.01f));
-        });
+        }
         if (instance.getModel().getInstance().userData == null)
             instance.getModel().getInstance().userData = Shaders.MODEL_VIEW.get();
         instance.translate(0, -1.625, 0);

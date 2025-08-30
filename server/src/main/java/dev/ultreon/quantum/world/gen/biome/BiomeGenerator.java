@@ -65,12 +65,12 @@ public class BiomeGenerator implements Disposable {
         for (int y = 0; y < CS; y++) {
             BlockVec blockInWorld = chunk.vec.blockInWorldSpace(x, y, z);
 
-            for (var feature : this.undergroundFeatures) {
+            for (TerrainFeature feature : this.undergroundFeatures) {
                 if (genFeature(chunk, blockInWorld.x, blockInWorld.y, blockInWorld.z, feature)) break;
             }
         }
 
-        for (var feature : this.surfaceFeatures) {
+        for (TerrainFeature feature : this.surfaceFeatures) {
             BlockVec blockInWorld = chunk.vec.blockInWorldSpace(x, 0, z);
 
             if (genFeature(chunk, blockInWorld.x, groundPos, blockInWorld.z, feature)) break;
@@ -111,7 +111,7 @@ public class BiomeGenerator implements Disposable {
         for (int y = 0; y < CS; y++) {
             if (chunk.get(x, y, z).isAir()) continue;
 
-            for (var layer : this.layers) {
+            for (TerrainLayer layer : this.layers) {
                 if (layer.handle(this.world, new WorldSlice(chunk), rng, offset.x + x, offset.y + y, offset.z + z, groundPos)) {
                     break;
                 }
@@ -129,8 +129,12 @@ public class BiomeGenerator implements Disposable {
 
     @Override
     public void dispose() {
-        this.layers.forEach(TerrainLayer::dispose);
-        this.surfaceFeatures.forEach(TerrainFeature::dispose);
+        for (TerrainLayer layer : this.layers) {
+            layer.dispose();
+        }
+        for (TerrainFeature surfaceFeature : this.surfaceFeatures) {
+            surfaceFeature.dispose();
+        }
     }
 
     public World getWorld() {

@@ -9,11 +9,8 @@ import dev.ultreon.quantum.ubo.DataIo;
 import dev.ultreon.quantum.ubo.types.DataType;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.world.vec.RegionVec;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 /**
  * The WorldStorage class represents a storage system for world data.
@@ -196,14 +193,7 @@ public final class WorldStorage {
      */
     public String getMD5Name() {
         if (md5Name == null) {
-            String string = getDirectory().name();
-
-            if (string == null) {
-                md5Name = Base64.getEncoder().encodeToString(string.getBytes(StandardCharsets.UTF_8)).replace("/", "_").replace("+", "-").replace("=", "");
-                return md5Name;
-            }
-
-            md5Name = hashSHA256(string.getBytes(StandardCharsets.UTF_8));
+            return getDirectory().name();
         }
 
         return md5Name;
@@ -215,7 +205,7 @@ public final class WorldStorage {
      * @return A string representing the generated folder name in hexadecimal format.
      */
     public static String createFolderName() {
-        return hashSHA256(String.valueOf(System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8));
+        return String.valueOf(System.currentTimeMillis());
     }
 
     /**
@@ -236,16 +226,6 @@ public final class WorldStorage {
     }
 
     /**
-     * Computes the MD5 hash of the given input byte array.
-     *
-     * @param input the byte array to be hashed
-     * @return a byte array containing the MD5 hash of the input
-     */
-    public static String hashSHA256(byte @NotNull [] input) {
-        return Base64.getEncoder().encodeToString(input).replace("/", "_").replace("+", "-").replace("=", "");
-    }
-
-    /**
      * Retrieves the name associated with the world storage.
      * If the name is not already known, it attempts to load this information.
      * If the information cannot be loaded, it defaults to the name of the directory.
@@ -258,7 +238,7 @@ public final class WorldStorage {
             this.info = loadInfo();
             name = this.info.name();
         } else {
-            name = getDirectory().name().toString();
+            name = getDirectory().name();
         }
         return name;
     }

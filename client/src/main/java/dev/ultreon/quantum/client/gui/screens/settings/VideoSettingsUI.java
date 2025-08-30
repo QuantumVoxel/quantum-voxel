@@ -55,7 +55,7 @@ public class VideoSettingsUI {
 
         builder.add(TextObject.translation("quantum.screen.options.video.guiScale"), new CycleButton<Scale>()
                 .values(Scale.values())
-                .value(Objects.requireNonNullElse(Scale.of(ClientConfiguration.guiScale.getValue()), Scale.MEDIUM))
+                .value(dev.ultreon.quantum.ObjectUtils.requireNonNullElse(Scale.of(ClientConfiguration.guiScale.getValue()), Scale.MEDIUM))
                 .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 150, 150, 21))
                 .formatter(scale -> {
                     if (scale.get() == 0) {

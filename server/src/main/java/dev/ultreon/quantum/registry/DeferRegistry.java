@@ -24,7 +24,7 @@ public class DeferRegistry<T> {
     }
 
     public <C extends T> DeferredElement<C> defer(@NotNull String name, @NotNull Supplier<@NotNull C> supplier) {
-        var id = new NamespaceID(this.modId, name);
+        NamespaceID id = new NamespaceID(this.modId, name);
 
         this.objects.add(new HashMap.SimpleEntry<>(id, supplier::get));
 

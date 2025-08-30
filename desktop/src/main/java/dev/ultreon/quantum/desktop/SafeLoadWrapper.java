@@ -27,8 +27,6 @@ import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.client.util.Utils;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 
-import java.time.format.DateTimeFormatter;
-
 public class SafeLoadWrapper implements ApplicationListener {
     private Main quantum;
     private SpriteBatch batch;
@@ -319,7 +317,7 @@ public class SafeLoadWrapper implements ApplicationListener {
                 Gdx.app.getClipboard().setContents(text);
 
                 FileChooser actor = new FileChooser(new FileHandle(System.getProperty("user.dir", ".")).child("game-crashes"), FileChooser.Mode.SAVE);
-                actor.setDefaultFileName("crash-" + DateTimeFormatter.ofPattern("dd.MM.yyyy_HH.mm.ss") + ".txt");
+//                actor.setDefaultFileName("crash-" + DateTimeFormatter.ofPattern("dd.MM.yyyy_HH.mm.ss") + ".txt");
                 actor.setWatchingFilesEnabled(true);
                 actor.setListener(new FileChooserListener() {
                     @Override

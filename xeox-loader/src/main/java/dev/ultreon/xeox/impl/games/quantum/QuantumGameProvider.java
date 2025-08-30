@@ -76,11 +76,11 @@ public class QuantumGameProvider implements IGameProvider {
 
     @Override
     public List<String> mixinConfigs() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override
     public List<EntryPoint> entrypoints() {
-        return List.of();
+        return Arrays.asList();
     }
 }

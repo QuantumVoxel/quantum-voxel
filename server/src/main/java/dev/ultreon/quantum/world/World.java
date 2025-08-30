@@ -44,7 +44,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * Represents the world (also known as a dimension) in the game with various attributes and manipulation methods.
@@ -114,7 +113,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     }
 
     @Override
-    public boolean unloadChunk(@NotNull ChunkVec chunkVec) {
+    public boolean unloadChunk(ChunkVec chunkVec) {
         this.checkThread();
 
         Chunk chunk = this.getChunk(chunkVec);
@@ -123,7 +122,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     }
 
     @Override
-    public abstract boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos);
+    public abstract boolean unloadChunk(Chunk chunk, ChunkVec pos);
 
     @Override
     public @NotNull EntityHit rayCastEntity(Ray ray) {
@@ -133,7 +132,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     @Override
     public @NotNull EntityHit rayCastEntity(Ray ray, float distance) {
         EntityHit result = new EntityHit(ray, distance);
-        Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().scl(distance))));
+        List<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().scl(distance))));
         entitiesWithin.forEach(entity -> {
             double curDistance = ray.origin.dst(entity.getPosition());
             if (curDistance > distance) return;
@@ -152,17 +151,17 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     @Override
     public @NotNull EntityHit rayCastEntity(Ray ray, float distance, Predicate<Entity> filter) {
         EntityHit result = new EntityHit(ray, distance);
-        Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().scl(distance))));
-        entitiesWithin.forEach(entity -> {
+        List<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().scl(distance))));
+        for (Entity entity : entitiesWithin) {
             if (filter.test(entity)) {
                 double curDistance = ray.origin.dst(entity.getPosition());
-                if (curDistance > distance) return;
+                if (curDistance > distance) continue;
                 if (result.getEntity() == null || curDistance < result.getDistance() && curDistance < result.getDistanceMax()) {
                     result.entity = entity;
                     result.distance = (float) curDistance;
                 }
             }
-        });
+        }
 
         if (result.getEntity() != null) {
             result.collide = true;
@@ -181,8 +180,14 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         return rayCastEntity(ray, distance, type::isInstance);
     }
 
-    private Stream<Entity> getEntitiesWithin(BoundingBox boundingBox) {
-        return Arrays.stream(this.entitiesById.values().toArray().toArray(Entity.class)).filter(entity -> boundingBox.intersects(entity.getBoundingBox()));
+    private List<Entity> getEntitiesWithin(BoundingBox boundingBox) {
+        List<Entity> list = new ArrayList<>();
+        for (Entity entity : this.entitiesById.values().toArray().toArray(Entity.class)) {
+            if (boundingBox.intersects(entity.getBoundingBox())) {
+                list.add(entity);
+            }
+        }
+        return list;
     }
 
     /**
@@ -359,7 +364,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         }
     }
 
-    public Heightmap heightMapAt(@NotNull ChunkVec vec, HeightmapType type) {
+    public Heightmap heightMapAt(ChunkVec vec, HeightmapType type) {
         switch (type) {
             case MOTION_BLOCKING:
                 return this.motionBlockingHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CS));
@@ -831,13 +836,13 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
      * @return true if the block was successfully set, false otherwise
      */
     @Override
-    public boolean set(BlockVec position, @NotNull BlockState block,
+    public boolean set(BlockVec position, BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         return this.set(position.getIntX(), position.getIntY(), position.getIntZ(), block, flags);
     }
 
     @Override
-    public boolean set(int x, int y, int z, @NotNull BlockState block,
+    public boolean set(int x, int y, int z, BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         this.checkThread();
 
@@ -930,7 +935,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         // No-op
     }
 
-    public abstract boolean isLoaded(@NotNull Chunk chunk);
+    public abstract boolean isLoaded(Chunk chunk);
 
     public @Nullable Structure getClosebyStructureCoords(ServerWorld world, int x, int z) {
         List<BlockVec> list = new ArrayList<>();

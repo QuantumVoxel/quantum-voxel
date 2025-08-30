@@ -58,13 +58,13 @@ public class ClientSyncRegistries implements RegistryHandle {
             }
 
             client.connection.disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Missing registries from client: " + notFound);
-            client.showScreen(new MissingRegistriesScreen(notFound, Set.of()));
+            client.showScreen(new MissingRegistriesScreen(notFound, dev.ultreon.quantum.SetUtils.of()));
             return;
         }
 
         if (!set.isEmpty()) {
             client.connection.disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Missing registries from server: " + set);
-            client.showScreen(new MissingRegistriesScreen(Set.of(), set));
+            client.showScreen(new MissingRegistriesScreen(dev.ultreon.quantum.SetUtils.of(), set));
         }
     }
 }

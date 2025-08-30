@@ -6,7 +6,6 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.text.Language;
-import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
 
 public class MemoryUsageOverlay extends Overlay {

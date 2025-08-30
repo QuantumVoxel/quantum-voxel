@@ -23,7 +23,6 @@ buildscript {
 
     // Build script dependencies
     dependencies {
-        classpath group: 'commons-io', name: 'commons-io', version: '2.18.0'
         classpath "com.google.code.gson:gson:2.11.0"
 
         // Shadow plugin for creating fat JARs
@@ -64,57 +63,17 @@ dependencies {
     // Internal project dependencies
     api(project(":server"))
 
-    // CoreLibs dependencies
-    api("dev.ultreon.corelibs:collections-v0:$coreLibsVersion")
-    api("dev.ultreon.corelibs:commons-v0:$coreLibsVersion")
-    api("dev.ultreon.corelibs:crash-v0:$coreLibsVersion")
-    api("dev.ultreon.corelibs:datetime-v0:$coreLibsVersion")
-    api("dev.ultreon.corelibs:events-v1:$coreLibsVersion")
-    api("dev.ultreon.corelibs:functions-v0:$coreLibsVersion")
-    api("dev.ultreon.corelibs:registries-v0:$coreLibsVersion")
-    api("dev.ultreon.corelibs:resources-v0:$coreLibsVersion")
-    api("dev.ultreon.corelibs:text-v0:$coreLibsVersion")
-    api("dev.ultreon.corelibs:translations-v1:$coreLibsVersion")
     api("dev.ultreon:ubo:$uboVersion")
-
-    // Discord integration
-    shadow(compileOnly("com.jagrosh:DiscordIPC:$discordIpcVersion"))
 
     // Graphics & Game Engine
     api("com.badlogicgames.gdx:gdx:$gdxVersion")
-    api("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
-    api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
     api("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
-    api("com.badlogicgames.gdx-video:gdx-video:$gdxVideoVersion")
     api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
-    api("com.badlogicgames.ashley:ashley:$ashleyVersion")
-    api("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
 
     // Graphics Extensions
     api("com.github.tommyettinger:textratypist:$textraTypistVersion")
-    api("com.kotcrab.vis:vis-ui:$visuiVersion")
-    api("com.crashinvaders.vfx:gdx-vfx-core:$vfxVersion")
-    api("com.crashinvaders.vfx:gdx-vfx-effects:$vfxVersion")
-    api("com.github.mgsx-dev.gdx-gltf:gltf:$gltfVersion")
     api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
     api("com.github.crykn.guacamole:gdx:$guacamoleVersion")
-
-    // Apache Commons
-    api("org.apache.commons:commons-lang3:$commonsLangVersion")
-    api("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
-
-    // Compression Libraries
-    api("org.tukaani:xz:$tukaaniXzVersion")
-    api("com.jcraft:jzlib:$jzlibVersion")
-
-    // Utilities
-    api("it.unimi.dsi:fastutil:$fastutilVersion", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
-    api("com.raylabz:opensimplex:$raylabzOpenSimplexVersion")
-    api("org.jetbrains:annotations:$jetbrainsAnnotationsVersion")
-    api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
-    api("org.json:json:$jsonVersion")
-    api("com.github.oshi:oshi-core:$oshiVersion")
-    api("io.github.libsdl4j:libsdl4j:$libsdl4jVersion")
 }
 
 // Configure resource processing to include LICENSE file and exclude certain file types

@@ -6,7 +6,6 @@ import dev.ultreon.quantum.world.rng.RNG;
 import javax.annotation.Nullable;
 import java.util.Locale;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.Math.max;
 
@@ -94,12 +93,12 @@ public class WordGenerator {
     }
 
     public String generate() {
-        final var random = this.random();
-        final var len = random.randint(max(this.minSize, 2), this.maxSize + 1);
+        final RNG random = this.random();
+        final int len = random.randint(max(this.minSize, 2), this.maxSize + 1);
 
-        final var named = new AtomicBoolean(this.isNamed);
-        var ref = new StateHolder(random);
-        final var sb = new StringBuilder();
+        final AtomicBoolean named = new AtomicBoolean(this.isNamed);
+        StateHolder ref = new StateHolder(random);
+        final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < len; i++) {
             this.switchState(ref, i, len, sb, named, random);
         }
@@ -188,7 +187,7 @@ public class WordGenerator {
 
     private void appendRandom(StringBuilder sb, AtomicBoolean named, RNG random, String[]... lists) {
         @Nullable String[] list = null;
-        for (var l : lists) {
+        for (String[] l : lists) {
             if (random.chance(1)) {
                 list = l;
                 break;
@@ -197,11 +196,11 @@ public class WordGenerator {
         if (list == null) {
             list = lists[0];
         }
-        var choose = this.choose(random, list);
+        String choose = this.choose(random, list);
         if (named.get()) {
             named.set(false);
-            final var c = choose.charAt(0);
-            final var substring = choose.substring(1);
+            final char c = choose.charAt(0);
+            final String substring = choose.substring(1);
             choose = ("" + c).toUpperCase(Locale.ROOT) + substring;
         }
         sb.append(choose);

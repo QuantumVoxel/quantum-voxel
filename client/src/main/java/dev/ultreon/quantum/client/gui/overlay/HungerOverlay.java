@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
+import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.entity.player.Player;
@@ -13,7 +14,7 @@ public class HungerOverlay extends Overlay {
 
         int x = (int) ((float) this.client.getScaledWidth() / 2) + 80;
 
-        var iconsTex = this.client.getTextureManager().getTexture(QuantumClient.id("textures/gui/icons.png"));
+        Texture iconsTex = this.client.getTextureManager().getTexture(QuantumClient.id("textures/gui/icons.png"));
         for (int emptyHeartX = 0; emptyHeartX < 10; emptyHeartX++)
             renderer.blit(iconsTex, x - emptyHeartX * 8, rightY - 9, 9, 9, 18, 27);
 

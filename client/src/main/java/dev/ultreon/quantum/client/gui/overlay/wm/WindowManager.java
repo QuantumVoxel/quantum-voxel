@@ -103,7 +103,7 @@ public class WindowManager {
         mouseX /= (int) guiScale;
         mouseY /= (int) guiScale;
 
-        for (DebugWindow window : List.copyOf(windows)) {
+        for (DebugWindow window : new ArrayList<>(windows)) {
             if (window.isMouseOver(mouseX, mouseY)) {
                 moveToFront(window);
                 window.mousePress(mouseX, mouseY, button);

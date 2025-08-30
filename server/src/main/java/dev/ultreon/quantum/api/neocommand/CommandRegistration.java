@@ -64,7 +64,9 @@ public class CommandRegistration {
                         return BasicCommandResult.error("You must specify at least one entity to kill");
 
                     // Kill each living being in the list of living entities. Wait, isn't that genocide? :concern:
-                    entity.forEach(LivingEntity::kill);
+                    for (LivingEntity livingEntity : entity) {
+                        livingEntity.kill();
+                    }
 
                     // Return success result with the amount they killed. How merciless!
                     return BasicCommandResult.success("You successfully killed " + entity.size() + " entities");

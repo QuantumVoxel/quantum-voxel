@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
+import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Ray;
@@ -73,7 +74,7 @@ public class GameCamera extends PerspectiveCamera {
      */
     public void update(LocalPlayer player) {
         if (!this.client.detachedCam) {
-            var lookVec = player.getLookVector(client.partialTick);
+            Vec3d lookVec = player.getLookVector(client.partialTick);
             this.camPos = player.getPosition(client.partialTick).div(WorldRenderer.SCALE).add(0, player.getEyeHeight() / WorldRenderer.SCALE, 0);
             this.player = player;
 
@@ -122,7 +123,7 @@ public class GameCamera extends PerspectiveCamera {
         this.walking = true;
         float old = this.cameraBop;
 
-        var bop = this.cameraBop;
+        float bop = this.cameraBop;
         bop -= this.inverseBop ? delta : -delta;
 
         if (bop > duration) {
@@ -144,8 +145,8 @@ public class GameCamera extends PerspectiveCamera {
 
     private void updateThirdPerson(Vec3d lookVec) {
         // Move camera backwards when player is in third person.
-        var ray = new Ray(this.camPos, lookVec.cpy().neg().nor());
-        var world = this.client.world;
+        Ray ray = new Ray(this.camPos, lookVec.cpy().neg().nor());
+        ClientWorld world = this.client.world;
         if (world != null) {
             if (client.getPlayerView() == PlayerView.THIRD_PERSON) {
                 this.hitResult = world.rayCast(ray, 5.1f);

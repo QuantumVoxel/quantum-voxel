@@ -1,17 +1,11 @@
 package dev.ultreon.mixinprovider.mixin;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g3d.Attributes;
-import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import dev.ultreon.mixinprovider.GdxRegistries;
-import dev.ultreon.mixinprovider.RenderDump;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BaseShader.class)

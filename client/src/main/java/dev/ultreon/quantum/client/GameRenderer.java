@@ -33,6 +33,7 @@ import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.debug.profiler.ProfilerSection;
 import dev.ultreon.quantum.debug.timing.Timing;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.platform.MouseDevice;
@@ -91,8 +92,8 @@ public class GameRenderer implements Disposable {
      * @param deltaTime The time elapsed since the last frame.
      */
     public void render(Renderer renderer, float deltaTime) {
-        var world = this.client.world;
-        var worldRenderer = this.client.worldRenderer;
+        ClientWorld world = this.client.world;
+        WorldRenderer worldRenderer = this.client.worldRenderer;
 
         LocalPlayer player = this.client.player;
         if (!GamePlatform.get().hasBackPanelRemoved()) {
@@ -100,7 +101,7 @@ public class GameRenderer implements Disposable {
         }
 
         if (player != null) {
-            try (var ignored1 = QuantumClient.PROFILER.start("camera")) {
+            try (ProfilerSection ignored1 = QuantumClient.PROFILER.start("camera")) {
                 positionCamera(deltaTime, player);
             }
         }
@@ -113,7 +114,7 @@ public class GameRenderer implements Disposable {
 
         renderer.begin();
 
-        var screen = this.client.screen;
+        Screen screen = this.client.screen;
 
 
         renderOverlays(renderer, deltaTime, world, worldRenderer, screen);
@@ -125,7 +126,7 @@ public class GameRenderer implements Disposable {
         renderer.pushMatrix();
         renderer.translate(this.client.getDrawOffset().x, this.client.getDrawOffset().y);
         renderer.scale(this.client.getGuiScale(), this.client.getGuiScale());
-        try (var ignored = QuantumClient.PROFILER.start("overlay")) {
+        try (ProfilerSection ignored = QuantumClient.PROFILER.start("overlay")) {
             if (!GamePlatform.get().hasBackPanelRemoved() && !(this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed())) {
                 renderer.clearColor(1 / 255f, 1 / 255f, 1 / 255f, 1);
             }
@@ -161,10 +162,10 @@ public class GameRenderer implements Disposable {
 
     private void renderWorld(float deltaTime, ClientWorld world, WorldRenderer worldRenderer) {
         if (this.client.renderWorld && world != null && worldRenderer != null && !worldRenderer.isDisposed()) {
-            try (var ignored = QuantumClient.PROFILER.start("world")) {
+            try (ProfilerSection ignored = QuantumClient.PROFILER.start("world")) {
                 EventSystem.postDefault(new RenderWorldEvent.Pre(world, worldRenderer, deltaTime));
 
-                var blurScale = this.blurScale;
+                float blurScale = this.blurScale;
                 blurScale += client.screen != null ? Gdx.graphics.getDeltaTime() * 3f : -Gdx.graphics.getDeltaTime() * 3f;
 
                 blurScale = Mth.clamp(blurScale, 0f, 1f);
@@ -206,8 +207,8 @@ public class GameRenderer implements Disposable {
         if (client.detachedCam) {
             client.renderCamera.position.set(client.detachedPos);
 
-            var rotation = this.tmp.set(client.detachedRot.x, client.detachedRot.y);
-            var quaternion = new Quaternion();
+            Vector2 rotation = this.tmp.set(client.detachedRot.x, client.detachedRot.y);
+            Quaternion quaternion = new Quaternion();
             quaternion.setFromAxis(Vector3.Y, rotation.x);
             quaternion.mul(new Quaternion(Vector3.X, rotation.y));
             quaternion.conjugate();
@@ -236,8 +237,8 @@ public class GameRenderer implements Disposable {
         this.client.camera.update(player);
         this.client.camera.far = ((float) ClientConfiguration.renderDistance.getValue() / CS - 1) * World.CS / WorldRenderer.SCALE;
 
-        var rotation = this.tmp.set(player.xHeadRot, player.yRot);
-        var quaternion = new Quaternion();
+        Vector2 rotation = this.tmp.set(player.xHeadRot, player.yRot);
+        Quaternion quaternion = new Quaternion();
         quaternion.setFromAxis(Vector3.Y, rotation.x);
         quaternion.mul(new Quaternion(Vector3.X, rotation.y));
         quaternion.conjugate();
@@ -328,7 +329,7 @@ public class GameRenderer implements Disposable {
             bufferSource.getBuffer(RenderPass.SKYBOX).flush();
             bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).flush();
 
-            var position = localPlayer.getPosition(client.partialTick);
+            Vec3d position = localPlayer.getPosition(client.partialTick);
             Array<Entity> toSort = new Array<>(world.getAllEntities());
             worldRenderer.render(client.renderBuffers(), deltaTime);
             for (Entity entity : toSort.toArray(Entity.class)) {
@@ -403,7 +404,7 @@ public class GameRenderer implements Disposable {
 
         if (screen == null) return;
 
-        try (var ignored = QuantumClient.PROFILER.start("screen")) {
+        try (ProfilerSection ignored = QuantumClient.PROFILER.start("screen")) {
             GridPoint2 mouseOffset = this.client.getMousePos();
             mouseVec[0] = GamePlatform.get().isShowingImGui() ? mouseOffset.x / this.client.getGuiScale() : Gdx.input.getX() / this.client.getGuiScale();
             mouseVec[1] = GamePlatform.get().isShowingImGui() ? mouseOffset.y / this.client.getGuiScale() : Gdx.input.getY() / this.client.getGuiScale();
@@ -453,7 +454,7 @@ public class GameRenderer implements Disposable {
 
     private void renderHUD(Renderer renderer, ClientWorldAccess world, float deltaTime) {
         if (world != null) {
-            try (var ignored = QuantumClient.PROFILER.start("hud")) {
+            try (ProfilerSection ignored = QuantumClient.PROFILER.start("hud")) {
                 if (EventSystem.postCancelable(new RenderHudEvent.Pre(world, renderer, deltaTime))) return;
                 OverlayManager.render(renderer, deltaTime);
                 EventSystem.postDefault(new RenderHudEvent.Post(world, renderer, deltaTime));

@@ -5,11 +5,10 @@ import dev.ultreon.quantum.ubo.DataKeys;
 import dev.ultreon.quantum.ubo.types.ListType;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.world.rng.RNG;
-import it.unimi.dsi.fastutil.objects.Reference2ShortFunction;
-import it.unimi.dsi.fastutil.shorts.Short2ReferenceFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,7 +16,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class FlatStorage<D> implements Storage<D> {
     private final D defaultValue;
@@ -82,7 +80,7 @@ public class FlatStorage<D> implements Storage<D> {
 
     @Override
     public void load(MapType inputData, Function<MapType, D> decoder) {
-        var data = inputData.<MapType>getList(DataKeys.PALETTE_DATA);
+        ListType<MapType> data = inputData.<MapType>getList(DataKeys.PALETTE_DATA);
         List<MapType> value = data.getValue();
         for (int i = 0, valueSize = value.size(); i < valueSize; i++) {
             MapType entryData = value.get(i);
@@ -107,7 +105,7 @@ public class FlatStorage<D> implements Storage<D> {
 
     @Override
     public void read(PacketIO buffer, Function<PacketIO, D> decoder) {
-        var size = buffer.readInt();
+        int size = buffer.readInt();
         this.data = Arrays.copyOf(this.data, size);
         for (int i = 0; i < size; i++) {
             D entry = decoder.apply(buffer);
@@ -142,9 +140,9 @@ public class FlatStorage<D> implements Storage<D> {
         short[] data = new short[this.data.length];
         D[] ds = this.data;
         for (int i = 0, dsLength = ds.length; i < dsLength; i++) {
-            var datum = ds[i];
+            D datum = ds[i];
             if (datum != null) {
-                data[i] =encoder.getShort(datum);
+                data[i] = encoder.get(datum);
             }
         }
         return data;
@@ -152,7 +150,11 @@ public class FlatStorage<D> implements Storage<D> {
 
     @Override
     public <R> Storage<R> map(R defaultValue, IntFunction<R[]> type, Function<D, R> o) {
-        var data = Arrays.stream(this.data).map(o).collect(Collectors.toList());
+        ArrayList<R> data = new ArrayList<R>();
+        for (D datum : this.data) {
+            R r = o.apply(datum);
+            data.add(r);
+        }
         return new FlatStorage<>(defaultValue, data);
     }
 

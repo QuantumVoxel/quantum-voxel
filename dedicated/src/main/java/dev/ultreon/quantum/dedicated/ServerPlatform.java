@@ -23,7 +23,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class ServerPlatform extends GamePlatform {
     private final Map<String, XeoxMod> mods = new IdentityHashMap<>();
@@ -51,7 +50,7 @@ public class ServerPlatform extends GamePlatform {
 
     @Override
     public Collection<Device> getGameDevices() {
-        return List.of(); // Server doesn't support mouse
+        return Arrays.asList(); // Server doesn't support mouse
     }
 
     @Override
@@ -132,6 +131,11 @@ public class ServerPlatform extends GamePlatform {
     }
 
     @Override
+    public String lineSep() {
+        return System.lineSeparator();
+    }
+
+    @Override
     public Logger getLogger(String name) {
         return (level, message, t) -> {
             if (level == null) return;
@@ -200,8 +204,13 @@ public class ServerPlatform extends GamePlatform {
 
     @Override
     public Collection<? extends Mod> getMods() {
-        var list = new ArrayList<Mod>();
-        list.addAll(IXeoxLoader.get().getMods().stream().map(container -> this.mods.computeIfAbsent(container.modId(), v -> new XeoxMod(container))).collect(Collectors.toList()));
+        ArrayList<Mod> list = new ArrayList<Mod>();
+        List<XeoxMod> result = new ArrayList<>();
+        for (IMod container : IXeoxLoader.get().getMods()) {
+            XeoxMod xeoxMod = this.mods.computeIfAbsent(container.modId(), v -> new XeoxMod(container));
+            result.add(xeoxMod);
+        }
+        list.addAll(result);
         return list;
     }
 

@@ -14,6 +14,7 @@ import dev.ultreon.quantum.world.container.FuelRegistry;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class BlastFurnaceBlockEntity
@@ -144,12 +145,12 @@ public class BlastFurnaceBlockEntity
 
     @Override
     public List<ItemSlot> getInputs() {
-        return List.of(this.getInputSlot());
+        return Arrays.asList(this.getInputSlot());
     }
 
     @Override
     public List<ItemSlot> getOutputs() {
-        return List.of(this.getOutputSlot());
+        return Arrays.asList(this.getOutputSlot());
     }
 
     @Override

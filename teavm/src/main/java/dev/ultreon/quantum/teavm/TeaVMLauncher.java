@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.teavm;
 
+import com.github.xpenatan.gdx.backends.teavm.utils.TeaBaseUrlProvider;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import com.github.xpenatan.gdx.backends.teavm.TeaApplication;
@@ -22,7 +23,7 @@ public class TeaVMLauncher {
         config.stencil = true;
         config.premultipliedAlpha = true;
         config.shouldEncodePreference = true;
-        var a = config.baseUrlProvider;
+        TeaBaseUrlProvider a = config.baseUrlProvider;
         config.baseUrlProvider = () -> {
             if (Window.current().getLocation().getFullURL().matches("https?://[0-9]+.discordsays.com(/.*)?")) {
                 if (a.getBaseUrl().endsWith("/")) {

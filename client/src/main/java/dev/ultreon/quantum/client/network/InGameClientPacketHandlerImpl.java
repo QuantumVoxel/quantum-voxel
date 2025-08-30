@@ -16,6 +16,7 @@ import dev.ultreon.quantum.client.gui.screens.world.WorldLoadScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.multiplayer.ClientRecipeManager;
+import dev.ultreon.quantum.client.multiplayer.MultiplayerData;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.RemotePlayer;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
@@ -28,6 +29,7 @@ import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Inventory;
+import dev.ultreon.quantum.menu.MenuType;
 import dev.ultreon.quantum.network.NetworkChannel;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.api.PacketDestination;
@@ -59,7 +61,6 @@ import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.ubo.types.MapType;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,7 +79,6 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     private final Map<NamespaceID, NetworkChannel> channels = new HashMap<>();
     private final PacketContext context;
     private final QuantumClient client = QuantumClient.get();
-    @Getter
     private long ping = 0;
     private boolean disconnected;
 
@@ -270,7 +270,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, float xHeadRot, float xRot, float yRot) {
         // Update the remote player's position in the local multiplayer data.
-        var data = this.client.getMultiplayerData();
+        MultiplayerData data = this.client.getMultiplayerData();
         RemotePlayer remotePlayer = data != null ? data.getRemotePlayerByUuid(player) : null;
         if (remotePlayer == null) return;
 
@@ -317,13 +317,13 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onMenuItemChanged(S2CMenuItemChangedPacket packet) {
-        var player = this.client.player;
+        LocalPlayer player = this.client.player;
 
         if (player != null) {
             ContainerMenu openMenu = player.getOpenMenu();
             if (openMenu != null) {
                 if (openMenu.getType().getId().equals(packet.menuId())) {
-                    for (var entry : packet.stackMap().entrySet()) {
+                    for (Map.Entry<Integer, ItemStack> entry : packet.stackMap().entrySet()) {
                         openMenu.setItem(entry.getKey(), entry.getValue());
                     }
                 } else {
@@ -340,14 +340,14 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onInventoryItemChanged(S2CInventoryItemChangedPacket packet) {
-        var player = this.client.player;
+        LocalPlayer player = this.client.player;
 
         if (player == null) return;
 
         Inventory inventory = player.inventory;
 
         if (inventory != null) {
-            for (var entry : packet.stackMap().entrySet()) {
+            for (Map.Entry<Integer, ItemStack> entry : packet.stackMap().entrySet()) {
                 inventory.setItem(entry.getKey(), entry.getValue());
             }
         }
@@ -360,7 +360,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onMenuCursorChanged(ItemStack cursor) {
-        var player = this.client.player;
+        LocalPlayer player = this.client.player;
         if (this.client.player != null) {
             ContainerMenu openMenu = player.getOpenMenu();
             if (openMenu != null) {
@@ -371,7 +371,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onOpenContainerMenu(NamespaceID menuTypeId, List<ItemStack> items) {
-        var menuType = Registries.MENU_TYPE.get(menuTypeId);
+        MenuType<?> menuType = Registries.MENU_TYPE.get(menuTypeId);
         LocalPlayer player = this.client.player;
         if (player == null) return;
         if (menuType != null) {
@@ -381,7 +381,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onAddPermission(AddPermissionPacket packet) {
-        var player = this.client.player;
+        LocalPlayer player = this.client.player;
         if (player != null) {
             player.getPermissions().onPacket(packet);
         }
@@ -389,7 +389,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onRemovePermission(RemovePermissionPacket packet) {
-        var player = this.client.player;
+        LocalPlayer player = this.client.player;
         if (player != null) {
             player.getPermissions().onPacket(packet);
         }
@@ -397,7 +397,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onInitialPermissions(InitialPermissionsPacket packet) {
-        var player = this.client.player;
+        LocalPlayer player = this.client.player;
         if (player != null) {
             player.getPermissions().onPacket(packet);
         }
@@ -482,7 +482,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onCloseContainerMenu() {
-        var player = this.client.player;
+        LocalPlayer player = this.client.player;
         if (player != null) {
             this.client.execute(player::closeMenu);
         }
@@ -581,5 +581,9 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public boolean isDisconnected() {
         return disconnected;
+    }
+
+    public long getPing() {
+        return ping;
     }
 }

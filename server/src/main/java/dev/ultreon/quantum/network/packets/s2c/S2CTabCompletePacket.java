@@ -6,6 +6,7 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,7 +18,7 @@ public final class S2CTabCompletePacket implements Packet<InGameClientPacketHand
     }
 
     public static S2CTabCompletePacket read(PacketIO buffer) {
-        var options = buffer.readList(buf -> buf.readString(64));
+        List<String> options = buffer.readList(buf -> buf.readString(64));
 
         return new S2CTabCompletePacket(options);
     }
@@ -27,7 +28,7 @@ public final class S2CTabCompletePacket implements Packet<InGameClientPacketHand
         if (this.options != null) {
             buffer.writeList(this.options, (buf, elem) -> buf.writeString(elem, 64));
         } else {
-            buffer.writeList(List.<String>of(), (buf, elem) -> buf.writeString(elem, 64));
+            buffer.writeList(new ArrayList<String>(), (buf, elem) -> buf.writeString(elem, 64));
         }
     }
 
@@ -51,7 +52,7 @@ public final class S2CTabCompletePacket implements Packet<InGameClientPacketHand
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CTabCompletePacket) obj;
+        S2CTabCompletePacket that = (S2CTabCompletePacket) obj;
         return Objects.equals(this.options, that.options);
     }
 

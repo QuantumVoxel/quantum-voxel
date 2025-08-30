@@ -14,21 +14,16 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
-import com.badlogic.gdx.video.VideoPlayer;
-import com.badlogic.gdx.video.VideoPlayerCreator;
-import com.badlogic.gdx.video.assets.VideoLoader;
 import com.github.tommyettinger.textra.Font;
 import com.github.tommyettinger.textra.KnownFonts;
 import de.damios.guacamole.gdx.graphics.NestableFrameBuffer;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.Logger;
 import dev.ultreon.quantum.api.ModApi;
@@ -59,6 +54,7 @@ import dev.ultreon.quantum.client.model.item.ItemModelRegistry;
 import dev.ultreon.quantum.client.model.model.JsonModelLoader;
 import dev.ultreon.quantum.client.multiplayer.MultiplayerData;
 import dev.ultreon.quantum.client.network.LoginClientPacketHandlerImpl;
+import dev.ultreon.quantum.client.network.system.ClientMemoryConnection;
 import dev.ultreon.quantum.client.network.system.ClientWebSocketConnection;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.SkinManager;
@@ -70,7 +66,6 @@ import dev.ultreon.quantum.client.render.*;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.resources.ResourceNotFoundException;
 import dev.ultreon.quantum.client.rpc.GameActivity;
-import dev.ultreon.quantum.client.rpc.RpcHandler;
 import dev.ultreon.quantum.client.sound.ClientSoundRegistry;
 import dev.ultreon.quantum.client.text.Language;
 import dev.ultreon.quantum.client.text.LanguageManager;
@@ -86,6 +81,7 @@ import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.debug.Debugger;
 import dev.ultreon.quantum.debug.profiler.Profiler;
+import dev.ultreon.quantum.debug.profiler.ProfilerSection;
 import dev.ultreon.quantum.debug.timing.Timing;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
@@ -115,7 +111,6 @@ import org.jetbrains.annotations.UnknownNullability;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.annotation.WillClose;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.StringBuilder;
 import java.util.*;
@@ -124,7 +119,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.badlogic.gdx.graphics.GL20.*;
 import static com.badlogic.gdx.graphics.Texture.*;
@@ -266,7 +260,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     // Boot info
     @SuppressWarnings("FieldMayBeFinal")
     boolean booted;
-    Duration bootTime;
 
     // Splash stuff
     private final Texture ultreonBgTex;
@@ -719,7 +712,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public BitmapFont loadFont(@NotNull NamespaceID resource) {
         NamespaceID id = resource.mapPath(path -> "font/" + path + ".fnt");
-        var handle = resource(id);
+        FileHandle handle = resource(id);
         if (!handle.exists()) {
             throw new ResourceNotFoundException(id);
         }
@@ -1081,21 +1074,12 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     /**
-     * Gets the boot time of the game.
-     *
-     * @return the boot time
-     */
-    public Duration getBootTime() {
-        return this.bootTime;
-    }
-
-    /**
      * Delays crashing the game.
      *
      * @param crashLog the crash log.
      */
     public void delayCrash(CrashLog crashLog) {
-        final var finalCrash = new CrashLog("An error occurred", crashLog, new RuntimeException("Delayed crash"));
+        final CrashLog finalCrash = new CrashLog("An error occurred", crashLog, new RuntimeException("Delayed crash"));
         Gdx.app.postRunnable(() -> QuantumClient.crash(finalCrash));
     }
 
@@ -1134,7 +1118,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return The handle to the created or recreated directory.
      */
     static FileHandle createDir(String dirName) {
-        var directory = QuantumClient.data(dirName);
+        FileHandle directory = QuantumClient.data(dirName);
         if (!directory.exists()) {
             // Create the directory if it doesn't exist
             directory.mkdirs();
@@ -1210,7 +1194,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         // Get current screen for handling transitions
-        var cur = this.screen;
+        Screen cur = this.screen;
 
         // Default to title screen if no world loaded
         if (next == null && this.world == null) {
@@ -1426,7 +1410,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             }
 
             // Do main rendering
-            try (var ignored = PROFILER.start("render")) {
+            try (ProfilerSection ignored = PROFILER.start("render")) {
                 this.doRender(deltaTime);
             }
             this.renderer.actuallyEnd();
@@ -1685,7 +1669,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             this.gameRenderer.render(renderer, deltaTime);
 
             // Render debug overlay if enabled
-            try (var ignored = QuantumClient.PROFILER.start("debug")) {
+            try (ProfilerSection ignored = QuantumClient.PROFILER.start("debug")) {
                 if (this.hideHud || !debugOverlayShown || this.isLoading()) return;
                 renderer.begin();
                 renderer.scale(2, 2);
@@ -1803,7 +1787,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param renderer the renderer.
      */
     private void renderLibGDXSplash(Renderer renderer) {
-        try (var ignored = QuantumClient.PROFILER.start("libgdxSplash")) {
+        try (ProfilerSection ignored = QuantumClient.PROFILER.start("libgdxSplash")) {
             // Initialize splash screen timing and play sound on the first render
 //            if (!this.libgdxSplashVideo.isPlaying())
 //                this.libgdxSplashVideo.play();
@@ -1839,7 +1823,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @param renderer The renderer used to draw the splash screen
      */
     private void renderUltreonSplash(Renderer renderer) {
-        try (var ignored = QuantumClient.PROFILER.start("ultreonSplash")) {
+        try (ProfilerSection ignored = QuantumClient.PROFILER.start("ultreonSplash")) {
             // Initialize splash screen timing and play sound on the first render
 //            if (!this.ultreonSplashVideo.isPlaying())
 //                this.ultreonSplashVideo.play();
@@ -1901,7 +1885,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 QuantumClient.crash(e.getCrashLog());
             } catch (Exception t) {
                 CommonConstants.LOGGER.error("An error occurred while ticking the game.", t);
-                var crashLog = new CrashLog("Game being ticked.", t);
+                CrashLog crashLog = new CrashLog("Game being ticked.", t);
                 QuantumClient.crash(crashLog);
             }
 
@@ -1985,7 +1969,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public static void crash(Throwable throwable) {
         QuantumClient.LOGGER.error("Game crash triggered:", throwable);
-        var crashLog = new CrashLog("An unexpected error occurred", throwable);
+        CrashLog crashLog = new CrashLog("An unexpected error occurred", throwable);
         QuantumClient.crash(crashLog);
     }
 
@@ -2008,7 +1992,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             }
 
             QuantumClient.instance.fillGameInfo(crashLog);
-            var crash = crashLog.createCrash();
+            ApplicationCrash crash = crashLog.createCrash();
             QuantumClient.crash(crash);
         } catch (Exception | OutOfMemoryError t) {
             QuantumClient.LOGGER.error(QuantumClient.FATAL_ERROR_MSG, t);
@@ -2028,8 +2012,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             this.world.fillCrashInfo(crashLog);
         }
 
-        var client = new CrashCategory("Game Details");
-        client.add("Time until crash", Duration.ofMilliseconds(System.currentTimeMillis() - QuantumClient.BOOT_TIMESTAMP).toSimpleString()); // Could be the game only crashes after a long time.
+        CrashCategory client = new CrashCategory("Game Details");
         client.add("Game booted", this.booted); // Could be that the game isn't booted yet.
         crashLog.addCategory(client);
     }
@@ -2047,7 +2030,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         crashing = true;
         try {
-            var crashLog = crash.getCrashLog();
+            CrashLog crashLog = crash.getCrashLog();
             CrashHandler.handleCrash(crashLog);
             String string = crashLog.toString();
             LOGGER.error("Dumping crash report...\n{}", string);
@@ -2342,7 +2325,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.gameRenderer.resize(getWidth(), getHeight());
 
         // Resize the current screen
-        var cur = this.screen;
+        Screen cur = this.screen;
         if (cur != null) {
             float w = getWidth() / this.getGuiScale();
             float h = getHeight() / this.getGuiScale();
@@ -2372,7 +2355,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             try {
                 // Remove completed futures from the list
                 while (!this.futures.isEmpty()) {
-                    this.futures.removeIf(Promise::isDone);
+                    ListUtils.removeIf(this.futures, Promise::isDone);
                 }
 
                 // Cancel any ongoing vibration effects
@@ -2397,9 +2380,15 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
                 GamePlatform.get().onGameDispose();
 
                 // Clean up various disposables
-                this.disposables.forEach(QuantumClient::cleanUp);
-                this.shutdownables.forEach(QuantumClient::cleanUp);
-                this.closeables.forEach(QuantumClient::cleanUp);
+                for (Disposable disposable : this.disposables) {
+                    cleanUp(disposable);
+                }
+                for (Shutdownable shutdownable : this.shutdownables) {
+                    cleanUp(shutdownable);
+                }
+                for (AutoCloseable closeable : this.closeables) {
+                    cleanUp(closeable);
+                }
 
                 // Dispose renderers to free graphics resources
                 QuantumClient.cleanUp(this.renderer);
@@ -2684,8 +2673,12 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return whether the files were dropped.
      */
     public boolean filesDropped(String[] files) {
-        var currentScreen = this.screen;
-        var handles = Arrays.stream(files).map(FileHandle::new).collect(Collectors.toList());
+        Screen currentScreen = this.screen;
+        ArrayList<FileHandle> handles = new ArrayList<>();
+        for (String file : files) {
+            FileHandle fileHandle = new FileHandle(file);
+            handles.add(fileHandle);
+        }
 
         if (currentScreen != null) {
             return currentScreen.filesDropped(handles);
@@ -2712,7 +2705,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public @NotNull BlockModel getBlockModel(BlockState block) {
         return QuantumClient.invokeAndWait(() -> {
             BlockModel blockModel = BlockModelRegistry.get().get(block);
-            return Objects.requireNonNullElse(blockModel, BakedCubeModel.defaultModel());
+            return dev.ultreon.quantum.ObjectUtils.requireNonNullElse(blockModel, BakedCubeModel.defaultModel());
         });
     }
 
@@ -2831,8 +2824,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return the maximum GUI scale.
      */
     public int calcMaxGuiScale() {
-        var windowWidth = getWidth();
-        var windowHeight = getHeight();
+        int windowWidth = getWidth();
+        int windowHeight = getHeight();
 
         // Compare width ratio and height ratio to determine the scaling factor
         if (windowWidth / QuantumClient.MINIMUM_WIDTH < windowHeight / QuantumClient.MINIMUM_HEIGHT) {
@@ -2961,7 +2954,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public void startIntegratedServer() {
         // Connect to the local server and unwrap the connection object
-        var mem = ClientWebSocketConnection.connectToLocalServer().unwrap();
+        ClientMemoryConnection mem = ClientWebSocketConnection.connectToLocalServer().unwrap();
         this.connection = mem;
         MemoryConnectionContext.set(mem);
 
@@ -2993,7 +2986,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Establish connection to the server
         this.connection = ClientWebSocketConnection.connectToServer(this, location, () -> {
-            var conn = this.connection;
+            IConnection<ClientPacketHandler, ServerPacketHandler> conn = this.connection;
             if (conn == null) return;
 
             // Initialize remote connection and multiplayer data
@@ -3363,7 +3356,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         CommonConstants.LOGGER.info("Disconnected: {}", message);
 
         try {
-            var conn = this.connection;
+            IConnection<ClientPacketHandler, ServerPacketHandler> conn = this.connection;
             if (conn != null) conn.close();
         } catch (IOException e) {
             CommonConstants.LOGGER.warn("Failed to close connection", e);

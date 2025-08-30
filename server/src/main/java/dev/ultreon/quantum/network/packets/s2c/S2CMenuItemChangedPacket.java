@@ -22,16 +22,16 @@ public final class S2CMenuItemChangedPacket implements Packet<InGameClientPacket
     }
 
     public S2CMenuItemChangedPacket(NamespaceID menuId, ItemSlot slot) {
-        this(menuId, Map.of(slot.getIndex(), slot.getItem()));
+        this(menuId, dev.ultreon.quantum.MapUtils.of(slot.getIndex(), slot.getItem()));
     }
 
     public S2CMenuItemChangedPacket(NamespaceID id, int slot, ItemStack item) {
-        this(id, Map.of(slot, item));
+        this(id, dev.ultreon.quantum.MapUtils.of(slot, item));
     }
 
     public static S2CMenuItemChangedPacket read(PacketIO buffer) {
-        var menuId = buffer.readId();
-        var stackMap = buffer.readMap(PacketIO::readInt, PacketIO::readItemStack);
+        NamespaceID menuId = buffer.readId();
+        Map<Integer, ItemStack> stackMap = buffer.readMap(PacketIO::readInt, PacketIO::readItemStack);
 
         return new S2CMenuItemChangedPacket(menuId, stackMap);
     }
@@ -67,7 +67,7 @@ public final class S2CMenuItemChangedPacket implements Packet<InGameClientPacket
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CMenuItemChangedPacket) obj;
+        S2CMenuItemChangedPacket that = (S2CMenuItemChangedPacket) obj;
         return Objects.equals(this.menuId, that.menuId) &&
                Objects.equals(this.stackMap, that.stackMap);
     }

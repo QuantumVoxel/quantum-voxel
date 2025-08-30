@@ -36,7 +36,7 @@ public final class S2CTemperatureSyncPacket implements Packet<InGameClientPacket
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CTemperatureSyncPacket) obj;
+        S2CTemperatureSyncPacket that = (S2CTemperatureSyncPacket) obj;
         return Double.doubleToLongBits(this.temperature) == Double.doubleToLongBits(that.temperature);
     }
 

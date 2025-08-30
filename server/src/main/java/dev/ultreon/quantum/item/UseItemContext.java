@@ -54,7 +54,7 @@ public final class UseItemContext {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (UseItemContext) obj;
+        UseItemContext that = (UseItemContext) obj;
         return Objects.equals(this.world, that.world) &&
                Objects.equals(this.player, that.player) &&
                Objects.equals(this.result, that.result) &&

@@ -13,7 +13,6 @@ import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.packets.c2s.C2SMenuTakeItemPacket;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,7 +39,7 @@ public abstract class ContainerScreen extends Screen {
     public final void build(@NotNull GuiBuilder builder) {
         this.slots = new ItemSlotWidget[this.menu.slots.length];
         for (int i = 0; i < this.menu.slots.length; i++) {
-            var slot = this.menu.slots[i];
+            ItemSlot slot = this.menu.slots[i];
             if (slot == null) throw new IllegalStateException("Slot " + i + " is null");
 
             ItemSlotWidget widget = new ItemSlotWidget(slot, this.left() + slot.getSlotX(), this.top() + slot.getSlotY());

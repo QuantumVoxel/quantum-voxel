@@ -1,7 +1,6 @@
 package dev.ultreon.mixinprovider;
 
 import org.apache.commons.collections4.BidiMap;
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.commons.collections4.bidimap.DualLinkedHashBidiMap;
 import org.jetbrains.annotations.NotNull;
 

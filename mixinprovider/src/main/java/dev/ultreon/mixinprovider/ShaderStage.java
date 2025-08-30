@@ -17,7 +17,6 @@
 package dev.ultreon.mixinprovider;
 
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.GL32;
 
 /**

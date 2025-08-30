@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class TranslationText extends MutableText {
     private final @NotNull String path;
@@ -58,7 +57,12 @@ public class TranslationText extends MutableText {
 
     @Override
     public @NotNull String getText() {
-        return this.getTranslated() + this.extras.stream().map(TextObject::getText).reduce("", (a, b) -> a + b);
+        String acc = "";
+        for (TextObject extra : this.extras) {
+            String text = extra.getText();
+            acc = acc + text;
+        }
+        return this.getTranslated() + acc;
     }
 
     @Override
@@ -106,8 +110,12 @@ public class TranslationText extends MutableText {
 
     @Override
     public MutableText copy() {
-        var copy = this.extras.stream().map(TextObject::copy).collect(Collectors.toList());
-        var translationText = new TranslationText(this.path, this.args);
+        ArrayList<TextObject> copy = new ArrayList<TextObject>();
+        for (TextObject extra : this.extras) {
+            MutableText copied = extra.copy();
+            copy.add(copied);
+        }
+        TranslationText translationText = new TranslationText(this.path, this.args);
         translationText.extras.addAll(copy);
         return translationText;
     }

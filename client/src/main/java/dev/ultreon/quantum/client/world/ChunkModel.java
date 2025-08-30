@@ -20,8 +20,6 @@ import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.ShowInNodeView;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -31,7 +29,7 @@ import static com.badlogic.gdx.graphics.GL20.GL_LINES;
 import static dev.ultreon.quantum.client.QuantumClient.PROFILER;
 
 public class ChunkModel extends GameObject {
-    private static final LazyInitializer<Model> gizmo = LazyInitializer.<Model>builder().setInitializer(ChunkModel::createBorderGizmo).get();
+    private static final LazyInitializer<Model> gizmo = new LazyInitializer<>(ChunkModel::createBorderGizmo);
     private static final Color CHUNK_GIZMO_COLOR = new Color(0.0f, 1.0f, 0.0f, 1.0f);
     private final ChunkVec pos;
     private final ClientChunk chunk;
@@ -91,11 +89,7 @@ public class ChunkModel extends GameObject {
 
     private void generateModelAsync(BoundingBox bounds) {
         chunk.immediateRebuild = false;
-        try {
-            this.gizmoInstance = new ModelInstance(gizmo.get(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
-        } catch (ConcurrentException e) {
-            throw new RuntimeException(e);
-        }
+        this.gizmoInstance = new ModelInstance(gizmo.get(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
 
         this.beingBuilt = true;
         if (meshes.isEmpty()) {
@@ -130,11 +124,7 @@ public class ChunkModel extends GameObject {
 
     private void generateModelSync(BoundingBox bounds) {
         chunk.immediateRebuild = false;
-        try {
-            this.gizmoInstance = new ModelInstance(gizmo.get(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
-        } catch (ConcurrentException e) {
-            throw new RuntimeException(e);
-        }
+        this.gizmoInstance = new ModelInstance(gizmo.get(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
 
         this.beingBuilt = true;
         if (meshes.isEmpty()) {

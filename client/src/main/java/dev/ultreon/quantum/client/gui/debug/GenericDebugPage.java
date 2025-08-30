@@ -11,6 +11,7 @@ import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
+import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.WorldRenderer;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
@@ -33,9 +34,9 @@ import java.util.Locale;
 public class GenericDebugPage implements DebugPage {
     @Override
     public void render(DebugPageContext context) {
-        var client = context.client();
-        var world = client.world;
-        var worldRenderer = client.worldRenderer;
+        QuantumClient client = context.client();
+        ClientWorld world = client.world;
+        WorldRenderer worldRenderer = client.worldRenderer;
         if (worldRenderer != null && worldRenderer.isDisposed()) worldRenderer = null;
         if (world != null && world.isDisposed()) world = null;
 

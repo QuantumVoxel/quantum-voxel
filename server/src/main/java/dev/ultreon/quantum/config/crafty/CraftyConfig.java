@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.Mod;
+import dev.ultreon.quantum.StringUtils;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.util.ModLoadingContext;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -117,21 +118,27 @@ public abstract class CraftyConfig {
      * Reset all CraftyConfig instances.
      */
     public static void resetAll() {
-        CONFIGS.values().forEach(CraftyConfig::reset);
+        for (CraftyConfig craftyConfig : CONFIGS.values()) {
+            craftyConfig.reset();
+        }
     }
 
     /**
      * Save all CraftyConfig instances.
      */
     public static void saveAll() {
-        CONFIGS.values().forEach(CraftyConfig::save);
+        for (CraftyConfig craftyConfig : CONFIGS.values()) {
+            craftyConfig.save();
+        }
     }
 
     /**
      * Load all CraftyConfig instances.
      */
     public static void loadAll() {
-        CONFIGS.values().forEach(CraftyConfig::load);
+        for (CraftyConfig craftyConfig : CONFIGS.values()) {
+            craftyConfig.load();
+        }
     }
 
     public static Collection<? extends CraftyConfig> getConfigs() {
@@ -234,7 +241,7 @@ public abstract class CraftyConfig {
                 String comment = configEntry.comment();
 
                 // Set the comment based on whether it is blank or not
-                if (comment.isBlank()) {
+                if (StringUtils.isBlank(comment)) {
                     comment = "Default value: " + serializeValue(value, type);
                 } else {
                     comment += "\n\nDefault value: " + serializeValue(value, type);
@@ -273,14 +280,16 @@ public abstract class CraftyConfig {
         this.configPath.delete();
 
         // Set default values for all configuration fields
-        this.fieldsMap.forEach((ignored, field) -> {
+        for (Map.Entry<String, Field> entry : this.fieldsMap.entrySet()) {
+            String ignored = entry.getKey();
+            Field field = entry.getValue();
             try {
                 this.setDefaults(field, field.getType());
             } catch (IllegalAccessException e) {
                 // Log an error if setting default value fails
                 CommonConstants.LOGGER.error("Failed to reset config entry {}", field.getName(), e);
             }
-        });
+        }
 
         // Save the configuration to the file
         this.save();

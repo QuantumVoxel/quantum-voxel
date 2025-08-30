@@ -18,7 +18,7 @@ public final class S2CEntityPipeline implements Packet<InGameClientPacketHandler
     }
 
     public static S2CEntityPipeline read(PacketIO buffer) {
-        var id = buffer.readVarInt();
+        int id = buffer.readVarInt();
         MapType pipeline = buffer.readUbo();
 
         return new S2CEntityPipeline(id, pipeline);
@@ -47,7 +47,7 @@ public final class S2CEntityPipeline implements Packet<InGameClientPacketHandler
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CEntityPipeline) obj;
+        S2CEntityPipeline that = (S2CEntityPipeline) obj;
         return this.id == that.id &&
                Objects.equals(this.pipeline, that.pipeline);
     }

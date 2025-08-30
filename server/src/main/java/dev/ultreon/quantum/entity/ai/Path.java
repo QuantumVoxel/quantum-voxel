@@ -45,7 +45,7 @@ public final class Path {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (Path) obj;
+        Path that = (Path) obj;
         return Objects.equals(this.points, that.points) &&
                Objects.equals(this.start, that.start) &&
                Objects.equals(this.end, that.end);

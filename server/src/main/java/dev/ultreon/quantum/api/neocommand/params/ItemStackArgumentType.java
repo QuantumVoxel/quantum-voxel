@@ -8,6 +8,7 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.NamespaceID;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class ItemStackArgumentType implements ArgumentType<ItemStack> {
@@ -76,7 +77,7 @@ public class ItemStackArgumentType implements ArgumentType<ItemStack> {
 
     @Override
     public List<String> getExamples() {
-        return List.of(
+        return Arrays.asList(
                 "quantum:stone",
                 "quantum:path/to/value",
                 "stone",

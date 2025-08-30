@@ -179,11 +179,10 @@ allprojects {
   }
 
   if (this@allprojects.name != "android") dependencies {
-    compileOnly("org.jetbrains:annotations:23.0.0")
+    compileOnly("org.jetbrains:annotations:26.0.2")
 
-    implementation(annotationProcessor("org.projectlombok:lombok:1.18.34")!!)
     annotationProcessor("com.google.code.findbugs:jsr305:3.0.2")
-    annotationProcessor("org.ow2.asm:asm-tree:9.3")
+    annotationProcessor("org.ow2.asm:asm-tree:9.8")
   }
 }
 

@@ -14,6 +14,7 @@ import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.server.CloseCodes;
 import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.NamespaceID;
 
@@ -129,7 +130,7 @@ public class LoginServerPacketHandler implements ServerPacketHandler {
             return;
         }
 
-        final var player = server.loadPlayer(name, uuid, connection);
+        final ServerPlayer player = server.loadPlayer(name, uuid, connection);
         connection.setPlayer(player);
 
         IConnection.LOGGER.info("{} joined the server.", name);

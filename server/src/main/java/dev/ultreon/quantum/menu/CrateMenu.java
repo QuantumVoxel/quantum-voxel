@@ -9,9 +9,11 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CrateMenu extends BlockContainerMenu {
     public final ItemSlot[][] crate = new ItemSlot[9][3];
@@ -100,16 +102,21 @@ public class CrateMenu extends BlockContainerMenu {
 
     @Override
     public List<ItemSlot> getInputs() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override
     public List<ItemSlot> getOutputs() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override
     public @NotNull Iterator<ItemStack> iterator() {
-        return Arrays.stream(slots).map(ItemSlot::getItem).iterator();
+        List<ItemStack> list = new ArrayList<>();
+        for (ItemSlot slot : slots) {
+            ItemStack item = slot.getItem();
+            list.add(item);
+        }
+        return list.iterator();
     }
 }

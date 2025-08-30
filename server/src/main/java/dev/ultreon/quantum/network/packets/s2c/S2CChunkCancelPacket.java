@@ -42,7 +42,7 @@ public final class S2CChunkCancelPacket implements Packet<InGameClientPacketHand
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CChunkCancelPacket) obj;
+        S2CChunkCancelPacket that = (S2CChunkCancelPacket) obj;
         return Objects.equals(this.pos, that.pos);
     }
 

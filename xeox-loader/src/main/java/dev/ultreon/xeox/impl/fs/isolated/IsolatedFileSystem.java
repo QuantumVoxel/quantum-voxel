@@ -11,11 +11,11 @@ public class IsolatedFileSystem implements IFileSystem {
     private final Set<String> protectedPaths;
 
     public IsolatedFileSystem(IPath parent, boolean readOnly) {
-        this(parent, readOnly, Set.of());
+        this(parent, readOnly, dev.ultreon.quantum.SetUtils.of());
     }
 
     public IsolatedFileSystem(IPath parent, boolean readOnly, String... protectedPaths) {
-        this(parent, readOnly, Set.of(protectedPaths));
+        this(parent, readOnly, dev.ultreon.quantum.SetUtils.of(protectedPaths));
     }
 
     public IsolatedFileSystem(IPath parent, boolean readOnly, Set<String> protectedPaths) {

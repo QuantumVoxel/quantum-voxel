@@ -6,17 +6,19 @@ import dev.ultreon.quantum.util.*;
 import dev.ultreon.libs.functions.v0.consumer.*;
 import dev.ultreon.libs.functions.v0.consumer.IntConsumer;
 import dev.ultreon.libs.functions.v0.supplier.FloatSupplier;
-import dev.ultreon.quantum.util.RgbColor;
 import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.*;
 import java.util.function.DoubleConsumer;
 import java.util.function.LongConsumer;
+import java.util.stream.Collectors;
 
 public class ImGuiEx {
     public static void text(String label, Supplier<Object> value) {
@@ -230,7 +232,11 @@ public class ImGuiEx {
         try {
             T e = getter.get();
             ImInt index = new ImInt(e.ordinal());
-            if (ImGui.combo("##" + s1, index, Arrays.stream(e.getClass().getEnumConstants()).map(Enum::name).toArray(String[]::new))) {
+            List<String> collect = new ArrayList<>();
+            for (Enum<?> constant : e.getClass().getEnumConstants()) {
+                collect.add(constant.name());
+            }
+            if (ImGui.combo("##" + s1, index, collect.toArray(String[]::new))) {
                 setter.accept(EnumUtils.byOrdinal(index.get(), e));
             }
         } catch (Exception e) {

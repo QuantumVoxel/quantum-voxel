@@ -17,7 +17,7 @@ public final class C2SRequestChunkLoadPacket implements Packet<InGameServerPacke
     }
 
     public static C2SRequestChunkLoadPacket read(PacketIO buffer) {
-        var pos = buffer.readChunkVec();
+        ChunkVec pos = buffer.readChunkVec();
 
         return new C2SRequestChunkLoadPacket(pos);
     }
@@ -40,7 +40,7 @@ public final class C2SRequestChunkLoadPacket implements Packet<InGameServerPacke
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (C2SRequestChunkLoadPacket) obj;
+        C2SRequestChunkLoadPacket that = (C2SRequestChunkLoadPacket) obj;
         return Objects.equals(this.pos, that.pos);
     }
 

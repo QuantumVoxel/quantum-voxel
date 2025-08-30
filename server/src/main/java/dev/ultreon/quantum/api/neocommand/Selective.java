@@ -23,7 +23,7 @@ public final class Selective {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (Selective) obj;
+        Selective that = (Selective) obj;
         return Objects.equals(this.name, that.name) &&
                Objects.equals(this.selectors, that.selectors);
     }

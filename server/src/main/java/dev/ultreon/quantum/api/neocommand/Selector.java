@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.api.neocommand;
 
-import dev.ultreon.libs.functions.v0.misc.ThrowingFunction;
+import dev.ultreon.quantum.resources.ThrowingFunction;
 import dev.ultreon.quantum.ubo.DataIo;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -41,7 +41,7 @@ public final class Selector<T> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (Selector) obj;
+        Selector that = (Selector) obj;
         return Objects.equals(this.type, that.type) &&
                Objects.equals(this.value, that.value);
     }

@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.debug.profiler;
 
+import dev.ultreon.quantum.MapUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -38,7 +39,7 @@ public final class ThreadSection {
     }
 
     public Map<String, Section> getData() {
-        return Map.copyOf(this.data);
+        return MapUtils.copyOf(this.data);
     }
 
     private Map<String, Section.FinishedSection> collect() {

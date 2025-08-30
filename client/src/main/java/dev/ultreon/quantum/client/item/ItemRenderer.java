@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.item;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -19,13 +18,9 @@ import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.item.BlockItemModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.model.item.ItemModelRegistry;
-import dev.ultreon.quantum.item.BlockItem;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.Items;
-import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

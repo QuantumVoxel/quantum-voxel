@@ -16,7 +16,7 @@ public final class C2SItemUsePacket implements Packet<InGameServerPacketHandler>
     }
 
     public static C2SItemUsePacket read(PacketIO buffer) {
-        var hit = new BlockHit(buffer);
+        BlockHit hit = new BlockHit(buffer);
 
         return new C2SItemUsePacket(hit);
     }
@@ -44,7 +44,7 @@ public final class C2SItemUsePacket implements Packet<InGameServerPacketHandler>
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (C2SItemUsePacket) obj;
+        C2SItemUsePacket that = (C2SItemUsePacket) obj;
         return Objects.equals(this.hit, that.hit);
     }
 

@@ -1,11 +1,7 @@
 package dev.ultreon.quantum.data;
 
-import com.badlogic.gdx.utils.JsonValue;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @ApiStatus.Experimental

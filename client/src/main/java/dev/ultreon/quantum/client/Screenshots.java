@@ -2,15 +2,11 @@ package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Renderer;
-import dev.ultreon.quantum.sound.event.SoundEvents;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
 public class Screenshots {
@@ -176,23 +172,23 @@ public class Screenshots {
      * Saves a screenshot.
      */
     private void saveScreenshot() {
-        // Beginning of the method
-        if (client.spriteBatch != null && client.spriteBatch.isDrawing()) client.spriteBatch.flush();
-
-        Screenshot grabbed = Screenshot.grab(client.width, client.height);
-        FileHandle save = grabbed.save(Gdx.files.local("screenshots").child(String.format("%s.png", DateTimeFormatter.ofPattern("MM.dd.yyyy-HH.mm.ss").format(LocalDateTime.now()))));
-
-        // Saving screenshot to a file
-        this.screenshotFlashTime = System.currentTimeMillis();
-
-        // Playing sound effect for taking a screenshot
-        client.playSound(SoundEvents.SCREENSHOT, 0.5f);
-
-        // Adding notification message with the saved file name and path
-        client.notifications.add("Screenshot taken.", save.name(), "screenshots");
-
-        onScreenshot.accept(grabbed);
-        grabbed.dispose();
+//        // Beginning of the method
+//        if (client.spriteBatch != null && client.spriteBatch.isDrawing()) client.spriteBatch.flush();
+//
+//        Screenshot grabbed = Screenshot.grab(client.width, client.height);
+//        FileHandle save = grabbed.save(Gdx.files.local("screenshots").child(String.format("%s.png", DateTimeFormatter.ofPattern("MM.dd.yyyy-HH.mm.ss").format(LocalDateTime.now()))));
+//
+//        // Saving screenshot to a file
+//        this.screenshotFlashTime = System.currentTimeMillis();
+//
+//        // Playing sound effect for taking a screenshot
+//        client.playSound(SoundEvents.SCREENSHOT, 0.5f);
+//
+//        // Adding notification message with the saved file name and path
+//        client.notifications.add("Screenshot taken.", save.name(), "screenshots");
+//
+//        onScreenshot.accept(grabbed);
+//        grabbed.dispose();
     }
 
 }

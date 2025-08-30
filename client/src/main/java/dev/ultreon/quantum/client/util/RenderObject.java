@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.util;
 
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.util.GameNode;
 import dev.ultreon.quantum.util.GameObject;
 
 public abstract class RenderObject extends GameObject implements Renderable {
@@ -12,7 +13,7 @@ public abstract class RenderObject extends GameObject implements Renderable {
             bufferSource.getBuffer(renderPass).render(this);
         }
 
-        for (var child : getChildren()) {
+        for (GameNode child : getChildren()) {
             if (child instanceof RenderObject) {
                 ((RenderObject) child).render(bufferSource);
             } else if (child instanceof GameObject && renderPass != null) {

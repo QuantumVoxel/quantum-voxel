@@ -41,7 +41,7 @@ public final class ClickEvent implements Serializable {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (ClickEvent) obj;
+        ClickEvent that = (ClickEvent) obj;
         return Objects.equals(this.action, that.action) &&
                Objects.equals(this.value, that.value);
     }

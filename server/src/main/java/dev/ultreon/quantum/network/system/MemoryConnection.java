@@ -134,21 +134,21 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
             int id = theirPacketData.getId(packet);
 
-            instance.forEach(packetPacketInstance -> {
-                PacketListener listener = packetPacketInstance.listener();
+            for (PacketInstance<Packet<? extends TheirHandler>> packetInstance : instance) {
+                PacketListener listener = packetInstance.listener();
                 if (listener != null) {
                     listener.onSent();
                 }
-            });
+            }
 
             this.otherSide.receive(id, bos.toByteArray());
 
-            instance.forEach(packetPacketInstance -> {
+            for (PacketInstance<Packet<? extends TheirHandler>> packetPacketInstance : instance) {
                 PacketListener listener = packetPacketInstance.listener();
                 if (listener != null) {
                     listener.onSuccess();
                 }
-            });
+            }
         } catch (IOException e) {
             for (PacketInstance<@NotNull Packet<? extends TheirHandler>> packetInstance : instance) {
                 PacketListener listener = packetInstance.listener();

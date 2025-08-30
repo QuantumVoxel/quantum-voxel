@@ -266,7 +266,7 @@ public class WorldShader extends DefaultShader {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
                 Integer debugValue = GamePlatform.get().getDebugValue(DebugKey.SHADER_DEBUG_STATE);
-                shader.set(inputID, Objects.requireNonNullElse(debugValue, 0));
+                shader.set(inputID, dev.ultreon.quantum.ObjectUtils.requireNonNullElse(debugValue, 0));
             }
         };
     }

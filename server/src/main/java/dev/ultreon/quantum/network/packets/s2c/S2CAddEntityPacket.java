@@ -30,9 +30,9 @@ public final class S2CAddEntityPacket implements Packet<InGameClientPacketHandle
     }
 
     public static S2CAddEntityPacket read(PacketIO buffer) {
-        var id = buffer.readVarInt();
-        var type = Registries.ENTITY_TYPE.byRawId(buffer.readVarInt());
-        var position = new Vec3d(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
+        int id = buffer.readVarInt();
+        EntityType<?> type = Registries.ENTITY_TYPE.byRawId(buffer.readVarInt());
+        Vec3d position = new Vec3d(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
         MapType pipeline = buffer.readUbo();
 
         return new S2CAddEntityPacket(id, type, position, pipeline);
@@ -85,7 +85,7 @@ public final class S2CAddEntityPacket implements Packet<InGameClientPacketHandle
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CAddEntityPacket) obj;
+        S2CAddEntityPacket that = (S2CAddEntityPacket) obj;
         return this.id == that.id &&
                Objects.equals(this.type, that.type) &&
                Objects.equals(this.position, that.position) &&

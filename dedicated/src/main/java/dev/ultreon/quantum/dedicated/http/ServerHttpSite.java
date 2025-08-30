@@ -522,7 +522,7 @@ public class ServerHttpSite implements AutoCloseable {
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (PasswordProtectedHandler) obj;
+            PasswordProtectedHandler that = (PasswordProtectedHandler) obj;
             return Objects.equals(this.handler, that.handler);
         }
 

@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.ubo.types;
 
+import dev.ultreon.quantum.BitSetUtils;
 import dev.ultreon.quantum.ubo.DataTypes;
 
 import java.io.DataInput;
@@ -12,11 +13,7 @@ public class BitSetType implements DataType<BitSet> {
     private BitSet obj;
 
     public BitSetType(byte[] bits) {
-        this.obj = BitSet.valueOf(bits);
-    }
-
-    public BitSetType(long[] bits) {
-        this.obj = BitSet.valueOf(bits);
+        this.obj = dev.ultreon.quantum.BitSetUtils.fromByteArray(bits);
     }
 
     public BitSetType(BitSet obj) {
@@ -48,7 +45,7 @@ public class BitSetType implements DataType<BitSet> {
 
     @Override
     public void write(DataOutput output) throws IOException {
-        byte[] arr = this.obj.toByteArray();
+        byte[] arr = BitSetUtils.toByteArray(this.obj);
         if (arr.length >= 32768) throw new IllegalArgumentException("Bitset is too big to be written");
         output.writeShort(arr.length);
         for (byte b : arr) {
@@ -104,26 +101,6 @@ public class BitSetType implements DataType<BitSet> {
 
     public int length() {
         return obj.length();
-    }
-
-    public int cardinality() {
-        return obj.cardinality();
-    }
-
-    public int nextSetBit(int fromIndex) {
-        return obj.nextSetBit(fromIndex);
-    }
-
-    public int nextClearBit(int fromIndex) {
-        return obj.nextClearBit(fromIndex);
-    }
-
-    public int previousSetBit(int fromIndex) {
-        return obj.previousSetBit(fromIndex);
-    }
-
-    public int previousClearBit(int fromIndex) {
-        return obj.previousClearBit(fromIndex);
     }
 
     @Override

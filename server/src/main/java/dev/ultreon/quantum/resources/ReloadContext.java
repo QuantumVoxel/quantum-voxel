@@ -34,7 +34,12 @@ public class ReloadContext {
     }
 
     public boolean isDone() {
-        return futures.stream().allMatch(Promise::isDone);
+        for (Promise<?> future : futures) {
+            if (!future.isDone()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void finish() {

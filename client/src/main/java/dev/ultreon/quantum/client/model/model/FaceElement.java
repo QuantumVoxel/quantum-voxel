@@ -69,7 +69,7 @@ public final class FaceElement {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (FaceElement) obj;
+        FaceElement that = (FaceElement) obj;
         return Objects.equals(this.texture, that.texture) &&
                Objects.equals(this.uvs, that.uvs) &&
                this.rotation == that.rotation &&

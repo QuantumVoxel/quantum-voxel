@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +29,7 @@ public class CrashScreen extends Screen {
     /**
      * List of stack elements to be ignored in crash logs.
      */
-    private static final List<String> UNUSABLE_STACK_ELEMENTS = List.of(
+    private static final List<String> UNUSABLE_STACK_ELEMENTS = Arrays.asList(
             "dev.ultreon.quantum.crash.", // Crash handling
             "java.", "javax.", "javafx.", // Java packages
             "kotlin.", "kotlinx.",        // Kotlin packages
@@ -100,10 +101,15 @@ public class CrashScreen extends Screen {
         File destination = new File("crash-reports/" + CrashLog.getFileNameWithoutExt() + "-loading.txt");
 
         // Write each crash log to the specified file
-        crashes.forEach(Utils.with(destination, CrashLog::writeToFile));
+        Consumer<CrashLog> action = Utils.with(destination, CrashLog::writeToFile);
+        for (CrashLog crashLog : crashes) {
+            action.accept(crashLog);
+        }
 
         // Write each crash log to the log
-        crashes.forEach(CrashLog::writeToLog);
+        for (CrashLog crash : crashes) {
+            crash.writeToLog();
+        }
     }
 
     /**
@@ -141,11 +147,15 @@ public class CrashScreen extends Screen {
         String errorMessage = message == null ? "<No message>" : message.trim().replace("\n", " ").replace("\t", "").replace("java.lang.", "");
 
         // Get the first usable stack id from the throwable stack trace
-        String usableStackTrace = Arrays.stream(throwable.getStackTrace())
-                .filter(CrashScreen::isUsableStackElement)
-                .map(StackTraceElement::toString)
-                .findFirst()
-                .orElse("<Unknown>")
+        String found = "<Unknown>";
+        for (StackTraceElement stackTraceElement : throwable.getStackTrace()) {
+            if (isUsableStackElement(stackTraceElement)) {
+                String string = stackTraceElement.toString();
+                found = string;
+                break;
+            }
+        }
+        String usableStackTrace = found
                 .trim();
 
         // Render the crash log details using the renderer

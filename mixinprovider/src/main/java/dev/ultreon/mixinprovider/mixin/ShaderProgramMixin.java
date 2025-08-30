@@ -1,7 +1,5 @@
 package dev.ultreon.mixinprovider.mixin;
 
-import com.badlogic.gdx.graphics.g3d.Shader;
-import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import dev.ultreon.mixinprovider.GdxRegistries;
 import org.spongepowered.asm.mixin.Mixin;

@@ -3,13 +3,11 @@ package dev.ultreon.quantum.client;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.IntMap;
 import com.github.tommyettinger.textra.Font;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.text.LanguageManager;
 import dev.ultreon.quantum.client.util.Utils;
-import regexodus.Category;
 
 import java.util.ArrayList;
 import java.util.List;

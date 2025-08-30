@@ -17,7 +17,7 @@ public final class S2CRemovePlayerPacket implements Packet<InGameClientPacketHan
     }
 
     public static S2CRemovePlayerPacket read(PacketIO buffer) {
-        var uuid = buffer.readUuid();
+        UUID uuid = buffer.readUuid();
 
         return new S2CRemovePlayerPacket(uuid);
     }
@@ -47,7 +47,7 @@ public final class S2CRemovePlayerPacket implements Packet<InGameClientPacketHan
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CRemovePlayerPacket) obj;
+        S2CRemovePlayerPacket that = (S2CRemovePlayerPacket) obj;
         return Objects.equals(this.uuid, that.uuid);
     }
 

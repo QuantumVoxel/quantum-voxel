@@ -49,7 +49,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Server-side player implementation.
@@ -759,7 +758,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
         String[] args = new String[cmd.length - 2];
         System.arraycopy(cmd, 2, args, 0, args.length);
-        Debugger.log(String.join(" ", args));
+        Debugger.log(dev.ultreon.quantum.StringUtils.join(" ", args));
     }
 
     private void dbgGamemode(String[] cmd) {
@@ -958,7 +957,10 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public Collection<String> getVariableNames(Class<?> clazz) {
-        return PlayerVariables.get(this).getVariablesByType(clazz).sorted().collect(Collectors.toList());
+        Set<String> variablesByType = PlayerVariables.get(this).getVariablesByType(clazz);
+        List<String> list = new ArrayList<>(variablesByType);
+        list.sort(null);
+        return list;
     }
 
     public void loadWithWorldPos(MapType data) {

@@ -16,7 +16,7 @@ public final class S2CGamemodePacket implements Packet<InGameClientPacketHandler
     }
 
     public static S2CGamemodePacket read(PacketIO buffer) {
-        var gameMode = GameMode.byOrdinal(buffer.readByte());
+        GameMode gameMode = GameMode.byOrdinal(buffer.readByte());
 
         return new S2CGamemodePacket(gameMode);
     }
@@ -46,7 +46,7 @@ public final class S2CGamemodePacket implements Packet<InGameClientPacketHandler
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CGamemodePacket) obj;
+        S2CGamemodePacket that = (S2CGamemodePacket) obj;
         return Objects.equals(this.gameMode, that.gameMode);
     }
 

@@ -19,8 +19,8 @@ import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +48,7 @@ public class TextureAtlasManager implements Manager<TextureAtlas> {
     @SuppressWarnings("GDXJavaUnsafeIterator")
     @Override
     public void reload(ReloadContext context) {
-        for (TextureAtlas atlas : List.copyOf(atlasMap.values())) {
+        for (TextureAtlas atlas : new ArrayList<>(atlasMap.values())) {
             context.submit(atlas::dispose);
         }
 

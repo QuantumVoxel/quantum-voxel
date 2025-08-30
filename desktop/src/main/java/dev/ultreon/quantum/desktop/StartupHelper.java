@@ -30,9 +30,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Adds some utilities to ensure that the JVM was started with the
@@ -119,7 +118,7 @@ public class StartupHelper {
         // The following line is used assuming you target Java 8, the minimum for LWJGL3.
 //        String javaExecPath = System.getProperty("java.home") + separator + "bin" + separator + "java";
         // If targeting Java 9 or higher, you could use the following instead of the above line:
-        String javaExecPath = ProcessHandle.current().info().command().orElseThrow();
+        String javaExecPath = ProcessHandle.current().info().command().get();
 
         if (!(new File(javaExecPath)).exists()) {
             System.err.println(
@@ -237,7 +236,7 @@ public class StartupHelper {
         // The following line is used assuming you target Java 8, the minimum for LWJGL3.
 //        String javaExecPath = System.getProperty("java.home") + separator + "bin" + separator + "java";
         // If targeting Java 9 or higher, you could use the following instead of the above line:
-        String javaExecPath = procInfo.command().orElseThrow();
+        String javaExecPath = procInfo.command().get();
 
         if (!new File(javaExecPath).exists()) {
             System.err.println("A Java installation could not be found. If you are distributing this app with a bundled JRE, be sure to set the -XstartOnFirstThread argument manually!");
@@ -310,7 +309,13 @@ public class StartupHelper {
             jvmArgs.add("-Xdock:name=Quantum Voxel");
             jvmArgs.add("-Xdock:icon=Resources/Quantum Voxel.icns");
         }
-        jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments().stream().filter(v -> !v.startsWith("-Xmx") && !v.startsWith("-Xms")).collect(Collectors.toList()));
+        List<String> result = new ArrayList<>();
+        for (String v : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
+            if (!v.startsWith("-Xmx") && !v.startsWith("-Xms")) {
+                result.add(v);
+            }
+        }
+        jvmArgs.addAll(result);
 
         Gson gson = new Gson();
         Path configPath = launcherPath.resolve("launch_cfg.json");
@@ -391,7 +396,13 @@ public class StartupHelper {
                 if (launcherPath != null && Files.notExists(launcherPath)) {
                     Files.createDirectories(launcherPath);
                 }
-                Process process = new ProcessBuilder(jvmArgs.stream().filter(Objects::nonNull).toArray(String[]::new))
+                List<String> list = new ArrayList<>();
+                for (String jvmArg : jvmArgs) {
+                    if (jvmArg != null) {
+                        list.add(jvmArg);
+                    }
+                }
+                Process process = new ProcessBuilder(list.toArray(new String[0]))
                         .directory(launcherPath != null ? launcherPath.toFile() : new File(".")
                                 .getAbsoluteFile())
                         .redirectErrorStream(true)

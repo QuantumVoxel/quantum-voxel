@@ -29,7 +29,7 @@ public final class Argument<T> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (Argument) obj;
+        Argument that = (Argument) obj;
         return Objects.equals(this.type, that.type) &&
                Objects.equals(this.name, that.name) &&
                Objects.equals(this.value, that.value);

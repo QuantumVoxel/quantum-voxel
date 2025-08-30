@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Inventory extends ContainerMenu {
     public static final int MAX_SLOTS = 36;
@@ -66,7 +67,7 @@ public class Inventory extends ContainerMenu {
     }
 
     public List<ItemSlot> getHotbarSlots() {
-        return List.of(this.hotbar);
+        return Arrays.asList(this.hotbar);
     }
 
     /**
@@ -135,17 +136,22 @@ public class Inventory extends ContainerMenu {
 
     @Override
     public List<ItemSlot> getInputs() {
-        return List.of(this.slots);
+        return Arrays.asList(this.slots);
     }
 
     @Override
     public List<ItemSlot> getOutputs() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override
     public @NotNull Iterator<ItemStack> iterator() {
-        return Arrays.stream(this.slots).map(ItemSlot::getItem).iterator();
+        List<ItemStack> list = new ArrayList<>();
+        for (ItemSlot slot : this.slots) {
+            ItemStack item = slot.getItem();
+            list.add(item);
+        }
+        return list.iterator();
     }
 
 

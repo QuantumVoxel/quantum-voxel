@@ -20,7 +20,7 @@ public final class S2CPlayerSetPosPacket implements Packet<InGameClientPacketHan
     }
 
     public static S2CPlayerSetPosPacket read(PacketIO buffer) {
-        var pos = buffer.readVec3d(new Vec3d());
+        Vec3d pos = buffer.readVec3d(new Vec3d());
 
         return new S2CPlayerSetPosPacket(pos);
     }
@@ -50,7 +50,7 @@ public final class S2CPlayerSetPosPacket implements Packet<InGameClientPacketHan
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CPlayerSetPosPacket) obj;
+        S2CPlayerSetPosPacket that = (S2CPlayerSetPosPacket) obj;
         return Objects.equals(this.pos, that.pos);
     }
 

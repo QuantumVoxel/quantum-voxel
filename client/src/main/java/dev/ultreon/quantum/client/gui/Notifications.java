@@ -1,15 +1,13 @@
 package dev.ultreon.quantum.client.gui;
 
-import dev.ultreon.libs.datetime.v0.Duration;
+import dev.ultreon.quantum.ListUtils;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.icon.Icon;
 import dev.ultreon.quantum.client.util.GuiRenderable;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.util.RgbColor;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.*;
-import java.util.concurrent.locks.Lock;
 
 public class Notifications implements GuiRenderable {
     private static final int HEIGHT = 41;
@@ -18,7 +16,7 @@ public class Notifications implements GuiRenderable {
     private static final int GAP = 5;
 
     private final QuantumClient client;
-    private final Deque<Notification> notifications = new ArrayDeque<>();
+    private final List<Notification> notifications = new ArrayList<>();
     private final Set<UUID> usedNotifications = new HashSet<>();
     private float motionY;
 
@@ -32,7 +30,7 @@ public class Notifications implements GuiRenderable {
 
         int y = (int) (Notifications.OFFSET + this.motionY);
 
-        this.notifications.removeIf(notification1 -> {
+        ListUtils.removeIf(this.notifications, notification1 -> {
             if (notification1.isFinished()) {
                 this.motionY += Notifications.HEIGHT + Notifications.GAP;
                 return true;
@@ -110,7 +108,7 @@ public class Notifications implements GuiRenderable {
     public void unavailable(String feature) {
         this.add(Notification.builder("Unavailable Feature", String.format("'%s' isn't available yet.", feature))
                 .subText("Feature Locker")
-                .duration(Duration.ofSeconds(5))
+                .duration(5000)
                 .build()
         );
     }

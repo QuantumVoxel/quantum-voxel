@@ -15,7 +15,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.TextureDescriptor;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.*;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.DevFlag;
@@ -407,12 +406,21 @@ public class ImGuiOverlay {
         Set<String> allClasses = GamePlatform.get().getLoadedClasses();
         filteredClasses.clear();
         if (!inputBuffer1.isEmpty()) {
+            List<String> toSort = new ArrayList<>();
+            for (String cls : allClasses) {
+                if (cls.toLowerCase().contains(inputBuffer1.get().toLowerCase())) {
+                    toSort.add(cls);
+                }
+            }
+            toSort.sort(null);
+            List<String> list = new ArrayList<>();
+            long limit = 100;
+            for (String cls : toSort) {
+                if (limit-- == 0) break;
+                list.add(cls);
+            }
             filteredClasses.addAll(
-                    allClasses.stream()
-                            .filter(cls -> cls.toLowerCase().contains(inputBuffer1.get().toLowerCase()))
-                            .sorted()
-                            .limit(100)
-                            .toList()
+                    list
             );
         }
     }
@@ -874,7 +882,12 @@ public class ImGuiOverlay {
             } else if (object instanceof List<?> list) {
                 return () -> {
                     ImInt selected = new ImInt(-1);
-                    ImGui.listBox("##List" + field.hashCode(), selected, list.stream().map(Object::toString).toArray(String[]::new));
+                    List<String> result = new ArrayList<>();
+                    for (Object o : list) {
+                        String string = o.toString();
+                        result.add(string);
+                    }
+                    ImGui.listBox("##List" + field.hashCode(), selected, result.toArray(new String[0]));
                     ImGui.sameLine(200);
                     ImGui.setNextItemWidth(ImGui.getWindowSizeX() - ImGui.getCursorPosX() - 110);
                     if (ImGui.treeNode(field.getName())) {
@@ -1257,7 +1270,12 @@ public class ImGuiOverlay {
     private static void renderProfiler(Profiler profiler) {
         if (nextProfilerCollect < System.currentTimeMillis()) {
             profilerData = profiler.collect();
-            threads = profilerData.getThreads().stream().sorted(Comparator.comparing(Thread::getName)).toList();
+            List<Thread> list = new ArrayList<>();
+            for (Thread thread : profilerData.getThreads()) {
+                list.add(thread);
+            }
+            list.sort(Comparator.comparing(Thread::getName));
+            threads = list;
             nextProfilerCollect = System.currentTimeMillis() + 1000;
         }
         for (Thread thread : threads) {
@@ -1426,7 +1444,14 @@ public class ImGuiOverlay {
         ImGui.setNextWindowPos(ImGui.getMainViewport().getPosX() + 100, ImGui.getMainViewport().getPosY() + 100, ImGuiCond.Once);
         if (ImGui.begin("Model Viewer", ImGuiOverlay.getDefaultFlags())) {
             if (ImGui.button("Reload")) {
-                modelViewerList = QuantumClient.get().entityModelManager.getRegistry().keySet().stream().map(EntityType::getId).map(Objects::toString).sorted(String.CASE_INSENSITIVE_ORDER).toArray(String[]::new);
+                List<String> list = new ArrayList<>();
+                for (EntityType<?> entityType : QuantumClient.get().entityModelManager.getRegistry().keySet()) {
+                    NamespaceID id = entityType.getId();
+                    String string = Objects.toString(id);
+                    list.add(string);
+                }
+                list.sort(String.CASE_INSENSITIVE_ORDER);
+                modelViewerList = list.toArray(new String[0]);
             }
 
             ImGui.text("Select Model:");
@@ -1734,7 +1759,7 @@ public class ImGuiOverlay {
 
     private static int getDefaultFlags() {
         boolean cursorCaught = Gdx.input.isCursorCatched();
-        var flags = ImGuiWindowFlags.None;
+        int flags = ImGuiWindowFlags.None;
         if (cursorCaught) flags |= ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoInputs;
         return flags;
     }

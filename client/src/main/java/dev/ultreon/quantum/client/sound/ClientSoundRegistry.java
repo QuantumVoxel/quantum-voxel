@@ -38,9 +38,11 @@ public class ClientSoundRegistry {
     }
 
     public void reload() {
-        Collection<Sound> old = List.copyOf(soundMap.values());
+        Collection<Sound> old = new ArrayList<>(soundMap.values());
         this.soundMap.clear();
-        old.forEach(Sound::dispose);
+        for (Sound sound : old) {
+            sound.dispose();
+        }
 
         this.registerSounds();
     }

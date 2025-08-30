@@ -29,9 +29,9 @@ public final class C2SModPacket implements Packet<InGameServerPacketHandler> {
     }
 
     public static C2SModPacket read(PacketIO buffer) {
-        var channelId = buffer.readId();
-        var channel = NetworkChannel.getChannel(channelId);
-        var packet = channel.getDecoder(buffer.readUnsignedShort()).apply(buffer);
+        NamespaceID channelId = buffer.readId();
+        NetworkChannel channel = NetworkChannel.getChannel(channelId);
+        ModPacket<? extends ModPacket<?>> packet = channel.getDecoder(buffer.readUnsignedShort()).apply(buffer);
 
         return new C2SModPacket(channel, channelId, packet);
     }
@@ -73,7 +73,7 @@ public final class C2SModPacket implements Packet<InGameServerPacketHandler> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (C2SModPacket) obj;
+        C2SModPacket that = (C2SModPacket) obj;
         return Objects.equals(this.channel, that.channel) &&
                Objects.equals(this.channelId, that.channelId) &&
                Objects.equals(this.packet, that.packet);

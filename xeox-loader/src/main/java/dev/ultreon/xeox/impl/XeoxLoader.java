@@ -12,10 +12,8 @@ import dev.ultreon.xeox.impl.games.IGameProvider;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
-import org.spongepowered.asm.service.IMixinService;
 import org.spongepowered.asm.service.MixinService;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +26,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dev.ultreon.xeox.impl.main.Main.LOGGER;
@@ -74,9 +71,9 @@ public class XeoxLoader implements IXeoxLoader {
     public List<IMod> getMods() {
         ClassLoader calledClassLoader = getCalledClassLoader(IXeoxClassLoader.class::isInstance);
         if (calledClassLoader instanceof ModClassLoader modClassLoader) {
-            return List.of(modClassLoader.mod);
+            return Arrays.asList(modClassLoader.mod);
         } else if (calledClassLoader instanceof GameClassLoader) {
-            return List.copyOf(mods.values());
+            return new ArrayList<>(mods.values());
         } else if (calledClassLoader == null) {
             throw new SecurityException("No class loader found to get mods");
         } else {
@@ -86,7 +83,7 @@ public class XeoxLoader implements IXeoxLoader {
 
     @Override
     public List<String> getModIds() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override
@@ -214,7 +211,7 @@ public class XeoxLoader implements IXeoxLoader {
                     jarFile.toString(),
                     title,
                     message,
-                    String.join(",", options))
+                    dev.ultreon.quantum.StringUtils.join(",", options))
                     .directory(tempDirectory.toFile())
                     .redirectErrorStream(true)
                     .inheritIO()
@@ -243,7 +240,7 @@ public class XeoxLoader implements IXeoxLoader {
 
             if (path.endsWith(".jar")) {
                 try {
-                    var modFs = new JavaFileSystem(FileSystems.newFileSystem(p, (ClassLoader) null));
+                    JavaFileSystem modFs = new JavaFileSystem(FileSystems.newFileSystem(p, (ClassLoader) null));
                     IPath iPath = modFs.path("xeox.mod.json");
                     if (!iPath.exists()) {
                         classLoader.loadJar(modFs);
@@ -255,7 +252,7 @@ public class XeoxLoader implements IXeoxLoader {
                 }
             } else if (Files.isDirectory(p)) {
                 try {
-                    var fs = new IsolatedFileSystem(JavaFileSystem.getDefault().path(path), true);
+                    IsolatedFileSystem fs = new IsolatedFileSystem(JavaFileSystem.getDefault().path(path), true);
                     IPath iPath = fs.path("xeox.mod.json");
                     if (!iPath.exists()) {
                         classLoader.loadJar(fs);
@@ -296,7 +293,7 @@ public class XeoxLoader implements IXeoxLoader {
             if (path.endsWith(".jar")) {
                 while (true) {
                     try {
-                        var modFs = new JavaFileSystem(FileSystems.newFileSystem(p, (ClassLoader) null));
+                        JavaFileSystem modFs = new JavaFileSystem(FileSystems.newFileSystem(p, (ClassLoader) null));
                         if (modFs.path("xeox.mod.json").exists()) {
                             LOGGER.info("Mod {} has a xeox.mod.json file, loading it", p);
                             classLoader.loadMod(modFs);
@@ -322,7 +319,7 @@ public class XeoxLoader implements IXeoxLoader {
                 }
             } else if (Files.isDirectory(p)) {
                 try {
-                    var fs = new IsolatedFileSystem(JavaFileSystem.getDefault().path(path), true);
+                    IsolatedFileSystem fs = new IsolatedFileSystem(JavaFileSystem.getDefault().path(path), true);
                     if (fs.path("xeox.mod.json").exists()) {
                         LOGGER.info("Mod {} has a xeox.mod.json file, loading it", p);
                         classLoader.loadMod(fs);
@@ -344,7 +341,7 @@ public class XeoxLoader implements IXeoxLoader {
 
                 LOGGER.info("Loading mod {}", modPath);
 
-                try (var modFs = new JavaFileSystem(FileSystems.newFileSystem(modPath, (ClassLoader) null))) {
+                try (JavaFileSystem modFs = new JavaFileSystem(FileSystems.newFileSystem(modPath, (ClassLoader) null))) {
                     IPath path = modFs.path("xeox.mod.json");
                     if (path.exists()) {
                         LOGGER.info("Mod {} has a xeox.mod.json file, loading it", modPath);
@@ -365,13 +362,18 @@ public class XeoxLoader implements IXeoxLoader {
             } else {
                 sb.append("No stack trace available");
             }
-            if (JOptionPane.showConfirmDialog(null, "An error occurred while loading mods:\n" + sb, "Error", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                System.exit(0);
-            }
+//            if (JOptionPane.showConfirmDialog(null, "An error occurred while loading mods:\n" + sb, "Error", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+//                System.exit(0);
+//            }
         }
 
         if (!loaderExceptions.isEmpty()) {
-            choose("Error", "Following errors occurred:\n" + loaderExceptions.stream().map(Exception::getMessage).collect(Collectors.joining("\n")), new String[]{"Quit"});
+            StringJoiner joiner = new StringJoiner("\n");
+            for (ModLoaderException loaderException : loaderExceptions) {
+                String message = loaderException.getMessage();
+                joiner.add(message);
+            }
+            choose("Error", "Following errors occurred:\n" + joiner.toString(), new String[]{"Quit"});
             System.exit(1);
         }
 
@@ -394,7 +396,7 @@ public class XeoxLoader implements IXeoxLoader {
             aClass.getMethod("setInstance", IXeoxLoader.class).invoke(null, instance);
         } catch (ClassNotFoundException e) {
             LOGGER.error("Failed to load XeoxLoaderProvider", e);
-            JOptionPane.showMessageDialog(null, "Failed to load XeoxLoaderProvider", "Error", JOptionPane.ERROR_MESSAGE);
+//            JOptionPane.showMessageDialog(null, "Failed to load XeoxLoaderProvider", "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
             throw new RuntimeException(e);
@@ -404,7 +406,7 @@ public class XeoxLoader implements IXeoxLoader {
             classLoader.loadMainClass(mainClass, args);
         } catch (ClassNotFoundException e) {
             LOGGER.error("Failed to load main class", e);
-            JOptionPane.showMessageDialog(null, "Failed to load main class", "Error", JOptionPane.ERROR_MESSAGE);
+//            JOptionPane.showMessageDialog(null, "Failed to load main class", "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         }
     }
@@ -431,7 +433,7 @@ public class XeoxLoader implements IXeoxLoader {
     }
 
     private void initMixins() {
-        if (!configurations.isEmpty() && choose("Warning", "Some mods can inject code into the game or other mods!\n\nThis may allow mods to bypass security policy, but can be used legitimately.\n\nThe following mixin configurations were loaded:\n" + String.join("\n", configurations), new String[]{"Continue", "Cancel"}) == 1) {
+        if (!configurations.isEmpty() && choose("Warning", "Some mods can inject code into the game or other mods!\n\nThis may allow mods to bypass security policy, but can be used legitimately.\n\nThe following mixin configurations were loaded:\n" + dev.ultreon.quantum.StringUtils.join("\n", configurations), new String[]{"Continue", "Cancel"}) == 1) {
             System.exit(0);
         }
 

@@ -1,6 +1,5 @@
 package dev.ultreon.xeox.impl;
 
-import dev.ultreon.logging.compat.ULoggerMarker;
 import dev.ultreon.xeox.api.IFileSystem;
 import dev.ultreon.xeox.api.IPath;
 import dev.ultreon.xeox.impl.main.Main;
@@ -19,7 +18,6 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
-import java.nio.channels.FileChannel;
 import java.util.*;
 
 public class ModClassLoader extends ClassLoader implements IXeoxClassLoader {

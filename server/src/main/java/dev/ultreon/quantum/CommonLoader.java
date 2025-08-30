@@ -4,7 +4,6 @@ import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.api.events.LoadingEvent;
 import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.scripting.ScriptLoader;
 import dev.ultreon.quantum.text.icon.EmoteMap;
 import dev.ultreon.quantum.text.icon.IconMap;
 import dev.ultreon.quantum.util.ModLoadingContext;

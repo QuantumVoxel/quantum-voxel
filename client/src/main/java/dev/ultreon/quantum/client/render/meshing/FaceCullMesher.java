@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.render.meshing;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
 import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.world.AmbientOcclusion;
@@ -39,9 +40,9 @@ public class FaceCullMesher implements Mesher {
             BoundingBox bounds, OpaqueFaces opaqueFaces, ChunkModelBuilder meshPartBuilder,
             int x, int y, int z, AmbientOcclusion ambientOcclusion
     ) {
-        final var block = chunk.getSafe(x, y, z);
+        final BlockState block = chunk.getSafe(x, y, z);
         if (!block.isAir()) {
-            final var model = QuantumClient.get().getBlockModel(block);
+            final BlockModel model = QuantumClient.get().getBlockModel(block);
             BlockState back = chunk.getSafe(x, y, z - 1);
             BlockState front = chunk.getSafe(x, y, z + 1);
             BlockState left = chunk.getSafe(x - 1, y, z);

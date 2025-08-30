@@ -37,7 +37,7 @@ public final class S2CTimeSyncPacket implements Packet<InGameClientPacketHandler
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CTimeSyncPacket) obj;
+        S2CTimeSyncPacket that = (S2CTimeSyncPacket) obj;
         return this.gameTime == that.gameTime;
     }
 

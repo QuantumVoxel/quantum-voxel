@@ -8,8 +8,8 @@ import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A class that holds items with a certain amount and with data.
@@ -156,7 +156,7 @@ public class ItemStack {
         }
 
         if (this.count - amount <= 0) {
-            var remainder = amount - this.count;
+            int remainder = amount - this.count;
             this.count = 0;
             this.item = Items.AIR;
             return remainder;
@@ -177,7 +177,7 @@ public class ItemStack {
             return amount;
 
         if (this.count + amount >= this.getItem().getMaxStackSize()) {
-            var overflown = this.count + amount - this.getItem().getMaxStackSize();
+            int overflown = this.count + amount - this.getItem().getMaxStackSize();
             this.count = this.getItem().getMaxStackSize();
             return overflown;
         } else {
@@ -322,7 +322,12 @@ public class ItemStack {
     }
 
     public String getFullDescription() {
-        String join = String.join("\n", getDescription().stream().map(TextObject::getText).collect(Collectors.toList()));
+        List<String> list = new ArrayList<>();
+        for (TextObject textObject : getDescription()) {
+            String text = textObject.getText();
+            list.add(text);
+        }
+        String join = dev.ultreon.quantum.StringUtils.join("\n", list);
         return join + "\n\n" + getExtendedDescription();
     }
 

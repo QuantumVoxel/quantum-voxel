@@ -8,7 +8,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.util.RenderObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;

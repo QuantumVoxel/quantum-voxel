@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.world.gen;
 
 import dev.ultreon.quantum.world.BuilderChunk;
+import dev.ultreon.quantum.world.structure.BlockPoint;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 
 import java.util.ArrayList;
@@ -18,10 +19,10 @@ public class FeatureData {
                 return;
             }
             for (FeatureInfo featureInfo : featureInfos) {
-                featureInfo.points().forEach(point -> {
+                for (BlockPoint point : featureInfo.points()) {
                     if (point.pos().chunk().equals(chunk.getVec()))
                         chunk.set(point.pos().chunkLocal(), point.state());
-                });
+                }
             }
         }
     }
@@ -32,10 +33,10 @@ public class FeatureData {
                 this.featureData.computeIfAbsent(chunkVec, k -> new ArrayList<>()).add(featureInfo);
 
                 if (chunkVec.equals(origin.getVec())) {
-                    featureInfo.points().forEach(point -> {
+                    for (BlockPoint point : featureInfo.points()) {
                         if (point.pos().chunk().equals(chunkVec))
                             origin.set(point.pos().chunkLocal(), point.state());
-                    });
+                    }
                 }
             }
         }

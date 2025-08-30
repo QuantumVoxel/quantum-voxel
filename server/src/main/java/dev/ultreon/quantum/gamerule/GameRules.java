@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.gamerule;
 
 import dev.ultreon.quantum.api.neocommand.CommandExecuteException;
-import org.apache.commons.lang3.EnumUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -35,7 +34,12 @@ public class GameRules {
     }
 
     public @Nullable Rule<?> getRule(String name) {
-        return this.rules.stream().filter(rule -> Objects.equals(rule.getKey(), name)).findFirst().orElse(null);
+        for (Rule<?> rule : this.rules) {
+            if (Objects.equals(rule.getKey(), name)) {
+                return rule;
+            }
+        }
+        return null;
     }
 
     private static class NumberRule implements Rule<Double> {

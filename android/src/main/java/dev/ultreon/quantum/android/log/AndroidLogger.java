@@ -3,8 +3,6 @@ package dev.ultreon.quantum.android.log;
 import android.util.Log;
 import dev.ultreon.quantum.Logger;
 
-import java.text.MessageFormat;
-
 public class AndroidLogger implements Logger {
     private final String name;
 

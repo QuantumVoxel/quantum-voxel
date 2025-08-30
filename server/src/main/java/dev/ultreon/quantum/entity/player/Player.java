@@ -22,7 +22,6 @@ import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.UUID;
@@ -366,7 +365,7 @@ public abstract class Player extends LivingEntity {
         this.flyingSpeed = data.getFloat("flyingSpeed", this.flyingSpeed);
         this.crouchModifier = data.getFloat("crouchingModifier", this.crouchModifier);
         this.runModifier = data.getFloat("runModifier", this.runModifier);
-        this.gamemode = Objects.requireNonNullElse(GameMode.byOrdinal(data.getByte("gamemode", (byte) 0)), GameMode.SURVIVAL);
+        this.gamemode = dev.ultreon.quantum.ObjectUtils.requireNonNullElse(GameMode.byOrdinal(data.getByte("gamemode", (byte) 0)), GameMode.SURVIVAL);
         this.abilities.load(data.getMap("Abilities"));
         this.inventory.load(data.getList("Inventory"));
     }
@@ -539,10 +538,17 @@ public abstract class Player extends LivingEntity {
      * @return the nearest entity if any are present, otherwise null
      */
     public @Nullable Entity nearestEntity() {
-        return Arrays.stream(this.world.getEntities()
-                .toArray(Entity.class))
-                .min(Comparator.comparing(entity -> entity.getPosition().dst(this.getPosition())))
-                .orElse(null);
+        boolean seen = false;
+        Entity best = null;
+        Comparator<Entity> comparator = Comparator.comparing(entity -> entity.getPosition().dst(this.getPosition()));
+        for (Entity entity1 : this.world.getEntities()
+                .toArray(Entity.class)) {
+            if (!seen || comparator.compare(entity1, best) < 0) {
+                seen = true;
+                best = entity1;
+            }
+        }
+        return seen ? best : null;
     }
 
     /**
@@ -553,12 +559,20 @@ public abstract class Player extends LivingEntity {
      * @return The nearest entity of the specified class type, or null if no such entity is found.
      */
     public @Nullable <T extends Entity> T nearestEntity(Class<T> clazz) {
-        return Arrays.stream(this.world.getEntities()
-                .toArray(Entity.class))
-                .filter(clazz::isInstance)
-                .map(clazz::cast)
-                .min(Comparator.comparing(entity -> entity.getPosition().dst(this.getPosition())))
-                .orElse(null);
+        boolean seen = false;
+        T best = null;
+        Comparator<T> comparator = Comparator.comparing(entity -> entity.getPosition().dst(this.getPosition()));
+        for (Entity entity1 : this.world.getEntities()
+                .toArray(Entity.class)) {
+            if (clazz.isInstance(entity1)) {
+                T obj = clazz.cast(entity1);
+                if (!seen || comparator.compare(obj, best) < 0) {
+                    seen = true;
+                    best = obj;
+                }
+            }
+        }
+        return seen ? best : null;
     }
 
     /**

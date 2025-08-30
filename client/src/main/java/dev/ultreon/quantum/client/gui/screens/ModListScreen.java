@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.gui.screens;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Align;
@@ -23,11 +22,8 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class ModListScreen extends Screen {
     private static final NamespaceID DEFAULT_MOD_ICON = QuantumClient.id("textures/gui/icons/missing_mod.png");
@@ -51,6 +47,11 @@ public class ModListScreen extends Screen {
 
     @Override
     public void init() {
+        List<Mod> result = new ArrayList<>();
+        for (Mod mod1 : GamePlatform.get().getMods()) {
+            result.add(mod1);
+        }
+        result.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
         this.list = add(new SelectionList<Mod>()
                 .withItemHeight(48)
                 .withDrawBackground(true)
@@ -59,10 +60,7 @@ public class ModListScreen extends Screen {
                 .withCutButtons(false)
                 .withSelectable(true)
                 .withCallback(this::selectMod)
-                .addEntries(GamePlatform.get().getMods()
-                        .stream()
-                        .sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName()))
-                        .collect(Collectors.toList())));
+                .addEntries(result));
 
         this.buttonPlatform = add(Platform.create());
 
@@ -185,7 +183,7 @@ public class ModListScreen extends Screen {
     }
 
     private void renderItem(Renderer renderer, Mod mod, int y, boolean selected, float deltaTime) {
-        var x = this.list.getX();
+        int x = this.list.getX();
 
         if (selected) renderer.drawHighlightPlatform(list.pos.x, y, list.size.width, list.getItemHeight(), 2);
         else renderer.drawPlatform(list.pos.x, y, list.size.width, list.getItemHeight(), 4);
@@ -306,10 +304,15 @@ public class ModListScreen extends Screen {
 
     private void selectMod(Mod caller) {
         this.descriptionLbl.setText(caller.getDescription() != null ? caller.getDescription() : "[/][gray]No description");
+        Optional<String> found = Optional.empty();
+        for (String s : caller.getAuthors()) {
+            found = Optional.of(s);
+            break;
+        }
         this.infoLbl.setText("[*][white]" + caller.getName() + "\n \n" +
                 "[ ][cyan]ID: [light grey]" + caller.getId() + "\n" +
                 "[ ][cyan]Version: [light grey]" + caller.getVersion() + "\n" +
-                caller.getAuthors().stream().findFirst().map(modContributor -> Formatter.format("[cyan]Made By: [light grey]" + modContributor)).orElse(Formatter.format("[yellow]Made By Anonymous")) + "\n" +
+                found.map(modContributor -> Formatter.format("[cyan]Made By: [light grey]" + modContributor)).orElse(Formatter.format("[yellow]Made By Anonymous")) + "\n" +
                 "[cyan]License: [light grey]" + caller.getLicense());
 
         try {

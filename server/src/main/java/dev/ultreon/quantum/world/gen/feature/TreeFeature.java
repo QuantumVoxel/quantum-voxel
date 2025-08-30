@@ -51,7 +51,7 @@ public class TreeFeature extends TerrainFeature {
                 System.out.println("[Start " + Thread.currentThread().getId() + "] TreeFeature: " + x + ", " + z + ", " + y);
             }
 
-            var trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
+            int trunkHeight = this.random.nextInt(this.minTrunkHeight, this.maxTrunkHeight);
 
             for (int ty = y; ty < y + trunkHeight; ty++) {
                 setter.set(x, ty, z, this.trunk.getDefaultState());

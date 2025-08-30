@@ -8,20 +8,14 @@ import dev.ultreon.quantum.text.icon.EmoteMap;
 import dev.ultreon.quantum.text.icon.IconMap;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import it.unimi.dsi.fastutil.chars.CharArrayList;
-import it.unimi.dsi.fastutil.chars.CharList;
-import it.unimi.dsi.fastutil.chars.CharPredicate;
-import org.apache.commons.lang3.CharUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 public class Formatter {
     private final boolean allowFormatting;
@@ -33,7 +27,7 @@ public class Formatter {
     private MutableText builder = MutableText.literal("");
 
     // Predicates
-    private final CharPredicate emotePredicate = it -> CharUtils.isAsciiAlphanumeric(it) || "_-".contains(Character.toString(it));
+    private final Predicate<Character> emotePredicate = it -> CharUtils.isAsciiAlphanumeric(it) || "_-".contains(Character.toString(it));
 
     // Redirect
     private ParseResult redirectValue = null;
@@ -133,12 +127,12 @@ public class Formatter {
                 this.offset++;
             }
         } else {
-            var offset = 0;
+            int offset = 0;
             while (offset < this.message.length()) {
-                var c = this.message.charAt(offset);
+                char c = this.message.charAt(offset);
                 if (c == '@') {
                     offset++;
-                    final var name = new StringBuilder();
+                    final StringBuilder name = new StringBuilder();
                     while (true) {
                         c = this.message.charAt(offset);
                         if (!("_-".contains(Character.toString(c)) || CharUtils.isAsciiAlphanumeric(c))) break;
@@ -148,7 +142,7 @@ public class Formatter {
                         }
                         name.append(c);
                     }
-                    final var player = QuantumServer.get().getPlayer(name.toString());
+                    final ServerPlayer player = QuantumServer.get().getPlayer(name.toString());
                     if (player != null && !name.toString().isEmpty() && Objects.equals(player.getName(), name.toString()) && this.doPing) {
                         this.pushBuilder();
                         this.addPingText(player);
@@ -166,8 +160,8 @@ public class Formatter {
                 offset++;
             }
         }
-        final var s = this.currentBuilder.toString();
-        final var textObj =
+        final String s = this.currentBuilder.toString();
+        final LiteralText textObj =
                 TextObject.literal(s).style(style -> style.color(this.currentColor).bold(this.bold)
                         .italic(this.italic).underline(this.underlined)
                         .strikethrough(this.strikethrough));
@@ -180,14 +174,14 @@ public class Formatter {
     }
 
     public static TextObject format(String message, boolean doPing) {
-        var formatter = new Formatter(true, doPing, message, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE);
-        var parse = formatter.parse();
+        Formatter formatter = new Formatter(true, doPing, message, TextObject.empty(), TextObject.empty(), null, RgbColor.WHITE);
+        ParseResult parse = formatter.parse();
         return parse.getResult();
     }
 
     private void parseEmote() {
         // TODO: Add emote parsing system. (Currently broken)
-        CharList characters = new CharArrayList();
+        StringBuilder characters = new StringBuilder();
 
         do {
             this.offset++;
@@ -195,24 +189,24 @@ public class Formatter {
                 this.currentBuilder.append(':');
                 this.pushBuilder();
 
-                this.redirect(String.join("", new String(characters.toCharArray())));
+                this.redirect(dev.ultreon.quantum.StringUtils.join("", characters.toString()));
                 return;
             }
-            characters.add(this.c());
+            characters.append(this.c());
         } while (this.c() != ':' && this.emotePredicate.test(this.c()));
 
         if (this.c() != ':') {
             this.currentBuilder.append(':');
             this.pushBuilder();
 
-            var toFormat = new String(characters.toCharArray());
+            String toFormat = characters.toString();
             this.redirect(toFormat);
             return;
         }
 
         this.offset++;
 
-        var arg = new String(characters.toCharArray()).substring(0, characters.size() - 1);
+        String arg = characters.substring(0, characters.length() - 1);
         this.pushBuilder();
 
         if (EmoteMap.INSTANCE.get(arg) != null) {
@@ -221,19 +215,19 @@ public class Formatter {
     }
 
     private void parseIcon() {
-        CharList characters = new CharArrayList();
+        StringBuilder characters = new StringBuilder();
 
         do {
             this.offset++;
             if (this.offset >= this.message.length()) {
                 return;
             }
-            characters.add(this.c());
+            characters.append(this.c());
         } while (this.c() != ')');
 
         this.offset++;
 
-        var arg = new String(characters.toCharArray()).substring(0, characters.size() - 1);
+        String arg = characters.substring(0, characters.length() - 1);
         this.pushBuilder();
 
         if (IconMap.INSTANCE.get(arg) != null) {
@@ -321,21 +315,21 @@ public class Formatter {
     }
 
     private void parseKey() {
-        CharList characters = new CharArrayList();
+        StringBuilder characters = new StringBuilder();
 
         do {
             this.offset++;
             if (this.offset >= this.message.length()) {
                 this.currentBuilder.append('%');
-                this.currentBuilder.append(characters.toCharArray());
+                this.currentBuilder.append(characters);
                 return;
             }
-            characters.add(this.c());
+            characters.append(this.c());
         } while (this.c() != '%');
 
         this.offset++;
 
-        var key = String.valueOf(characters.toCharArray()).replace("%", "");
+        String key = String.valueOf(characters.toString()).replace("%", "");
         this.pushBuilder();
 
         switch (key) {
@@ -365,21 +359,15 @@ public class Formatter {
             case "console-sender":
                 this.currentBuilder.append("Console");
                 break;
-            case "time":
-                this.currentBuilder.append(LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME));
-                break;
-            case "date":
-                this.currentBuilder.append(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
-                break;
             default:
-                var identifier = NamespaceID.tryParse(key);
+                NamespaceID identifier = NamespaceID.tryParse(key);
                 if (identifier == null) {
                     this.currentBuilder.append('%');
                     this.currentBuilder.append(key);
                     this.currentBuilder.append('%');
                     break;
                 }
-                var textKey = CustomKeyRegistry.get(identifier);
+                TextKey textKey = CustomKeyRegistry.get(identifier);
                 if (textKey == null) {
                     this.currentBuilder.append('%');
                     this.currentBuilder.append(key);
@@ -392,13 +380,13 @@ public class Formatter {
     }
 
     private void parseFunction() {
-        CharList characters = new CharArrayList();
-        var type = "";
+        StringBuilder characters = new StringBuilder();
+        String type = "";
 
-        var mode = Mode.TYPE;
+        Mode mode = Mode.TYPE;
         List<String> arguments = new ArrayList<>();
-        var currentArg = new StringBuilder();
-        var ignoreSpaces = true;
+        StringBuilder currentArg = new StringBuilder();
+        boolean ignoreSpaces = true;
         while (this.c() != '}') {
             this.offset++;
             if (this.offset >= this.message.length()) {
@@ -411,8 +399,8 @@ public class Formatter {
             if (mode == Mode.TYPE) {
                 switch (this.c()) {
                     case ':':
-                        type = new String(characters.toCharArray()).replaceAll("[:}]", "");
-                        characters.clear();
+                        type = characters.toString().replaceAll("[:}]", "");
+                        characters.delete(0, characters.length());
                         mode = Mode.BODY;
                         ignoreSpaces = true;
                         continue;
@@ -431,7 +419,7 @@ public class Formatter {
                     currentArg = new StringBuilder();
                 }
             }
-            characters.add(this.c());
+            characters.append(this.c());
         }
         arguments.add(currentArg.toString());
 
@@ -439,7 +427,7 @@ public class Formatter {
 
         switch (type) {
             case "click":
-                var actionName = arguments.remove(0);
+                String actionName = arguments.remove(0);
                 ClickEvent event = null;
                 switch (actionName) {
                     case "@":
@@ -447,7 +435,7 @@ public class Formatter {
                     case "url":
                     case "open-url":
                         if (arguments.isEmpty()) return;
-                        var url = arguments.remove(0);
+                        String url = arguments.remove(0);
                         try {
                             event = ClickEvent.openUri(new URI(url));
                         } catch (URISyntaxException ignored) {
@@ -461,14 +449,14 @@ public class Formatter {
                     case "cp":
                     case "copy-to-clipboard":
                         if (arguments.isEmpty()) return;
-                        var text = arguments.remove(0);
+                        String text = arguments.remove(0);
                         event = ClickEvent.copyToClipboard(text);
                         break;
                     case "/":
                     case "cmd":
                     case "command":
                         if (arguments.isEmpty()) return;
-                        var cmd = arguments.remove(0);
+                        String cmd = arguments.remove(0);
                         event = ClickEvent.runCommand(cmd);
                         break;
                     case ">":
@@ -533,7 +521,7 @@ public class Formatter {
 
         this.offset++;
 
-        var name = new StringBuilder();
+        StringBuilder name = new StringBuilder();
         while (true) {
             if (!("_-".contains(String.valueOf(this.c())) || Character.isLetterOrDigit(this.c())))
                 break;
@@ -546,12 +534,12 @@ public class Formatter {
         }
 
         QuantumServer quantumServer = QuantumServer.get();
-        var player = quantumServer == null ? null : quantumServer.getPlayer(name.toString());
+        ServerPlayer player = quantumServer == null ? null : quantumServer.getPlayer(name.toString());
 
         if (player != null && !name.toString().isEmpty() && player.getName().contentEquals(name) && this.doPing) {
             this.pushBuilder();
 
-            var hoverText = String.format(
+            String hoverText = String.format(
                     "[light blue]%s\n[grey]Name [/]%s</i>\n[dark grey]%s".trim(),
                     ColorCode.stripColor(player.getPublicName()),
                     player.getName(),
@@ -575,19 +563,19 @@ public class Formatter {
     }
 
     public void parseColor() {
-        var characters = new CharArrayList();
+        StringBuilder characters = new StringBuilder();
 
         while (this.c() != '>') {
             this.offset++;
             if (this.offset >= this.message.length()) {
                 this.currentBuilder.append('<');
-                this.currentBuilder.append(characters.toCharArray());
+                this.currentBuilder.append(characters);
                 return;
             }
-            characters.push(this.c());
+            characters.append(this.c());
         }
 
-        var arg = new String(characters.toCharArray()).replace(">", "");
+        String arg = characters.toString().replace(">", "");
 
         this.pushBuilder();
 
@@ -819,7 +807,7 @@ public class Formatter {
 
     private void redirect(String message) {
         this.redirect = true;
-        var it = new Formatter(
+        Formatter it = new Formatter(
                 this.allowFormatting,
                 this.doPing, message,
                 this.builder,
@@ -859,8 +847,8 @@ public class Formatter {
 
     private void addPingText(ServerPlayer player) {
         // Set hover text.
-        final var hoverText = this.getPlayerHoverText(player);
-        final var textComponent1 = TextObject.literal(
+        final String hoverText = this.getPlayerHoverText(player);
+        final LiteralText textComponent1 = TextObject.literal(
                 "@" + player.getName()).style(style -> style
                 .color(RgbColor.of(ColorCode.BLUE))
                 .bold(false)

@@ -20,7 +20,7 @@ public final class S2CRemoveEntityPacket implements Packet<InGameClientPacketHan
     }
 
     public static S2CRemoveEntityPacket read(PacketIO buffer) {
-        var id = buffer.readVarInt();
+        int id = buffer.readVarInt();
 
         return new S2CRemoveEntityPacket(id);
     }
@@ -48,7 +48,7 @@ public final class S2CRemoveEntityPacket implements Packet<InGameClientPacketHan
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CRemoveEntityPacket) obj;
+        S2CRemoveEntityPacket that = (S2CRemoveEntityPacket) obj;
         return this.id == that.id;
     }
 

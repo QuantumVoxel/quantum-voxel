@@ -8,11 +8,7 @@ import dev.ultreon.quantum.debug.profiler.ThreadSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static dev.ultreon.quantum.client.gui.debug.DebugOverlay.escape;
 
@@ -95,7 +91,12 @@ public class ProfilerDebugPage implements DebugPage {
         List<Section.FinishedSection> data;
 
         if (path.equals("/")) {
-            data = threadSection.getData().values().stream().sorted(comparator).collect(Collectors.toList());
+            List<Section.FinishedSection> list = new ArrayList<>();
+            for (Section.FinishedSection finishedSection : threadSection.getData().values()) {
+                list.add(finishedSection);
+            }
+            list.sort(comparator);
+            data = list;
         } else {
             Section.FinishedSection section = this.profile.getSection(threadSection, path);
             if (section == null) {
@@ -103,7 +104,12 @@ public class ProfilerDebugPage implements DebugPage {
                 this.currentPath = "/";
                 return true;
             }
-            data = section.getData().values().stream().sorted(comparator).collect(Collectors.toList());
+            List<Section.FinishedSection> list = new ArrayList<>();
+            for (Section.FinishedSection finishedSection : section.getData().values()) {
+                list.add(finishedSection);
+            }
+            list.sort(comparator);
+            data = list;
         }
 
         if (data.isEmpty()) return true;
@@ -117,7 +123,11 @@ public class ProfilerDebugPage implements DebugPage {
 
     private void navThreadView(int idx) {
         Thread thread;
-        List<Thread> threads = this.profile.getThreads().stream().sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName())).collect(Collectors.toList());
+        List<Thread> threads = new ArrayList<>();
+        for (Thread thread1 : this.profile.getThreads()) {
+            threads.add(thread1);
+        }
+        threads.sort((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
         if (idx >= 0 && idx < threads.size()) {
             thread = threads.get(idx);
             this.currentThread = thread;
@@ -133,7 +143,12 @@ public class ProfilerDebugPage implements DebugPage {
                 .entryLine();
 
         if (path.equals("/")) {
-            data = threadSection.getData().values().stream().sorted(comparator).collect(Collectors.toList());
+            List<Section.FinishedSection> list = new ArrayList<>();
+            for (Section.FinishedSection finishedSection : threadSection.getData().values()) {
+                list.add(finishedSection);
+            }
+            list.sort(comparator);
+            data = list;
         } else {
             Section.FinishedSection section = this.profile.getSection(threadSection, path);
             if (section == null) {
@@ -142,7 +157,12 @@ public class ProfilerDebugPage implements DebugPage {
                 return true;
             }
 
-            data = section.getData().values().stream().sorted(comparator).collect(Collectors.toList());
+            List<Section.FinishedSection> list = new ArrayList<>();
+            for (Section.FinishedSection finishedSection : section.getData().values()) {
+                list.add(finishedSection);
+            }
+            list.sort(comparator);
+            data = list;
             Map<String, Integer> stats = section.getStats();
             for (Map.Entry<String, Integer> entry : stats.entrySet()) {
                 context.entryLine(entry.getKey(), String.valueOf(entry.getValue()));
@@ -161,7 +181,11 @@ public class ProfilerDebugPage implements DebugPage {
         context.entryLine("[green][*][_]Thread View")
                 .entryLine();
 
-        List<Thread> threads = this.profile.getThreads().stream().sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName())).collect(Collectors.toList());
+        List<Thread> threads = new ArrayList<>();
+        for (Thread thread : this.profile.getThreads()) {
+            threads.add(thread);
+        }
+        threads.sort((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
         if (threads.isEmpty()) return true;
 
         for (int i = 0, threadsSize = threads.size(); i < threadsSize; i++) {

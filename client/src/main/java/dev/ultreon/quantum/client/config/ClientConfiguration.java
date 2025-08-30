@@ -5,8 +5,6 @@ import dev.ultreon.quantum.client.text.LanguageManager;
 import dev.ultreon.quantum.config.api.ConfigCategory;
 import dev.ultreon.quantum.config.api.Configuration;
 import dev.ultreon.quantum.config.api.props.ConfigProperty;
-import dev.ultreon.quantum.config.crafty.ConfigInfo;
-import dev.ultreon.quantum.config.crafty.CraftyConfig;
 import dev.ultreon.quantum.util.NamespaceID;
 
 /**

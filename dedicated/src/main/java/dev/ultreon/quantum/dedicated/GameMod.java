@@ -35,7 +35,7 @@ public class GameMod implements Mod {
 
     @Override
     public @NotNull Collection<String> getAuthors() {
-        return List.of("Ultreon Studios");
+        return Arrays.asList("Ultreon Studios");
     }
 
     @Override

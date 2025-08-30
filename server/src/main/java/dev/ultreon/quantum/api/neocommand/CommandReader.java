@@ -114,7 +114,7 @@ public class CommandReader {
     public String remainder() {
         String[] args = new String[this.args.length - this.cur];
         System.arraycopy(this.args, this.cur, args, 0, args.length);
-        return String.join(" ", args);
+        return dev.ultreon.quantum.StringUtils.join(" ", args);
     }
 
     public Selector<?> nextSelector() throws CommandParseException {
@@ -176,7 +176,7 @@ public class CommandReader {
     }
 
     public String getCommandlineArgs() {
-        return String.join(" ", this.args);
+        return dev.ultreon.quantum.StringUtils.join(" ", this.args);
     }
 
     public boolean hasNext() {

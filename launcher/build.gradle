@@ -31,7 +31,6 @@ buildscript {
 
     dependencies {
         classpath "io.github.fourlastor:construo:1.5.1"
-        classpath group: 'commons-io', name: 'commons-io', version: '2.11.0'
         classpath "com.google.code.gson:gson:2.10.1"
     }
 }
@@ -135,8 +134,6 @@ dependencies {
     runtimeOnly("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
     runtimeOnly("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion")
     runtimeOnly("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
-    runtimeOnly("org.tukaani:xz:$tukaaniXzVersion")
-    runtimeOnly("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
 
     // JNA
     runtimeOnly("net.java.dev.jna:jna:$jnaVersion")
@@ -150,12 +147,10 @@ dependencies {
     runtimeOnly("com.google.guava:guava:$guavaVersion")
 
     // Misc
-    runtimeOnly("it.unimi.dsi:fastutil:8.5.12", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
     runtimeOnly('com.raylabz:opensimplex:1.0.3')
 
     runtimeOnly("space.earlygrey:shapedrawer:$shapeDrawerVersion")
 
-    runtimeOnly("it.unimi.dsi:fastutil-core:8.5.9")
     runtimeOnly("com.google.code.findbugs:jsr305:$jsrVersion")
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"

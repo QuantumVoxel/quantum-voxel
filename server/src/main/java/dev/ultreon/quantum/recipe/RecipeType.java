@@ -94,7 +94,7 @@ public final class RecipeType<T extends Recipe> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (RecipeType<?>) obj;
+        RecipeType<?> that = (RecipeType<?>) obj;
         return Objects.equals(this.deserializer, that.deserializer);
     }
 

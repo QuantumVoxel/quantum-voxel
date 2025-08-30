@@ -2,15 +2,13 @@ package dev.ultreon.quantum.collection;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.IntArray;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.ubo.DataKeys;
 import dev.ultreon.quantum.ubo.types.ListType;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.world.rng.RNG;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
-import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -79,7 +77,7 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     @Override
     public void load(MapType inputData, Function<MapType, D> decoder) {
         this.data.clear();
-        var data = inputData.<MapType>getList(DataKeys.PALETTE_DATA);
+        ListType<MapType> data = inputData.<MapType>getList(DataKeys.PALETTE_DATA);
         for (MapType entryData : data.getValue()) {
             D entry = decoder.apply(entryData);
             if (entry == null) {
@@ -105,8 +103,8 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
 
     @Override
     public void read(PacketIO buffer, Function<PacketIO, D> decoder) {
-        var data = new Array<D>(defaultValue.getClass());
-        var dataSize = buffer.readVarInt();
+        Array<D> data = new Array<D>(defaultValue.getClass());
+        int dataSize = buffer.readVarInt();
         for (int i = 0; i < dataSize; i++)
             data.add(decoder.apply(buffer));
         this.data = data;
@@ -237,7 +235,7 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     }
 
     public List<D> getData() {
-        return List.of(this.data.toArray());
+        return Arrays.asList(this.data.toArray());
     }
 
     public void set(short[] palette, D[] data) {
@@ -288,7 +286,7 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
     public @NotNull D getRandom(RNG rng, AtomicInteger integer, Predicate<D> predicate) {
         if (this.data.size == 0) return null;
 
-        IntList list = new IntArrayList();
+        IntArray list = new IntArray();
         D[] array = this.data.toArray();
         for (int i = 0, arrayLength = array.length; i < arrayLength; i++) {
             D d = array[i];
@@ -297,7 +295,7 @@ public class PaletteStorage<D> implements Disposable, Storage<D> {
         }
         if (list.isEmpty()) return null;
 
-        int[] realIndexes = findIndexes(this.palette, list.toIntArray());
+        int[] realIndexes = findIndexes(this.palette, list.toArray());
         int rand = realIndexes[rng.nextInt(realIndexes.length)];
         integer.set(rand);
         return get(rand);

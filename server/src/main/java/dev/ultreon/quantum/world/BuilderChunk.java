@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import static dev.ultreon.quantum.world.World.CS_2;
 
@@ -131,7 +130,7 @@ public final class BuilderChunk extends Chunk {
         return this.rng;
     }
 
-    public Stream<Vec3d> getCavePoints() {
+    public List<Vec3d> getCavePoints() {
         return this.world.getCavePointsFor(getVec());
     }
 

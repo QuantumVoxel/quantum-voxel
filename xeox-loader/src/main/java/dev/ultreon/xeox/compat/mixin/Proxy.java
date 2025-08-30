@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.ultreon.xeox.impl.IClassTransformer;
-import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 import org.spongepowered.asm.service.ILegacyClassTransformer;

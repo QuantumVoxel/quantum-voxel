@@ -30,7 +30,7 @@ public interface IGameProvider {
     List<EntryPoint> entrypoints();
 
     default List<String> permissions() {
-        return List.of("*");
+        return Arrays.asList("*");
     }
 
     default boolean disableMixinCheck() {

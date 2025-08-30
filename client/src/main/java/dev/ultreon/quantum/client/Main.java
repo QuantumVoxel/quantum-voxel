@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Matrix4;
@@ -25,11 +24,9 @@ import org.jetbrains.annotations.Nullable;
 import dev.ultreon.quantum.Logger;
 import dev.ultreon.quantum.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.badlogic.gdx.graphics.profiling.GLInterceptor.resolveErrorNumber;
 
@@ -95,7 +92,12 @@ public final class Main implements ApplicationListener {
         if (GamePlatform.get().isDevEnvironment()) glProfiler.enable();
 
         glProfiler.setListener(error -> {
-            String stackTrace = String.join("\n", Arrays.stream(new Exception().getStackTrace()).map(stackTraceElement -> "    at " + stackTraceElement.toString()).toArray(String[]::new));
+            List<String> list = new ArrayList<>();
+            for (StackTraceElement stackTraceElement : new Exception().getStackTrace()) {
+                String s = "    at " + stackTraceElement.toString();
+                list.add(s);
+            }
+            String stackTrace = dev.ultreon.quantum.StringUtils.join("\n", list.toArray(new String[0]));
             Gdx.app.error("GLProfiler", "Error " + resolveErrorNumber(error) + " at:\n" + stackTrace);
         });
 
@@ -111,9 +113,7 @@ public final class Main implements ApplicationListener {
 //                this.client = new DataGeneratorClient();
             }
 
-            AtomicBoolean preprocessing = new AtomicBoolean(true);
             generated = true;
-            preprocessing.set(false);
         } catch (ApplicationCrash t) {
             // Handle ApplicationCrash exception
             QuantumClient.crash(t);

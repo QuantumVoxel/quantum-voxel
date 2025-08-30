@@ -26,13 +26,13 @@ public final class C2SPlayerMoveAndRotatePacket implements Packet<InGameServerPa
     }
 
     public static C2SPlayerMoveAndRotatePacket read(PacketIO buffer) {
-        var x = buffer.readDouble();
-        var y = buffer.readDouble();
-        var z = buffer.readDouble();
+        double x = buffer.readDouble();
+        double y = buffer.readDouble();
+        double z = buffer.readDouble();
 
-        var xHeadRot = buffer.readFloat();
-        var xRot = buffer.readFloat();
-        var yRot = buffer.readFloat();
+        float xHeadRot = buffer.readFloat();
+        float xRot = buffer.readFloat();
+        float yRot = buffer.readFloat();
 
         return new C2SPlayerMoveAndRotatePacket(x, y, z, xHeadRot, xRot, yRot);
     }
@@ -93,7 +93,7 @@ public final class C2SPlayerMoveAndRotatePacket implements Packet<InGameServerPa
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (C2SPlayerMoveAndRotatePacket) obj;
+        C2SPlayerMoveAndRotatePacket that = (C2SPlayerMoveAndRotatePacket) obj;
         return Double.doubleToLongBits(this.x) == Double.doubleToLongBits(that.x) &&
                Double.doubleToLongBits(this.y) == Double.doubleToLongBits(that.y) &&
                Double.doubleToLongBits(this.z) == Double.doubleToLongBits(that.z) &&

@@ -10,18 +10,13 @@ import dev.ultreon.quantum.config.QuantumServerConfig;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.dedicated.gui.DedicatedServerGui;
+//import dev.ultreon.quantum.dedicated.gui.DedicatedServerGui;
 //import dev.ultreon.quantum.dedicated.http.ServerHttpSite;
 import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.util.ModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
 
-import javax.swing.*;
-import java.awt.*;
-import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,7 +32,7 @@ public class Main {
     static final ServerPlatform SERVER_PLATFORM = new ServerPlatform();
 
     private static final Logger LOGGER = LoggerFactory.getLogger("ServerMain");
-    private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy-HH.mm.ss");
+//    private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy-HH.mm.ss");
     @SuppressWarnings("GDXJavaStaticResource")
     private static DedicatedServer server;
 
@@ -87,7 +82,7 @@ public class Main {
         } catch (ApplicationCrash e) {
             e.printCrash();
             e.handleCrash();
-            e.getCrashLog().writeToFile(new File("crash-reports/crash-" + FORMAT.format(LocalDateTime.now()) + ".txt"));
+//            e.getCrashLog().writeToFile(new File("crash-reports/crash-" + FORMAT.format(LocalDateTime.now()) + ".txt"));
         } catch (Throwable e) {
             serverCrash(e);
         }
@@ -139,7 +134,7 @@ public class Main {
     }
 
     private static HeadlessApplicationConfiguration createConfig() {
-        var config = new HeadlessApplicationConfiguration();
+        HeadlessApplicationConfiguration config = new HeadlessApplicationConfiguration();
         config.updatesPerSecond = 20;
         config.preferencesDirectory = "config";
         config.maxNetThreads = 32;

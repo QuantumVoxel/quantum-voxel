@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.rpc;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.ServiceLoader;
 
 /**
  * This interface represents a handler for RPC (Rich Presence) operations.
@@ -11,7 +11,7 @@ import java.util.ServiceLoader;
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 public interface RpcHandler {
-    Iterable<RpcHandler> HANDLERS = List.of(new DiscordRPC());
+    Iterable<RpcHandler> HANDLERS = Arrays.asList();
 
     /**
      * Starts the RPC handler, initializing any necessary resources or connections.

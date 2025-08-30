@@ -2,7 +2,6 @@ package dev.ultreon.quantum.client.util;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.quantum.OS;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.util.Vec3d;
 import org.jetbrains.annotations.Nullable;

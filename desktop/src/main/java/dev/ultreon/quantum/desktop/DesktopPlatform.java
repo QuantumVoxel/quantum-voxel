@@ -10,8 +10,6 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.*;
-import dev.ultreon.quantum.ModInitializer;
-import dev.ultreon.quantum.client.FontManager;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.client.rpc.GameActivity;
@@ -34,8 +32,6 @@ import dev.ultreon.xeox.api.IMod;
 import dev.ultreon.xeox.api.IPath;
 import dev.ultreon.xeox.api.IXeoxLoader;
 import dev.ultreon.xeox.impl.XeoxLoader;
-import it.unimi.dsi.fastutil.longs.LongArraySet;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.Platform;
@@ -52,7 +48,6 @@ import java.nio.channels.ClosedChannelException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
-import java.util.stream.Collectors;
 
 import static dev.ultreon.quantum.desktop.DesktopLauncher.LOGGER;
 
@@ -189,7 +184,9 @@ public abstract class DesktopPlatform extends GamePlatform {
             CommonConstants.LOGGER.warn("Quantum Voxel mods unavailable!");
             return Collections.emptyList();
         }
-        iXeoxLoader.getMods().forEach(mod -> this.mods.put(mod.modId(), new XeoxMod(mod)));
+        for (IMod mod : iXeoxLoader.getMods()) {
+            this.mods.put(mod.modId(), new XeoxMod(mod));
+        }
         return this.mods.values();
     }
 
@@ -533,7 +530,12 @@ public abstract class DesktopPlatform extends GamePlatform {
             int secondsPassed = 0;
             LongSet threadIds = new LongArraySet();
             while (true) {
-                Set<Thread> threads = Thread.getAllStackTraces().keySet().stream().filter(t -> !t.isDaemon() && !t.isInterrupted() && t.getId() != Thread.currentThread().getId()).collect(Collectors.toSet());
+                Set<Thread> threads = new HashSet<>();
+                for (Thread thread : Thread.getAllStackTraces().keySet()) {
+                    if (!thread.isDaemon() && !thread.isInterrupted() && thread.getId() != Thread.currentThread().getId()) {
+                        threads.add(thread);
+                    }
+                }
                 for (Thread t : threads) {
                     if (threadIds.add(t.getId())) LOGGER.debug("{}: {}", t.getName(), t.getState());
                     t.interrupt();
@@ -685,7 +687,12 @@ public abstract class DesktopPlatform extends GamePlatform {
         if (iXeoxLoader == null) {
             return Collections.emptySet();
         }
-        return iXeoxLoader.getMods().stream().map(IMod::modId).collect(Collectors.toSet());
+        Set<String> set = new HashSet<>();
+        for (IMod iMod : iXeoxLoader.getMods()) {
+            String modId = iMod.modId();
+            set.add(modId);
+        }
+        return set;
     }
 
     @Override
@@ -720,7 +727,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
                 @Override
                 public @NotNull Collection<String> getAuthors() {
-                    return List.of("Ultreon Studios");
+                    return Arrays.asList("Ultreon Studios");
                 }
 
                 @Override
@@ -816,6 +823,11 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public <T> List<T> createSyncList() {
         return new CopyOnWriteArrayList<>();
+    }
+
+    @Override
+    public String lineSep() {
+        return System.lineSeparator();
     }
 
     @Override

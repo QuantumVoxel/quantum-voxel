@@ -29,10 +29,10 @@ public final class S2CSpawnParticlesPacket implements Packet<InGameClientPacketH
     }
 
     public static S2CSpawnParticlesPacket read(PacketIO packetIO) {
-        var particleTypeId = packetIO.readVarInt();
-        var position = packetIO.readVec3d(new Vec3d());
-        var motion = packetIO.readVec3d(new Vec3d());
-        var count = packetIO.readVarInt();
+        int particleTypeId = packetIO.readVarInt();
+        Vec3d position = packetIO.readVec3d(new Vec3d());
+        Vec3d motion = packetIO.readVec3d(new Vec3d());
+        int count = packetIO.readVarInt();
 
         return new S2CSpawnParticlesPacket(particleTypeId, position, motion, count);
     }
@@ -84,7 +84,7 @@ public final class S2CSpawnParticlesPacket implements Packet<InGameClientPacketH
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (S2CSpawnParticlesPacket) obj;
+        S2CSpawnParticlesPacket that = (S2CSpawnParticlesPacket) obj;
         return this.particleTypeId == that.particleTypeId &&
                Objects.equals(this.position, that.position) &&
                Objects.equals(this.motion, that.motion) &&

@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.texture;
 
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.util.NamespaceID;

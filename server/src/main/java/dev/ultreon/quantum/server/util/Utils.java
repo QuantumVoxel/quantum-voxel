@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.server.util;
 
-import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -27,28 +26,6 @@ public class Utils {
 
     public static int normalizeToInt(byte b) {
         return b < 0 ? (int)b + 128 : b;
-    }
-
-    public static Duration parseDuration(String text) {
-        try {
-            String[] parts = text.split(":");
-            long days = 0, hours = 0, minutes = 0, seconds = 0;
-
-            seconds = Utils.getDurationNum(parts[parts.length - 1], true);
-            minutes = Utils.getDurationNum(parts[parts.length - 2], parts.length >= 3);
-            if (parts.length >= 3) hours = Utils.getDurationNum(parts[parts.length - 3], parts.length >= 4);
-            if (parts.length >= 4) days = Utils.getDurationNum(parts[parts.length - 4], false);
-            return Duration.ofSeconds(seconds + (minutes * 60) + (hours * 3600) + (days * 86400));
-        } catch (NumberFormatException e) {
-            throw new TimeFormatException("Invalid number format: " + e, e);
-        }
-    }
-
-    private static long getDurationNum(String part, boolean trim) {
-        if (!trim) {
-            return Integer.parseInt(part);
-        }
-        return 0;
     }
 
     public static String reprChar(char c) {

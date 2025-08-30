@@ -8,9 +8,10 @@ import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.util.NamespaceID;
-import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -24,7 +25,7 @@ public final class CubeModel {
     private final NamespaceID front;
     private final NamespaceID back;
     private final ModelProperties properties;
-    private NamespaceID resourceId;
+    private final NamespaceID resourceId;
 
     private CubeModel(NamespaceID resourceId, NamespaceID top, NamespaceID bottom,
                       NamespaceID left, NamespaceID right,
@@ -233,7 +234,7 @@ public final class CubeModel {
     }
 
     public Set<NamespaceID> all() {
-        return new ReferenceArraySet<>(new Object[]{top, bottom, left, right, front, back});
+        return new HashSet<>(Arrays.asList(top, bottom, left, right, front, back));
     }
 
     public NamespaceID resourceId() {

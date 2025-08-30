@@ -173,7 +173,7 @@ public class MergePath implements IPath {
         Set<String> list = new HashSet<>();
         for (IPath path : paths) {
             try {
-                list.addAll(List.of(path.list()));
+                list.addAll(Arrays.asList(path.list()));
             } catch (Throwable e) {
                 // Ignore
             }
@@ -186,7 +186,7 @@ public class MergePath implements IPath {
         Set<String> list = new HashSet<>();
         for (IPath path : paths) {
             try {
-                list.addAll(List.of(path.list(extension)));
+                list.addAll(Arrays.asList(path.list(extension)));
             } catch (Throwable e) {
                 // Ignore
             }

@@ -79,7 +79,7 @@ public final class ModelObject implements Disposable {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (ModelObject) obj;
+        ModelObject that = (ModelObject) obj;
         return Objects.equals(this.shaderProvider, that.shaderProvider) &&
                Objects.equals(this.model, that.model) &&
                Objects.equals(this.renderables, that.renderables);

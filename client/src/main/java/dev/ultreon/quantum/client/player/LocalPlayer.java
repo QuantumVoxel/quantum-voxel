@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.client.player;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -180,7 +179,7 @@ public class LocalPlayer extends ClientPlayer {
         // Determine if the player is jumping based on input
         this.jumping = !this.isDead() && (client.playerInput.up && Gdx.input.isCursorCatched());
 
-        var connection = this.client.connection;
+        IConnection<ClientPacketHandler, ServerPacketHandler> connection = this.client.connection;
         if (xRot != oXRot || yRot != oYRot || xHeadRot != oXHeadRot) {
             if (connection != null) {
                 connection.send(new C2SPlayerMoveAndRotatePacket(this.x, this.y, this.z, this.xHeadRot, this.xRot, this.yRot));
@@ -308,7 +307,7 @@ public class LocalPlayer extends ClientPlayer {
             int renderDistance = Math.max(2, ClientConfiguration.renderDistance.getValue() / CS);
 
             unloading.clear();
-            Collection<? extends ClientChunkAccess> loadedChunks = List.copyOf(this.clientWorld.getLoadedChunks());
+            Collection<? extends ClientChunkAccess> loadedChunks = new ArrayList<>(this.clientWorld.getLoadedChunks());
             for (ClientChunkAccess chunk : loadedChunks) {
                 if (chunk.getVec().dst(chunkVec) > renderDistance) {
                     unloading.add(chunkVec);
@@ -338,17 +337,16 @@ public class LocalPlayer extends ClientPlayer {
                 }
             }
             if (!this.chunksToLoad.isEmpty()) {
-                Stream<ChunkVec> sorted = loadingChunks.stream().sorted(Comparator.comparing(chunkVec1 -> this.tmp2I.set(chunkVec1.getIntX(), chunkVec1.getIntZ()).dst(chunkVec.getIntX(), chunkVec.getIntZ())));
-                sorted.forEachOrdered(e -> {
+                List<ChunkVec> sorted = new ArrayList<>(loadingChunks);
+                sorted.sort(Comparator.comparing(chunkVec1 -> this.tmp2I.set(chunkVec1.getIntX(), chunkVec1.getIntZ()).dst(chunkVec.getIntX(), chunkVec.getIntZ())));
+                sorted.forEach(e -> {
                     this.pendingChunks.add(e);
                     this.sendQueue.add(e);
                 });
             }
 
             this.isLoading = false;
-        }).thenRun(() -> {
-            refreshing = false;
-        }).exceptionally(throwable -> {
+        }).thenRun(() -> refreshing = false).exceptionally(throwable -> {
             CommonConstants.LOGGER.error("Failed to refresh chunks", throwable);
             refreshing = false;
             return null;

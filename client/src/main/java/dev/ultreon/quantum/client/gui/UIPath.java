@@ -6,6 +6,7 @@ package dev.ultreon.quantum.client.gui;
 
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class UIPath {
      * @param component the component.
      */
     public UIPath(Widget component) {
-        this.components = new ArrayList<>(List.of(component));
+        this.components = new ArrayList<>(Arrays.asList(component));
     }
 
     /**

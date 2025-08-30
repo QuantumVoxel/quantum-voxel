@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.model.item;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.ObjectUtils;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.atlas.TextureStitcher;
@@ -108,7 +109,7 @@ public class ItemModelRegistry implements ContextAwareReloadable {
     }
 
     public void bakeJsonModels(QuantumClient client) {
-        for (var entry : customRegistry.entrySet()) {
+        for (Map.Entry<Item, Supplier<ItemModel>> entry : customRegistry.entrySet()) {
             ItemModel model = entry.getValue().get();
             if (model == null) {
                 QuantumClient.LOGGER.error("Failed to load item model for {}: {}", entry.getKey().getId(), entry.getKey());
@@ -127,14 +128,14 @@ public class ItemModelRegistry implements ContextAwareReloadable {
             try {
                 if (customRegistry.containsKey(value)) continue;
                 JsonModel load = loader.load(value);
-                customRegistry.computeIfAbsent(value, key -> () -> Objects.requireNonNullElseGet(load, () -> new FlatItemModel(value)));
+                customRegistry.computeIfAbsent(value, key -> () -> ObjectUtils.requireNonNullElseGet(load, () -> new FlatItemModel(value)));
             } catch (Exception e) {
                 QuantumClient.LOGGER.error("Failed to load item model for {}: {}", value.getId(), e.toString());
             }
             this.loadingItem = null;
         }
 
-        for (var entry : customRegistry.entrySet()) {
+        for (Map.Entry<Item, Supplier<ItemModel>> entry : customRegistry.entrySet()) {
             if (entry.getKey() == Items.AIR) continue;
             this.loadingItem = entry.getKey();
             try {

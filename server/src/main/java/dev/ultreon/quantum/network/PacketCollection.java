@@ -1,10 +1,8 @@
 package dev.ultreon.quantum.network;
 
+import com.badlogic.gdx.utils.IntMap;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.network.packets.Packet;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import org.apache.commons.lang3.function.TriConsumer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +18,7 @@ import java.util.function.BiFunction;
 public class PacketCollection<H extends PacketHandler> {
     private int id;
     private final Map<Class<? extends Packet<H>>, TriConsumer<Packet<H>, PacketHandler, PacketIO>> encoders = new HashMap<>();
-    private final Int2ObjectMap<BiFunction<H, PacketIO, ? extends Packet<H>>> decoders = new Int2ObjectArrayMap<>();
+    private final IntMap<BiFunction<H, PacketIO, ? extends Packet<H>>> decoders = new IntMap<>();
     private final Map<Class<? extends Packet<H>>, BiConsumer<Packet<H>, Pair<PacketContext, H>>> handlers = new HashMap<>();
     private final Map<Class<? extends Packet<H>>, Integer> packet2id = new HashMap<>();
 

@@ -10,7 +10,6 @@ import com.github.tommyettinger.textra.TypingAdapter;
 import com.github.tommyettinger.textra.TypingLabel;
 import com.github.tommyettinger.textra.TypingListener;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Dialog;
 import dev.ultreon.quantum.client.gui.DialogBuilder;
 import dev.ultreon.quantum.client.gui.Screen;

@@ -2,11 +2,8 @@ package dev.ultreon.quantum.client.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.api.events.ItemStackEvent;

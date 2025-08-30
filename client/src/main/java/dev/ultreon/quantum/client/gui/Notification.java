@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.gui;
 
-import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.client.gui.icon.Icon;
 import dev.ultreon.quantum.text.MutableText;
 
@@ -19,7 +18,7 @@ public class Notification {
         this.title = builder.title;
         this.summary = builder.summary;
         this.subText = (builder.subText == null ? MutableText.literal("Game Notification") : builder.subText);
-        this.duration = builder.duration.toMillis();
+        this.duration = builder.durationMs;
         this.sticky = builder.sticky;
         this.icon = builder.icon;
     }
@@ -107,7 +106,7 @@ public class Notification {
         private final MutableText title;
         private final MutableText summary;
         private MutableText subText = null;
-        private Duration duration = Duration.ofSeconds(3);
+        private long durationMs = 3000;
         private boolean sticky = false;
         public Icon icon = null;
 
@@ -131,8 +130,8 @@ public class Notification {
             return this;
         }
 
-        public Builder duration(Duration duration) {
-            this.duration = duration;
+        public Builder duration(long durationMs) {
+            this.durationMs = durationMs;
             return this;
         }
 

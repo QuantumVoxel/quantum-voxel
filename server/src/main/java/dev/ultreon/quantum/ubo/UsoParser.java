@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.ubo;
 
+import dev.ultreon.quantum.text.CharUtils;
 import dev.ultreon.quantum.ubo.types.*;
 
 import java.io.EOFException;
@@ -52,7 +53,7 @@ public class UsoParser {
         while (true) {
             int r = read();
             if (r == -1) break;
-            if (!Character.isAlphabetic(r)) break;
+            if (!CharUtils.isAlphabetic((char) r)) break;
             builder.append((char) r);
         }
 

@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.gui.screens.world;
 
-import dev.ultreon.libs.datetime.v0.DateTime;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -16,7 +15,6 @@ import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldSaveInfo;
 import dev.ultreon.quantum.world.WorldStorage;
-import it.unimi.dsi.fastutil.longs.LongHash;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -157,8 +155,7 @@ public class WorldCreationScreen extends Screen {
                         World.REGION_DATA_VERSION,
                         gameMode,
                         gameMode,
-                        worldName,
-                        DateTime.current()
+                        worldName
                 ));
             } catch (IOException e) {
                 CommonConstants.LOGGER.error("Failed to save world info", e);

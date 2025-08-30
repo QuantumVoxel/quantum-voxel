@@ -32,6 +32,7 @@ import dev.ultreon.quantum.util.RgbColor;
 import dev.ultreon.quantum.world.Direction;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -276,7 +277,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel, Item
 
     @Override
     public Collection<NamespaceID> getAllTextures() {
-        return List.of();
+        return Arrays.asList();
     }
 
     @Override
@@ -286,14 +287,14 @@ public final class BakedCubeModel extends BakedModel implements BlockModel, Item
 
     @Override
     public void bakeInto(BoundingBox bounds, OpaqueFaces opaqueFaces, MeshPartBuilder builder, int x, int y, int z, int cull, int[] ao, long light) {
-        final var from = w_from;
-        final var to = w_to;
+        final Vector3 from = w_from;
+        final Vector3 to = w_to;
 
-        final var v00 = new VertexInfo();
-        final var v01 = new VertexInfo();
-        final var v10 = new VertexInfo();
-        final var v11 = new VertexInfo();
-        for (var direction : Direction.values()) {
+        final VertexInfo v00 = new VertexInfo();
+        final VertexInfo v01 = new VertexInfo();
+        final VertexInfo v10 = new VertexInfo();
+        final VertexInfo v11 = new VertexInfo();
+        for (Direction direction : Direction.values()) {
             if (FaceCull.culls(direction, cull)) {
                 opaqueFaces.add(x, y, z, direction);
                 continue;
@@ -312,7 +313,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel, Item
             v10.setNor(direction.getNormal());
             v11.setNor(direction.getNormal());
 
-            var region = this.tex(direction);
+            TextureRegion region = this.tex(direction);
             if (region == null) {
                 region = QuantumClient.get().blocksTextureAtlas.get(NamespaceID.of("blocks/error"), TextureAtlas.TextureAtlasType.DIFFUSE);
             }

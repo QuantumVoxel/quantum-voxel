@@ -106,7 +106,9 @@ public class JavaWebSocket implements WebSocket, java.net.http.WebSocket.Listene
         this.connecting = false;
         listener.handle(this);
         java.net.http.WebSocket.Listener.super.onOpen(webSocket);
-        this.openListeners.forEach(openListener -> openListener.handle(this));
+        for (OpenListener openListener : this.openListeners) {
+            openListener.handle(this);
+        }
     }
 
     @Override
@@ -137,7 +139,9 @@ public class JavaWebSocket implements WebSocket, java.net.http.WebSocket.Listene
 
     @Override
     public CompletionStage<?> onClose(java.net.http.WebSocket webSocket, int statusCode, String reason) {
-        closeListeners.forEach(listener -> listener.handle(statusCode, reason));
+        for (CloseListener closeListener : closeListeners) {
+            closeListener.handle(statusCode, reason);
+        }
         return CompletableFuture.runAsync(webSocket::abort);
     }
 

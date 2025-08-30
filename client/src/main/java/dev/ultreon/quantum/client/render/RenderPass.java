@@ -15,7 +15,6 @@ import dev.ultreon.quantum.client.management.TextureAtlasManager;
 import dev.ultreon.quantum.client.shaders.Shaders;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.util.Suppliers;
-import net.mgsx.gltf.scene3d.attributes.FogAttribute;
 import org.jetbrains.annotations.ApiStatus;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -211,11 +210,6 @@ public class RenderPass {
             return this;
         }
 
-        public Builder fog(float density, float start, float end) {
-            this.attributeDelegates.add(new Fog(density, start, end));
-            return this;
-        }
-
         public Builder ambientColor(Color color) {
             this.attributeDelegates.add(new AmbientColor(color));
             return this;
@@ -229,12 +223,16 @@ public class RenderPass {
         public RenderPass build() {
             material = Suppliers.memoize(() -> {
                 Material material = new Material();
-                attributeDelegates.forEach(delegate -> delegate.apply(material));
+                for (AttributeDelegate delegate : attributeDelegates) {
+                    delegate.apply(material);
+                }
                 return material;
             });
             instanceMaterial = Suppliers.memoize(() -> {
                 Material material = new Material();
-                instanceAttributeDelegates.forEach(delegate -> delegate.apply(material));
+                for (AttributeDelegate delegate : instanceAttributeDelegates) {
+                    delegate.apply(material);
+                }
                 return material;
             });
             RenderPass renderPass = new RenderPass(this);
@@ -262,7 +260,7 @@ public class RenderPass {
             public boolean equals(Object obj) {
                 if (obj == this) return true;
                 if (obj == null || obj.getClass() != this.getClass()) return false;
-                var that = (CullFace) obj;
+                CullFace that = (CullFace) obj;
                 return this.mode == that.mode;
             }
 
@@ -303,7 +301,7 @@ public class RenderPass {
             public boolean equals(Object obj) {
                 if (obj == this) return true;
                 if (obj == null || obj.getClass() != this.getClass()) return false;
-                var that = (AlphaTest) obj;
+                AlphaTest that = (AlphaTest) obj;
                 return Float.floatToIntBits(this.threshold) == Float.floatToIntBits(that.threshold);
             }
 
@@ -358,7 +356,7 @@ public class RenderPass {
             public boolean equals(Object obj) {
                 if (obj == this) return true;
                 if (obj == null || obj.getClass() != this.getClass()) return false;
-                var that = (DepthTest) obj;
+                DepthTest that = (DepthTest) obj;
                 return this.func == that.func &&
                        Float.floatToIntBits(this.rangeNear) == Float.floatToIntBits(that.rangeNear) &&
                        Float.floatToIntBits(this.rangeFar) == Float.floatToIntBits(that.rangeFar) &&
@@ -407,7 +405,7 @@ public class RenderPass {
             public boolean equals(Object obj) {
                 if (obj == this) return true;
                 if (obj == null || obj.getClass() != this.getClass()) return false;
-                var that = (Blending) obj;
+                Blending that = (Blending) obj;
                 return this.src == that.src &&
                        this.dst == that.dst;
             }
@@ -455,7 +453,7 @@ public class RenderPass {
             public boolean equals(Object obj) {
                 if (obj == this) return true;
                 if (obj == null || obj.getClass() != this.getClass()) return false;
-                var that = (Atlas) obj;
+                Atlas that = (Atlas) obj;
                 return Objects.equals(this.textureId, that.textureId) &&
                        Objects.equals(this.type, that.type);
             }
@@ -485,7 +483,7 @@ public class RenderPass {
                     public void apply(Material material) {
                         QuantumClient client = QuantumClient.get();
                         TextureManager textureManager = client.getTextureManager();
-                        var texture = textureManager.getTexture(textureId);
+                com.badlogic.gdx.graphics.Texture texture = textureManager.getTexture(textureId);
                         material.set(TextureAttribute.createDiffuse(texture));
                     }
 
@@ -497,7 +495,7 @@ public class RenderPass {
             public boolean equals(Object obj) {
                 if (obj == this) return true;
                 if (obj == null || obj.getClass() != this.getClass()) return false;
-                var that = (Texture) obj;
+                Texture that = (Texture) obj;
                 return Objects.equals(this.textureId, that.textureId);
             }
 
@@ -530,7 +528,7 @@ public class RenderPass {
                         QuantumClient client = QuantumClient.get();
                         TextureAtlas atlas = client.getAtlas(atlasId);
                         if (atlas == null) throw new IllegalStateException("Texture atlas " + atlasId + " not found");
-                        var texture = atlas.get(textureId, type);
+                com.badlogic.gdx.graphics.g2d.TextureRegion texture = atlas.get(textureId, type);
                         if (texture == null) {
                             material.set(TextureAttribute.createDiffuse(TextureManager.DEFAULT_TEX_REG));
                             return;
@@ -554,7 +552,7 @@ public class RenderPass {
             public boolean equals(Object obj) {
                 if (obj == this) return true;
                 if (obj == null || obj.getClass() != this.getClass()) return false;
-                var that = (TextureRegion) obj;
+                TextureRegion that = (TextureRegion) obj;
                 return Objects.equals(this.atlasId, that.atlasId) &&
                        Objects.equals(this.textureId, that.textureId) &&
                        Objects.equals(this.type, that.type);
@@ -595,7 +593,7 @@ public class RenderPass {
             public boolean equals(Object obj) {
                 if (obj == this) return true;
                 if (obj == null || obj.getClass() != this.getClass()) return false;
-                var that = (FogColor) obj;
+                FogColor that = (FogColor) obj;
                 return Objects.equals(this.color, that.color);
             }
 
@@ -608,59 +606,6 @@ public class RenderPass {
             public String toString() {
                 return "FogColor[" +
                        "color=" + color + ']';
-            }
-
-                }
-
-        public static final class Fog implements AttributeDelegate {
-            private final float density;
-            private final float start;
-            private final float end;
-
-            public Fog(float density, float start, float end) {
-                this.density = density;
-                this.start = start;
-                this.end = end;
-            }
-
-            @Override
-                    public void apply(Material material) {
-                        material.set(FogAttribute.createFog(start, end, density));
-                    }
-
-            public float density() {
-                return density;
-            }
-
-            public float start() {
-                return start;
-            }
-
-            public float end() {
-                return end;
-            }
-
-            @Override
-            public boolean equals(Object obj) {
-                if (obj == this) return true;
-                if (obj == null || obj.getClass() != this.getClass()) return false;
-                var that = (Fog) obj;
-                return Float.floatToIntBits(this.density) == Float.floatToIntBits(that.density) &&
-                       Float.floatToIntBits(this.start) == Float.floatToIntBits(that.start) &&
-                       Float.floatToIntBits(this.end) == Float.floatToIntBits(that.end);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(density, start, end);
-            }
-
-            @Override
-            public String toString() {
-                return "Fog[" +
-                       "density=" + density + ", " +
-                       "start=" + start + ", " +
-                       "end=" + end + ']';
             }
 
                 }
@@ -685,7 +630,7 @@ public class RenderPass {
             public boolean equals(Object obj) {
                 if (obj == this) return true;
                 if (obj == null || obj.getClass() != this.getClass()) return false;
-                var that = (AmbientColor) obj;
+                AmbientColor that = (AmbientColor) obj;
                 return Objects.equals(this.color, that.color);
             }
 

@@ -95,11 +95,13 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         this.clientWorld = world;
         this.active = false;
 
-        blockEntities.forEach((vec, type) -> {
+        for (Map.Entry<BlockVec, BlockEntityType<?>> entry : blockEntities.entrySet()) {
+            BlockVec key = entry.getKey();
+            BlockEntityType<?> type = entry.getValue();
             if (type != null) {
-                this.setBlockEntity(vec, type.create(world, pos.blockInWorldSpace(vec)));
+                this.setBlockEntity(key, type.create(world, pos.blockInWorldSpace(key)));
             }
-        });
+        }
 
         this.mesher = new FaceCullMesher(this);
     }
@@ -348,7 +350,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     public void destroyModels() {
-        for (var model : this.models.values()) {
+        for (BlockObject model : this.models.values()) {
             this.remove(model);
         }
     }

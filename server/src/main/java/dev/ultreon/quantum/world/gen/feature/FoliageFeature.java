@@ -20,7 +20,7 @@ public class FoliageFeature extends TerrainFeature {
 
         this.material = material;
         this.threshold = threshold;
-        this.validGround = new HashSet<>(List.of(validGround));
+        this.validGround = new HashSet<>(Arrays.asList(validGround));
     }
 
     @Override

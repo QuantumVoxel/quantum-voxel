@@ -4,6 +4,7 @@ import dev.ultreon.quantum.api.neocommand.CommandParseException;
 import dev.ultreon.quantum.api.neocommand.CommandReader;
 import dev.ultreon.quantum.api.neocommand.SuggestionProvider;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class LiteralArgumentType implements ArgumentType<String> {
@@ -30,6 +31,6 @@ public class LiteralArgumentType implements ArgumentType<String> {
 
     @Override
     public List<String> getExamples() {
-        return List.of(literal);
+        return Arrays.asList(literal);
     }
 }

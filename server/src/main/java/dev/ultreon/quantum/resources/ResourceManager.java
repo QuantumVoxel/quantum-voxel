@@ -5,7 +5,6 @@ import com.badlogic.gdx.files.FileHandle;
 import dev.ultreon.libs.commons.v0.Logger;
 import dev.ultreon.libs.commons.v0.exceptions.SyntaxException;
 import dev.ultreon.libs.commons.v0.util.IOUtils;
-import dev.ultreon.libs.functions.v0.misc.ThrowingSupplier;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.event.EventSystem;
@@ -17,12 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -61,21 +55,6 @@ public abstract class ResourceManager extends GameObject implements Closeable {
         addImported(new DeferredResourcePackage(ref, this.root));
     }
 
-    public void importPackage(URI uri) throws IOException {
-        URL url = uri.toURL();
-        if (url.getProtocol().equals("file")) {
-            this.importPackage(new FileHandle(new File(uri)));
-        } else if (url.getProtocol().equals("jar")) {
-            try {
-                this.importFilePackage(new ZipInputStream(new URI(uri.toURL().getPath().split("!/", 2)[0]).toURL().openStream()), uri.toASCIIString());
-            } catch (URISyntaxException e) {
-                throw new IOException("Invalid URI: " + uri, e);
-            }
-        } else {
-            this.importFilePackage(new ZipInputStream(uri.toURL().openStream()), uri.toASCIIString());
-        }
-    }
-
     public void importPackage(FileHandle file) throws IOException {
         if (!file.exists()) {
             throw new IOException("Resource package doesn't exists: " + file.path());
@@ -108,11 +87,11 @@ public abstract class ResourceManager extends GameObject implements Closeable {
             if (file.startsWith(root + GamePlatform.get().getFileSep())) {
                 String domain = file.substring(root.length() + 1);
                 String domainId = domain.substring(0, domain.indexOf(str));
-                String[] path = domain.substring(domain.indexOf(str) + 1).split("\\" + str);
+                String[] path = domain.substring(domain.indexOf(str) + 1).split("\\\\" + str);
                 String[] categoryParts = Arrays.copyOf(path, path.length - 1);
                 String filename = path[path.length - 1];
 
-                String categoryPath = categoryParts.length > 0 ? String.join(str, categoryParts) + str : "";
+                String categoryPath = categoryParts.length > 0 ? dev.ultreon.quantum.StringUtils.join(str, categoryParts) + str : "";
                 String filePath = categoryPath + filename;
 
                 StaticResource resource = new StaticResource(
@@ -164,50 +143,49 @@ public abstract class ResourceManager extends GameObject implements Closeable {
                 String namespace = resPackage.name();
 
                 // Walk assets package.
-                try (Stream<FileHandle> walk = walk(resPackage)) {
-                    for (FileHandle assetPath : walk.collect(Collectors.toList())) {
-                        // Convert to a file object.
+                List<FileHandle> walk = walk(resPackage);
+                for (FileHandle assetPath : new ArrayList<>(walk)) {
+                    // Convert to a file object.
 
-                        // Check if it's a file, if not,
-                        // we will walk to the next file / folder in the Files.walk(...)
-                        // list.
-                        if (assetPath.isDirectory()) {
-                            continue;
-                        }
-
-                        // Continue to the next file / folder
-                        // if the asset path is the same path as the resource package.
-                        if (assetPath.equals(resPackage)) {
-                            continue;
-                        }
-
-                        // Calculate resource path.
-                        FileHandle relative = Gdx.files.getFileHandle(assetPath.path().substring(resPackage.path().length() + 1), resPackage.type());
-                        String s = relative.toString().replaceAll("\\\\", "/");
-
-                        // Create resource entry.
-                        NamespaceID entry;
-                        try {
-                            entry = new NamespaceID(namespace, s);
-                        } catch (SyntaxException e) {
-                            logger.error("Invalid resource identifier:", e);
-                            continue;
-                        }
-
-                        // Create resource with file input stream.
-                        ThrowingSupplier<InputStream, IOException> sup = assetPath::read;
-                        StaticResource resource = new StaticResource(entry, sup);
-
-                        String path = entry.getPath();
-                        String[] split = path.split("/");
-                        String category = split[0];
-                        if (split.length > 1) {
-                            categories.computeIfAbsent(category, ResourceCategory::new).set(entry, resource);
-                        }
-
-                        // Add resource mapping for (entry -> resource).
-                        map.put(entry, resource);
+                    // Check if it's a file, if not,
+                    // we will walk to the next file / folder in the Files.walk(...)
+                    // list.
+                    if (assetPath.isDirectory()) {
+                        continue;
                     }
+
+                    // Continue to the next file / folder
+                    // if the asset path is the same path as the resource package.
+                    if (assetPath.equals(resPackage)) {
+                        continue;
+                    }
+
+                    // Calculate resource path.
+                    FileHandle relative = Gdx.files.getFileHandle(assetPath.path().substring(resPackage.path().length() + 1), resPackage.type());
+                    String s = relative.toString().replaceAll("\\\\", "/");
+
+                    // Create resource entry.
+                    NamespaceID entry;
+                    try {
+                        entry = new NamespaceID(namespace, s);
+                    } catch (SyntaxException e) {
+                        logger.error("Invalid resource identifier:", e);
+                        continue;
+                    }
+
+                    // Create resource with file input stream.
+                    ThrowingSupplier<InputStream, IOException> sup = assetPath::read;
+                    StaticResource resource = new StaticResource(entry, sup);
+
+                    String path = entry.getPath();
+                    String[] split = path.split("/");
+                    String category = split[0];
+                    if (split.length > 1) {
+                        categories.computeIfAbsent(category, ResourceCategory::new).set(entry, resource);
+                    }
+
+                    // Add resource mapping for (entry -> resource).
+                    map.put(entry, resource);
                 }
             }
 
@@ -215,9 +193,9 @@ public abstract class ResourceManager extends GameObject implements Closeable {
         }
     }
 
-    private Stream<FileHandle> walk(FileHandle resPackage) {
+    private List<FileHandle> walk(FileHandle resPackage) {
         if (!resPackage.exists()) {
-            return Stream.empty();
+            return Collections.emptyList();
         }
 
         List<FileHandle> files = new ArrayList<>();
@@ -225,11 +203,11 @@ public abstract class ResourceManager extends GameObject implements Closeable {
 
         if (resPackage.isDirectory()) {
             for (FileHandle child : resPackage.list()) {
-                files.addAll(walk(child).collect(Collectors.toList()));
+                files.addAll(new ArrayList<>(walk(child)));
             }
         }
 
-        return files.stream();
+        return files;
     }
 
     private void importFilePackage(ZipInputStream stream, String filePath) throws IOException {
@@ -341,13 +319,16 @@ public abstract class ResourceManager extends GameObject implements Closeable {
     }
 
     public List<ResourceCategory> getResourceCategory(String category) {
-        return this.resourcePackages.stream().map(resourcePackage -> {
-            if (!resourcePackage.hasCategory(category)) {
-                return null;
+        List<ResourceCategory> list = new ArrayList<>();
+        for (ResourcePackage resourcePackage : this.resourcePackages) {
+            if (resourcePackage.hasCategory(category)) {
+                ResourceCategory resourceCategory = resourcePackage.getCategory(category);
+                if (resourceCategory != null) {
+                    list.add(resourceCategory);
+                }
             }
-
-            return resourcePackage.getCategory(category);
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        }
+        return list;
     }
 
     public List<ResourcePackage> getResourcePackages() {
@@ -355,7 +336,11 @@ public abstract class ResourceManager extends GameObject implements Closeable {
     }
 
     public List<ResourceCategory> getResourceCategories() {
-        return this.resourcePackages.stream().flatMap(resourcePackage -> resourcePackage.getCategories().stream()).collect(Collectors.toList());
+        List<ResourceCategory> list = new ArrayList<>();
+        for (ResourcePackage resourcePackage : this.resourcePackages) {
+            list.addAll(resourcePackage.getCategories());
+        }
+        return list;
     }
 
     public void close() {

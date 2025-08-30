@@ -85,7 +85,7 @@ public final class Section {
 
     public Map<String, FinishedSection> collect() {
         Map<String, FinishedSection> map = new HashMap<>();
-        for (var entry : this.data.entrySet()) {
+        for (Map.Entry<String, Section> entry : this.data.entrySet()) {
             map.put(entry.getKey(), FinishedSection.create(entry.getValue()));
         }
 
@@ -113,7 +113,7 @@ public final class Section {
         private final Map<String, Integer> stats;
 
         public FinishedSection(Section section) {
-            for (var entry : section.getData().entrySet()) {
+            for (Map.Entry<String, Section> entry : section.getData().entrySet()) {
                 this.data.put(entry.getKey(), FinishedSection.create(entry.getValue()));
             }
             this.nanos = section.getNanos();

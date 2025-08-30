@@ -58,7 +58,7 @@ public class JavaWebSocketServer implements Networker {
 
     @Override
     public List<? extends IConnection<ServerPacketHandler, ClientPacketHandler>> getConnections() {
-        return List.copyOf(connections.values());
+        return new ArrayList<>(connections.values());
     }
 
     @Override

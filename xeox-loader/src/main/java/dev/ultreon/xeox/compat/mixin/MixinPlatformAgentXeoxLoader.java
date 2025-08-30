@@ -27,7 +27,6 @@ package dev.ultreon.xeox.compat.mixin;
 import java.io.File;
 import java.util.Collection;
 
-import dev.ultreon.xeox.api.IXeoxLoader;
 import dev.ultreon.xeox.impl.XeoxLoader;
 import org.slf4j.Logger;
 import org.spongepowered.asm.launch.platform.IMixinPlatformServiceAgent;
