@@ -62,7 +62,10 @@ public final class WorldStorage {
      */
     public void write(DataType<?> data, String path) throws IOException {
         if (!directory.exists()) directory.mkdirs();
-        DataIo.write(data, directory.child(path).write(false));
+        FileHandle child = directory.child(path);
+        FileHandle parent = child.parent();
+        parent.mkdirs();
+        DataIo.write(data, child.write(false));
     }
 
     /**
@@ -251,6 +254,9 @@ public final class WorldStorage {
      */
     public void saveInfo(WorldSaveInfo worldSaveInfo) throws IOException {
         this.info = worldSaveInfo;
+        if (!this.getDirectory().exists()) {
+            this.getDirectory().mkdirs();
+        }
         worldSaveInfo.save(this);
     }
 

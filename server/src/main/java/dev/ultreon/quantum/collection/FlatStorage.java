@@ -117,7 +117,7 @@ public class FlatStorage<D> implements Storage<D> {
     @Override
     public boolean set(int idx, D value) {
         if (idx < 0 || idx >= this.data.length) {
-            throw new ArrayIndexOutOfBoundsException(idx);
+            throw new ArrayIndexOutOfBoundsException(idx + " (length: " + this.data.length + ")");
         }
 
         D datum = data[idx];
@@ -129,7 +129,7 @@ public class FlatStorage<D> implements Storage<D> {
     @Override
     public D get(int idx) {
         if (idx < 0 || idx >= this.data.length) {
-            throw new ArrayIndexOutOfBoundsException(idx);
+            throw new ArrayIndexOutOfBoundsException(idx + " (length: " + this.data.length + ")");
         }
 
         D datum = this.data[idx];

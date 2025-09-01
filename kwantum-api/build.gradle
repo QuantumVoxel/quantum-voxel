@@ -1,7 +1,3 @@
-plugins {
-    id 'org.jetbrains.kotlin.jvm' version '2.2.0'
-}
-
 group = 'dev.ultreon.quantum'
 version = rootProject.version
 
@@ -13,8 +9,6 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 java.targetCompatibility = JavaVersion.VERSION_17
 
 dependencies {
-    testImplementation 'org.jetbrains.kotlin:kotlin-test'
-
     implementation project(":desktop")
 }
 

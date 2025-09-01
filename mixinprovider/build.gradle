@@ -35,7 +35,6 @@ dependencies {
     implementation("com.badlogicgames.ashley:ashley:$ashleyVersion")
     implementation("com.badlogicgames.gdx:gdx-ai:$aiVersion")
     implementation("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
-    implementation("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
     implementation("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
     compileOnly project(":desktop")
 
@@ -82,7 +81,6 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
     implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion")
-    implementation("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
     implementation("com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion")
 
     implementation("com.github.crykn.guacamole:gdx:v0.3.5")

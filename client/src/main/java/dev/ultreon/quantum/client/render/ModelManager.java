@@ -154,12 +154,12 @@ public class ModelManager {
             return this.models.get(id);
         }
 
-        this.builder.get().begin();
+        getModelBuilder().begin();
         Model model;
         try {
-            builder.accept(this.builder.get());
+            builder.accept(getModelBuilder());
         } finally {
-            model = this.builder.get().end();
+            model = getModelBuilder().end();
         }
         this.models.put(id, model);
         return model;
@@ -173,7 +173,7 @@ public class ModelManager {
      * @return The generated Model instance.
      */
     public Model generateModel(NamespaceID id, Function<ModelBuilder, Model> builder) {
-        Model model = builder.apply(this.builder.get());
+        Model model = builder.apply(getModelBuilder());
 
         this.models.put(id, model);
 

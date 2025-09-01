@@ -9,6 +9,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.logging.API;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
@@ -39,6 +40,7 @@ import party.iroiro.luajava.luajit.LuaJit;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.net.ConnectException;
 import java.net.URI;
@@ -60,6 +62,24 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     DesktopPlatform(boolean angleGLES, SafeLoadWrapper safeWrapper) {
         super();
+
+        API.PROPERTY.set(new API() {
+            @Override
+            public void addShutdownHook(Runnable runnable) {
+                Runtime.getRuntime().addShutdownHook(new Thread(runnable));
+            }
+
+            @Override
+            public void setOut(PrintStream oldOut) {
+                System.setOut(oldOut);
+            }
+
+            @Override
+            public void setErr(PrintStream oldErr) {
+                System.setErr(oldErr);
+            }
+        });
+
         this.angleGLES = angleGLES;
         this.safeWrapper = safeWrapper;
         if (angleGLES)

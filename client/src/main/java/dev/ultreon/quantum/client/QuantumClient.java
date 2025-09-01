@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -122,7 +121,6 @@ import java.util.function.Function;
 
 import static com.badlogic.gdx.graphics.GL20.*;
 import static com.badlogic.gdx.graphics.Texture.*;
-import static com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.*;
 import static com.badlogic.gdx.math.MathUtils.ceil;
 import static dev.ultreon.quantum.server.PlatformOS.isMac;
 
@@ -557,7 +555,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         KnownFonts.addEmoji(font);
 
-        unifont = new GameFont(loadFontTTF(id("pixel_sans"), p -> p.size = 9), Font.DistanceFieldType.STANDARD, 0, 0, 0, -1, true);
+//        unifont = new GameFont(loadFontTTF(id("pixel_sans"), p -> p.size = 9), Font.DistanceFieldType.STANDARD, 0, 0, 0, -1, true);
+        unifont = font;
         unifont.useIntegerPositions(true);
         unifont.setBoldStrength(0.33f);
         unifont.lineHeight = 9f;
@@ -684,22 +683,6 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 //        if (ClientConfiguration.skipSplashScreen.getValue()) {
         this.startLoading();
 //        }
-    }
-
-    private BitmapFont loadFontTTF(NamespaceID id, Consumer<FreeTypeFontParameter> config) {
-        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(resource(id.mapPath(s -> "font/" + s + ".ttf")));
-        FreeTypeFontParameter param = new FreeTypeFontParameter();
-        param.minFilter = TextureFilter.Nearest;
-        param.magFilter = TextureFilter.Nearest;
-        param.characters = genUnicode();
-        param.kerning = false;
-        param.mono = true;
-        param.renderCount = 1;
-        param.gamma = 8;
-        param.flip = false;
-        param.hinting = Hinting.None;
-        config.accept(param);
-        return fontGen.generateFont(param);
     }
 
     private String genUnicode() {

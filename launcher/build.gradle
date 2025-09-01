@@ -125,7 +125,6 @@ dependencies {
     runtimeOnly("com.badlogicgames.ashley:ashley:$ashleyVersion")
     runtimeOnly("com.badlogicgames.gdx:gdx-ai:$aiVersion")
     runtimeOnly("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
-    runtimeOnly("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
     runtimeOnly("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
 
     runtimeOnly("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
@@ -133,7 +132,6 @@ dependencies {
     runtimeOnly("com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop")
     runtimeOnly("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
     runtimeOnly("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion")
-    runtimeOnly("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
 
     // JNA
     runtimeOnly("net.java.dev.jna:jna:$jnaVersion")
@@ -152,8 +150,6 @@ dependencies {
     runtimeOnly("space.earlygrey:shapedrawer:$shapeDrawerVersion")
 
     runtimeOnly("com.google.code.findbugs:jsr305:$jsrVersion")
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
     runtimeOnly("org.xbib.elasticsearch:joptsimple:6.3.2.1")
 

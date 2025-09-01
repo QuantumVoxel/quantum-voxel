@@ -3,6 +3,7 @@ package dev.ultreon.quantum.util;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.component.Component;
 import dev.ultreon.quantum.component.GameComponent;
 import org.jetbrains.annotations.NotNull;

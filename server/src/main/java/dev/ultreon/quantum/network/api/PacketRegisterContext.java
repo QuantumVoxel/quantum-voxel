@@ -33,7 +33,7 @@ public class PacketRegisterContext {
             throw new RuntimeException("ModPacket " + construct.getClass().getName() + " is missing a constructor that takes a FriendlyByteBuf as an argument.", e);
         }
 
-        if (!declaredConstructor.canAccess(null)) {
+        if (!declaredConstructor.isAccessible()) {
             try {
                 declaredConstructor.setAccessible(true);
             } catch (SecurityException e) {

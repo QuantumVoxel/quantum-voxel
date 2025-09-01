@@ -1,9 +1,12 @@
 package dev.ultreon.logging;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 import static dev.ultreon.logging.AnsiColors.*;
 
@@ -34,10 +37,28 @@ public class Logger {
             doLog(time, level, category, null, exc, fromReplay, wasSuppressed);
             return;
         }
-        for (String line : msg.lines().collect(Collectors.toList())) {
+        for (String line : splitLines(msg)) {
             doLog(time, level, category, line, exc, fromReplay, wasSuppressed);
             exc = null; //? Prevent exception log spam
         }
+    }
+
+    private static String[] splitLines(String msg) {
+        msg = msg.replace("\r\n", "\n").replace("\r", "\n");
+        List<String> lines = new ArrayList<>();
+        int index = 0;
+        while (index < msg.length()) {
+            int nextIndex = msg.indexOf('\n', index);
+            if (nextIndex == -1) {
+                lines.add(msg.substring(index));
+                break;
+            } else {
+                lines.add(msg.substring(index, nextIndex));
+                index = nextIndex + 1;
+            }
+        }
+
+        return lines.toArray(new String[0]);
     }
 
     private void doLog(long time, LogLevel level, LogCategory category, String msg, Throwable exc, boolean fromReplay, boolean wasSuppressed) {
@@ -59,8 +80,9 @@ public class Logger {
             sb.append(RED + " (replay)" + RESET);
         }
         sb.append(RESET + "\n");
+        PrintStream printStream = outFor(level);
         if (exc == null) {
-            outFor(level).print(sb);
+            printStream.print(sb);
             return;
         }
         sb.append(BLUE).append(exc.getClass().getName()).append(": ").append(RESET).append(exc.getMessage()).append("\n");
@@ -68,7 +90,8 @@ public class Logger {
 
         sb.append("\n");
 
-        outFor(level).print(sb);
+        printStream.print(sb);
+        printStream.flush();
     }
 
     private PrintStream outFor(LogLevel level) {
@@ -115,7 +138,9 @@ public class Logger {
             sb.append(RED).append("    Suppressed: ").append(BLUE).append(suppressed.getClass().getName()).append(": ").append(RESET).append(suppressed.getMessage()).append("\n");
             StringBuilder suppressedSb = new StringBuilder();
             stack(suppressed, exc.getStackTrace(), suppressedSb);
-            suppressedSb.toString().lines().forEach(str -> sb.append("    ").append(str).append("\n"));
+            for (String str : splitLines(suppressedSb.toString())) {
+                sb.append("    ").append(str).append("\n");
+            }
         }
     }
 

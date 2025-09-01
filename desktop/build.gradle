@@ -148,7 +148,6 @@ dependencies {
     implementation api("com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop")
     implementation api("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
     implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion")
-    implementation api("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
     implementation api("com.badlogicgames.gdx-video:gdx-video:$gdxVideoVersion")
     implementation api("com.badlogicgames.gdx-video:gdx-video:$gdxVideoVersion")
     implementation api("com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion") {
@@ -214,9 +213,6 @@ dependencies {
     implementation api("io.github.spair:imgui-java-natives-windows:$imGuiVersion")
 
     implementation api("com.google.code.findbugs:jsr305:$jsrVersion")
-
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
     implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
 

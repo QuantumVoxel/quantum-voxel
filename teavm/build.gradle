@@ -21,8 +21,6 @@ java.sourceCompatibility = "11"
 
 dependencies {
   implementation "com.github.xpenatan.gdx-teavm:backend-teavm:$gdxTeaVMVersion"
-  implementation "com.github.xpenatan.gdx-teavm:gdx-freetype-teavm:$gdxTeaVMVersion"
-  implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
   implementation "org.teavm:teavm-classlib:$teaVMVersion"
   implementation "org.teavm:teavm-core:$teaVMVersion"
   implementation "org.teavm:teavm-jso-apis:$teaVMVersion"

@@ -58,9 +58,11 @@ public abstract class Button<T extends Button<T>> extends Widget {
         if (yOffset > yOffsetGoal) {
             if (yOffset < yOffsetGoal + 0.3f) yOffset = yOffsetGoal;
             yOffset -= (yOffset - yOffsetGoal) * Gdx.graphics.getDeltaTime() * 8f;
+            if (yOffset < yOffsetGoal) yOffset = yOffsetGoal;
         } else if (yOffset < yOffsetGoal) {
             if (yOffset > yOffsetGoal - 0.3f) yOffset = yOffsetGoal;
             yOffset += (yOffsetGoal - yOffset) * Gdx.graphics.getDeltaTime() * 8f;
+            if (yOffset > yOffsetGoal) yOffset = yOffsetGoal;
         }
     }
 

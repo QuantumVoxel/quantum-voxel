@@ -14,7 +14,4 @@ public class PlatformOS {
     public static boolean isMobile = GamePlatform.get().isMobile();
     public static boolean isServer = GamePlatform.get().isServer();
     public static boolean isClient = GamePlatform.get().isClient();
-    public static boolean isSwitch = GamePlatform.get().isSwitch();
-    public static boolean isXbox = GamePlatform.get().isXbox();
-    public static boolean isSwitchGDX = GamePlatform.get().isSwitchGDX();
 }

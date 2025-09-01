@@ -351,18 +351,6 @@ public abstract class GamePlatform {
         return false;
     }
 
-    public boolean isSwitch() {
-        return false;
-    }
-
-    public boolean isXbox() {
-        return false;
-    }
-
-    public boolean isSwitchGDX() {
-        return false;
-    }
-
     @Deprecated
     public boolean hasImGui() {
         return isImGuiSupported();

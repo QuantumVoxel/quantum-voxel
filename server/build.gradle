@@ -73,8 +73,6 @@ dependencies {
     implementation api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
 
     implementation api("com.google.code.findbugs:jsr305:$jsrVersion")
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 }
 
 processResources {

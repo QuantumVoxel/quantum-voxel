@@ -17,7 +17,6 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.file.NoSuchFileException;
 import java.util.*;
 
 /**
@@ -692,8 +691,6 @@ public abstract class CraftyConfig {
     public void load() {
         try {
             this.loadUnsafe();
-        } catch (NoSuchFileException ignored) {
-            // File not found, can be ignored
         } catch (Exception e) {
             // Log error if failed to load the config file
             CommonConstants.LOGGER.error("Failed to load config file", e);
