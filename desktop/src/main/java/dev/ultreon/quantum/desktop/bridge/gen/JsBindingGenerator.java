@@ -329,7 +329,7 @@ public class JsBindingGenerator {
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append("type %s$$$ = %s%s;\n".formatted(getName(cls), superClassName, interfaces.isEmpty() ? "" : " & " + dev.ultreon.quantum.StringUtils.join(" & ", interfaces)));
+        builder.append("type %s$$$ = %s%s;\n".formatted(getName(cls), superClassName, interfaces.isEmpty() ? "" : " & " + String.join(" & ", interfaces)));
 
         builder.append("\n/**\n");
         builder.append(" * Java signature: ").append(cls.toGenericString()).append("\n");
@@ -449,8 +449,6 @@ public class JsBindingGenerator {
                             str += " | null";
                         } else if (method.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) {
                             str += " | null";
-                        } else if (method.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) {
-                            str += " | null";
                         } else if (method.isAnnotationPresent(Null.class)) {
                             str += " | null";
                         }
@@ -490,8 +488,6 @@ public class JsBindingGenerator {
                 } else if (field.isAnnotationPresent(org.jspecify.annotations.Nullable.class)) {
                     fieldType += " | null";
                 } else if (field.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) {
-                    fieldType += " | null";
-                } else if (field.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) {
                     fieldType += " | null";
                 } else if (field.isAnnotationPresent(Null.class)) {
                     fieldType += " | null";
@@ -540,8 +536,6 @@ public class JsBindingGenerator {
                             str += " | null";
                         } else if (method.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) {
                             str += " | null";
-                        } else if (method.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) {
-                            str += " | null";
                         } else if (method.isAnnotationPresent(Null.class)) {
                             str += " | null";
                         }
@@ -581,8 +575,6 @@ public class JsBindingGenerator {
                 } else if (field.isAnnotationPresent(org.jspecify.annotations.Nullable.class)) {
                     fieldType += " | null";
                 } else if (field.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) {
-                    fieldType += " | null";
-                } else if (field.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) {
                     fieldType += " | null";
                 } else if (field.isAnnotationPresent(Null.class)) {
                     fieldType += " | null";
@@ -691,7 +683,6 @@ public class JsBindingGenerator {
         else if (type.isAnnotationPresent(Nullable.class)) typeName += " | null";
         else if (type.isAnnotationPresent(org.jspecify.annotations.Nullable.class)) typeName += " | null";
         else if (type.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) typeName += " | null";
-        else if (type.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) typeName += " | null";
 
         if (type.isPrimitive()) {
             return typeName;

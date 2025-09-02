@@ -348,7 +348,7 @@ public class PyBindingGenerator {
         }
 
         Set<String> slots = new HashSet<>();
-        builder.append("class %s(%s%s%s):\n".formatted(getName(cls), superClassName, interfaces.isEmpty() ? "" : ", " + dev.ultreon.quantum.StringUtils.join(", ", interfaces), abc == null ? "" : ", metaclass=" + abc));
+        builder.append("class %s(%s%s%s):\n".formatted(getName(cls), superClassName, interfaces.isEmpty() ? "" : ", " + String.join(", ", interfaces), abc == null ? "" : ", metaclass=" + abc));
         builder.append("  \"\"\"\n  Generated Python wrapper for %s\n  \"\"\"\n\n".formatted(cls.getName()));
         List<Constructor<?>> publicConstructors = new ArrayList<>();
         for (Constructor<?> constructor : cls.getDeclaredConstructors()) {
@@ -423,8 +423,6 @@ public class PyBindingGenerator {
                             str += " | None";
                         } else if (method.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) {
                             str += " | None";
-                        } else if (method.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) {
-                            str += " | None";
                         } else if (method.isAnnotationPresent(Null.class)) {
                             str += " | None";
                         }
@@ -478,8 +476,6 @@ public class PyBindingGenerator {
                     fieldType += " | None";
                 } else if (field.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) {
                     fieldType += " | None";
-                } else if (field.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) {
-                    fieldType += " | None";
                 } else if (field.isAnnotationPresent(Null.class)) {
                     fieldType += " | None";
                 }
@@ -527,8 +523,6 @@ public class PyBindingGenerator {
                         } else if (method.isAnnotationPresent(org.jspecify.annotations.Nullable.class)) {
                             str += " | None";
                         } else if (method.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) {
-                            str += " | None";
-                        } else if (method.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) {
                             str += " | None";
                         } else if (method.isAnnotationPresent(Null.class)) {
                             str += " | None";
@@ -582,8 +576,6 @@ public class PyBindingGenerator {
                     fieldType += " | None";
                 } else if (field.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) {
                     fieldType += " | None";
-                } else if (field.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) {
-                    fieldType += " | None";
                 } else if (field.isAnnotationPresent(Null.class)) {
                     fieldType += " | None";
                 }
@@ -592,7 +584,7 @@ public class PyBindingGenerator {
             builder.append(String.format("  %s: %s\n", fieldName, fieldType));
         }
 
-        builder.append(String.format("  __slots__ = ('%s')\n", dev.ultreon.quantum.StringUtils.join("', '", slots)));
+        builder.append(String.format("  __slots__ = ('%s')\n", String.join("', '", slots)));
         return builder.toString();
     }
 
@@ -696,7 +688,6 @@ public class PyBindingGenerator {
         else if (type.isAnnotationPresent(Nullable.class)) typeName += " | None";
         else if (type.isAnnotationPresent(org.jspecify.annotations.Nullable.class)) typeName += " | None";
         else if (type.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) typeName += " | None";
-        else if (type.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) typeName += " | None";
 
         if (type.isPrimitive()) {
             return typeName;

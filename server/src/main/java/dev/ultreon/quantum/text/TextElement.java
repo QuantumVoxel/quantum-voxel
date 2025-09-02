@@ -23,7 +23,7 @@ public final class TextElement {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        TextElement that = (TextElement) obj;
+        var that = (TextElement) obj;
         return Objects.equals(this.text, that.text) &&
                Objects.equals(this.style, that.style);
     }

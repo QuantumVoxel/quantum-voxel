@@ -3,12 +3,12 @@ package dev.ultreon.quantum.dedicated;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.backends.headless.HeadlessApplication;
 import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
-import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.config.QuantumServerConfig;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
+import dev.ultreon.quantum.dedicated.gui.DedicatedServerGui;
 import dev.ultreon.quantum.server.QuantumServer;
 //import dev.ultreon.quantum.dedicated.gui.DedicatedServerGui;
 //import dev.ultreon.quantum.dedicated.http.ServerHttpSite;
@@ -16,6 +16,8 @@ import dev.ultreon.quantum.text.LanguageBootstrap;
 import dev.ultreon.quantum.util.ModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
@@ -191,7 +193,7 @@ public class Main {
             thread.setName("WaitForKey");
             thread.start();
 
-            Duration.ofSeconds(10).sleep();
+            Thread.sleep(10000);
 
             running.set(false);
             thread.join();

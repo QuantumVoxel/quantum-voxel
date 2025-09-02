@@ -8,7 +8,6 @@ import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.Point;
-import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.rng.JavaRNG;
@@ -27,9 +26,8 @@ import static dev.ultreon.quantum.world.World.CS_2;
  * It includes functionality for handling biome data and block state manipulation.
  */
 public final class BuilderChunk extends Chunk {
-    private final @NotNull ServerWorld world;
     private final @NotNull Thread thread;
-    private final @NotNull Storage<BiomeGenerator> biomeData;
+    private final @NotNull Storage<@NotNull BiomeGenerator> biomeData;
     private @Nullable List<Vec3i> biomeCenters;
     private final @NotNull ServerWorld.Region region;
     private final @NotNull RNG rng;
@@ -37,12 +35,22 @@ public final class BuilderChunk extends Chunk {
 
     public BuilderChunk(@NotNull ServerWorld world, @NotNull Thread thread, ChunkVec pos, ServerWorld.@NotNull Region region) {
         super(world, pos);
-        this.world = world;
         this.thread = thread;
         this.region = region;
         this.rng = new JavaRNG(this.world.getSeed() + (pos.getIntX() ^ ((long) pos.getIntZ() << 4)) & 0x3FFFFFFF);
-        this.biomeData = new PaletteStorage<>(CS_2, world.getServer().getBiomes().plains.create(this.world));
+        this.biomeData = new PaletteStorage<>(CS_2, world.getServer().getBiomes().plains.create((ServerWorld) this.world));
         this.server = world.getServer();
+    }
+
+    @Override
+    protected void retrieveNeighbors() {
+        for (Direction direction : Direction.values()) {
+            Chunk chunk = ((ServerWorld) world).getChunkNoLoad(tmpCV.set(vec).add(direction.getOffset()));
+
+            this.neighbors[direction.ordinal()] = chunk;
+            if (chunk != null)
+                chunk.neighbors[direction.getOpposite().ordinal()] = this;
+        }
     }
 
     @Override
@@ -75,7 +83,7 @@ public final class BuilderChunk extends Chunk {
 
     @Override
     public @NotNull ServerWorld getWorld() {
-        return this.world;
+        return (ServerWorld) this.world;
     }
 
     public boolean isOnInvalidThread() {
@@ -90,8 +98,8 @@ public final class BuilderChunk extends Chunk {
 
     @SuppressWarnings("unchecked")
     public ServerChunk build() {
-        Storage<RegistryKey<Biome>> map = this.biomeData.map(world.getServer().getBiomes().getDefaultKey(), RegistryKey[]::new, gen -> gen.getBiomeKey(world.getServer()));
-        return new ServerChunk(this.world, this.getVec(), this.storage, map, region);
+        Storage<RegistryKey<Biome>> map = this.biomeData.map(((ServerWorld) world).getServer().getBiomes().getDefaultKey(), RegistryKey[]::new, gen -> gen.getBiomeKey(((ServerWorld) world).getServer()));
+        return new ServerChunk((ServerWorld) this.world, this.vec, this.storage, map, region);
     }
 
     public void setBiomeGenerator(int x, int z, BiomeGenerator generator) {
@@ -130,12 +138,8 @@ public final class BuilderChunk extends Chunk {
         return this.rng;
     }
 
-    public List<Vec3d> getCavePoints() {
-        return this.world.getCavePointsFor(getVec());
-    }
-
     public BuilderFork createFork(int x, int y, int z) {
-        return new BuilderFork(this, x, y, z, this.world.getGenerator());
+        return new BuilderFork(this, x, y, z, ((ServerWorld) this.world).getGenerator());
     }
 
     public QuantumServer getServer() {

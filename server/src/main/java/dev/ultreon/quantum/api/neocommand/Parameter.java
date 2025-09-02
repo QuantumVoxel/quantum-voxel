@@ -37,7 +37,7 @@ public final class Parameter<T> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        Parameter<?> that = (Parameter<?>) obj;
+        var that = (Parameter<?>) obj;
         return Objects.equals(this.name, that.name) &&
                Objects.equals(this.type, that.type);
     }

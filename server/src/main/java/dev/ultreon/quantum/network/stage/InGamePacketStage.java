@@ -31,7 +31,6 @@ public class InGamePacketStage extends PacketStage {
         this.addServerBound(C2SCraftAdvancedRecipePacket::read);
         this.addServerBound(C2SDropItemPacket::read);
         this.addServerBound(C2SAttackPacket::read);
-        this.addServerBound(C2SRequestChunkLoadPacket::read);
         this.addServerBound(C2SUnloadChunkPacket::read);
         this.addServerBound(C2SItemSpawnPacket::read);
         this.addServerBound(C2SItemDeletePacket::read);

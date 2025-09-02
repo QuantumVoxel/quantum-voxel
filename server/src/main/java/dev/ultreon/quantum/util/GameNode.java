@@ -3,7 +3,6 @@ package dev.ultreon.quantum.util;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.component.Component;
 import dev.ultreon.quantum.component.GameComponent;
 import org.jetbrains.annotations.NotNull;
@@ -255,9 +254,7 @@ public abstract class GameNode implements Disposable {
 
     public void clearChildren() {
         synchronized (children) {
-            for (GameNode child : children) {
-                child.dispose();
-            }
+            children.forEach(GameNode::dispose);
             children.clear();
         }
     }
@@ -283,11 +280,7 @@ public abstract class GameNode implements Disposable {
 
     public void clearComponents() {
         synchronized (components) {
-            for (Map.Entry<Class<?>, Component<?>> entry : components.entrySet()) {
-                Class<?> type = entry.getKey();
-                Component<?> value = entry.getValue();
-                value.onRemoved(this);
-            }
+            components.forEach((type, value) -> value.onRemoved(this));
             components.clear();
         }
     }

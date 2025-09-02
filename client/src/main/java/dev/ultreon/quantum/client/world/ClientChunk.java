@@ -52,11 +52,9 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     public final Vector3 deltaOffset = new Vector3();
     private final ChunkVec tmpCV = new ChunkVec();
 
-    public volatile boolean dirty;
     public boolean initialized = false;
     private final QuantumClient client = QuantumClient.get();
     private final Map<BlockVec, BlockState> customRendered = new HashMap<>();
-    public boolean immediateRebuild = false;
     private final Vector3 tmp = new Vector3();
     private final Vector3 tmp1 = new Vector3();
     private final Map<BlockVec, ModelInstance> addedModels = new ConcurrentHashMap<>();
@@ -79,29 +77,17 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     public final Box occlusionBounds = new Box();
     public @Nullable OpaqueFaces opaqueFaces;
 
-    private final @Nullable ClientChunk[] neighbors = new ClientChunk[6];
-
     public ClientChunk(ClientWorld world, ChunkVec pos, Storage<@NotNull BlockState> storage, Storage<@NotNull RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         super(world, pos, storage, biomeStorage);
-
-        for (Direction direction : Direction.values()) {
-            ClientChunk chunk = world.getChunk(tmpCV.set(pos).add(direction.getOffset()));
-
-            this.neighbors[direction.ordinal()] = chunk;
-            if (chunk != null)
-                chunk.neighbors[direction.getOpposite().ordinal()] = this;
-        }
 
         this.clientWorld = world;
         this.active = false;
 
-        for (Map.Entry<BlockVec, BlockEntityType<?>> entry : blockEntities.entrySet()) {
-            BlockVec key = entry.getKey();
-            BlockEntityType<?> type = entry.getValue();
+        blockEntities.forEach((vec, type) -> {
             if (type != null) {
-                this.setBlockEntity(key, type.create(world, pos.blockInWorldSpace(key)));
+                this.setBlockEntity(vec, type.create(world, pos.blockInWorldSpace(vec)));
             }
-        }
+        });
 
         this.mesher = new FaceCullMesher(this);
     }
@@ -162,15 +148,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         synchronized (this) {
             super.dispose();
 
-            Direction[] values = Direction.values();
-            for (int i = 0, neighborsLength = neighbors.length; i < neighborsLength; i++) {
-                ClientChunk chunk = neighbors[i];
-                if (chunk != null) {
-                    Direction direction = values[i];
-                    chunk.neighbors[direction.getOpposite().ordinal()] = null;
-                }
-            }
-
             @Nullable TerrainRenderer worldRenderer = QuantumClient.get().worldRenderer;
             if (worldRenderer != null) worldRenderer.unload(this);
 
@@ -214,10 +191,9 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         boolean isBlockSet = super.setFast(x, y, z, block);
 
         this.dirty = true;
-        this.immediateRebuild = true;
-        for (ClientChunk chunk : neighbors) {
+        for (@Nullable Chunk chunk : neighbors) {
             if (chunk != null) {
-                chunk.immediateRebuild = true;
+                chunk.dirty = true;
             }
         }
 
@@ -291,8 +267,9 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     public boolean isSubmerged() {
         boolean isSubmerged = true;
-        for (ClientChunk chunk : neighbors) {
-            if (chunk != null && !chunk.isEmpty()) {
+        for (@Nullable Chunk chunk : neighbors) {
+            ClientChunk clientChunk = (ClientChunk) chunk;
+            if (clientChunk != null && !clientChunk.isEmpty()) {
                 isSubmerged = false;
                 break;
             }
@@ -350,7 +327,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     public void destroyModels() {
-        for (BlockObject model : this.models.values()) {
+        for (var model : this.models.values()) {
             this.remove(model);
         }
     }
@@ -361,10 +338,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     public void setBlockLight(Vec3i pos, int light) {
         this.setBlockLight(pos.x, pos.y, pos.z, light);
-    }
-
-    public void updateLight(WorldAccess world) {
-        world.updateLightSources(this.getOffset(), lights);
     }
 
     public void setLightSource(Vec3i tmp, int light) {

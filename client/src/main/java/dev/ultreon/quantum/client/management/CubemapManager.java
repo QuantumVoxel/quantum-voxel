@@ -13,8 +13,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -79,7 +79,7 @@ public class CubemapManager implements Manager<Cubemap>, Disposable {
     }
 
     public void reload(ReloadContext context) {
-        for (Cubemap cubemap : new ArrayList<>(this.cubemaps.values())) {
+        for (Cubemap cubemap : List.copyOf(this.cubemaps.values())) {
             context.submit(cubemap::dispose);
         }
 

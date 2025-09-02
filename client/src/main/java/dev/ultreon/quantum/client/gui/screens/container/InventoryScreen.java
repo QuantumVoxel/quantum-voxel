@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class InventoryScreen extends ContainerScreen {
     private static final int CONTAINER_SIZE = 40;
@@ -53,7 +54,7 @@ public class InventoryScreen extends ContainerScreen {
     }
 
     public void nextPage() {
-        int page = this.page + 1;
+        var page = this.page + 1;
         if (page > MathUtils.ceil(this.recipes.size() / 30f) - 1) {
             page = 0;
         }
@@ -63,7 +64,7 @@ public class InventoryScreen extends ContainerScreen {
     }
 
     public void previousPage() {
-        int page = this.page - 1;
+        var page = this.page - 1;
         if (page < 0) {
             page = MathUtils.ceil(this.recipes.size() / 30f) - 1;
         }
@@ -80,7 +81,7 @@ public class InventoryScreen extends ContainerScreen {
 
         if (inventory == null) return;
 
-        for (Widget child : new ArrayList<>(this.children())) {
+        for (Widget child : List.copyOf(this.children())) {
             if (child instanceof RecipeSlot) {
                 RecipeSlot recipeSlot = (RecipeSlot) child;
                 this.remove(recipeSlot);
@@ -147,8 +148,8 @@ public class InventoryScreen extends ContainerScreen {
     }
 
     private String withRecipeInfo(Recipe recipe, String description) {
-        ArrayList<TextObject> result = new ArrayList<TextObject>();
-        List<ItemStack> ingredients = recipe.ingredients();
+        var result = new ArrayList<TextObject>();
+        var ingredients = recipe.ingredients();
         if (!ingredients.isEmpty()) {
             result.add(TextObject.empty());
             result.add(TextObject.translation("quantum.recipe.ingredients").style(textStyle -> textStyle.color(RgbColor.WHITE).bold(true)));
@@ -163,12 +164,7 @@ public class InventoryScreen extends ContainerScreen {
             result.add(TextObject.translation("quantum.recipe.uncraftable").style(textStyle -> textStyle.color(RgbColor.RED)));
         }
 
-        List<String> list = new ArrayList<>();
-        for (TextObject textObject : result) {
-            String text = textObject.getText();
-            list.add(text);
-        }
-        return dev.ultreon.quantum.StringUtils.join("\n", list) + description;
+        return String.join("\n", result.stream().map(TextObject::getText).collect(Collectors.toList())) + description;
     }
 
     private boolean showOnlyCraftable() {
@@ -244,7 +240,7 @@ public class InventoryScreen extends ContainerScreen {
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            RecipeSlot that = (RecipeSlot) obj;
+            var that = (RecipeSlot) obj;
             return Objects.equals(this.recipe, that.recipe) &&
                     Objects.equals(this.slot, that.slot);
         }

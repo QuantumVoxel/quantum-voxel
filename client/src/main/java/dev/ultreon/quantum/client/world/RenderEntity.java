@@ -24,7 +24,7 @@ public final class RenderEntity extends RenderObject {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        RenderEntity that = (RenderEntity) obj;
+        var that = (RenderEntity) obj;
         return Objects.equals(this.entity, that.entity);
     }
 

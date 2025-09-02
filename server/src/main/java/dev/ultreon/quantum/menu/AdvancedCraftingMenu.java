@@ -11,11 +11,9 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A class that holds a bunch of item slots.
@@ -76,12 +74,12 @@ public class AdvancedCraftingMenu extends ContainerMenu {
 
     @Override
     public List<ItemSlot> getInputs() {
-        return Arrays.asList();
+        return List.of();
     }
 
     @Override
     public List<ItemSlot> getOutputs() {
-        return Arrays.asList();
+        return List.of();
     }
 
     /**
@@ -105,11 +103,6 @@ public class AdvancedCraftingMenu extends ContainerMenu {
 
     @Override
     public @NotNull Iterator<ItemStack> iterator() {
-        List<ItemStack> list = new ArrayList<>();
-        for (ItemSlot slot : this.slots) {
-            ItemStack item = slot.getItem();
-            list.add(item);
-        }
-        return list.iterator();
+        return Arrays.stream(this.slots).map(ItemSlot::getItem).iterator();
     }
 }

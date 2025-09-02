@@ -16,7 +16,6 @@ import dev.ultreon.quantum.client.gui.screens.world.WorldLoadScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.gui.screens.container.InventoryScreen;
 import dev.ultreon.quantum.client.multiplayer.ClientRecipeManager;
-import dev.ultreon.quantum.client.multiplayer.MultiplayerData;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.RemotePlayer;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
@@ -29,7 +28,6 @@ import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.Inventory;
-import dev.ultreon.quantum.menu.MenuType;
 import dev.ultreon.quantum.network.NetworkChannel;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.api.PacketDestination;
@@ -61,6 +59,7 @@ import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.ubo.types.MapType;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,6 +78,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     private final Map<NamespaceID, NetworkChannel> channels = new HashMap<>();
     private final PacketContext context;
     private final QuantumClient client = QuantumClient.get();
+    @Getter
     private long ping = 0;
     private boolean disconnected;
 
@@ -136,18 +136,6 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     public void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         Promise.runAsync(() -> {
             try {
-                LocalPlayer player = this.client.player;
-                if (player == null/* || new Vec2d(pos.setX(), pos.z()).dst(new Vec2d(player.getChunkVec().setX(), player.getChunkVec().z())) > this.client.settings.renderDistance.getConfig()*/) {
-                    this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
-                    return;
-                }
-
-                double dst = pos.dst(player.getChunkVec());
-                if (dst > (double) ClientConfiguration.renderDistance.getValue() / CS) {
-                    this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.UNLOADED));
-                    return;
-                }
-
                 try {
                     var ref = new Object() {
                         @Nullable
@@ -180,7 +168,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 } catch (Throwable throwable) {
                     this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
                     QuantumClient.LOGGER.error("Failed to load chunk:", throwable);
-                    QuantumClient.crash(throwable);
+                    client.notifications.add("Failed to load chunk", "Check the log for more information", "Chunk: " + pos.toString());
                 }
             } catch (Exception e) {
                 this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
@@ -226,6 +214,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         }
         this.disconnected = true;
 
+        CommonConstants.LOGGER.info("Disconnected from server: " + message);
         this.client.submit(() -> {
             this.client.renderWorld = false;
             @Nullable ClientWorldAccess worldAccess = this.client.world;
@@ -247,6 +236,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                 throw new RuntimeException(e);
             }
             if (this.client.integratedServer != null) {
+                // Stop the integrated server if it's running.
                 this.client.integratedServer.shutdown(() -> {
                 });
                 this.client.remove(this.client.integratedServer);
@@ -270,7 +260,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, float xHeadRot, float xRot, float yRot) {
         // Update the remote player's position in the local multiplayer data.
-        MultiplayerData data = this.client.getMultiplayerData();
+        var data = this.client.getMultiplayerData();
         RemotePlayer remotePlayer = data != null ? data.getRemotePlayerByUuid(player) : null;
         if (remotePlayer == null) return;
 
@@ -317,13 +307,13 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onMenuItemChanged(S2CMenuItemChangedPacket packet) {
-        LocalPlayer player = this.client.player;
+        var player = this.client.player;
 
         if (player != null) {
             ContainerMenu openMenu = player.getOpenMenu();
             if (openMenu != null) {
                 if (openMenu.getType().getId().equals(packet.menuId())) {
-                    for (Map.Entry<Integer, ItemStack> entry : packet.stackMap().entrySet()) {
+                    for (var entry : packet.stackMap().entrySet()) {
                         openMenu.setItem(entry.getKey(), entry.getValue());
                     }
                 } else {
@@ -340,14 +330,14 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onInventoryItemChanged(S2CInventoryItemChangedPacket packet) {
-        LocalPlayer player = this.client.player;
+        var player = this.client.player;
 
         if (player == null) return;
 
         Inventory inventory = player.inventory;
 
         if (inventory != null) {
-            for (Map.Entry<Integer, ItemStack> entry : packet.stackMap().entrySet()) {
+            for (var entry : packet.stackMap().entrySet()) {
                 inventory.setItem(entry.getKey(), entry.getValue());
             }
         }
@@ -360,7 +350,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onMenuCursorChanged(ItemStack cursor) {
-        LocalPlayer player = this.client.player;
+        var player = this.client.player;
         if (this.client.player != null) {
             ContainerMenu openMenu = player.getOpenMenu();
             if (openMenu != null) {
@@ -371,7 +361,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onOpenContainerMenu(NamespaceID menuTypeId, List<ItemStack> items) {
-        MenuType<?> menuType = Registries.MENU_TYPE.get(menuTypeId);
+        var menuType = Registries.MENU_TYPE.get(menuTypeId);
         LocalPlayer player = this.client.player;
         if (player == null) return;
         if (menuType != null) {
@@ -381,7 +371,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onAddPermission(AddPermissionPacket packet) {
-        LocalPlayer player = this.client.player;
+        var player = this.client.player;
         if (player != null) {
             player.getPermissions().onPacket(packet);
         }
@@ -389,7 +379,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onRemovePermission(RemovePermissionPacket packet) {
-        LocalPlayer player = this.client.player;
+        var player = this.client.player;
         if (player != null) {
             player.getPermissions().onPacket(packet);
         }
@@ -397,7 +387,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onInitialPermissions(InitialPermissionsPacket packet) {
-        LocalPlayer player = this.client.player;
+        var player = this.client.player;
         if (player != null) {
             player.getPermissions().onPacket(packet);
         }
@@ -462,9 +452,8 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     public void onAddEntity(int id, EntityType<?> type, Vec3d position, MapType pipeline) {
         if (this.client.world != null) {
             this.client.world.addEntity(id, type, position, pipeline);
-            QuantumClient.get().notifications.add("Added entity: " + id, "Element ID: " + type.getId());
         } else {
-            QuantumClient.get().notifications.add("Failed to add entity: " + id, "Element ID: " + type.getId());
+            QuantumClient.get().notifications.add("Failed to add entity: " + id, "World not loaded!", "Element ID: " + type.getId());
         }
     }
 
@@ -482,7 +471,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onCloseContainerMenu() {
-        LocalPlayer player = this.client.player;
+        var player = this.client.player;
         if (player != null) {
             this.client.execute(player::closeMenu);
         }
@@ -534,12 +523,11 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
         TerrainRenderer worldRenderer = this.client.worldRenderer;
         if (worldRenderer != null) worldRenderer.setWorld(world);
 
-        ClientWorldAccess finalWorld = world;
+        ClientWorld finalWorld = world;
         this.client.execute(() -> {
             LocalPlayer player = this.client.player;
             if (player != null) {
                 player.onTeleportedDimension(finalWorld);
-                player.refreshChunks();
             }
         });
     }
@@ -581,9 +569,5 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public boolean isDisconnected() {
         return disconnected;
-    }
-
-    public long getPing() {
-        return ping;
     }
 }

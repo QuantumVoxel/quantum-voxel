@@ -149,7 +149,7 @@ public class RgbColor implements Color {
             int rgb = Integer.valueOf(hex.substring(1), 16);
             return RgbColor.rgb(rgb);
         } else if (Pattern.matches("#[0-9a-fA-F]{8}", hex)) {
-            int rgb = (int) Long.parseLong(hex.substring(1), 16);
+            int rgb = Integer.parseUnsignedInt(hex.substring(1), 16);
             return RgbColor.rgba(rgb);
         } else if (Pattern.matches("#[0-9a-fA-F]{3}", hex)) {
             int rgb = Integer.valueOf(new String(new char[]{

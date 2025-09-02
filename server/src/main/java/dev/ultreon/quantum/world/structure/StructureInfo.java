@@ -35,7 +35,7 @@ public final class StructureInfo {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        StructureInfo that = (StructureInfo) obj;
+        var that = (StructureInfo) obj;
         return Objects.equals(this.structure, that.structure) &&
                Float.floatToIntBits(this.chance) == Float.floatToIntBits(that.chance) &&
                Objects.equals(this.heightRange, that.heightRange);

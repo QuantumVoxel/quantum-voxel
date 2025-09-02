@@ -3,10 +3,10 @@ package dev.ultreon.quantum.world.gen;
 import dev.ultreon.quantum.util.Vec2f;
 import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.quantum.world.Chunk;
-import dev.ultreon.quantum.world.Double2BooleanFunction;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
 import dev.ultreon.quantum.world.gen.noise.NoiseInstance;
+import it.unimi.dsi.fastutil.doubles.Double2BooleanFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -33,10 +33,10 @@ public class TreeGenerator {
     }
 
     public static List<Vec2i> findLocalMaxima(double[][] dataMatrix, int x, int z) {
-        ArrayList<Vec2i> maxima = new ArrayList<Vec2i>();
-        for (int matrixX = 0; matrixX < dataMatrix.length; matrixX++) {
-            for (int matrixZ = 0; matrixZ < dataMatrix[matrixX].length; matrixZ++) {
-                double noiseVal = dataMatrix[matrixX][matrixZ];
+        var maxima = new ArrayList<Vec2i>();
+        for (var matrixX = 0; matrixX < dataMatrix.length; matrixX++) {
+            for (var matrixZ = 0; matrixZ < dataMatrix[matrixX].length; matrixZ++) {
+                var noiseVal = dataMatrix[matrixX][matrixZ];
                 if (TreeGenerator.checkNeighbours(dataMatrix, matrixX, matrixZ, (neighbourNoise) -> neighbourNoise < noiseVal)) {
                     maxima.add(new Vec2i(x + matrixX, z + matrixZ));
                 }
@@ -47,15 +47,15 @@ public class TreeGenerator {
     }
 
     private static boolean checkNeighbours(double[][] matrix, int x, int y, Double2BooleanFunction successCondition) {
-        for (Neighbour8Direction direction : Neighbour8Direction.values()) {
-            Vec2i dir = direction.vec();
-            Vec2f newPost = new Vec2f(x + dir.x, y + dir.y);
+        for (var direction : Neighbour8Direction.values()) {
+            var dir = direction.vec();
+            var newPost = new Vec2f(x + dir.x, y + dir.y);
 
             if (newPost.x < 0 || newPost.x >= matrix.length || newPost.y < 0 || newPost.y >= matrix[0].length) {
                 continue;
             }
 
-            if (successCondition.apply(matrix[x + dir.x][y + dir.y])) {
+            if (successCondition.get(matrix[x + dir.x][y + dir.y])) {
                 return false;
             }
         }
@@ -63,22 +63,22 @@ public class TreeGenerator {
     }
 
     public TreeData generateTreeData(Chunk chunkData) {
-        NoiseInstance noise = this.noise;
-        TreeData treeData = new TreeData();
+        var noise = this.noise;
+        var treeData = new TreeData();
 
         return treeData;
     }
 
     private double[][] generateMatrix(Chunk chunkData, NoiseInstance noise) {
-        double[][] noiseMax = new double[CS][CS];
-        int xMax = chunkData.getOffset().x + CS;
-        int xMin = chunkData.getOffset().x;
-        int zMax = chunkData.getOffset().z + CS;
-        int zMin = chunkData.getOffset().z;
+        var noiseMax = new double[CS][CS];
+        var xMax = chunkData.getOffset().x + CS;
+        var xMin = chunkData.getOffset().x;
+        var zMax = chunkData.getOffset().z + CS;
+        var zMin = chunkData.getOffset().z;
         int xIndex = 0, zIndex = 0;
 
-        for (int x = xMin; x < xMax; x++) {
-            for (int z = zMin; z < zMax; z++) {
+        for (var x = xMin; x < xMax; x++) {
+            for (var z = zMin; z < zMax; z++) {
                 noiseMax[xIndex][zIndex] = this.domainWrapping.generateDomainNoise(x, z, noise);
                 zIndex++;
             }

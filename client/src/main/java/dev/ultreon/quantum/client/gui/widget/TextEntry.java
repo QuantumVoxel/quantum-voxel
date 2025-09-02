@@ -14,6 +14,7 @@ import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
+import it.unimi.dsi.fastutil.chars.CharPredicate;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Supplier;
@@ -33,7 +34,7 @@ public class TextEntry extends Widget {
     private int selectFrom = -1;
     private int selectTo = -1;
     private float yOffset = 0f;
-    private final Layout layout = new Layout();
+    private Layout layout = new Layout();
 
     /**
      * @param width  the width of the text entry.
@@ -147,8 +148,8 @@ public class TextEntry extends Widget {
                 return true;
             }
 
-            String start = this.value.substring(0, this.cursorIdx);
-            String end = this.value.substring(this.cursorIdx);
+            var start = this.value.substring(0, this.cursorIdx);
+            var end = this.value.substring(this.cursorIdx);
             this.value = start + character + end;
             this.cursorIdx++;
             this.deselect();
@@ -167,8 +168,8 @@ public class TextEntry extends Widget {
                 return true;
             }
             if (this.cursorIdx > 0) {
-                String start = this.value.substring(0, this.cursorIdx - 1);
-                String end = this.value.substring(this.cursorIdx);
+                var start = this.value.substring(0, this.cursorIdx - 1);
+                var end = this.value.substring(this.cursorIdx);
                 this.value = start + end;
                 this.cursorIdx--;
                 this.deselect();
@@ -183,8 +184,8 @@ public class TextEntry extends Widget {
                 return true;
             }
             if (this.cursorIdx < this.value.length()) {
-                String start = this.value.substring(0, this.cursorIdx);
-                String end = this.value.substring(this.cursorIdx + 1);
+                var start = this.value.substring(0, this.cursorIdx);
+                var end = this.value.substring(this.cursorIdx + 1);
                 this.value = start + end;
                 this.deselect();
                 this.revalidateCursor();
@@ -337,8 +338,8 @@ public class TextEntry extends Widget {
         int selectFrom = Math.min(this.selectFrom, this.selectTo);
         int selectTo = Math.max(this.selectFrom, this.selectTo);
 
-        String start = this.value.substring(0, selectFrom);
-        String end = this.value.substring(selectTo);
+        var start = this.value.substring(0, selectFrom);
+        var end = this.value.substring(selectTo);
         this.value = start + text + end;
         this.cursorIdx++;
         this.deselect();
@@ -356,8 +357,8 @@ public class TextEntry extends Widget {
             return;
         }
 
-        String start = this.value.substring(0, this.cursorIdx);
-        String end = this.value.substring(this.cursorIdx);
+        var start = this.value.substring(0, this.cursorIdx);
+        var end = this.value.substring(this.cursorIdx);
         this.value = start + pasted + end;
         this.cursorIdx += pasted.length();
         this.deselect();
@@ -367,8 +368,8 @@ public class TextEntry extends Widget {
         int selectFrom = Math.min(this.selectFrom, this.selectTo);
         int selectTo = Math.max(this.selectFrom, this.selectTo);
 
-        String start = this.value.substring(0, selectFrom);
-        String end = this.value.substring(selectTo);
+        var start = this.value.substring(0, selectFrom);
+        var end = this.value.substring(selectTo);
         this.value = start + end;
         this.cursorIdx = selectFrom;
         this.deselect();

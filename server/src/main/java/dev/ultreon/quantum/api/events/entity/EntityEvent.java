@@ -7,6 +7,7 @@ import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.Vec;
 import dev.ultreon.quantum.world.Location;
+import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,7 @@ public interface EntityEvent extends Event {
         return clazz.isInstance(this.getEntity());
     }
 
-    default @Nullable WorldAccess getWorld() {
+    default @Nullable World getWorld() {
         if (this.getEntity() == null) {
             return null;
         }

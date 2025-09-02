@@ -30,7 +30,7 @@ public class DebugGenerator implements ChunkGenerator {
     public DebugGenerator(Registry<Biome> biomeRegistry) {
         super();
 
-        this.biomeTag = biomeRegistry.getTag(new NamespaceID("overworld_biomes")).get();
+        this.biomeTag = biomeRegistry.getTag(new NamespaceID("overworld_biomes")).orElseThrow();
     }
 
     @Override

@@ -24,7 +24,7 @@ public class ClientParticle {
 
     public void load(Array<ParticleBatch<?>> batches) {
         NamespaceID namespaceID = this.type.getId().mapPath(path -> "particles/" + path + ".pfx");
-        ParticleEffectLoadParameter param = new ParticleEffectLoadParameter(batches);
+        var param = new ParticleEffectLoadParameter(batches);
 
         AssetManager assetManager = QuantumClient.get().getAssetManager();
         assetManager.load(namespaceID.toString(), ParticleEffect.class, param);

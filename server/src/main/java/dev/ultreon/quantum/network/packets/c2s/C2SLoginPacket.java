@@ -15,7 +15,7 @@ public final class C2SLoginPacket implements Packet<LoginServerPacketHandler> {
     }
 
     public static C2SLoginPacket read(PacketIO buffer) {
-        String name = buffer.readString(20);
+        var name = buffer.readString(20);
 
         return new C2SLoginPacket(name);
     }
@@ -38,7 +38,7 @@ public final class C2SLoginPacket implements Packet<LoginServerPacketHandler> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        C2SLoginPacket that = (C2SLoginPacket) obj;
+        var that = (C2SLoginPacket) obj;
         return Objects.equals(this.name, that.name);
     }
 

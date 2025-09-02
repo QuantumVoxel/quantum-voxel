@@ -5,7 +5,6 @@ import dev.ultreon.quantum.api.neocommand.CommandReader;
 import dev.ultreon.quantum.api.neocommand.Parameter;
 import dev.ultreon.quantum.api.neocommand.SuggestionProvider;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class StringArgumentType implements ArgumentType<String> {
@@ -28,7 +27,7 @@ public class StringArgumentType implements ArgumentType<String> {
 
     @Override
     public List<String> getExamples() {
-        return Arrays.asList("hello", "world", "hello world");
+        return List.of("hello", "world", "hello world");
     }
 
     public static Parameter<String> strings(String name) {

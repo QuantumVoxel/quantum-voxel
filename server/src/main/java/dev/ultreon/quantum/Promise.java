@@ -56,7 +56,7 @@ public interface Promise<T> {
 
     <V> Promise<V> apply(BiFunction<? super T, ? super Throwable, ? extends V> function);
 
-    default <V> Promise<V> applyAsync(BiFunction<? super T, ? super Throwable, ? extends V> function) {
+    default <V> Promise<? extends V> applyAsync(BiFunction<? super T, ? super Throwable, ? extends V> function) {
         return this.apply((t, throwable) -> supplyAsync(() -> function.apply(t, throwable)).get());
     }
 
@@ -72,19 +72,19 @@ public interface Promise<T> {
 
     <V> Promise<V> thenApply(Function<T, V> function);
 
-    <V> Promise<V> thenApplyAsync(Function<T, V> function);
+    <V> Promise<? extends V> thenApplyAsync(Function<T, V> function);
 
     <V> Promise<V> thenApplyAsync(Function<T, V> function, AsyncExecutor executor);
 
     <V> Promise<V> thenCompose(Function<T, Promise<V>> function);
 
-    <V> Promise<V> thenComposeAsync(Function<T, Promise<V>> function);
+    <V> Promise<? extends V> thenComposeAsync(Function<T, Promise<V>> function);
 
     <V> Promise<V> thenComposeAsync(Function<T, Promise<V>> function, AsyncExecutor executor);
 
     <V> Promise<V> handle(Function<Throwable, V> function);
 
-    <V> Promise<V> handleAsync(Function<Throwable, V> function);
+    <V> Promise<? extends V> handleAsync(Function<Throwable, V> function);
 
     <V> Promise<V> handleAsync(Function<Throwable, V> function, AsyncExecutor executor);
 
@@ -107,7 +107,7 @@ public interface Promise<T> {
 
     boolean isCancelled();
 
-    boolean isCanceled() ;
+    boolean isCanceled();
 
     void cancel();
 
@@ -120,7 +120,7 @@ public interface Promise<T> {
         });
     }
 
-    default Promise<T> exceptionallyAsync(Function<Throwable, T> function) {
+    default Promise<?> exceptionallyAsync(Function<Throwable, T> function) {
         return this.applyAsync((t, throwable) -> {
             if (throwable != null) {
                 return GamePlatform.get().supplyAsync(() -> function.apply(throwable)).get();

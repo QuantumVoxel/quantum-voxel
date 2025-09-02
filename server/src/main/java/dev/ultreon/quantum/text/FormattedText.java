@@ -1,6 +1,9 @@
 package dev.ultreon.quantum.text;
 
+import it.unimi.dsi.fastutil.chars.CharList;
+
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Deprecated
 public class FormattedText {
@@ -16,6 +19,13 @@ public class FormattedText {
         }
     }
 
+    private FormattedText(TextStyle style, CharList text) {
+        TextFormatElement element = new TextFormatElement(style, new String(text.toCharArray()), 0);
+        this.elements.add(element);
+        this.indexedElements.put(0, element);
+        this.length = text.size();
+    }
+
     private FormattedText(TextStyle style, String text) {
         TextFormatElement element = new TextFormatElement(style, text, 0);
         this.elements.add(element);
@@ -25,6 +35,10 @@ public class FormattedText {
 
     private FormattedText(String text) {
         this(new TextStyle(), text);
+    }
+
+    private FormattedText() {
+
     }
 
     public static FormattedText from(String text) {
@@ -195,12 +209,7 @@ public class FormattedText {
     }
 
     public FormattedText copy() {
-        List<TextFormatElement> list = new ArrayList<>();
-        for (TextFormatElement element : this.elements) {
-            TextFormatElement copy = element.copy();
-            list.add(copy);
-        }
-        return new FormattedText(list);
+        return new FormattedText(this.elements.stream().map(TextFormatElement::copy).collect(Collectors.toList()));
     }
 
     public int indexOf(TextFormatElement element) {
@@ -257,7 +266,7 @@ public class FormattedText {
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            TextFormatElement that = (TextFormatElement) obj;
+            var that = (TextFormatElement) obj;
             return Objects.equals(this.style, that.style) &&
                    Objects.equals(this.text, that.text) &&
                    this.index == that.index;

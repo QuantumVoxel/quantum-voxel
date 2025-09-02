@@ -2,7 +2,6 @@ package dev.ultreon.quantum.text;
 
 import dev.ultreon.quantum.entity.player.Player;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class ParseResult {
@@ -11,7 +10,7 @@ public class ParseResult {
     private final TextObject[] textObject;
 
     public static ParseResult error(Exception e) {
-        return new ParseResult(Arrays.asList(), TextObject.empty(), TextObject.empty(), MutableText.literal(e.getMessage()).setColor(ColorCode.RED));
+        return new ParseResult(List.of(), TextObject.empty(), TextObject.empty(), MutableText.literal(e.getMessage()).setColor(ColorCode.RED));
     }
 
     @Deprecated

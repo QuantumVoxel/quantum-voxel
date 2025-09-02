@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.desktop.bridge.gen;
 
-import dev.ultreon.quantum.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
@@ -155,7 +154,7 @@ public class LuaBindingGenerator {
                             out.printf("---@overload fun(" + transform(m.getParameters()) + ")\n");
                         } else {
                             String transform = transform(m.getParameters());
-                            if (StringUtils.isBlank(transform)) {
+                            if (transform.isBlank()) {
                                 out.printf("---@overload fun(this: self)\n");
                             } else {
                                 out.printf("---@overload fun(this: self, " + transform + ")\n");
@@ -174,7 +173,7 @@ public class LuaBindingGenerator {
                             out.printf("---@overload fun(" + transform(m.getParameters()) + ")\n");
                         } else {
                             String transform = transform(m.getParameters());
-                            if (StringUtils.isBlank(transform)) {
+                            if (transform.isBlank()) {
                                 out.printf("---@overload fun(this: self)\n");
                             } else {
                                 out.printf("---@overload fun(this: self, " + transform + ")\n");

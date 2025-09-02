@@ -5,7 +5,6 @@ import dev.ultreon.quantum.api.neocommand.CommandReader;
 import dev.ultreon.quantum.api.neocommand.Parameter;
 import dev.ultreon.quantum.api.neocommand.SuggestionProvider;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class IntArgumentType implements ArgumentType<Integer> {
@@ -36,7 +35,7 @@ public class IntArgumentType implements ArgumentType<Integer> {
 
     @Override
     public List<String> getExamples() {
-        return Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+        return List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     }
 
     public static Parameter<Integer> ints(String name) {

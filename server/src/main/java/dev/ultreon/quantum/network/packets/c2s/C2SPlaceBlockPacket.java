@@ -22,10 +22,10 @@ public final class C2SPlaceBlockPacket implements Packet<InGameServerPacketHandl
     }
 
     public static C2SPlaceBlockPacket read(PacketIO buffer) {
-        int x = buffer.readVarInt();
-        int y = buffer.readVarInt();
-        int z = buffer.readVarInt();
-        BlockState block = buffer.readBlockState();
+        var x = buffer.readVarInt();
+        var y = buffer.readVarInt();
+        var z = buffer.readVarInt();
+        var block = buffer.readBlockState();
 
         return new C2SPlaceBlockPacket(x, y, z, block);
     }
@@ -73,7 +73,7 @@ public final class C2SPlaceBlockPacket implements Packet<InGameServerPacketHandl
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        C2SPlaceBlockPacket that = (C2SPlaceBlockPacket) obj;
+        var that = (C2SPlaceBlockPacket) obj;
         return this.x == that.x &&
                this.y == that.y &&
                this.z == that.z &&

@@ -1,17 +1,25 @@
 package dev.ultreon.quantum.entity;
 
-import java.util.*;
+import it.unimi.dsi.fastutil.objects.Reference2DoubleArrayMap;
+import it.unimi.dsi.fastutil.objects.Reference2DoubleMap;
+import org.apache.commons.collections4.map.DefaultedMap;
+
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class AttributeMap {
-    private final Map<Attribute, Double> bases = new HashMap<>();
-    private final Map<Attribute, Map<UUID, AttributeModifier>> modifiers = new HashMap<>();
+    private final Reference2DoubleMap<Attribute> bases = new Reference2DoubleArrayMap<>();
+    private final DefaultedMap<Attribute, Map<UUID, AttributeModifier>> modifiers = new DefaultedMap<>(input -> new HashMap<>());
 
     public void setBase(Attribute attribute, double base) {
         this.bases.put(attribute, base);
     }
 
     public double getBase(Attribute attribute) {
-        return this.bases.getOrDefault(attribute, 0.0);
+        return this.bases.getDouble(attribute);
     }
 
     public void addModifier(Attribute attribute, AttributeModifier modifier) {
@@ -23,11 +31,8 @@ public class AttributeMap {
     }
 
     public double get(Attribute attribute) {
-        double value = this.bases.getOrDefault(attribute, 0.0);
-        List<AttributeModifier> list = new ArrayList<>();
-        list.addAll(this.modifiers.getOrDefault(attribute, Collections.emptyMap()).values());
-        list.sort(Comparator.comparing(modifier -> modifier.operation().ordinal()));
-        for (AttributeModifier modifier : list) {
+        double value = this.bases.getDouble(attribute);
+        for (AttributeModifier modifier : this.modifiers.get(attribute).values().stream().sorted(Comparator.comparing(modifier -> modifier.operation().ordinal())).collect(Collectors.toList())) {
             AttributeModifier.Operation operation = modifier.operation();
             value = operation.calculate(value, modifier.value());
         }

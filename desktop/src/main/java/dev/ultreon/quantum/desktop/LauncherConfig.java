@@ -4,7 +4,6 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonWriter;
-import dev.ultreon.quantum.ObjectUtils;
 import dev.ultreon.quantum.desktop.platform.win32.MARGINS;
 
 import java.io.IOException;
@@ -24,7 +23,7 @@ public class LauncherConfig {
     public boolean enableFullVibrancy = false;
     public boolean enableFullAero = false;
     public MARGINS aeroBounds = new MARGINS();
-    public boolean useAngleGraphics = System.getProperty("os.name").startsWith("Windows");
+    public boolean useAngleGraphics = false;
     public boolean frameless = false;
     public boolean removeBorder = false;
 
@@ -84,7 +83,7 @@ public class LauncherConfig {
         } catch (IOException | GdxRuntimeException | NullPointerException e) {
             config = new LauncherConfig();
         }
-        LauncherConfig.instance = ObjectUtils.requireNonNullElseGet(config, LauncherConfig::new);
+        LauncherConfig.instance = Objects.requireNonNullElseGet(config, LauncherConfig::new);
     }
 
     public static LauncherConfig get() {

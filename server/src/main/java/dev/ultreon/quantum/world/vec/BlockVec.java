@@ -4,6 +4,8 @@ import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.Direction;
 
+import java.util.Objects;
+
 import static dev.ultreon.quantum.world.World.CS;
 import static dev.ultreon.quantum.world.World.REGION_SIZE;
 
@@ -253,7 +255,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        BlockVec that = (BlockVec) obj;
+        var that = (BlockVec) obj;
         return this.x == that.x &&
                this.y == that.y &&
                this.z == that.z;

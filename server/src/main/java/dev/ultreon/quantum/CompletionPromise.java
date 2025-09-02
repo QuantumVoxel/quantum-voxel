@@ -36,7 +36,7 @@ public interface CompletionPromise<T> extends Promise<T> {
     }
 
     @Override
-    default <V> Promise<V> thenApplyAsync(Function<T, V> function) {
+    default <V> Promise<? extends V> thenApplyAsync(Function<T, V> function) {
         return applyAsync((value, throwable) -> function.apply(value));
     }
 
@@ -51,7 +51,7 @@ public interface CompletionPromise<T> extends Promise<T> {
     }
 
     @Override
-    default <V> Promise<V> thenComposeAsync(Function<T, Promise<V>> function) {
+    default <V> Promise<? extends V> thenComposeAsync(Function<T, Promise<V>> function) {
         return applyAsync((value, throwable) -> function.apply(value).get());
     }
 
@@ -66,7 +66,7 @@ public interface CompletionPromise<T> extends Promise<T> {
     }
 
     @Override
-    default <V> Promise<V> handleAsync(Function<Throwable, V> function) {
+    default <V> Promise<? extends V> handleAsync(Function<Throwable, V> function) {
         return applyAsync((value, throwable) -> function.apply(throwable));
     }
 

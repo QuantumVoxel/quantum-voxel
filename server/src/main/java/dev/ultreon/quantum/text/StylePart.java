@@ -84,7 +84,7 @@ public final class StylePart implements TextPart {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        StylePart that = (StylePart) obj;
+        var that = (StylePart) obj;
         return Objects.equals(this.text, that.text) &&
                this.style == that.style &&
                this.color == that.color &&

@@ -28,7 +28,7 @@ public final class FontIconPart implements TextPart {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        FontIconPart that = (FontIconPart) obj;
+        var that = (FontIconPart) obj;
         return Objects.equals(this.map, that.map) &&
                Objects.equals(this.icon, that.icon);
     }

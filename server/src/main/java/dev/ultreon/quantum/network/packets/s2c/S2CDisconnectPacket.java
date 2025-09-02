@@ -16,7 +16,7 @@ public final class S2CDisconnectPacket implements Packet<ClientPacketHandler> {
     }
 
     public static S2CDisconnectPacket read(PacketIO buffer) {
-        String message = buffer.readString(300);
+        var message = buffer.readString(300);
         return new S2CDisconnectPacket(message);
     }
 
@@ -45,7 +45,7 @@ public final class S2CDisconnectPacket implements Packet<ClientPacketHandler> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CDisconnectPacket that = (S2CDisconnectPacket) obj;
+        var that = (S2CDisconnectPacket) obj;
         return Objects.equals(this.message, that.message);
     }
 

@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.entity;
 
+import dev.ultreon.libs.functions.v0.BiDouble2DoubleFunction;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -30,7 +32,7 @@ public final class AttributeModifier {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        AttributeModifier that = (AttributeModifier) obj;
+        var that = (AttributeModifier) obj;
         return Objects.equals(this.id, that.id) &&
                Objects.equals(this.operation, that.operation) &&
                Double.doubleToLongBits(this.value) == Double.doubleToLongBits(that.value);

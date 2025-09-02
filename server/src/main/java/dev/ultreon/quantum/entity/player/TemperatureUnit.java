@@ -1,5 +1,7 @@
 package dev.ultreon.quantum.entity.player;
 
+import it.unimi.dsi.fastutil.doubles.Double2DoubleFunction;
+
 @SuppressWarnings("NonAsciiCharacters")
 public enum TemperatureUnit {
     CELSIUS("C", temp -> 5 * (25.27027027 + 44.86486486 * temp - 32.0) / 9, temp -> ((double) 9 / 5) * ((temp * 5) / 5), 1),
@@ -28,15 +30,15 @@ public enum TemperatureUnit {
     }
 
     public double convertFromInternal(double mcTemp) {
-        return fromInternal.apply(mcTemp);
+        return fromInternal.applyAsDouble(mcTemp);
     }
 
     public double convertToInternal(double temperature) {
-        return toInternal.apply(temperature);
+        return toInternal.applyAsDouble(temperature);
     }
 
     public double convertTo(double temperature, TemperatureUnit format) {
-        return fromInternal.apply(toInternal.apply(temperature));
+        return fromInternal.applyAsDouble(toInternal.apply(temperature));
     }
 
     public int getDecimalCount() {

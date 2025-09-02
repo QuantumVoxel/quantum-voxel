@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.gui;
 
 import com.github.tommyettinger.textra.Font;
 import dev.ultreon.quantum.client.ClientRegistries;
+import dev.ultreon.quantum.client.FontManager;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.registry.RegistryKey;
 

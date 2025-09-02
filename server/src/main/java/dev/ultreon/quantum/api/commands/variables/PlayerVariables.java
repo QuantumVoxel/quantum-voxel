@@ -5,7 +5,10 @@ import dev.ultreon.quantum.api.events.ServerPlayerEvent;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Result;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 public class PlayerVariables {
     private static final Map<UUID, PlayerVariables> players = new HashMap<>();
@@ -45,14 +48,7 @@ public class PlayerVariables {
         return player;
     }
 
-    public Set<String> getVariablesByType(Class<?> clazz) {
-        Set<Map.Entry<String, Object>> entries = variables.entrySet();
-        Set<String> keys = new HashSet<>();
-        for (Map.Entry<String, Object> entry : entries) {
-            if (clazz.isInstance(entry.getValue())) {
-                keys.add(entry.getKey());
-            }
-        }
-        return keys;
+    public Stream<String> getVariablesByType(Class<?> clazz) {
+        return variables.entrySet().stream().filter(entry -> clazz.isInstance(entry.getValue())).map(Map.Entry::getKey);
     }
 }

@@ -9,7 +9,6 @@ import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.NamespaceID;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class RegistryEntryArgumentType<T> implements ArgumentType<T> {
@@ -41,7 +40,7 @@ public class RegistryEntryArgumentType<T> implements ArgumentType<T> {
 
     @Override
     public List<String> getExamples() {
-        return Arrays.asList(
+        return List.of(
                 "quantum:stone",
                 "quantum:blocks/stone",
                 "stone",

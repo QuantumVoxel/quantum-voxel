@@ -48,7 +48,7 @@ public class CrashHandler {
      * @param crashLog The crash log to be processed by the handlers.
      */
     private static void processCrashHandlers(CrashLog crashLog) {
-        for (Consumer<CrashLog> handler : CrashHandler.HANDLERS) {
+        for (var handler : CrashHandler.HANDLERS) {
             try {
                 handler.accept(crashLog);
             } catch (Throwable e) {

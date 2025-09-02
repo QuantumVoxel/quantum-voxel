@@ -8,7 +8,10 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.EntityHit;
 import dev.ultreon.quantum.util.Hit;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class PlayerArgumentType implements ArgumentType<ServerPlayer> {
     private final boolean includeSelf;
@@ -93,8 +96,7 @@ public class PlayerArgumentType implements ArgumentType<ServerPlayer> {
                 ctx.suggest(player.getVariableNames(ServerPlayer.class));
             }
         } else if (ctx.getCurrent().charAt(0) == Selector.Type.ID.character) {
-            List<Entity> entities = new ArrayList<>();
-            entities.addAll(ctx.getServer().getEntities());
+            List<Entity> entities = ctx.getServer().getEntities().collect(Collectors.toList());
             for (Entity entity : entities) {
                 if (entity instanceof Player) {
                     Player player = (Player) entity;
@@ -126,7 +128,7 @@ public class PlayerArgumentType implements ArgumentType<ServerPlayer> {
 
     @Override
     public List<String> getExamples() {
-        return Arrays.asList(
+        return List.of(
                 "#me",
                 "#selection",
                 "#target",

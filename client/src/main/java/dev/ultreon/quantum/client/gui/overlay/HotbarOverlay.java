@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.github.tommyettinger.textra.Layout;
+import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
@@ -26,7 +26,7 @@ public class HotbarOverlay extends Overlay {
         ItemStack selectedItem = player.getSelectedItem();
         NamespaceID key = Registries.ITEM.getId(selectedItem.getItem());
 
-        Texture widgetsTex = this.client.getTextureManager().getTexture(NamespaceID.of("textures/gui/widgets.png"));
+        var widgetsTex = this.client.getTextureManager().getTexture(NamespaceID.of("textures/gui/widgets.png"));
         renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 87, leftY - 48, 179, 32, 0, 61);
         renderer.blit(widgetsTex, (int)((float)this.client.getScaledWidth() / 2) - 87 + x + 5, leftY - 43, 18, 18, 0, 42);
 

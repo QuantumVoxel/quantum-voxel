@@ -12,15 +12,15 @@ public class JavaFileSystem implements IFileSystem, AutoCloseable {
     private final Set<String> protectedPaths;
 
     public JavaFileSystem(FileSystem fileSystem) {
-        this(fileSystem, dev.ultreon.quantum.SetUtils.of());
+        this(fileSystem, Set.of());
     }
 
     public JavaFileSystem(FileSystem fileSystem, String protectedPath) {
-        this(fileSystem, dev.ultreon.quantum.SetUtils.of(protectedPath));
+        this(fileSystem, Set.of(protectedPath));
     }
 
     public JavaFileSystem(FileSystem fileSystem, String... protectedPaths) {
-        this(fileSystem, dev.ultreon.quantum.SetUtils.of(protectedPaths));
+        this(fileSystem, Set.of(protectedPaths));
     }
 
     public JavaFileSystem(FileSystem fileSystem, Set<String> protectedPaths) {

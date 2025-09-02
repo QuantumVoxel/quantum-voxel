@@ -9,25 +9,25 @@ public class ArgParser {
     private final List<String> argv;
 
     public ArgParser(String... argv) {
-        this.argv = Arrays.asList(argv);
+        this.argv = List.of(argv);
 
-        ArrayList<String> args =new ArrayList<String>();
-        HashSet<String> flags = new HashSet<String>();
-        HashMap<String, String> keywordArgs = new HashMap<String, String>();
+        var args =new ArrayList<String>();
+        var flags = new HashSet<String>();
+        var keywordArgs = new HashMap<String, String>();
 
         for (String s : argv) {
             if (s.startsWith("--")) {
-                String name = s.substring(2);
-                String[] split = name.split("=", 2);
+                var name = s.substring(2);
+                var split = name.split("=", 2);
                 if (split.length == 1) {
                     flags.add(name);
                 } else {
-                    String key = split[0];
-                    String value = split[1];
+                    var key = split[0];
+                    var value = split[1];
                     keywordArgs.put(key, value);
                 }
             } else if (s.startsWith("-")) {
-                String name = s.substring(1);
+                var name = s.substring(1);
                 if (name.length() != 1) {
                     args.add(name);
                 } else {

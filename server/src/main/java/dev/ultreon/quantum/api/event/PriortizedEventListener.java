@@ -23,7 +23,7 @@ public final class PriortizedEventListener<T extends Event> implements EventList
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        PriortizedEventListener that = (PriortizedEventListener) obj;
+        var that = (PriortizedEventListener) obj;
         return this.priority == that.priority;
     }
 

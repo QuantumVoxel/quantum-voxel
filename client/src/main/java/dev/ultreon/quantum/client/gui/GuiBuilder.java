@@ -26,7 +26,7 @@ public class GuiBuilder {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        GuiBuilder that = (GuiBuilder) obj;
+        var that = (GuiBuilder) obj;
         return Objects.equals(this.screen, that.screen);
     }
 

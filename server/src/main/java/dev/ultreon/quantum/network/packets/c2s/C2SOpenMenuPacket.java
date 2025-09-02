@@ -20,8 +20,8 @@ public final class C2SOpenMenuPacket implements Packet<InGameServerPacketHandler
     }
 
     public static C2SOpenMenuPacket read(PacketIO buffer) {
-        NamespaceID id = buffer.readId();
-        BlockVec pos = buffer.readBoolean() ? buffer.readBlockVec() : null;
+        var id = buffer.readId();
+        var pos = buffer.readBoolean() ? buffer.readBlockVec() : null;
 
         return new C2SOpenMenuPacket(id, pos);
     }
@@ -61,7 +61,7 @@ public final class C2SOpenMenuPacket implements Packet<InGameServerPacketHandler
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        C2SOpenMenuPacket that = (C2SOpenMenuPacket) obj;
+        var that = (C2SOpenMenuPacket) obj;
         return Objects.equals(this.id, that.id) &&
                Objects.equals(this.pos, that.pos);
     }

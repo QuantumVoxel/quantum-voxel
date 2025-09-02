@@ -1,12 +1,11 @@
 package dev.ultreon.quantum.ubo;
 
-import com.badlogic.gdx.files.FileHandle;
 import dev.ultreon.quantum.ubo.types.DataType;
 import dev.ultreon.quantum.ubo.util.DataTypeVisitor;
 
 import java.io.*;
 import java.net.URL;
-import java.util.logging.FileHandler;
+import java.nio.file.Files;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -16,8 +15,8 @@ public class DataIo {
     private static final int BUFFER_SIZE = 4096;
 
     @SafeVarargs
-    public static <T extends DataType<?>> T read(FileHandle file, T... type) throws IOException {
-        try (InputStream stream = new BufferedInputStream(file.read(), BUFFER_SIZE)) {
+    public static <T extends DataType<?>> T read(File file, T... type) throws IOException {
+        try (InputStream stream = new BufferedInputStream(Files.newInputStream(file.toPath()), BUFFER_SIZE)) {
             return read(stream, type);
         }
     }
@@ -77,8 +76,8 @@ public class DataIo {
     }
 
     @SafeVarargs
-    public static <T extends DataType<?>> T readCompressed(FileHandle file, T... type) throws IOException {
-        try (InputStream stream = new BufferedInputStream(file.read(), BUFFER_SIZE)) {
+    public static <T extends DataType<?>> T readCompressed(File file, T... type) throws IOException {
+        try (InputStream stream = new BufferedInputStream(Files.newInputStream(file.toPath()), BUFFER_SIZE)) {
             return readCompressed(stream, type);
         }
     }
@@ -103,8 +102,8 @@ public class DataIo {
         return read(gzipStream, type);
     }
 
-    public static void write(DataType<?> dataType, FileHandle file) throws IOException {
-        try (OutputStream stream = new BufferedOutputStream(file.write(false), BUFFER_SIZE)) {
+    public static void write(DataType<?> dataType, File file) throws IOException {
+        try (OutputStream stream = new BufferedOutputStream(Files.newOutputStream(file.toPath()), BUFFER_SIZE)) {
             write(dataType, stream);
         }
     }
@@ -151,8 +150,8 @@ public class DataIo {
         return bos.toByteArray();
     }
 
-    public static void writeCompressed(DataType<?> dataType, FileHandle file) throws IOException {
-        try (OutputStream stream = new BufferedOutputStream(file.write(false), BUFFER_SIZE)) {
+    public static void writeCompressed(DataType<?> dataType, File file) throws IOException {
+        try (OutputStream stream = new BufferedOutputStream(Files.newOutputStream(file.toPath()), BUFFER_SIZE)) {
             writeCompressed(dataType, stream);
         }
     }

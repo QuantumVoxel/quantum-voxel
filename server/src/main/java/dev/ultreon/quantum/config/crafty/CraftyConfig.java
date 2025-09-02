@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.Mod;
-import dev.ultreon.quantum.StringUtils;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.util.ModLoadingContext;
 import dev.ultreon.quantum.util.NamespaceID;
@@ -17,6 +16,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.NoSuchFileException;
 import java.util.*;
 
 /**
@@ -117,27 +117,21 @@ public abstract class CraftyConfig {
      * Reset all CraftyConfig instances.
      */
     public static void resetAll() {
-        for (CraftyConfig craftyConfig : CONFIGS.values()) {
-            craftyConfig.reset();
-        }
+        CONFIGS.values().forEach(CraftyConfig::reset);
     }
 
     /**
      * Save all CraftyConfig instances.
      */
     public static void saveAll() {
-        for (CraftyConfig craftyConfig : CONFIGS.values()) {
-            craftyConfig.save();
-        }
+        CONFIGS.values().forEach(CraftyConfig::save);
     }
 
     /**
      * Load all CraftyConfig instances.
      */
     public static void loadAll() {
-        for (CraftyConfig craftyConfig : CONFIGS.values()) {
-            craftyConfig.load();
-        }
+        CONFIGS.values().forEach(CraftyConfig::load);
     }
 
     public static Collection<? extends CraftyConfig> getConfigs() {
@@ -240,7 +234,7 @@ public abstract class CraftyConfig {
                 String comment = configEntry.comment();
 
                 // Set the comment based on whether it is blank or not
-                if (StringUtils.isBlank(comment)) {
+                if (comment.isBlank()) {
                     comment = "Default value: " + serializeValue(value, type);
                 } else {
                     comment += "\n\nDefault value: " + serializeValue(value, type);
@@ -279,16 +273,14 @@ public abstract class CraftyConfig {
         this.configPath.delete();
 
         // Set default values for all configuration fields
-        for (Map.Entry<String, Field> entry : this.fieldsMap.entrySet()) {
-            String ignored = entry.getKey();
-            Field field = entry.getValue();
+        this.fieldsMap.forEach((ignored, field) -> {
             try {
                 this.setDefaults(field, field.getType());
             } catch (IllegalAccessException e) {
                 // Log an error if setting default value fails
                 CommonConstants.LOGGER.error("Failed to reset config entry {}", field.getName(), e);
             }
-        }
+        });
 
         // Save the configuration to the file
         this.save();
@@ -691,6 +683,8 @@ public abstract class CraftyConfig {
     public void load() {
         try {
             this.loadUnsafe();
+        } catch (NoSuchFileException ignored) {
+            // File not found, can be ignored
         } catch (Exception e) {
             // Log error if failed to load the config file
             CommonConstants.LOGGER.error("Failed to load config file", e);

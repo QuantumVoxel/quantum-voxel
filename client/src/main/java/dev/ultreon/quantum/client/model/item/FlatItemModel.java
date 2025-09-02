@@ -23,7 +23,6 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -53,7 +52,7 @@ public class FlatItemModel implements ItemModel {
         TextureRegion r = TextureManager.DEFAULT_TEX_REG.getTexture() == texture ? TextureManager.DEFAULT_TEX_REG : new TextureRegion(texture) ;
         item1.setUVRange(r);
 
-        VertexInfo v1 = new VertexInfo();
+        var v1 = new VertexInfo();
         item1.rect(
                 v1.setPos(0, 0, 0).setNor(1, 0, 0).setUV(0, 0),
                 v1.setPos(1, 0, 0).setNor(1, 0, 0).setUV(1, 0),
@@ -84,7 +83,7 @@ public class FlatItemModel implements ItemModel {
 
     @Override
     public Collection<NamespaceID> getAllTextures() {
-        return Arrays.asList(item.getId().mapPath(path -> "items/" + path));
+        return List.of(item.getId().mapPath(path -> "items/" + path));
     }
 
     @Override

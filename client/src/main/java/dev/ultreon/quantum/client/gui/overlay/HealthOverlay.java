@@ -1,6 +1,5 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
-import com.badlogic.gdx.graphics.Texture;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.entity.player.Player;
@@ -17,7 +16,7 @@ public class HealthOverlay extends Overlay {
         int delU = 2;
         if (player.regenFlashTimer % 2 == 0) delU = 29;
 
-        Texture iconsTex = this.client.getTextureManager().getTexture(QuantumClient.id("textures/gui/icons.png"));
+        var iconsTex = this.client.getTextureManager().getTexture(QuantumClient.id("textures/gui/icons.png"));
         for (int emptyHeartX = 0; emptyHeartX < 10; emptyHeartX++)
             renderer.blit(iconsTex, x + emptyHeartX * 8, leftY - 9, 9, 9, 34 + delU, 0);
 

@@ -2,7 +2,6 @@ package dev.ultreon.quantum.world;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.Promise;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.BlockState;
@@ -275,14 +274,6 @@ public interface WorldAccess extends Disposable, WorldReader, BlockSetter {
      * @param intensity the light intensity to set at the specified block, typically ranging from 0 to 15
      */
     void setBlockLight(int x, int y, int z, int intensity);
-
-    /**
-     * Updates the light sources based on the given offset.
-     *
-     * @param offset the vector offset to apply to the light sources
-     * @param lights the map of light sources to be updated, with Vec3i as keys representing positions and LightSource as values
-     */
-    void updateLightSources(Vec3i offset, ObjectMap<Vec3i, LightSource> lights);
 
     /**
      * Performs a raycasting operation to find the first entity or block hit along a ray.

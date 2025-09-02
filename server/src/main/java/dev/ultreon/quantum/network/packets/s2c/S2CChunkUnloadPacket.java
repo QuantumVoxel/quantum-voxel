@@ -44,7 +44,7 @@ public final class S2CChunkUnloadPacket implements Packet<InGameClientPacketHand
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CChunkUnloadPacket that = (S2CChunkUnloadPacket) obj;
+        var that = (S2CChunkUnloadPacket) obj;
         return Objects.equals(this.chunkVec, that.chunkVec);
     }
 

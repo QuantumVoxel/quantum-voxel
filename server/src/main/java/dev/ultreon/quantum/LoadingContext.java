@@ -25,7 +25,7 @@ public final class LoadingContext {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        LoadingContext that = (LoadingContext) obj;
+        var that = (LoadingContext) obj;
         return Objects.equals(this.namespace, that.namespace);
     }
 

@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ConfigGui extends Screen {
     private final CraftyConfig config;
@@ -29,12 +30,9 @@ public class ConfigGui extends Screen {
 
         this.entries = createEntries();
 
-        List<Widget> result = new ArrayList<>();
-        for (ConfigEntry<?> entry : entries) {
-            Widget widget = entry.createWidget();
-            result.add(widget);
-        }
-        this.entryWidgets = result;
+        this.entryWidgets = entries.stream()
+                .map(ConfigEntry::createWidget)
+                .collect(Collectors.toList());
     }
 
     private List<ConfigEntry<?>> createEntries() {

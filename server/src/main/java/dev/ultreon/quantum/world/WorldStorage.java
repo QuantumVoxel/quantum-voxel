@@ -9,8 +9,11 @@ import dev.ultreon.quantum.ubo.DataIo;
 import dev.ultreon.quantum.ubo.types.DataType;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.world.vec.RegionVec;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 /**
  * The WorldStorage class represents a storage system for world data.
@@ -62,10 +65,7 @@ public final class WorldStorage {
      */
     public void write(DataType<?> data, String path) throws IOException {
         if (!directory.exists()) directory.mkdirs();
-        FileHandle child = directory.child(path);
-        FileHandle parent = child.parent();
-        parent.mkdirs();
-        DataIo.write(data, child.write(false));
+        DataIo.write(data, directory.child(path).write(false));
     }
 
     /**
@@ -196,7 +196,14 @@ public final class WorldStorage {
      */
     public String getMD5Name() {
         if (md5Name == null) {
-            return getDirectory().name();
+            String string = getDirectory().name();
+
+            if (string == null) {
+                md5Name = Base64.getEncoder().encodeToString(string.getBytes(StandardCharsets.UTF_8)).replace("/", "_").replace("+", "-").replace("=", "");
+                return md5Name;
+            }
+
+            md5Name = hashSHA256(string.getBytes(StandardCharsets.UTF_8));
         }
 
         return md5Name;
@@ -208,7 +215,7 @@ public final class WorldStorage {
      * @return A string representing the generated folder name in hexadecimal format.
      */
     public static String createFolderName() {
-        return String.valueOf(System.currentTimeMillis());
+        return hashSHA256(String.valueOf(System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -229,6 +236,16 @@ public final class WorldStorage {
     }
 
     /**
+     * Computes the MD5 hash of the given input byte array.
+     *
+     * @param input the byte array to be hashed
+     * @return a byte array containing the MD5 hash of the input
+     */
+    public static String hashSHA256(byte @NotNull [] input) {
+        return Base64.getEncoder().encodeToString(input).replace("/", "_").replace("+", "-").replace("=", "");
+    }
+
+    /**
      * Retrieves the name associated with the world storage.
      * If the name is not already known, it attempts to load this information.
      * If the information cannot be loaded, it defaults to the name of the directory.
@@ -241,7 +258,7 @@ public final class WorldStorage {
             this.info = loadInfo();
             name = this.info.name();
         } else {
-            name = getDirectory().name();
+            name = getDirectory().name().toString();
         }
         return name;
     }
@@ -254,9 +271,6 @@ public final class WorldStorage {
      */
     public void saveInfo(WorldSaveInfo worldSaveInfo) throws IOException {
         this.info = worldSaveInfo;
-        if (!this.getDirectory().exists()) {
-            this.getDirectory().mkdirs();
-        }
         worldSaveInfo.save(this);
     }
 

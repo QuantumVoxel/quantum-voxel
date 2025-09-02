@@ -8,7 +8,6 @@ import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class CrateBlockEntity extends ContainerBlockEntity<CrateMenu> {
@@ -29,11 +28,11 @@ public class CrateBlockEntity extends ContainerBlockEntity<CrateMenu> {
 
     @Override
     public List<ItemSlot> getInputs() {
-        return Arrays.asList();
+        return List.of();
     }
 
     @Override
     public List<ItemSlot> getOutputs() {
-        return Arrays.asList();
+        return List.of();
     }
 }

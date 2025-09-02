@@ -19,7 +19,7 @@ public class SlabBlock extends Block {
 
     @Override
     public BoundingBox getBoundingBox(int x, int y, int z, BlockState blockState) {
-        Type type = blockState.get(StateProperties.SLAB_TYPE);
+        var type = blockState.get(StateProperties.SLAB_TYPE);
 
         switch (type) {
             case TOP:

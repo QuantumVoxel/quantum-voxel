@@ -57,32 +57,20 @@ public class TabCompletePopup implements GuiRenderable {
         Arrays.sort(values);
         this.values = values;
         this.index = 0;
-        boolean seen = false;
-        int best = 0;
-        for (String value : this.values) {
+        this.width = Arrays.stream(this.values).mapToInt(text -> {
             layout.clear();
-            font.markup(value, layout);
-            int applyAsInt = (int) layout.getWidth();
-            if (!seen || applyAsInt > best) {
-                seen = true;
-                best = applyAsInt;
-            }
-        }
-        this.width = (seen ? best : 0) + 4;
-        int sum = 0;
-        for (String text : this.values) {
-            int i = (int) (this.font.getLineHeight() + 4);
-            sum += i;
-        }
-        this.height = (int) (Math.min(sum, 5 * (this.font.getLineHeight() + 4)) + 8);
+            font.markup(text, layout);
+            return (int) layout.getWidth();
+        }).max().orElse(0) + 4;
+        this.height = (int) (Math.min(Arrays.stream(this.values).mapToInt(text -> (int) (this.font.getLineHeight() + 4)).sum(), 5 * (this.font.getLineHeight() + 4)) + 8);
     }
 
     @Override
     public void render(Renderer renderer, float deltaTime) {
         if (!this.visible || this.values.length == 0) return;
 
-        int textX = this.x + 2;
-        int textY = this.y - this.height + 3;
+        var textX = this.x + 2;
+        var textY = this.y - this.height + 3;
         renderer.fill(this.x, this.y - this.height, this.width, this.height, RgbColor.BLACK.withAlpha(0x90));
         String[] strings = this.values;
 

@@ -173,14 +173,14 @@ final class XeoxClassLoaderUtil implements IClassTracker {
      * Get the classloader exclusions from the target classloader
      */
     Set<String> getClassLoaderExceptions() {
-        return dev.ultreon.quantum.ObjectUtils.requireNonNullElse(this.classLoaderExceptions, Collections.emptySet());
+        return Objects.requireNonNullElse(this.classLoaderExceptions, Collections.emptySet());
     }
     
     /**
      * Get the transformer exclusions from the target classloader
      */
     Set<String> getTransformerExceptions() {
-        return dev.ultreon.quantum.ObjectUtils.requireNonNullElse(this.transformerExceptions, Collections.emptySet());
+        return Objects.requireNonNullElse(this.transformerExceptions, Collections.emptySet());
     }
 
     @SuppressWarnings("unchecked")

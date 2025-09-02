@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.desktop.bridge.gen;
 
 import com.badlogic.gdx.utils.Null;
-import com.esotericsoftware.kryo.kryo5.serializers.FieldSerializer;
 import com.google.common.collect.ImmutableMap;
-import dev.ultreon.quantum.collection.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
@@ -445,8 +445,6 @@ public class CppBindingGenerator {
                             str.isNullable = true;
                         } else if (method.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) {
                             str.isNullable = true;
-                        } else if (method.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) {
-                            str.isNullable = true;
                         } else if (method.isAnnotationPresent(Null.class)) {
                             str.isNullable = true;
                         }
@@ -511,8 +509,6 @@ public class CppBindingGenerator {
                     fieldType.isNullable = true;
                 } else if (field.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) {
                     fieldType.isNullable = true;
-                } else if (field.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) {
-                    fieldType.isNullable = true;
                 } else if (field.isAnnotationPresent(Null.class)) {
                     fieldType.isNullable = true;
                 }
@@ -561,8 +557,6 @@ public class CppBindingGenerator {
                         } else if (method.isAnnotationPresent(org.jspecify.annotations.Nullable.class)) {
                             str.isNullable = true;
                         } else if (method.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) {
-                            str.isNullable = true;
-                        } else if (method.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) {
                             str.isNullable = true;
                         } else if (method.isAnnotationPresent(Null.class)) {
                             str.isNullable = true;
@@ -627,8 +621,6 @@ public class CppBindingGenerator {
                 } else if (field.isAnnotationPresent(org.jspecify.annotations.Nullable.class)) {
                     fieldType.isNullable = true;
                 } else if (field.isAnnotationPresent(org.jetbrains.annotations.Nullable.class)) {
-                    fieldType.isNullable = true;
-                } else if (field.isAnnotationPresent(com.esotericsoftware.kryo.kryo5.util.Null.class)) {
                     fieldType.isNullable = true;
                 } else if (field.isAnnotationPresent(Null.class)) {
                     fieldType.isNullable = true;
@@ -740,11 +732,9 @@ public class CppBindingGenerator {
 
     private static boolean isNullable(Class<?> type) {
         boolean nullable = !type.isAnnotationPresent(NonNull.class);
-        if (type.isAnnotationPresent(com.esotericsoftware.kryo.NotNull.class)) nullable = false;
         if (type.isAnnotationPresent(org.jspecify.annotations.NonNull.class)) nullable = false;
         if (type.isAnnotationPresent(NotNull.class)) nullable = false;
         if (type.isAnnotationPresent(Nonnull.class)) nullable = false;
-        if (type.isAnnotationPresent(FieldSerializer.NotNull.class)) nullable = false;
         return nullable;
     }
 

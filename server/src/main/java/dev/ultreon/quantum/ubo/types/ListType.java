@@ -9,6 +9,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ListType<T extends DataType<?>> implements DataType<List<T>>, Iterable<T> {
     private final int id;
@@ -158,12 +160,7 @@ public class ListType<T extends DataType<?>> implements DataType<List<T>>, Itera
     @Override
     @SuppressWarnings("unchecked")
     public ListType<T> copy() {
-        List<T> list = new ArrayList<>();
-        for (T t : obj) {
-            T copy = (T) t.copy();
-            list.add(copy);
-        }
-        return new ListType<>(list);
+        return new ListType<>(obj.stream().map(t -> (T) t.copy()).collect(Collectors.toList()));
     }
 
     @Override
@@ -211,6 +208,10 @@ public class ListType<T extends DataType<?>> implements DataType<List<T>>, Itera
             list.add(r);
         }
         return list;
+    }
+
+    public Stream<T> stream() {
+        return obj.stream();
     }
 
     public boolean isEmpty() {

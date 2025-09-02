@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.server;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
@@ -55,8 +54,10 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -124,7 +125,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     /**
      * Creates a new {@link QuantumServer} instance.
      *
-     * @param storage    the world storage for the world data.
+     * @param storage the world storage for the world data.
      */
     protected QuantumServer(WorldStorage storage, Profiler profiler) {
         super(profiler);
@@ -186,12 +187,12 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     private void loadRegistries() {
-        Registry<ChunkGenerator> chunkGenRegistry = registries.get(RegistryKeys.CHUNK_GENERATOR);
+        var chunkGenRegistry = registries.get(RegistryKeys.CHUNK_GENERATOR);
         chunkGenRegistry.register(ChunkGenerator.OVERWORLD, CHUNK_DEBUG ? new DebugGenerator(this.registries.biomes()) : new OverworldGenerator(this.registries.biomes()));
         chunkGenRegistry.register(ChunkGenerator.TEST, new TestGenerator(this.registries.biomes()));
         chunkGenRegistry.register(ChunkGenerator.FLOATING_ISLANDS, new SpaceGenerator(this.registries.biomes()));
 
-        Registry<DimensionInfo> dimRegistry = registries.get(RegistryKeys.DIMENSION);
+        var dimRegistry = registries.get(RegistryKeys.DIMENSION);
 //        for (ResourceCategory dimensions : resourceManager.getResourceCategory("dimensions")) {
 //            for (NamespaceID entry : dimensions.entries()) {
 //                if (dimRegistry.contains(entry)) {
@@ -228,7 +229,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     private void reload(ReloadContext context) {
-        for (Registry<?> registry : registries)
+        for (Registry<?> registry : registries.stream().collect(Collectors.toList()))
             registry.reload(context);
 
         this.recipeManager.reload(context);
@@ -240,10 +241,10 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     public void save(boolean silent) throws IOException {
         try {
-            for (Map.Entry<RegistryKey<DimensionInfo>, ServerWorld> worldEntry : dimManager.getWorlds().entrySet()) {
+            for (var worldEntry : dimManager.getWorlds().entrySet()) {
                 if (!silent) LOGGER.info("Saving world {}", worldEntry.getKey());
 
-                ServerWorld world = worldEntry.getValue();
+                var world = worldEntry.getValue();
                 if (world.getCanSave()) world.save(silent);
             }
 
@@ -258,7 +259,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     private void savePlayers(boolean silent) throws IOException {
-        for (ServerPlayer entry : this.players.values()) {
+        for (var entry : this.players.values()) {
             UUID key = entry.getUuid();
             if (key.equals(getHost())) continue;
             savePlayer(silent, entry);
@@ -380,23 +381,41 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @ApiStatus.Internal
     public void run() {
         // Calculate tick duration based on TPS.
-        double tickCap = 1000.0 / (double) QuantumServer.TPS;
-        double tickTime = 0d;
-        double gameFrameTime = 0d;
-        int ticksPassed = 0;
+        var tickCap = 1000.0 / (double) QuantumServer.TPS;
+        var tickTime = 0d;
+        var gameFrameTime = 0d;
+        var ticksPassed = 0;
 
         double time = System.currentTimeMillis();
 
+        try {
+            doRun(time, gameFrameTime, tickTime, tickCap, ticksPassed);
+        } finally {
+            // Clear the instance.
+            QuantumServer.instance = null;
+
+            // Send event for server stopping to mods.
+            EventSystem.postDefault(new ServerEvent.Stopped(this));
+
+            // Log server stopped event.
+            QuantumServer.LOGGER.info("Server stopped.");
+
+            Runnable runnable = finalizer;
+            if (runnable != null) runnable.run();
+        }
+    }
+
+    private boolean doRun(double time, double gameFrameTime, double tickTime, double tickCap, int ticksPassed) {
         try {
             // Send server started event to mods.
             EventSystem.postDefault(new ServerEvent.Started(this));
 
             //* Main-loop.
             while (this.running) {
-                boolean canTick = false;
+                var canTick = false;
 
                 double time2 = System.currentTimeMillis();
-                double passed = time2 - time;
+                var passed = time2 - time;
                 gameFrameTime += passed;
                 tickTime += passed;
 
@@ -432,7 +451,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
             // Server crashed.
             this.crash(t);
             this.close();
-            return;
+            return true;
         } finally {
             // Send server stopped event to mods.
             EventSystem.postDefault(new ServerEvent.Stopping(this));
@@ -467,18 +486,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         } catch (Exception e) {
             this.fatalCrash(e);
         }
-
-        // Clear the instance.
-        QuantumServer.instance = null;
-
-        // Send event for server stopping to mods.
-        EventSystem.postDefault(new ServerEvent.Stopped(this));
-
-        // Log server stopped event.
-        QuantumServer.LOGGER.info("Server stopped.");
-
-        Runnable runnable = finalizer;
-        if (runnable != null) runnable.run();
+        return false;
     }
 
     /**
@@ -515,6 +523,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @Override
     @Blocking
     public void shutdown(Runnable finalizer) {
+        CommonConstants.LOGGER.info("Shutting down server...");
+
         // Send event for server stopping.
         kickAllPlayers();
 
@@ -523,7 +533,9 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.running = false;
 
         // Shut down the parent executor service.
-        super.shutdownNow();
+        super.shutdown(finalizer);
+
+        CommonConstants.LOGGER.info("Server stopped.");
     }
 
     /**
@@ -656,15 +668,12 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
         this.recipeManager.unload();
         this.cachedPlayers.clear();
-        for (Map.Entry<UUID, ServerPlayer> entry : this.players.entrySet()) {
-            UUID uuid = entry.getKey();
-            ServerPlayer player = entry.getValue();
+        this.players.forEach((UUID uuid, ServerPlayer player) -> {
             player.connection.disconnect(CloseCodes.GOING_AWAY.getCode(), "Server closed!");
             this.cachedPlayers.remove(player.getName());
-        }
+        });
         this.players.clear();
         this.resourceManager.close();
-
         this.service.dispose();
     }
 
@@ -778,13 +787,15 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.cachedPlayers.put(player.getName(), new CachedPlayer(player.getUuid(), player.getName()));
 
         // Send player to all other players within the render distance.
-        ArrayList<ServerPlayer> players = new ArrayList<ServerPlayer>(this.getPlayers());
+        var players = this.getPlayers()
+                .stream()
+                .collect(Collectors.toList());
 
-        IConnection<ServerPacketHandler, ClientPacketHandler> connection = player.connection;
+        var connection = player.connection;
         for (ServerPlayer other : players) {
             if (other == player) continue;
             Debugger.log("Player " + player.getName() + " is within the render distance of " + this.getEntityRenderDistance() + "!");
-            IConnection<ServerPacketHandler, ClientPacketHandler> otherConnection = other.connection;
+            var otherConnection = other.connection;
             if (otherConnection != null)
                 otherConnection.send(new S2CAddPlayerPacket(player.getId(), player.getUuid(), player.getName(), player.getPosition()));
             if (connection != null)
@@ -863,16 +874,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
      * @param pos the chunk to find players in.
      * @return the players in the specified chunk.
      */
-    public Iterable<ServerPlayer> getPlayersInChunk(ChunkVec pos) {
-        return () -> {
-            List<ServerPlayer> list = new ArrayList<>();
-            for (ServerPlayer player : this.players.values()) {
-                if (player.getChunkVec().equals(pos)) {
-                    list.add(player);
-                }
-            }
-            return list.iterator();
-        };
+    public Stream<ServerPlayer> getPlayersInChunk(ChunkVec pos) {
+        return this.players.values().stream().filter(player -> player.getChunkVec().equals(pos));
     }
 
     /**
@@ -1006,15 +1009,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     public @Nullable Entity getEntity(@NotNull UUID uuid) {
-        for (ServerWorld serverWorld : this.dimManager.getWorlds().values()) {
-            Array<Entity> v = serverWorld.getEntities();
-            for (Entity entity : v.toArray(Entity.class)) {
-                if (entity.getUuid().equals(uuid)) {
-                    return entity;
-                }
-            }
-        }
-        return null;
+        return this.dimManager.getWorlds().values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class))).filter(entity -> entity.getUuid().equals(uuid)).findAny().orElse(null);
     }
 
     public CommandSender getConsoleSender() {
@@ -1041,17 +1036,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     @ApiStatus.Experimental
     public final <T extends Entity> T getEntity(int id, T... typeGetter) {
         Class<T> type = (Class<T>) typeGetter.getClass().getComponentType();
-        Entity entityById = null;
-        OUTER:
-        for (ServerWorld serverWorld : this.dimManager.getWorlds().values()) {
-            Array<Entity> v = serverWorld.getEntities();
-            for (Entity entity : v.toArray(Entity.class)) {
-                if (entity.getId() == id) {
-                    entityById = entity;
-                    break OUTER;
-                }
-            }
-        }
+        Entity entityById = this.dimManager.getWorlds().values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class))).filter(entity -> entity.getId() == id).findAny().orElse(null);
 
         if (type.isInstance(entityById)) {
             return type.cast(entityById);
@@ -1061,13 +1046,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     public Map<String, ServerPlayer> getPlayersByName() {
-        Map<String, ServerPlayer> map = new HashMap<>();
-        for (ServerPlayer serverPlayer : this.players.values()) {
-            if (map.put(serverPlayer.getName(), serverPlayer) != null) {
-                throw new IllegalStateException("Duplicate key");
-            }
-        }
-        return Collections.unmodifiableMap(map);
+        return Collections.unmodifiableMap(this.players.values().stream().collect(Collectors.toMap(ServerPlayer::getName, Function.identity())));
     }
 
     public void onChunkBuilt(ServerChunk builtChunk) {
@@ -1129,13 +1108,8 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         return thread;
     }
 
-    public List<Entity> getEntities() {
-        List<Entity> list = new ArrayList<>();
-        for (ServerWorld serverWorld : this.dimManager.getWorlds().values()) {
-            Array<Entity> v = serverWorld.getEntities();
-            list.addAll(Arrays.asList(v.toArray(Entity.class)));
-        }
-        return list;
+    public Stream<Entity> getEntities() {
+        return this.dimManager.getWorlds().values().stream().map(World::getEntities).flatMap(v -> Arrays.stream(v.toArray(Entity.class)));
     }
 
     public void handleIOError(String title, String body) {
@@ -1143,12 +1117,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     }
 
     public void onSaveEvent(SaveEventType type, int... args) {
-        StringJoiner joiner = new StringJoiner(", ");
-        for (int arg : args) {
-            String string = Integer.toString(arg);
-            joiner.add(string);
-        }
-        CommonConstants.LOGGER.warn("SAVE [" + type + "] @ " + joiner.toString());
+        CommonConstants.LOGGER.warn("SAVE [" + type + "] @ " + Arrays.stream(args).mapToObj(Integer::toString).collect(Collectors.joining(", ")));
     }
 
 }

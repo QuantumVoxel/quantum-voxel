@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.player;
 
+import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityTypes;
@@ -21,7 +22,7 @@ public class RemotePlayer extends ClientPlayer {
      *
      * @param world The world to create the player in.
      */
-    public RemotePlayer(@Nullable ClientWorldAccess world) {
+    public RemotePlayer(@Nullable ClientWorld world) {
         super(EntityTypes.PLAYER, world);
     }
 

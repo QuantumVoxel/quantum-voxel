@@ -33,9 +33,7 @@ public class WorldCardList extends HorizontalList<WorldCardList.Entry> {
     }
 
     public WorldCardList worlds(List<WorldStorage> worlds) {
-        for (WorldStorage world : worlds) {
-            addWorld(world);
-        }
+        worlds.forEach(this::addWorld);
         return this;
     }
 

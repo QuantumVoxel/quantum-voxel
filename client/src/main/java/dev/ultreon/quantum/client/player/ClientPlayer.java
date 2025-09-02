@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.player;
 
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.player.Player;
@@ -30,7 +31,7 @@ public abstract class ClientPlayer extends Player {
      * @param entityType The type of the player entity being created.
      * @param world The client world access object representing the world in which this player entity exists.
      */
-    protected ClientPlayer(EntityType<? extends Player> entityType, ClientWorldAccess world) {
+    protected ClientPlayer(EntityType<? extends Player> entityType, ClientWorld world) {
         super(entityType, world, QuantumClient.get().getUser().name());
     }
 

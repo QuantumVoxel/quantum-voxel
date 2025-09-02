@@ -46,7 +46,7 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
 
         this.client.connection.moveTo(PacketStages.IN_GAME, new InGameClientPacketHandlerImpl(this.connection));
 
-        LocalPlayer player = this.client.player = new LocalPlayer(EntityTypes.PLAYER, this.client.world, uuid);
+        var player = this.client.player = new LocalPlayer(EntityTypes.PLAYER, this.client.world, uuid);
         EventSystem.postDefault(new ClientPlayerEvent.Joined(player));
 
         player.setPosition(spawnPos.x, spawnPos.y, spawnPos.z);

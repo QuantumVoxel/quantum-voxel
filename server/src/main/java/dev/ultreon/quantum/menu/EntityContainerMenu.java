@@ -4,9 +4,11 @@ import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.container.Container;
 import dev.ultreon.quantum.world.vec.BlockVec;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@Getter
 public abstract class EntityContainerMenu extends ContainerMenu {
     private final Entity owner;
 
@@ -26,7 +28,4 @@ public abstract class EntityContainerMenu extends ContainerMenu {
         this.owner = owner;
     }
 
-    public Entity getOwner() {
-        return owner;
-    }
 }

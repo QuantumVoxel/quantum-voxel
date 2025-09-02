@@ -46,10 +46,19 @@ public class PauseScreen extends Screen {
                 }
             }).exceptionally(throwable -> {
                 CommonConstants.LOGGER.error("ATHROW", throwable);
-                client.notifications.add("Saving Failed", throwable.getMessage(), "Failed to save world");
+                client.notifications.add("Saving Failed", "An internal error occurred", cutErrorMessage(throwable));
                 return null;
             });
         }
+    }
+
+    private String cutErrorMessage(Throwable throwable) {
+        String message = throwable.getMessage();
+        if (message == null) {
+            return "Unknown Error";
+        }
+
+        return message.substring(0, Math.min(message.length(), 30));
     }
 
     @Override

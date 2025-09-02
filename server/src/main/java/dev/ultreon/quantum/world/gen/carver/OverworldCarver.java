@@ -11,10 +11,10 @@ import dev.ultreon.quantum.world.gen.CaveNoiseGenerator;
 import dev.ultreon.quantum.world.gen.HillinessNoise;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.vec.BlockVec;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongList;
+import it.unimi.dsi.fastutil.longs.LongLists;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static dev.ultreon.quantum.world.World.CS;
 
@@ -29,7 +29,7 @@ public class OverworldCarver implements Carver {
     private final CaveNoiseGenerator caveNoise;
 
     public static long totalDurations = 0L;
-    public static List<Long> durations = new CopyOnWriteArrayList<>();
+    public static LongList durations = LongLists.synchronize(new LongArrayList());
     private final HillinessNoise hillinessNoise;
 
     public OverworldCarver(DomainWarping domainWarping, NoiseSource biomeNoise, long seed) {

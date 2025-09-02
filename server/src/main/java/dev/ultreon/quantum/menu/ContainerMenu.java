@@ -318,7 +318,7 @@ public abstract class ContainerMenu implements Menu {
         for (Player player : this.watching) {
             if (!(player instanceof ServerPlayer)) continue;
             ServerPlayer serverPlayer = (ServerPlayer) player;
-            Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, changed.toArray(new ItemSlot[0]));
+            Packet<InGameClientPacketHandler> packet = this.createPacket(serverPlayer, changed.toArray(ItemSlot[]::new));
             if (packet != null && !serverPlayer.connection.isLoggingIn()) {
                 serverPlayer.connection.send(packet);
             }

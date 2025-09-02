@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client;
 
 import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
 import java.util.*;
 
 import com.badlogic.gdx.utils.GdxRuntimeException;
@@ -99,10 +100,15 @@ public class IntegratedServer extends QuantumServer {
             });
             return;
         }
-        MapType playerData = this.getStorage().<MapType>read("player.ubo");
-        BlockVec spawnPoint = overworld.getSpawnPoint();
-        player.setPosition(spawnPoint.d().add(0.5, 0.0, 0.5));
-        player.loadWithWorldPos(playerData);
+        try {
+            var playerData = this.getStorage().<MapType>read("player.ubo");
+            BlockVec spawnPoint = overworld.getSpawnPoint();
+            player.setPosition(spawnPoint.d().add(0.5, 0.0, 0.5));
+            player.loadWithWorldPos(playerData);
+        } catch (IOException e) {
+            QuantumServer.LOGGER.error("Failed to load player data.", e);
+            throw new WorldDataCorruptionError("Failed to load player data.", e);
+        }
 
         host = player;
     }
@@ -162,6 +168,7 @@ public class IntegratedServer extends QuantumServer {
      */
     @Override
     public void crash(CrashLog crashLog) {
+        CommonConstants.LOGGER.error("Game crashed:" + crashLog.toString());
         this.shutdown(() -> {
         });
         crashLog.writeToLog();
@@ -293,10 +300,15 @@ public class IntegratedServer extends QuantumServer {
 
     @Override
     public void shutdown(Runnable finalizer) {
-        super.shutdown(finalizer);
+        CommonConstants.LOGGER.info("Shutting down integrated server.");
+
+        super.shutdown(() -> {});
 
         this.client.remove(this);
         this.client.integratedServer = null;
+
+        CommonConstants.LOGGER.info("Integrated server shutdown complete.");
+        finalizer.run();
     }
 
     @Override
@@ -306,6 +318,8 @@ public class IntegratedServer extends QuantumServer {
 
         try {
             this.getNetworker().close();
+        } catch (ClosedChannelException e) {
+            // Ignore
         } catch (IOException e) {
             throw new GdxRuntimeException(e);
         }

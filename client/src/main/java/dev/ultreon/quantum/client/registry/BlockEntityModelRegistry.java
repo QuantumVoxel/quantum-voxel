@@ -49,7 +49,7 @@ public class BlockEntityModelRegistry {
      */
     @Internal
     public static void load(QuantumClient client) {
-        for (Map.Entry<BlockEntityType<?>, Function<NamespaceID, BlockModel>> entry : REGISTRY.entrySet()) {
+        for (var entry : REGISTRY.entrySet()) {
             BlockModel model = entry.getValue().apply(Objects.requireNonNull(entry.getKey().getId()).mapPath(path -> "blocks/" + path + ".g3dj"));
             QuantumClient.invokeAndWait(() -> model.load(client));
             FINISHED_REGISTRY.put(entry.getKey(), model);

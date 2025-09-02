@@ -43,6 +43,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -99,7 +100,8 @@ public class DesktopLauncher {
                         QuantumClient.crash(crash.getCrashLog());
                     }
 
-                    defaultUncaughtExceptionHandler.uncaughtException(t, e);
+                    logger.error("Failed to launch game", e);
+                    GamePlatform.get().halt(StatusCode.forException());
                 } catch (Throwable t1) {
                     try {
                         logger.error("Failed to handle exception", t1);
@@ -250,14 +252,6 @@ public class DesktopLauncher {
                 return false;
             }
         };
-
-        CrashHandler.addHandler(crashLog -> {
-            try {
-                KeyAndMouseInput.setCursorCaught(false);
-            } catch (Exception e) {
-                QuantumClient.LOGGER.error("Failed to hide cursor", e);
-            }
-        });
 
         try {
             Files.createDirectories(Path.of("logs"));

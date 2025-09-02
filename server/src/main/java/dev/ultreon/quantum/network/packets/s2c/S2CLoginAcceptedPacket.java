@@ -27,11 +27,11 @@ public final class S2CLoginAcceptedPacket implements Packet<LoginClientPacketHan
     }
 
     public static S2CLoginAcceptedPacket read(PacketIO buffer) {
-        UUID uuid = buffer.readUuid();
-        Vec3d spawnPos = buffer.readVec3d(new Vec3d());
-        GameMode gameMode = buffer.readEnum(GameMode.SURVIVAL);
-        float health = buffer.readFloat();
-        int hunger = buffer.readInt();
+        var uuid = buffer.readUuid();
+        var spawnPos = buffer.readVec3d(new Vec3d());
+        var gameMode = buffer.readEnum(GameMode.SURVIVAL);
+        var health = buffer.readFloat();
+        var hunger = buffer.readInt();
 
         return new S2CLoginAcceptedPacket(uuid, spawnPos, gameMode, health, hunger);
     }
@@ -81,7 +81,7 @@ public final class S2CLoginAcceptedPacket implements Packet<LoginClientPacketHan
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CLoginAcceptedPacket that = (S2CLoginAcceptedPacket) obj;
+        var that = (S2CLoginAcceptedPacket) obj;
         return Objects.equals(this.uuid, that.uuid) &&
                Objects.equals(this.spawnPos, that.spawnPos) &&
                Objects.equals(this.gameMode, that.gameMode) &&

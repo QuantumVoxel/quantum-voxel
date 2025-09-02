@@ -5,6 +5,7 @@ import dev.ultreon.quantum.api.events.world.WorldAccessEvent;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.entity.player.Player;
+import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,7 @@ public interface BlockEvent extends WorldAccessEvent {
 
     class Use implements BlockEvent, PlayerEvent {
         @NotNull
-        private final WorldAccess world;
+        private final World world;
         @NotNull
         private final BlockState state;
         @NotNull
@@ -33,7 +34,7 @@ public interface BlockEvent extends WorldAccessEvent {
         @Nullable
         private final Player entity;
 
-        public Use(@NotNull WorldAccess world,
+        public Use(@NotNull World world,
                    @NotNull BlockState state,
                    @NotNull BlockVec position,
                    @Nullable Player entity) {
@@ -59,7 +60,7 @@ public interface BlockEvent extends WorldAccessEvent {
         }
 
         @Override
-        public @NotNull WorldAccess getWorld() {
+        public @Nullable World getWorld() {
             return world;
         }
     }

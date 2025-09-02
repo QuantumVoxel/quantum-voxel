@@ -1,27 +1,13 @@
 package dev.ultreon.quantum.server.player;
 
 import dev.ultreon.quantum.api.commands.perms.Permission;
-
-import java.util.LinkedHashSet;
+import org.apache.commons.collections4.set.ListOrderedSet;
 
 public class PermissionMap {
-    protected final LinkedHashSet<Permission> allows = new LinkedHashSet<>();
-    protected final LinkedHashSet<Permission> denies = new LinkedHashSet<>();
+    protected final ListOrderedSet<Permission> allows = new ListOrderedSet<>();
+    protected final ListOrderedSet<Permission> denies = new ListOrderedSet<>();
 
     public boolean has(Permission permission) {
-        boolean b = true;
-        for (Permission allow : this.allows) {
-            if (allow.allows(permission)) {
-                b = false;
-                break;
-            }
-        }
-        if (b) return false;
-        for (Permission p : this.denies) {
-            if (p.allows(permission)) {
-                return false;
-            }
-        }
-        return true;
+        return this.allows.stream().anyMatch(p -> p.allows(permission)) && this.denies.stream().noneMatch(p -> p.allows(permission));
     }
 }

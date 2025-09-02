@@ -32,7 +32,7 @@ public class MemoryNetworker implements Networker {
 
     @Override
     public List<? extends IConnection<ServerPacketHandler, ClientPacketHandler>> getConnections() {
-        ServerMemoryConnection conn = this.connection;
+        var conn = this.connection;
         if (conn == null) {
             return Collections.emptyList();
         }
@@ -41,7 +41,7 @@ public class MemoryNetworker implements Networker {
 
     @Override
     public void tick() {
-        ServerMemoryConnection conn = connection;
+        var conn = connection;
         if (conn != null) {
             conn.tick();
         }

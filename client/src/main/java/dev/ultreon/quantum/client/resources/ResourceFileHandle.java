@@ -1,10 +1,10 @@
 package dev.ultreon.quantum.client.resources;
 
+import com.badlogic.gdx.Files;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.resources.Resource;
-import dev.ultreon.quantum.resources.ResourcePackage;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +12,10 @@ import org.jetbrains.annotations.Nullable;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * A file handle for resources.
@@ -35,17 +38,12 @@ public class ResourceFileHandle extends FileHandle {
         this.resource = QuantumClient.get().resourceManager.getResource(id);
 
         if (this.resource != null) {
-            this.subResources = Arrays.asList();
+            this.subResources = List.of();
         } else {
-            List<NamespaceID> list = new ArrayList<>();
-            for (ResourcePackage it : QuantumClient.get().resourceManager.getResourcePackages()) {
-                for (NamespaceID namespaceID : it.entries()) {
-                    if (namespaceID.getPath().startsWith(id.getPath())) {
-                        list.add(namespaceID);
-                    }
-                }
-            }
-            this.subResources = list;
+            this.subResources = QuantumClient.get().resourceManager.getResourcePackages().stream()
+                    .flatMap(it -> it.entries().stream())
+                    .filter(it -> it.getPath().startsWith(id.getPath()))
+                    .collect(Collectors.toList());
         }
     }
 
@@ -60,7 +58,7 @@ public class ResourceFileHandle extends FileHandle {
         this.id = new NamespaceID("java", "generated_" + UUID.randomUUID().toString().replace("-", ""));
         this.resource = resource;
 
-        this.subResources = Arrays.asList();
+        this.subResources = List.of();
     }
 
     /**
@@ -118,30 +116,22 @@ public class ResourceFileHandle extends FileHandle {
     @Override
     public FileHandle[] list() {
         if (this.resource == null) throw new GdxRuntimeException(String.format("Resource %s not found", this.id));
-        List<ResourceFileHandle> list = new ArrayList<>();
-        for (NamespaceID it : subResources) {
-            if (it.getDomain().equals(this.id.getDomain())
-                    && it.getPath().lastIndexOf('/') == this.id.getPath().length()) {
-                ResourceFileHandle resourceFileHandle = new ResourceFileHandle(it);
-                list.add(resourceFileHandle);
-            }
-        }
-        return list.toArray(new FileHandle[0]);
+        return subResources.stream()
+                .filter(it -> it.getDomain().equals(this.id.getDomain())
+                              && it.getPath().lastIndexOf('/') == this.id.getPath().length())
+                .map(ResourceFileHandle::new)
+                .toArray(FileHandle[]::new);
     }
 
     @Override
     public FileHandle[] list(String suffix) {
         if (this.resource == null) throw new GdxRuntimeException(String.format("Resource %s not found", this.id));
-        List<ResourceFileHandle> list = new ArrayList<>();
-        for (NamespaceID it : subResources) {
-            if (it.getDomain().equals(this.id.getDomain())
-                    && it.getPath().lastIndexOf('/') == this.id.getPath().length()
-                    && it.getPath().endsWith(suffix)) {
-                ResourceFileHandle resourceFileHandle = new ResourceFileHandle(it);
-                list.add(resourceFileHandle);
-            }
-        }
-        return list.toArray(new FileHandle[0]);
+        return subResources.stream()
+                .filter(it -> it.getDomain().equals(this.id.getDomain())
+                              && it.getPath().lastIndexOf('/') == this.id.getPath().length()
+                              && it.getPath().endsWith(suffix))
+                .map(ResourceFileHandle::new)
+                .toArray(FileHandle[]::new);
     }
 
     @Override

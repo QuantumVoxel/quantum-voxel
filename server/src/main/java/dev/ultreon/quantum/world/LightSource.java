@@ -38,7 +38,7 @@ public final class LightSource {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        LightSource that = (LightSource) obj;
+        var that = (LightSource) obj;
         return this.x == that.x &&
                 this.y == that.y &&
                 this.z == that.z &&

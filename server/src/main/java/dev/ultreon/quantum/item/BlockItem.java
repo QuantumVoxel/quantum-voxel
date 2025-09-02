@@ -10,7 +10,6 @@ import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Suppliers;
 import dev.ultreon.quantum.util.Vec3i;
 import dev.ultreon.quantum.world.BlockFlags;
-import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -33,13 +32,13 @@ public class BlockItem extends Item {
     public UseResult use(UseItemContext context) {
         super.use(context);
 
-        World world = context.world();
-        ItemStack stack = context.stack();
+        var world = context.world();
+        var stack = context.stack();
         BlockHit hit = (BlockHit) context.hit();
-        BlockVec pos = hit.getBlockVec();
-        BlockVec next = hit.getNext();
-        Direction direction = hit.getDirection();
-        Player player = context.player();
+        var pos = hit.getBlockVec();
+        var next = hit.getNext();
+        var direction = hit.getDirection();
+        var player = context.player();
 
         BlockVec blockVec = new BlockVec(next);
         if (EventSystem.postCancelable(new BlockChangeEvent.AttemptPlace(context.world(), context.world().get(blockVec), blockVec, context.player(), hit)))
@@ -84,7 +83,7 @@ public class BlockItem extends Item {
             return UseResult.DENY;
 
         BlockVec blockVec = new BlockVec(vec);
-        BlockState state = this.getBlock().onPlacedBy(this.createBlockMeta(), blockVec, useItemContext);
+        var state = this.getBlock().onPlacedBy(this.createBlockMeta(), blockVec, useItemContext);
         world.set(blockVec, state);
 
         ItemStack stack = useItemContext.stack();

@@ -15,9 +15,14 @@ import dev.ultreon.quantum.resources.ReloadContext;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class TextureManager implements Disposable {
     private final Map<NamespaceID, Texture> textures = new HashMap<>();
@@ -39,8 +44,7 @@ public class TextureManager implements Disposable {
     }
 
     private boolean frozen = false;
-    private final Map<NamespaceID, TextureAtlas> atlasMap = new HashMap<>();
-    private final Map<TextureAtlas, NamespaceID> idMap = new HashMap<>();
+    private final BidiMap<NamespaceID, TextureAtlas> atlasMap = new DualHashBidiMap<>();
 
     public TextureManager(ResourceManager resourceManager) {
         this.resourceManager = resourceManager;
@@ -190,13 +194,7 @@ public class TextureManager implements Disposable {
     public void reload(ReloadContext context) {
         this.frozen = true;
         context.submit(() -> {
-            List<Texture> list = new ArrayList<>();
-            for (Texture texture1 : this.textures.values()) {
-                if (texture1 != null) {
-                    list.add(texture1);
-                }
-            }
-            Iterable<Texture> textures = list;
+            Iterable<Texture> textures = this.textures.values().stream().filter(Objects::nonNull).collect(Collectors.toList());
             this.textures.clear();
             defaultTex = new Texture(MISSING_NO);
             for (Texture texture : textures) {
@@ -212,7 +210,7 @@ public class TextureManager implements Disposable {
     }
 
     public NamespaceID getAtlasId(TextureAtlas atlas) {
-        return this.idMap.get(atlas);
+        return this.atlasMap.inverseBidiMap().get(atlas);
     }
 
     public TextureAtlas getAtlas(NamespaceID id) {

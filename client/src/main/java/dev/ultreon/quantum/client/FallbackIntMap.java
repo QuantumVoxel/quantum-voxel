@@ -29,7 +29,7 @@ public class FallbackIntMap<T> extends IntMap<T> {
             return fallback.get(key);
         }
 
-        if (!containsKey(key) && fallback != null) {
+        if (!containsKey(key) && fallback != null && fallback != this) {
             return fallback.get(key);
         }
 

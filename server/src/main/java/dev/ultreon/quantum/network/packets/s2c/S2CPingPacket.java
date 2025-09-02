@@ -22,8 +22,8 @@ public final class S2CPingPacket implements Packet<ClientPacketHandler> {
     }
 
     public static S2CPingPacket read(PacketIO buffer) {
-        long serverTime = buffer.readLong();
-        long time = buffer.readLong();
+        var serverTime = buffer.readLong();
+        var time = buffer.readLong();
 
         return new S2CPingPacket(serverTime, time);
     }
@@ -59,7 +59,7 @@ public final class S2CPingPacket implements Packet<ClientPacketHandler> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CPingPacket that = (S2CPingPacket) obj;
+        var that = (S2CPingPacket) obj;
         return this.serverTime == that.serverTime &&
                this.time == that.time;
     }

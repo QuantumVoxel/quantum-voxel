@@ -46,7 +46,7 @@ import java.util.UUID;
  */
 public abstract class Entity extends GameObject implements CommandSender {
     private final EntityType<? extends Entity> type;
-    protected WorldAccess world;
+    protected World world;
     public double x;
     public double y;
     public double z;
@@ -95,7 +95,7 @@ public abstract class Entity extends GameObject implements CommandSender {
      * @param entityType the entity type
      * @param world      the world to create the entity in
      */
-    public Entity(EntityType<? extends Entity> entityType, WorldAccess world) {
+    public Entity(EntityType<? extends Entity> entityType, World world) {
         this.type = entityType;
         this.world = world;
 
@@ -819,7 +819,7 @@ public abstract class Entity extends GameObject implements CommandSender {
         this.setPosition(x, y, z);
     }
 
-    public WorldAccess getWorld() {
+    public World getWorld() {
         return this.world;
     }
 
@@ -1025,7 +1025,7 @@ public abstract class Entity extends GameObject implements CommandSender {
         world.spawn(this);
     }
 
-    public void onTeleportedDimension(WorldAccess world) {
+    public void onTeleportedDimension(World world) {
         this.world = world;
     }
 

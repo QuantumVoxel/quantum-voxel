@@ -20,7 +20,7 @@ public final class C2SAttackPacket implements Packet<InGameServerPacketHandler> 
     }
 
     public static C2SAttackPacket read(PacketIO buffer) {
-        int id = buffer.readInt();
+        var id = buffer.readInt();
 
         return new C2SAttackPacket(id);
     }
@@ -43,7 +43,7 @@ public final class C2SAttackPacket implements Packet<InGameServerPacketHandler> 
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        C2SAttackPacket that = (C2SAttackPacket) obj;
+        var that = (C2SAttackPacket) obj;
         return this.id == that.id;
     }
 

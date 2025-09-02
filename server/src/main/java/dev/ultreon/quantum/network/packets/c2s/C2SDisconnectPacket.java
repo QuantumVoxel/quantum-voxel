@@ -18,8 +18,8 @@ public final class C2SDisconnectPacket implements Packet<ServerPacketHandler> {
     }
 
     public static C2SDisconnectPacket read(PacketIO buffer) {
-        short code = buffer.readShort();
-        String message = buffer.readString(300);
+        var code = buffer.readShort();
+        var message = buffer.readString(300);
 
         return new C2SDisconnectPacket(code, message);
     }
@@ -53,7 +53,7 @@ public final class C2SDisconnectPacket implements Packet<ServerPacketHandler> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        C2SDisconnectPacket that = (C2SDisconnectPacket) obj;
+        var that = (C2SDisconnectPacket) obj;
         return Objects.equals(this.message, that.message);
     }
 

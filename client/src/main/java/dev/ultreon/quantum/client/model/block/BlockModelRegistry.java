@@ -2,10 +2,13 @@ package dev.ultreon.quantum.client.model.block;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
+import dev.ultreon.libs.collections.v0.tables.Table;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.BlockState;
+import dev.ultreon.quantum.block.property.BlockDataEntry;
+import dev.ultreon.quantum.block.property.StatePropertyKey;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
 import dev.ultreon.quantum.client.atlas.TextureStitcher;
@@ -134,9 +137,9 @@ public class BlockModelRegistry implements ContextAwareReloadable {
     }
 
     public void bakeJsonModels(QuantumClient client) {
-        for (Map.Entry<Block, Map<BlockState, Supplier<BlockModel>>> entry : customRegistry.entrySet()) {
+        for (var entry : customRegistry.entrySet()) {
             Map<BlockState, Supplier<BlockModel>> models = new HashMap<>();
-            for (Map.Entry<BlockState, Supplier<BlockModel>> pair : entry.getValue().entrySet()) {
+            for (var pair : entry.getValue().entrySet()) {
                 BlockModel model = pair.getValue().get();
                 if (model == null) {
                     QuantumClient.LOGGER.error("Failed to load block model for {}: {}", entry.getKey().getId(), pair.getKey());
@@ -159,11 +162,9 @@ public class BlockModelRegistry implements ContextAwareReloadable {
                 if (load != null) {
                     customRegistry.computeIfAbsent(value, key -> new HashMap<>()).put(value.getDefaultState(), () -> load);
 
-//                    Table<String, BlockDataEntry<?>, JsonModel> overrides = load.getOverrides();
-//                    if (overrides == null) continue;
-//                    for (Table.Cell<String, BlockDataEntry<?>, JsonModel> cell : overrides.cellSet()) {
-//                        customRegistry.computeIfAbsent(value, key -> new HashMap<>()).put(value.getDefaultState().with((StatePropertyKey) value.getDefinition().keyByName(cell.getRow()), cell.getColumn().value), cell::getValue);
-//                    }
+                    Table<String, BlockDataEntry<?>, JsonModel> overrides = load.getOverrides();
+                    if (overrides == null) continue;
+                    overrides.cellSet().forEach((cell) -> customRegistry.computeIfAbsent(value, key -> new HashMap<>()).put(value.getDefaultState().with((StatePropertyKey) value.getDefinition().keyByName(cell.getRow()), cell.getColumn().value), cell::getValue));
                 } else if (value.doesRender()) {
                     this.registerDefault(value);
                 }
@@ -173,12 +174,12 @@ public class BlockModelRegistry implements ContextAwareReloadable {
             this.loadingBlock = null;
         }
 
-        for (Map.Entry<Block, Map<BlockState, Supplier<BlockModel>>> entry : customRegistry.entrySet()) {
+        for (var entry : customRegistry.entrySet()) {
             if (entry.getKey() == Blocks.AIR) continue;
             this.loadingBlock = entry.getKey();
             try {
                 Map<BlockState, Supplier<BlockModel>> models = new HashMap<>();
-                for (Map.Entry<BlockState, Supplier<BlockModel>> pair : entry.getValue().entrySet()) {
+                for (var pair : entry.getValue().entrySet()) {
                     BlockModel model = pair.getValue().get();
                     models.put(pair.getKey(), Suppliers.memoize(() -> model));
 

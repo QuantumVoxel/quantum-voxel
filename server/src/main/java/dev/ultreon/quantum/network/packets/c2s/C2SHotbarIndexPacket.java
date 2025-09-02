@@ -15,7 +15,7 @@ public final class C2SHotbarIndexPacket implements Packet<InGameServerPacketHand
     }
 
     public static C2SHotbarIndexPacket read(PacketIO buffer) {
-        byte hotbarIdx = buffer.readByte();
+        var hotbarIdx = buffer.readByte();
 
         return new C2SHotbarIndexPacket(hotbarIdx);
     }
@@ -45,7 +45,7 @@ public final class C2SHotbarIndexPacket implements Packet<InGameServerPacketHand
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        C2SHotbarIndexPacket that = (C2SHotbarIndexPacket) obj;
+        var that = (C2SHotbarIndexPacket) obj;
         return this.hotbarIdx == that.hotbarIdx;
     }
 

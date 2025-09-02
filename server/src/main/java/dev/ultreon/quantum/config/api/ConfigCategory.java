@@ -12,55 +12,55 @@ public class ConfigCategory implements ConfigValue {
     private final Map<String, ConfigValue> properties = new HashMap<>();
 
     public BooleanProperty create(String name, boolean fallback) {
-        BooleanProperty property = new BooleanProperty(name, fallback);
+        var property = new BooleanProperty(name, fallback);
         properties.put(name, property);
         return property;
     }
 
     public StringProperty create(String name, String fallback, Predicate<String> validation) {
-        StringProperty property = new StringProperty(name, fallback, validation);
+        var property = new StringProperty(name, fallback, validation);
         properties.put(name, property);
         return property;
     }
 
     public NamespaceIDProperty create(String name, NamespaceID fallback, Predicate<NamespaceID> validation) {
-        NamespaceIDProperty property = new NamespaceIDProperty(name, fallback, validation);
+        var property = new NamespaceIDProperty(name, fallback, validation);
         properties.put(name, property);
         return property;
     }
 
     public ByteProperty create(String name, byte fallback, byte min, byte max) {
-        ByteProperty property = new ByteProperty(name, fallback, min, max);
+        var property = new ByteProperty(name, fallback, min, max);
         properties.put(name, property);
         return property;
     }
 
     public ShortProperty create(String name, short fallback, short min, short max) {
-        ShortProperty property = new ShortProperty(name, fallback, min, max);
+        var property = new ShortProperty(name, fallback, min, max);
         properties.put(name, property);
         return property;
     }
 
     public IntProperty create(String name, int fallback, int min, int max) {
-        IntProperty property = new IntProperty(name, fallback, min, max);
+        var property = new IntProperty(name, fallback, min, max);
         properties.put(name, property);
         return property;
     }
 
     public LongProperty create(String name, long fallback, long min, long max) {
-        LongProperty property = new LongProperty(name, fallback, min, max);
+        var property = new LongProperty(name, fallback, min, max);
         properties.put(name, property);
         return property;
     }
 
     public FloatProperty create(String name, float fallback, float min, float max) {
-        FloatProperty property = new FloatProperty(name, fallback, min, max);
+        var property = new FloatProperty(name, fallback, min, max);
         properties.put(name, property);
         return property;
     }
 
     public DoubleProperty create(String name, double fallback, double min, double max) {
-        DoubleProperty property = new DoubleProperty(name, fallback, min, max);
+        var property = new DoubleProperty(name, fallback, min, max);
         properties.put(name, property);
         return property;
     }

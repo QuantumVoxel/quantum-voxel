@@ -8,6 +8,7 @@ import dev.ultreon.xeox.impl.ModClassLoader;
 import dev.ultreon.xeox.impl.ModLoaderException;
 import dev.ultreon.xeox.impl.games.IGameProvider;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class QuantumGameProvider implements IGameProvider {

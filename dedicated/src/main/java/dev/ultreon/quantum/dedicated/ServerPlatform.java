@@ -8,13 +8,11 @@ import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.scripting.ScriptLoader;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.xeox.api.IMod;
 import dev.ultreon.xeox.api.IPath;
 import dev.ultreon.xeox.api.IXeoxLoader;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +24,6 @@ import java.util.function.Consumer;
 
 public class ServerPlatform extends GamePlatform {
     private final Map<String, XeoxMod> mods = new IdentityHashMap<>();
-    private final ScriptLoader scriptLoader = new ScriptLoader();
 
     @Override
     public WebSocket newWebSocket(String location, Consumer<Throwable> onError, WebSocket.InitializeListener initializeListener, WebSocket.ConnectedListener connectedListener) {
@@ -122,7 +119,7 @@ public class ServerPlatform extends GamePlatform {
 
     @Override
     public void load(ResourceManager resourceManager) {
-        scriptLoader.reload(resourceManager);
+
     }
 
     @Override
@@ -131,15 +128,10 @@ public class ServerPlatform extends GamePlatform {
     }
 
     @Override
-    public String lineSep() {
-        return System.lineSeparator();
-    }
-
-    @Override
     public Logger getLogger(String name) {
         return (level, message, t) -> {
             if (level == null) return;
-            org.slf4j.Logger logger = LoggerFactory.getLogger(name);
+            Logger logger = LoggerFactory.getLogger(name);
 
             if (t == null) {
                 switch (level) {
@@ -204,7 +196,7 @@ public class ServerPlatform extends GamePlatform {
 
     @Override
     public Collection<? extends Mod> getMods() {
-        ArrayList<Mod> list = new ArrayList<Mod>();
+        ArrayList<Mod> list = new ArrayList<>();
         List<XeoxMod> result = new ArrayList<>();
         for (IMod container : IXeoxLoader.get().getMods()) {
             XeoxMod xeoxMod = this.mods.computeIfAbsent(container.modId(), v -> new XeoxMod(container));

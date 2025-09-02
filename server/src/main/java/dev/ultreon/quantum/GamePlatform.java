@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -351,6 +352,18 @@ public abstract class GamePlatform {
         return false;
     }
 
+    public boolean isSwitch() {
+        return false;
+    }
+
+    public boolean isXbox() {
+        return false;
+    }
+
+    public boolean isSwitchGDX() {
+        return false;
+    }
+
     @Deprecated
     public boolean hasImGui() {
         return isImGuiSupported();
@@ -465,10 +478,6 @@ public abstract class GamePlatform {
 
     public abstract <T> List<T> createSyncList();
 
-    public String lineSep() {
-        return "\n";
-    }
-
     private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {
         private boolean done = false;
         private boolean cancelled = false;
@@ -536,18 +545,14 @@ public abstract class GamePlatform {
         public void complete(T value) {
             this.value = value;
             done = true;
-            for (BiConsumer<? super T, ? super Throwable> listener : listeners) {
-                listener.accept(value, null);
-            }
+            listeners.forEach(listener -> listener.accept(value, null));
         }
 
         @Override
         public void fail(Throwable throwable) {
             this.throwable = throwable;
             done = true;
-            for (BiConsumer<? super T, ? super Throwable> listener : listeners) {
-                listener.accept(null, throwable);
-            }
+            listeners.forEach(listener -> listener.accept(null, throwable));
         }
 
         @Override

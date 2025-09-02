@@ -50,7 +50,7 @@ public final class TouchPoint {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        TouchPoint that = (TouchPoint) obj;
+        var that = (TouchPoint) obj;
         return this.mouseX == that.mouseX &&
                this.mouseY == that.mouseY &&
                this.pointer == that.pointer &&

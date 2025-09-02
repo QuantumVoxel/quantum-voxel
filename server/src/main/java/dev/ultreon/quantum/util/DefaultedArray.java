@@ -106,8 +106,8 @@ public class DefaultedArray<T> implements List<T> {
 
     @Override
     public T get(int index) {
-        if (index >= size) throw new IndexOutOfBoundsException(index + " >= " + size + " (" + size + ")");
-        if (index < 0) throw new IndexOutOfBoundsException(index + " < 0 (" + size + ")");
+        if (index >= size) throw new IndexOutOfBoundsException(index);
+        if (index < 0) throw new IndexOutOfBoundsException(index);
         if (index >= list.size()) return this.defaultValue.get();
 
         T t = list.get(index);
@@ -131,8 +131,8 @@ public class DefaultedArray<T> implements List<T> {
 
     @Override
     public T remove(int index) {
-        if (index >= this.size) throw new IndexOutOfBoundsException(index + " >= " + size + " (" + size + ")");
-        if (index < 0) throw new IndexOutOfBoundsException(index + " < 0 (" + size + ")");
+        if (index >= this.size) throw new IndexOutOfBoundsException(index);
+        if (index < 0) throw new IndexOutOfBoundsException(index);
         if (index >= this.list.size()) return null;
 
         return this.list.remove(index);

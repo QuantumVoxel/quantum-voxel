@@ -19,15 +19,15 @@ public final class S2CInventoryItemChangedPacket implements Packet<InGameClientP
     }
 
     public S2CInventoryItemChangedPacket(ItemSlot slot) {
-        this(dev.ultreon.quantum.MapUtils.of(slot.getIndex(), slot.getItem()));
+        this(Map.of(slot.getIndex(), slot.getItem()));
     }
 
     public S2CInventoryItemChangedPacket(int slot, ItemStack item) {
-        this(dev.ultreon.quantum.MapUtils.of(slot, item));
+        this(Map.of(slot, item));
     }
 
     public static S2CInventoryItemChangedPacket read(PacketIO buffer) {
-        Map<Integer, ItemStack> stackMap = buffer.readMap(PacketIO::readInt, PacketIO::readItemStack);
+        var stackMap = buffer.readMap(PacketIO::readInt, PacketIO::readItemStack);
 
         return new S2CInventoryItemChangedPacket(stackMap);
     }
@@ -57,7 +57,7 @@ public final class S2CInventoryItemChangedPacket implements Packet<InGameClientP
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CInventoryItemChangedPacket that = (S2CInventoryItemChangedPacket) obj;
+        var that = (S2CInventoryItemChangedPacket) obj;
         return Objects.equals(this.stackMap, that.stackMap);
     }
 

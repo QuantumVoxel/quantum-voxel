@@ -35,7 +35,11 @@ public class ServerHttpSite implements AutoCloseable {
 
         HttpServer httpServer = HttpServer.create();
         httpServer.bind(new InetSocketAddress(80), 0);
-        httpServer.setExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
+        httpServer.setExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
+            Thread thread = new Thread(r);
+            thread.setName("Quantum Dedicated Server HTTP Thread");
+            return thread;
+        }));
         httpServer.start();
 
         httpServer.createContext(HttpPaths.PATH_API, apiHandler);

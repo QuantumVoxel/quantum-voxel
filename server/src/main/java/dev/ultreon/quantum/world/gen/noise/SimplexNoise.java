@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.world.gen.noise;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class SimplexNoise implements NoiseType {
@@ -58,9 +59,7 @@ public class SimplexNoise implements NoiseType {
     @SuppressWarnings("DataFlowIssue")
     public void dispose() {
         this.disposed = true;
-        for (Octave octave : this.octaves) {
-            octave.dispose();
-        }
+        Arrays.stream(this.octaves).forEach(Octave::dispose);
         this.octaves = null;
         this.frequencies = null;
         this.amplitudes = null;

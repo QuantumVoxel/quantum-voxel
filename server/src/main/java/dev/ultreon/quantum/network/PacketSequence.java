@@ -25,7 +25,7 @@ public final class PacketSequence<T extends PacketHandler> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        PacketSequence that = (PacketSequence) obj;
+        var that = (PacketSequence) obj;
         return this.sequence == that.sequence &&
                Objects.equals(this.packet, that.packet);
     }

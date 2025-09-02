@@ -23,8 +23,8 @@ public final class S2CPlayerAttackPacket implements Packet<InGameClientPacketHan
     }
 
     public static S2CPlayerAttackPacket read(PacketIO buffer) {
-        int playerId = buffer.readVarInt();
-        int entityId = buffer.readVarInt();
+        var playerId = buffer.readVarInt();
+        var entityId = buffer.readVarInt();
 
         return new S2CPlayerAttackPacket(playerId, entityId);
     }
@@ -52,7 +52,7 @@ public final class S2CPlayerAttackPacket implements Packet<InGameClientPacketHan
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CPlayerAttackPacket that = (S2CPlayerAttackPacket) obj;
+        var that = (S2CPlayerAttackPacket) obj;
         return this.playerId == that.playerId &&
                this.entityId == that.entityId;
     }

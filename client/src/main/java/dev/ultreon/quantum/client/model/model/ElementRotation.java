@@ -84,7 +84,7 @@ public final class ElementRotation {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        ElementRotation that = (ElementRotation) obj;
+        var that = (ElementRotation) obj;
         return Objects.equals(this.originVec, that.originVec) &&
                Objects.equals(this.axis, that.axis) &&
                Float.floatToIntBits(this.angle) == Float.floatToIntBits(that.angle) &&

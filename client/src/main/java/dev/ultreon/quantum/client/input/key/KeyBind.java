@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.input.key;
 
 import com.badlogic.gdx.Input.Keys;
+import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.input.KeyAndMouseInput;
 //import dev.ultreon.quantum.client.input.controller.ControllerInput;
 //import dev.ultreon.quantum.client.input.controller.ControllerMapping;

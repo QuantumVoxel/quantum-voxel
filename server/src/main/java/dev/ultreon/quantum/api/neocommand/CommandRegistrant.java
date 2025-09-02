@@ -19,7 +19,7 @@ public class CommandRegistrant {
     }
 
     public CommandRegistrant overload(CommandExecutor executor, Parameter<?>... arguments) {
-        this.overloads.put(Arrays.asList(arguments), executor);
+        this.overloads.put(List.of(arguments), executor);
         this.executor = executor;
         return this;
     }
@@ -43,7 +43,7 @@ public class CommandRegistrant {
                 Object parse = parameter.type().parse(reader);
                 arguments.add(new Argument<>(parse.getClass(), parameter.name(), parse));
                 if (i == parameters.size() - 1) {
-                    return this.overloads.get(parameters).execute(new CommandContext(server, sender, arguments.toArray(new Argument[0])));
+                    return this.overloads.get(parameters).execute(new CommandContext(server, sender, arguments.toArray(Argument[]::new)));
                 }
             }
             reader.seek(0);
@@ -95,7 +95,7 @@ public class CommandRegistrant {
 
     public CommandRegistrant aliases(String... aliases) {
         for (String alias : aliases) Commands.ALIASES.put(alias, this);
-        this.aliases.addAll(Arrays.asList(aliases));
+        this.aliases.addAll(List.of(aliases));
         return this;
     }
 

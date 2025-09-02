@@ -1,11 +1,11 @@
 package dev.ultreon.quantum.desktop.imgui;
 
 import com.badlogic.gdx.graphics.Color;
+import de.damios.guacamole.func.BooleanConsumer;
+import de.damios.guacamole.func.FloatConsumer;
+import de.damios.guacamole.func.ShortConsumer;
 import dev.ultreon.libs.commons.v0.util.EnumUtils;
 import dev.ultreon.quantum.util.*;
-import dev.ultreon.libs.functions.v0.consumer.*;
-import dev.ultreon.libs.functions.v0.consumer.IntConsumer;
-import dev.ultreon.libs.functions.v0.supplier.FloatSupplier;
 import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
 import imgui.flag.ImGuiInputTextFlags;

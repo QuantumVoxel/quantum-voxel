@@ -21,26 +21,26 @@ public final class Profiler implements Disposable {
         if (!profiling) {
             return null;
         }
-        ThreadSection threadSection = this.threads.computeIfAbsent(Thread.currentThread(), thread -> new ThreadSection(this));
+        var threadSection = this.threads.computeIfAbsent(Thread.currentThread(), thread -> new ThreadSection(this));
         threadSection.start(name);
 
         return new ProfilerSection(this, name);
     }
 
     public void begin(String name) {
-        ThreadSection threadSection = this.threads.computeIfAbsent(Thread.currentThread(), thread -> new ThreadSection(this));
+        var threadSection = this.threads.computeIfAbsent(Thread.currentThread(), thread -> new ThreadSection(this));
         threadSection.start(name);
     }
 
     public void end() {
-        Thread cur = Thread.currentThread();
+        var cur = Thread.currentThread();
         if (this.threads.containsKey(cur)) this.threads.get(cur).end();
         else this.threads.put(cur, new ThreadSection(this));
     }
 
     public void update() {
         Thread cur = Thread.currentThread();
-        ThreadSection threadSection = this.threads.computeIfAbsent(cur, thread -> new ThreadSection(this));
+        var threadSection = this.threads.computeIfAbsent(cur, thread -> new ThreadSection(this));
         if (threadSection.lastUpdate + 2000 < System.currentTimeMillis()) {
             this.finished.put(cur, ThreadSection.FinishedThreadSection.create(threadSection));
             threadSection.lastUpdate = System.currentTimeMillis();
@@ -48,7 +48,7 @@ public final class Profiler implements Disposable {
     }
 
     public ProfileData collect() {
-        for (Thread thread : this.threads.keySet()) {
+        for (var thread : this.threads.keySet()) {
             if (!thread.isAlive())
                 this.threads.remove(thread);
         }
@@ -78,8 +78,8 @@ public final class Profiler implements Disposable {
     }
 
     public void addStat(String s, int size) {
-        Thread cur = Thread.currentThread();
-        ThreadSection threadSection = this.threads.computeIfAbsent(cur, thread -> new ThreadSection(this));
+        var cur = Thread.currentThread();
+        var threadSection = this.threads.computeIfAbsent(cur, thread -> new ThreadSection(this));
         threadSection.addStat(s, size);
     }
 }

@@ -45,10 +45,12 @@ import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Server-side player implementation.
@@ -74,8 +76,11 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     private final Tracker<ChunkVec> chunkTracker = new Tracker<>();
     private boolean isInactive;
     private final Vec3d tmp3Da = new Vec3d();
+    private long lastChunkRefreshTime;
+    private final Vec3d lastPosition = new Vec3d();
+    private int clientRenderDistance = 8;
 
-    public ServerPlayer(EntityType<? extends Player> entityType,
+    public ServerPlayer(EntityType<? extends @NotNull Player> entityType,
                         ServerWorld world,
                         UUID uuid,
                         String name,
@@ -269,6 +274,14 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         }
 
         EventSystem.postDefault(new ServerPlayerTickEvent.Post(this));
+
+        if (this.lastChunkRefreshTime + 1000 < System.currentTimeMillis()) {
+            this.lastChunkRefreshTime = System.currentTimeMillis();
+            if (this.lastPosition.x != this.x || this.lastPosition.y != this.y || this.lastPosition.z != this.z) {
+                this.lastPosition.set(this.x, this.y, this.z);
+                this.world.getChunksAround(this, clientRenderDistance);
+            }
+        }
     }
 
     @Override
@@ -758,7 +771,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
         String[] args = new String[cmd.length - 2];
         System.arraycopy(cmd, 2, args, 0, args.length);
-        Debugger.log(dev.ultreon.quantum.StringUtils.join(" ", args));
+        Debugger.log(String.join(" ", args));
     }
 
     private void dbgGamemode(String[] cmd) {
@@ -805,7 +818,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     @Override
-    public void onTeleportedDimension(@NotNull WorldAccess world) {
+    public void onTeleportedDimension(World world) {
         super.onTeleportedDimension(world);
 
         if (!(world instanceof ServerWorld))
@@ -957,10 +970,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     }
 
     public Collection<String> getVariableNames(Class<?> clazz) {
-        Set<String> variablesByType = PlayerVariables.get(this).getVariablesByType(clazz);
-        List<String> list = new ArrayList<>(variablesByType);
-        list.sort(null);
-        return list;
+        return PlayerVariables.get(this).getVariablesByType(clazz).sorted().collect(Collectors.toList());
     }
 
     public void loadWithWorldPos(MapType data) {
@@ -973,5 +983,11 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         MapType save = super.save(data);
         save.putString("world", getWorld().getDimension().id().toString());
         return save;
+    }
+
+    @Contract("null->false;_->_")
+    public boolean isTracking(@Nullable ServerChunk serverChunk) {
+        if (serverChunk == null) return false;
+        return this.chunkTracker.isTracking(serverChunk.vec);
     }
 }

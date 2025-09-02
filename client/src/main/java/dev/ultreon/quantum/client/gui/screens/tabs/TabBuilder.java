@@ -56,7 +56,7 @@ public class TabBuilder {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        TabBuilder that = (TabBuilder) obj;
+        var that = (TabBuilder) obj;
         return Objects.equals(this.tabContent, that.tabContent);
     }
 

@@ -19,7 +19,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
@@ -51,6 +50,9 @@ import dev.ultreon.quantum.world.Direction;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.mgsx.gltf.scene3d.attributes.FogAttribute;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,7 +81,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private final List<Gizmo> gizmoSort = new ArrayList<>();
     public final Set<Rectangle> occlusionBounds = new HashSet<>();
     public ParticleSystem particleSystem = new ParticleSystem();
-    final AsyncExecutor executor = new AsyncExecutor(Math.max(GamePlatform.get().cpuCores() / 3, 4));
+    final AsyncExecutor executor = new AsyncExecutor(Math.max(GamePlatform.get().cpuCores() / 3, 4), "World-Renderer");
 
     private @Nullable Material material;
     private @Nullable Material transparentMaterial;
@@ -101,8 +103,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private boolean disposed = false;
     private final Vector3 tmp = new Vector3();
     private final Array<Model> breakingModels = new Array<>();
-    private final IntMap<ClientEntityInfo> modelInstances = new IntMap<>();
-    private final IntMap<QVModel> qvModels = new IntMap<>();
+    private final Int2ObjectMap<ClientEntityInfo> modelInstances = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<QVModel> qvModels = new Int2ObjectOpenHashMap<>();
     private final List<Disposable> disposables = new ArrayList<>();
     private final Skybox skybox = new Skybox();
     private final Map<ChunkVec, ChunkModel> chunkModels = new ConcurrentHashMap<>();
@@ -167,7 +169,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             breakingTexRegions.set(i, textureRegion);
         }
 
-        dev.ultreon.quantum.util.BoundingBox boundingBox = Blocks.STONE.getBoundingBox(0, 0, 0, Blocks.STONE.getDefaultState());
+        var boundingBox = Blocks.STONE.getBoundingBox(0, 0, 0, Blocks.STONE.getDefaultState());
         float v = 0.001f;
         boundingBox.set(boundingBox);
         boundingBox.min.sub(v);
@@ -243,6 +245,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             moonMat.set(new DepthTestAttribute(GL_LEQUAL, true));
             moonMat.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE));
             moonMat.set(IntAttribute.createCullFace(0));
+            moonMat.set(FogAttribute.createFog(1, 1, 1));
 
             modelBuilder.part(NamespaceID.of("generated/moon_part").toString(), createMoon(), GL_TRIANGLES, moonMat);
         });
@@ -370,7 +373,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     public void render(RenderBufferSource batch, float deltaTime) {
         PROFILER.begin("world-renderer@render");
         try {
-            LocalPlayer player = this.client.player;
+            var player = this.client.player;
             if (player == null) return;
             if (this.disposed) return;
 
@@ -379,12 +382,12 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             this.fogColor.set(this.skybox.bottomColor);
 
             // Get the loaded chunks and sort them by distance from the player.
-            List<ClientChunk> chunks = WorldRenderer.chunksInViewSorted(getRayVisibleChunks(), player);
+            var chunks = WorldRenderer.chunksInViewSorted(getRayVisibleChunks(), player);
             this.loadedChunks = chunks.size();
             this.visibleChunks = 0;
 
             // Create a new ChunkRenderRef and an array of ChunkVec.
-            ChunkRenderRef ref = new ChunkRenderRef();
+            var ref = new ChunkRenderRef();
 
             batch.getBuffer(RenderPass.OPAQUE);
             batch.getBuffer(RenderPass.WATER);
@@ -458,7 +461,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         try {
             occlusionBounds.clear();
             for (int i = chunks.size() - 1; i >= 0; i--) {
-                ClientChunk chunk = chunks.get(i);
+                var chunk = chunks.get(i);
                 if (chunk.isDisposed()) {
                     unload(chunk);
                     continue;
@@ -478,14 +481,11 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 if (frustumCulling(chunk)) continue;
 
                 ChunkModel model = this.chunkModels.get(chunk.vec);
-                if (chunk.immediateRebuild || !chunk.initialized) {
-                    model = revalidateChunk(ref, chunk, model);
-                } else if (model == null) {
-                    if (ref.chunkRendered || this.shouldIgnoreRebuild()) continue;
+                if (model == null) {
+                    if (ref.chunkRendered) continue;
                     model = buildChunk(ref, chunk);
-                } else if (model.needsRebuild(world) && !(ref.chunkRendered || this.shouldIgnoreRebuild())) {
+                } else if (chunk.dirty) {
                     rebuildChunk(ref, chunk, model);
-                    continue;
                 }
 
                 model.render(client.camera, bufferSource);
@@ -510,7 +510,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                     .project(client.camera.combined).rect(new Rectangle());
 
             if (rect.width <= 0 || rect.height <= 0 || occlusionBounds.contains(rect)) return true;
-            for (Rectangle occlusion : occlusionBounds) {
+            for (var occlusion : occlusionBounds) {
                 if (occlusion.contains(rect)) {
                     return true;
                 }
@@ -638,32 +638,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     /**
-     * Revalidates a chunk model by determining whether it needs to be rebuilt or reused based on
-     * the provided rendering references and client chunk data. If the given model is null, it creates
-     * a new chunk model. Otherwise, it checks the current rendering conditions to decide whether to
-     * rebuild the chunk or reuse the existing model.
-     *
-     * @param ref   the reference object that tracks information about the chunk rendering state
-     * @param chunk the client chunk containing the data for the chunk to be rendered
-     * @param model the existing chunk model, or null if a new model needs to be created
-     * @return the validated chunk model, either reused or newly built
-     */
-    private ChunkModel revalidateChunk(ChunkRenderRef ref, ClientChunk chunk, @Nullable ChunkModel model) {
-        client.profiler.begin("revalidate-chunk");
-        try {
-            if (model == null) {
-                return buildChunk(ref, chunk);
-            }
-            if (!(client.screen instanceof WorldLoadScreen || ref.chunkRendered || this.shouldIgnoreRebuild())) {
-                rebuildChunk(ref, chunk, model);
-            }
-        } finally {
-            client.profiler.end();
-        }
-        return model;
-    }
-
-    /**
      * Rebuilds the rendering model for a given chunk. This method processes the chunk, updates
      * its rendering state, and marks it as initialized and ready for rendering.
      *
@@ -729,7 +703,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      * @param chunk the client chunk that contains the blocks and their breaking states
      */
     private void renderBlockBreaking(RenderBufferSource batch, ClientChunk chunk) {
-        for (Map.Entry<BlockVec, Float> entry : chunk.getBreaking().entrySet()) {
+        for (var entry : chunk.getBreaking().entrySet()) {
             BlockVec pos = entry.getKey();
 
             Model breakingMesh = this.breakingModels.get(Math.round(Mth.clamp(1.0f * 5, 0, 5)));
@@ -740,10 +714,6 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             batch.getBuffer(RenderPass.TRANSPARENT).render(modelInstance);
         }
-    }
-
-    private boolean shouldIgnoreRebuild() {
-        return false;
     }
 
     /**
@@ -766,7 +736,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             }
 
             //noinspection unchecked
-            EntityRenderer<@NotNull Entity> renderer = (EntityRenderer<@NotNull Entity>) this.client.entityRendererManager.get(entity.getType());
+            var renderer = (EntityRenderer<@NotNull Entity>) this.client.entityRendererManager.get(entity.getType());
             if (model == null) {
                 if (renderer == null) {
                     QuantumClient.LOGGER.warn("Failed to render entity {} because it's renderer is null", entity.getId());
@@ -822,7 +792,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     @Override
     public void reloadChunks() {
-        for (Map.Entry<ChunkVec, ChunkModel> entry : new ArrayList<>(chunkModels.entrySet())) unload(entry.getValue().getChunk());
+        for (var entry : List.copyOf(chunkModels.entrySet())) unload(entry.getValue().getChunk());
         this.chunkModels.clear();
         this.visibleChunks = 0;
         this.loadedChunks = 0;
@@ -875,7 +845,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
         ModelManager.INSTANCE.unloadModel(NamespaceID.of("generated/skybox"));
 
-        for (Map.Entry<ChunkVec, ChunkModel> entry : chunkModels.entrySet()) {
+        for (var entry : chunkModels.entrySet()) {
             ClientChunk first = entry.getValue().getChunk();
             unload(first);
         }
@@ -885,9 +855,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
         this.modelInstances.clear();
 
-        for (Disposable disposable : this.disposables) {
-            disposable.dispose();
-        }
+        this.disposables.forEach(Disposable::dispose);
     }
 
     @Override
@@ -935,7 +903,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
             this.setupMaterials(blockTex, emissiveBlockTex);
 
-            for (Map.Entry<ChunkVec, ChunkModel> entry : chunkModels.entrySet()) {
+            for (var entry : chunkModels.entrySet()) {
                 ClientChunk first = entry.getValue().getChunk();
                 unload(first);
             }
@@ -998,7 +966,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         wasSunMoonShown = true;
 
         Objects.requireNonNull(material).set(new DepthTestAttribute(GL_LEQUAL, true));
-        ClientWorld world = this.world;
+        var world = this.world;
 
         long daytime = world.getDaytime();
 

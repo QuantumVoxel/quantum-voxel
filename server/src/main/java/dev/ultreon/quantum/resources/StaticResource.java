@@ -2,6 +2,7 @@ package dev.ultreon.quantum.resources;
 
 import com.badlogic.gdx.utils.JsonValue;
 import dev.ultreon.libs.commons.v0.util.IOUtils;
+import dev.ultreon.libs.functions.v0.misc.ThrowingSupplier;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.Nullable;

@@ -9,7 +9,10 @@ import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class ShaderProviderManager implements Manager<ShaderProvider> {
@@ -57,22 +60,20 @@ public class ShaderProviderManager implements Manager<ShaderProvider> {
 
     @Override
     public void reload(ReloadContext context) {
-        for (ShaderProvider shaderProvider : new ArrayList<>(this.shaders.values())) {
+        for (ShaderProvider shaderProvider : List.copyOf(this.shaders.values())) {
             context.submit(shaderProvider::dispose);
         }
 
         this.shaders.clear();
 
-        for (Map.Entry<NamespaceID, Supplier<? extends ShaderProvider>> entry : this.shaderProviderFactories.entrySet()) {
-            NamespaceID id = entry.getKey();
-            Supplier<? extends ShaderProvider> factory = entry.getValue();
+        this.shaderProviderFactories.forEach((id, factory) -> {
             ShaderProvider provider = factory.get();
             if (provider == null) {
                 CommonConstants.LOGGER.warn("Failed to load shader provider: {}", id);
-                continue;
+                return;
             }
             this.shaders.put(id, provider);
             context.submit(provider::dispose);
-        }
+        });
     }
 }

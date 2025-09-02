@@ -1,23 +1,29 @@
 package dev.ultreon.quantum.util;
 
-import com.badlogic.gdx.utils.IntArray;
-import dev.ultreon.quantum.collection.ArrayUtils;
+import dev.ultreon.libs.collections.v0.exceptions.OutOfRangeException;
+import dev.ultreon.libs.collections.v0.exceptions.ValueExistsException;
+import dev.ultreon.libs.collections.v0.util.ArrayUtils;
+import dev.ultreon.libs.collections.v0.util.Range;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.objects.Reference2IntFunction;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * This class is used to dynamically change ranges or get values from an index (based create all ranges merged).
- * One problem: it can cause performance issues. But, so far known, this is currently the fastest method.
+ * This class is used for dynamically change ranges or get values from an index (based create all ranges merged).
+ * One problem: it can cause performance issues. But, so far currently known is this the fastest method.
  *
  * @param <T> the type to use for the partition value.
  */
 @SuppressWarnings({"unused", "deprecation"})
 public class IntSizedList<T> {
-    IntArray sizes = new IntArray();
+    IntList sizes = new IntArrayList();
     final List<T> values = new CopyOnWriteArrayList<>();
 
     int totalSize = 0;
+    private Reference2IntFunction<T> applier;
 
     public IntSizedList() {
 
@@ -29,8 +35,8 @@ public class IntSizedList<T> {
      *
      * @param size  the size.
      * @param value the value.
-     * @return the partition index creates the new partition.
-     * @throws ValueExistsException as the exception, it says: if the value already exists.
+     * @return the partition index create the new partition.
+     * @throws ValueExistsException as the exception it says: if the value already exists.
      */
     public int add(int size, T value) {
         if (this.values.contains(value)) throw new ValueExistsException();
@@ -89,7 +95,7 @@ public class IntSizedList<T> {
      */
     public void remove(int index) {
         this.totalSize -= this.sizes.get(index);
-        this.sizes.removeValue(index);
+        this.sizes.remove(index);
         this.values.remove(index);
     }
 
@@ -102,9 +108,9 @@ public class IntSizedList<T> {
      */
     public Range getRange(int index) {
         Range range = null;
-        int currentSize = 0;
-        for (int i = 0; i < this.sizes.size; i++) {
-            int newSize = currentSize + this.sizes.get(i);
+        var currentSize = 0;
+        for (var i = 0; i < this.sizes.size(); i++) {
+            var newSize = currentSize + this.sizes.get(i);
             if (i == index) {
                 range = new Range(currentSize, newSize);
             }
@@ -131,9 +137,9 @@ public class IntSizedList<T> {
         }
 
         T value = null;
-        int currentSize = -1;
-        for (int i = 0; i < this.sizes.size; i++) {
-            int newSize = currentSize + this.sizes.get(i);
+        var currentSize = -1;
+        for (var i = 0; i < this.sizes.size(); i++) {
+            var newSize = currentSize + this.sizes.get(i);
             if ((currentSize < index) && (newSize >= index)) {
                 value = this.values.get(i);
             }
@@ -151,7 +157,7 @@ public class IntSizedList<T> {
      * @return the value.
      */
     public T getDirectValue(int rangeIdx) {
-        if (!((0d <= rangeIdx) && (this.sizes.size > rangeIdx))) {
+        if (!((0d <= rangeIdx) && (this.sizes.size() > rangeIdx))) {
             throw new OutOfRangeException(rangeIdx, 0, this.totalSize);
         }
 
@@ -166,9 +172,9 @@ public class IntSizedList<T> {
      * @return the new size.
      */
     public int edit(T value, int size) {
-        int index = this.indexOf(value);
+        var index = this.indexOf(value);
 
-        if (index >= this.sizes.size) throw new OutOfRangeException(index, 0, this.sizes.size);
+        if (index >= this.sizes.size()) throw new OutOfRangeException(index, 0, this.sizes.size());
 
         this.totalSize = this.totalSize - this.sizes.get(index) + size;
 
@@ -177,7 +183,7 @@ public class IntSizedList<T> {
     }
 
     /**
-     * Change the size and value to create a partition.
+     * Change the size and value create a partition.
      *
      * @param value    the value to change.
      * @param size     the partition size/
@@ -185,9 +191,9 @@ public class IntSizedList<T> {
      * @return the new size.
      */
     public int edit(T value, int size, T newValue) {
-        int index = this.indexOf(value);
+        var index = this.indexOf(value);
 
-        if (index >= this.sizes.size) throw new OutOfRangeException(index, 0, this.sizes.size);
+        if (index >= this.sizes.size()) throw new OutOfRangeException(index, 0, this.sizes.size());
 
         this.totalSize = this.totalSize - this.sizes.get(index) + size;
 
@@ -202,10 +208,10 @@ public class IntSizedList<T> {
      * @return the ranges create all partitions.
      */
     public Range[] getRanges() {
-        Range[] ranges = new Range[]{};
-        int currentSize = 0;
-        for (int size : this.sizes.toArray()) {
-            int newSize = currentSize + size;
+        var ranges = new Range[]{};
+        var currentSize = 0;
+        for (int size : this.sizes) {
+            var newSize = currentSize + size;
 
             ranges = ArrayUtils.add(ranges, new Range(currentSize, newSize));
             currentSize = newSize;
@@ -235,7 +241,7 @@ public class IntSizedList<T> {
      * @return the index.
      */
     public Range rangeOf(T value) {
-        int index = this.values.indexOf(value);
+        var index = this.values.indexOf(value);
 
         return this.getRange(index);
     }
@@ -246,11 +252,12 @@ public class IntSizedList<T> {
      * @param applier the function that maps a value to a new size
      */
     public void editLengths(Reference2IntFunction<T> applier) {
-        int currentSize = 0;
-        IntArray sizes2 = new IntArray(this.sizes);
-        for (int i = 0; i < sizes2.size; i++) {
+        this.applier = applier;
+        var currentSize = 0;
+        IntList sizes2 = new IntArrayList(this.sizes);
+        for (var i = 0; i < sizes2.size(); i++) {
             int applierSize = applier.apply(this.values.get(i));
-            int newSize = currentSize + sizes2.get(i);
+            var newSize = currentSize + sizes2.get(i);
             this.totalSize = this.totalSize - sizes2.get(i) + applierSize;
             sizes2.set(i, applierSize);
 
@@ -265,9 +272,9 @@ public class IntSizedList<T> {
      * @param decorations the IntSizedList from which the elements are to be added.
      */
     public void addAll(IntSizedList<? extends T> decorations) {
-        IntArray sizes = decorations.sizes;
+        IntList sizes = decorations.sizes;
         List<? extends T> values = decorations.values;
-        for (int i = 0, numSizes = sizes.size; i < numSizes; i++) {
+        for (int i = 0, numSizes = sizes.size(); i < numSizes; i++) {
             int size = sizes.get(i);
             T value = values.get(i);
             this.add(size, value);
@@ -275,7 +282,7 @@ public class IntSizedList<T> {
     }
 
     public int size() {
-        return this.sizes.size;
+        return this.sizes.size();
     }
 
     /**
@@ -296,7 +303,7 @@ public class IntSizedList<T> {
         int nextRealIdx = 0;
 
         boolean first = true;
-        for (int i = 0; i < this.sizes.size; i++) {
+        for (int i = 0; i < this.sizes.size(); i++) {
             int realIdx = nextRealIdx;
             nextRealIdx += this.sizes.get(i);
 

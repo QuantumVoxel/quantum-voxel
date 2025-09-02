@@ -3,7 +3,6 @@ package dev.ultreon.quantum.world;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.IntMap;
-import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.Logger;
 import dev.ultreon.quantum.LoggerFactory;
@@ -44,6 +43,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * Represents the world (also known as a dimension) in the game with various attributes and manipulation methods.
@@ -73,6 +73,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     private final List<ChunkVec> alwaysLoaded = new ArrayList<>();
 
     boolean disposed;
+    @Deprecated(forRemoval = true, since = "0.1.0")
     private final Set<ChunkVec> invalidatedChunks = Collections.synchronizedSet(new LinkedHashSet<>());
     private final List<Menu> menus = new ArrayList<>();
     private final RegistryKey<DimensionInfo> info = DimensionInfo.OVERWORLD; // TODO WIP
@@ -113,7 +114,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     }
 
     @Override
-    public boolean unloadChunk(ChunkVec chunkVec) {
+    public boolean unloadChunk(@NotNull ChunkVec chunkVec) {
         this.checkThread();
 
         Chunk chunk = this.getChunk(chunkVec);
@@ -122,7 +123,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     }
 
     @Override
-    public abstract boolean unloadChunk(Chunk chunk, ChunkVec pos);
+    public abstract boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos);
 
     @Override
     public @NotNull EntityHit rayCastEntity(Ray ray) {
@@ -132,7 +133,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     @Override
     public @NotNull EntityHit rayCastEntity(Ray ray, float distance) {
         EntityHit result = new EntityHit(ray, distance);
-        List<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().scl(distance))));
+        Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().scl(distance))));
         entitiesWithin.forEach(entity -> {
             double curDistance = ray.origin.dst(entity.getPosition());
             if (curDistance > distance) return;
@@ -151,17 +152,17 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     @Override
     public @NotNull EntityHit rayCastEntity(Ray ray, float distance, Predicate<Entity> filter) {
         EntityHit result = new EntityHit(ray, distance);
-        List<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().scl(distance))));
-        for (Entity entity : entitiesWithin) {
+        Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().scl(distance))));
+        entitiesWithin.forEach(entity -> {
             if (filter.test(entity)) {
                 double curDistance = ray.origin.dst(entity.getPosition());
-                if (curDistance > distance) continue;
+                if (curDistance > distance) return;
                 if (result.getEntity() == null || curDistance < result.getDistance() && curDistance < result.getDistanceMax()) {
                     result.entity = entity;
                     result.distance = (float) curDistance;
                 }
             }
-        }
+        });
 
         if (result.getEntity() != null) {
             result.collide = true;
@@ -180,14 +181,8 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         return rayCastEntity(ray, distance, type::isInstance);
     }
 
-    private List<Entity> getEntitiesWithin(BoundingBox boundingBox) {
-        List<Entity> list = new ArrayList<>();
-        for (Entity entity : this.entitiesById.values().toArray().toArray(Entity.class)) {
-            if (boundingBox.intersects(entity.getBoundingBox())) {
-                list.add(entity);
-            }
-        }
-        return list;
+    private Stream<Entity> getEntitiesWithin(BoundingBox boundingBox) {
+        return Arrays.stream(this.entitiesById.values().toArray().toArray(Entity.class)).filter(entity -> boundingBox.intersects(entity.getBoundingBox()));
     }
 
     /**
@@ -364,7 +359,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         }
     }
 
-    public Heightmap heightMapAt(ChunkVec vec, HeightmapType type) {
+    public Heightmap heightMapAt(@NotNull ChunkVec vec, HeightmapType type) {
         switch (type) {
             case MOTION_BLOCKING:
                 return this.motionBlockingHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CS));
@@ -442,17 +437,10 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     @Override
     @ApiStatus.Internal
     public void updateNeighbours(Chunk chunk) {
-        ChunkVec pos = chunk.getVec();
-        if (pos.getSpace() != ChunkVecSpace.WORLD) throw new IllegalArgumentException("Chunk must be in world space");
-        this.updateChunk(this.getChunk(pos.offset(-1, -1, 0)));
-        this.updateChunk(this.getChunk(pos.offset(+1, -1, 0)));
-        this.updateChunk(this.getChunk(pos.offset(0, -1, -1)));
-        this.updateChunk(this.getChunk(pos.offset(0, -1, +1)));
-
-        this.updateChunk(this.getChunk(pos.offset(-1, +1, 0)));
-        this.updateChunk(this.getChunk(pos.offset(+1, +1, 0)));
-        this.updateChunk(this.getChunk(pos.offset(0, +1, -1)));
-        this.updateChunk(this.getChunk(pos.offset(0, +1, +1)));
+        for (Chunk neighbor : chunk.neighbors) {
+            if (neighbor == null) continue;
+            neighbor.dirty = true;
+        }
     }
 
     @Override
@@ -464,10 +452,9 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     }
 
     @Override
-    @ApiStatus.Internal
     public void updateChunk(@Nullable Chunk chunk) {
         if (chunk == null) return;
-        this.invalidatedChunks.add(chunk.getVec());
+        chunk.dirty = true;
     }
 
     /**
@@ -836,13 +823,13 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
      * @return true if the block was successfully set, false otherwise
      */
     @Override
-    public boolean set(BlockVec position, BlockState block,
+    public boolean set(BlockVec position, @NotNull BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         return this.set(position.getIntX(), position.getIntY(), position.getIntZ(), block, flags);
     }
 
     @Override
-    public boolean set(int x, int y, int z, BlockState block,
+    public boolean set(int x, int y, int z, @NotNull BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         this.checkThread();
 
@@ -930,12 +917,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         // No-op
     }
 
-    @Override
-    public void updateLightSources(Vec3i offset, ObjectMap<Vec3i, LightSource> lights) {
-        // No-op
-    }
-
-    public abstract boolean isLoaded(Chunk chunk);
+    public abstract boolean isLoaded(@NotNull Chunk chunk);
 
     public @Nullable Structure getClosebyStructureCoords(ServerWorld world, int x, int z) {
         List<BlockVec> list = new ArrayList<>();

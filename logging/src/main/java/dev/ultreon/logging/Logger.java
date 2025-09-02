@@ -1,17 +1,19 @@
 package dev.ultreon.logging;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 import static dev.ultreon.logging.AnsiColors.*;
 
 public class Logger {
-//    private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
     private final LoggerManager manager;
     private final String name;
 
@@ -37,34 +39,16 @@ public class Logger {
             doLog(time, level, category, null, exc, fromReplay, wasSuppressed);
             return;
         }
-        for (String line : splitLines(msg)) {
+        for (String line : msg.split("\r\n|\r|\n")) {
             doLog(time, level, category, line, exc, fromReplay, wasSuppressed);
             exc = null; //? Prevent exception log spam
         }
     }
 
-    private static String[] splitLines(String msg) {
-        msg = msg.replace("\r\n", "\n").replace("\r", "\n");
-        List<String> lines = new ArrayList<>();
-        int index = 0;
-        while (index < msg.length()) {
-            int nextIndex = msg.indexOf('\n', index);
-            if (nextIndex == -1) {
-                lines.add(msg.substring(index));
-                break;
-            } else {
-                lines.add(msg.substring(index, nextIndex));
-                index = nextIndex + 1;
-            }
-        }
-
-        return lines.toArray(new String[0]);
-    }
-
     private void doLog(long time, LogLevel level, LogCategory category, String msg, Throwable exc, boolean fromReplay, boolean wasSuppressed) {
         StringBuilder sb = new StringBuilder();
-//        String format = LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()).format(FORMAT);
-//        sb.append(BLUE).append(format).append(" ");
+        String format = LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()).format(FORMAT);
+        sb.append(BLUE).append(format).append(" ");
         sb.append(colorFor(level)).append("[").append(Thread.currentThread().getName()).append("/").append(level).append("] ");
         sb.append(CYAN).append("(").append(name);
         if (category != null && category != LogCategory.DEFAULT) {
@@ -80,9 +64,8 @@ public class Logger {
             sb.append(RED + " (replay)" + RESET);
         }
         sb.append(RESET + "\n");
-        PrintStream printStream = outFor(level);
         if (exc == null) {
-            printStream.print(sb);
+            outFor(level).print(sb);
             return;
         }
         sb.append(BLUE).append(exc.getClass().getName()).append(": ").append(RESET).append(exc.getMessage()).append("\n");
@@ -90,8 +73,7 @@ public class Logger {
 
         sb.append("\n");
 
-        printStream.print(sb);
-        printStream.flush();
+        outFor(level).print(sb);
     }
 
     private PrintStream outFor(LogLevel level) {
@@ -138,7 +120,7 @@ public class Logger {
             sb.append(RED).append("    Suppressed: ").append(BLUE).append(suppressed.getClass().getName()).append(": ").append(RESET).append(suppressed.getMessage()).append("\n");
             StringBuilder suppressedSb = new StringBuilder();
             stack(suppressed, exc.getStackTrace(), suppressedSb);
-            for (String str : splitLines(suppressedSb.toString())) {
+            for (String str : suppressedSb.toString().split("\r\n|\r|\n")) {
                 sb.append("    ").append(str).append("\n");
             }
         }

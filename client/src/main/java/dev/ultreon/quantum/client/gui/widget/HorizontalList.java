@@ -329,9 +329,7 @@ public class HorizontalList<T extends HorizontalList.Entry> extends UIContainer<
     }
 
     public HorizontalList<T> entries(Collection<? extends T> values) {
-        for (T value : values) {
-            entry(value);
-        }
+        values.forEach(this::entry);
         return this;
     }
 

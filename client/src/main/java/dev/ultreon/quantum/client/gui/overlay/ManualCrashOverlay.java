@@ -4,9 +4,12 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.StaticWidget;
+import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
 
 public class ManualCrashOverlay implements StaticWidget {
     private long endTime;
@@ -34,8 +37,8 @@ public class ManualCrashOverlay implements StaticWidget {
             this.crash();
         }
 
-        int width = QuantumClient.get().getScaledWidth();
-        int height = QuantumClient.get().getScaledHeight();
+        var width = QuantumClient.get().getScaledWidth();
+        var height = QuantumClient.get().getScaledHeight();
 
         renderer.fill(0, 0, width, height, RgbColor.rgb(0x101010))
                 .fill(0, 0, width, 2, RgbColor.rgb(0xff0000));

@@ -3,7 +3,7 @@ package dev.ultreon.quantum;
 import java.util.Timer;
 
 public class TimerInstanceImpl implements TimerInstance {
-    private final Timer timer = new Timer("Quantum Timer");
+    private final Timer timer = new Timer("Quantum Timer", false);
 
     @Override
     public void dispose() {
@@ -31,7 +31,12 @@ public class TimerInstanceImpl implements TimerInstance {
 
         @Override
         public void run() {
-            timerTask.run();
+            try {
+                timerTask.run();
+            } catch (Throwable throwable) {
+                GamePlatform.get().getLogger("Quantum").error("TimerTask failed!", throwable);
+                timerTask.cancel();
+            }
         }
     }
 }

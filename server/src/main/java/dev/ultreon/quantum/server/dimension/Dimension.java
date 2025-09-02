@@ -26,7 +26,7 @@ public final class Dimension {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        Dimension that = (Dimension) obj;
+        var that = (Dimension) obj;
         return Objects.equals(this.info, that.info) &&
                Objects.equals(this.generator, that.generator);
     }

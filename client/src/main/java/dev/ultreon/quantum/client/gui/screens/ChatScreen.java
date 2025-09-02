@@ -10,6 +10,9 @@ import dev.ultreon.quantum.client.gui.widget.ChatTextEntry;
 import dev.ultreon.quantum.network.packets.c2s.C2SChatPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SCommandPacket;
 import dev.ultreon.quantum.text.TextObject;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongList;
+import it.unimi.dsi.fastutil.longs.LongLists;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -20,7 +23,7 @@ public class ChatScreen extends Screen {
     private final String input;
     private ChatTextEntry entry;
     private static final List<TextObject> MESSAGES = new CopyOnWriteArrayList<>();
-    private static final List<Long> MESSAGE_TIMESTAMPS = new CopyOnWriteArrayList<>();
+    private static final LongList MESSAGE_TIMESTAMPS = LongLists.synchronize(new LongArrayList());
 
     public ChatScreen(String input) {
         super("");
@@ -39,7 +42,7 @@ public class ChatScreen extends Screen {
 
         if (ChatScreen.MESSAGES.size() > 100) {
             ChatScreen.MESSAGES.remove(ChatScreen.getMessages().size() - 1);
-            ChatScreen.MESSAGE_TIMESTAMPS.remove(ChatScreen.getMessages().size());
+            ChatScreen.MESSAGE_TIMESTAMPS.removeLong(ChatScreen.getMessages().size());
         }
     }
 
@@ -47,8 +50,8 @@ public class ChatScreen extends Screen {
         return Collections.unmodifiableList(ChatScreen.MESSAGES);
     }
 
-    public static List<Long> getMessageTimestamps() {
-        return ChatScreen.MESSAGE_TIMESTAMPS;
+    public static LongList getMessageTimestamps() {
+        return LongLists.unmodifiable(ChatScreen.MESSAGE_TIMESTAMPS);
     }
 
     @Override
@@ -82,7 +85,7 @@ public class ChatScreen extends Screen {
     }
 
     public void send() {
-        String input = this.entry.getValue();
+        var input = this.entry.getValue();
         if (input.startsWith("/")) {
             if (this.client.connection == null) return;
             this.client.connection.send(new C2SCommandPacket(input.substring(1)));

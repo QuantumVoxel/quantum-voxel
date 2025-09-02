@@ -26,6 +26,7 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.BitSet;
+import java.util.stream.IntStream;
 
 public class TouchInput extends GameInput implements InputProcessor {
     private static final BitSet KEYS = new BitSet(Input.Keys.MAX_KEYCODE);
@@ -56,7 +57,7 @@ public class TouchInput extends GameInput implements InputProcessor {
 
     @Override
     protected void switchOut() {
-        for (int key = 0; key < Input.Keys.MAX_KEYCODE; key++) KEYS.clear(key);
+        for (int key : PRESSED.stream().toArray()) this.keyUp(key);
 
         for (KeyBind keyBind : KeyBindRegistry.getAll()) keyBind.release();
     }
@@ -80,13 +81,7 @@ public class TouchInput extends GameInput implements InputProcessor {
      * @return true if any mouse button is pressed, false otherwise
      */
     public static boolean isPressingAnyButton() {
-        int bound = Input.Buttons.FORWARD;
-        for (int i = 0; i <= bound; i++) {
-            if (Gdx.input.isButtonPressed(i)) {
-                return true;
-            }
-        }
-        return false;
+        return IntStream.rangeClosed(0, Input.Buttons.FORWARD).anyMatch(i -> Gdx.input.isButtonPressed(i));
     }
 
     /**

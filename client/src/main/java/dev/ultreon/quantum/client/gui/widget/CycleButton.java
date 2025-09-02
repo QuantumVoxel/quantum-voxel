@@ -7,10 +7,10 @@ import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.components.ColorComponent;
 import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
-import dev.ultreon.quantum.collection.ArrayUtils;
 import dev.ultreon.quantum.text.MutableText;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.RgbColor;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;

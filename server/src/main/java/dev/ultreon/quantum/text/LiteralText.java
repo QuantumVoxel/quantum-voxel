@@ -4,8 +4,8 @@ import dev.ultreon.quantum.ubo.types.ListType;
 import dev.ultreon.quantum.ubo.types.MapType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class LiteralText extends MutableText {
     private final @NotNull String text;
@@ -57,12 +57,8 @@ public class LiteralText extends MutableText {
 
     @Override
     public LiteralText copy() {
-        ArrayList<TextObject> copy = new ArrayList<TextObject>();
-        for (TextObject extra : this.extras) {
-            MutableText copied = extra.copy();
-            copy.add(copied);
-        }
-        LiteralText literalText = new LiteralText(this.text);
+        var copy = this.extras.stream().map(TextObject::copy).collect(Collectors.toList());
+        var literalText = new LiteralText(this.text);
         literalText.extras.addAll(copy);
         return literalText;
     }

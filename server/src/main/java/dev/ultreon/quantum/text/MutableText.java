@@ -19,9 +19,9 @@ public abstract class MutableText extends TextObject {
 
     @Override
     public String getText() {
-        StringBuilder builder = new StringBuilder();
+        var builder = new StringBuilder();
         builder.append(this.createString());
-        for (TextObject extra : this.extras) {
+        for (var extra : this.extras) {
             builder.append(extra.getText());
         }
         return builder.toString();
@@ -157,7 +157,7 @@ public abstract class MutableText extends TextObject {
     protected void bake(Array<TextPart> bake) {
         bake.add(createPart());
 
-        for (TextObject extra : extras) {
+        for (var extra : extras) {
             extra.bake(bake);
         }
     }

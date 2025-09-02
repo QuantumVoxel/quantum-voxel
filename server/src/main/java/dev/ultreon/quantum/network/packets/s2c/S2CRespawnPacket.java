@@ -16,7 +16,7 @@ public final class S2CRespawnPacket implements Packet<InGameClientPacketHandler>
     }
 
     public static S2CRespawnPacket read(PacketIO buffer) {
-        Vec3d pos = buffer.readVec3d(new Vec3d());
+        var pos = buffer.readVec3d(new Vec3d());
 
         return new S2CRespawnPacket(pos);
     }
@@ -46,7 +46,7 @@ public final class S2CRespawnPacket implements Packet<InGameClientPacketHandler>
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CRespawnPacket that = (S2CRespawnPacket) obj;
+        var that = (S2CRespawnPacket) obj;
         return Objects.equals(this.pos, that.pos);
     }
 

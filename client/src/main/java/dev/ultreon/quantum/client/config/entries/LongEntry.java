@@ -33,7 +33,7 @@ public class LongEntry extends ConfigEntry<Long> {
         return TextEntry.of(Long.toString(this.value))
                 .withFilter(c -> Character.isDigit(c) || c == '-')
                 .withCallback(entry -> {
-                    String value = entry.getValue();
+                    var value = entry.getValue();
                     try {
                         long value1 = Long.parseLong(value);
                         if (value1 < this.min) {

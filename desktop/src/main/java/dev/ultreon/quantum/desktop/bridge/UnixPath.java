@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class UnixPath implements Path {
     private final @NotNull String[] path;
     private final boolean absolute;
-    private @NotNull FileSystem fileSystem;
+    private final @NotNull FileSystem fileSystem;
 
     public UnixPath(URI uri, @NotNull FileSystem fileSystem) {
         this(uri.getPath(), fileSystem);
@@ -147,7 +147,7 @@ public class UnixPath implements Path {
     @Override
     public @NotNull URI toUri() {
         try {
-            return new URI("unix", null, (absolute ? "/" : "") + dev.ultreon.quantum.StringUtils.join("/", path), null, null);
+            return new URI("unix", null, (absolute ? "/" : "") + String.join("/", path), null, null);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -181,7 +181,7 @@ public class UnixPath implements Path {
 
     @Override
     public String toString() {
-        if (absolute) return "/" + dev.ultreon.quantum.StringUtils.join("/", path);
-        return dev.ultreon.quantum.StringUtils.join("/", path);
+        if (absolute) return "/" + String.join("/", path);
+        return String.join("/", path);
     }
 }

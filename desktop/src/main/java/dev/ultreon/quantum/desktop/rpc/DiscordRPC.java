@@ -16,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
 
 import dev.ultreon.quantum.Promise;
 
+import java.time.OffsetDateTime;
+
 /**
  * A class that handles Discord Rich Presence integration. The Discord IPC client is used to send
  * Rich Presence updates to Discord.

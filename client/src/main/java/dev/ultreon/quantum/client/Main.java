@@ -14,19 +14,23 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Clipboard;
 import com.badlogic.gdx.utils.ScreenUtils;
+import dev.ultreon.baseskript.BaseSkript;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.GameWindow;
+import dev.ultreon.quantum.client.skript.QuantumClientSkript;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
+import dev.ultreon.quantum.skript.QuantumSkript;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import dev.ultreon.quantum.Logger;
 import dev.ultreon.quantum.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.badlogic.gdx.graphics.profiling.GLInterceptor.resolveErrorNumber;
 
@@ -41,7 +45,9 @@ public final class Main implements ApplicationListener {
     public static final Color SEMI_TRANSPARENT_WHITE = new Color(.5f, .5f, .5f, 1);
     private static Main instance;
     private static CrashLog crashOverride;
-    private final String[] argv;
+    private final String[] args;
+    private final QuantumSkript quantumSkript;
+    private final QuantumClientSkript quantumClientSkript;
     @Nullable
     private DesktopMain client;
     private long crashFrame;
@@ -60,14 +66,28 @@ public final class Main implements ApplicationListener {
     /**
      * Constructs a new GameLibGDXWrapper object.
      *
-     * @param argv The command line arguments.
+     * @param args The command line arguments.
      */
-    private Main(String[] argv) {
-        this.argv = argv;
+    private Main(String[] args) {
+        this.args = args;
 
         if (instance == null) {
             instance = this;
         }
+
+
+        BaseSkript.main(args);
+
+        quantumSkript = new QuantumSkript(() -> QuantumClient.get().registries);
+        quantumClientSkript = new QuantumClientSkript();
+
+        BaseSkript.load();
+        quantumSkript.onLoad();
+        quantumSkript.onEnable();
+        quantumClientSkript.onLoad();
+        quantumClientSkript.onEnable();
+
+        BaseSkript.init();
     }
 
     @ApiStatus.Internal
@@ -92,12 +112,7 @@ public final class Main implements ApplicationListener {
         if (GamePlatform.get().isDevEnvironment()) glProfiler.enable();
 
         glProfiler.setListener(error -> {
-            List<String> list = new ArrayList<>();
-            for (StackTraceElement stackTraceElement : new Exception().getStackTrace()) {
-                String s = "    at " + stackTraceElement.toString();
-                list.add(s);
-            }
-            String stackTrace = dev.ultreon.quantum.StringUtils.join("\n", list.toArray(new String[0]));
+            String stackTrace = String.join("\n", Arrays.stream(new Exception().getStackTrace()).map(stackTraceElement -> "    at " + stackTraceElement.toString()).toArray(String[]::new));
             Gdx.app.error("GLProfiler", "Error " + resolveErrorNumber(error) + " at:\n" + stackTrace);
         });
 
@@ -113,7 +128,9 @@ public final class Main implements ApplicationListener {
 //                this.client = new DataGeneratorClient();
             }
 
+            AtomicBoolean preprocessing = new AtomicBoolean(true);
             generated = true;
+            preprocessing.set(false);
         } catch (ApplicationCrash t) {
             // Handle ApplicationCrash exception
             QuantumClient.crash(t);
@@ -121,7 +138,7 @@ public final class Main implements ApplicationListener {
     }
 
     private void createClient() {
-        this.client = new QuantumClient(this.argv);
+        this.client = new QuantumClient(this.args);
     }
 
     /**

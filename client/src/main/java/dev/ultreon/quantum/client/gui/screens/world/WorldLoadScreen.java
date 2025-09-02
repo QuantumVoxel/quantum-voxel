@@ -7,26 +7,21 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.TimerTask;
 import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.WorldDataCorruptionError;
 import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.DeathScreen;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.WorldRenderer;
-import dev.ultreon.quantum.network.client.ClientPacketHandler;
-import dev.ultreon.quantum.network.packets.c2s.C2SRequestChunkLoadPacket;
-import dev.ultreon.quantum.network.server.ServerPacketHandler;
-import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.WorldStorage;
-import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.Objects;
 
 public class WorldLoadScreen extends Screen {
     public static final @NotNull Color PROGRESS_BG = new Color(0xffffff80);
@@ -64,10 +59,19 @@ public class WorldLoadScreen extends Screen {
 
         try {
             server.init();
-        } catch (IOException e) {
+        } catch (WorldDataCorruptionError e) {
+            QuantumClient.LOGGER.error("Failed to initialize server:", e);
             server.shutdown(() -> {
+                QuantumClient.LOGGER.error("World data corrupted!");
                 this.client.remove(server);
-                client.showScreen(new DisconnectedScreen("Server failed to initialize!", false));
+                client.showScreen(new DisconnectedScreen("World data corrupted!", false));
+            });
+            return;
+        } catch (IOException e) {
+            QuantumClient.LOGGER.error("Failed to initialize server:", e);
+            this.client.remove(server);
+            client.showScreen(new DisconnectedScreen("Server failed to initialize!", false));
+            server.shutdown(() -> {
             });
             return;
         }
@@ -92,19 +96,22 @@ public class WorldLoadScreen extends Screen {
     public void resized(int width, int height) {
         super.resized(width, height);
 
-        this.titleLabel.setPos(this.size.width / 2, this.size.height / 3 - 25);
-        this.descriptionLabel.setPos(this.size.width / 2, this.size.height / 3 + 3);
-        this.subTitleLabel.setPos(this.size.width / 2, this.size.height / 3 + 31);
+        Label titleLabel1 = this.titleLabel;
+        if (titleLabel1 != null)
+            titleLabel1.setPos(this.size.width / 2, this.size.height / 3 - 25);
+        Label descriptionLabel1 = this.descriptionLabel;
+        if (descriptionLabel1 != null)
+            descriptionLabel1.setPos(this.size.width / 2, this.size.height / 3 + 3);
+        Label subTitleLabel1 = this.subTitleLabel;
+        if (subTitleLabel1 != null)
+            subTitleLabel1.setPos(this.size.width / 2, this.size.height / 3 + 31);
     }
 
     @Override
     public boolean onClose(@Nullable Screen next) {
-        if (!this.client.renderWorld) return false;
-
         DeathScreen closeScreen = this.closeScreen;
         if (next == null && closeScreen != null) {
             this.client.showScreen(closeScreen);
-            return false;
         }
 
         return super.onClose(next);
@@ -133,7 +140,7 @@ public class WorldLoadScreen extends Screen {
     }
 
     private void waitUntilLoggedIn() {
-        IConnection<ClientPacketHandler, ServerPacketHandler> connection = client.connection;
+        var connection = client.connection;
         if (loggedIn && client.player != null && connection != null && connection.isConnected()) {
             completeRun();
         } else {
@@ -148,9 +155,6 @@ public class WorldLoadScreen extends Screen {
 
     private void completeRun() {
         try {
-            ChunkVec chunkVec = Objects.requireNonNull(this.client.player, "Player is null").getChunkVec();
-            this.client.connection.send(new C2SRequestChunkLoadPacket(chunkVec));
-
             this.message("Waiting for server to finalize...");
         } catch (Exception throwable) {
             QuantumClient.LOGGER.error("Failed to load world:", throwable);

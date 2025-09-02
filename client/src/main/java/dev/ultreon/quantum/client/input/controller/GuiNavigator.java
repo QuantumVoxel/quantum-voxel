@@ -65,16 +65,9 @@ public class GuiNavigator {
 
     private Widget getClosestWidget(Widget current, Collection<Widget> candidates) {
         // Find the closest widget by comparing distances
-        boolean seen = false;
-        Widget best = null;
-        Comparator<Widget> comparator = Comparator.comparingDouble(c -> distance(current.getCenter(), c.getCenter()));
-        for (Widget candidate : candidates) {
-            if (!seen || comparator.compare(candidate, best) < 0) {
-                seen = true;
-                best = candidate;
-            }
-        }
-        return seen ? best : null;
+        return candidates.stream()
+                .min(Comparator.comparingDouble(c -> distance(current.getCenter(), c.getCenter())))
+                .orElse(null);
     }
 
     private double distance(Vector2 a, Vector2 b) {

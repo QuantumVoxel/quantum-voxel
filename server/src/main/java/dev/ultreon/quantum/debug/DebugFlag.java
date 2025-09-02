@@ -26,7 +26,7 @@ public final class DebugFlag {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        DebugFlag that = (DebugFlag) obj;
+        var that = (DebugFlag) obj;
         return this.enabled == that.enabled;
     }
 

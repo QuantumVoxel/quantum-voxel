@@ -62,7 +62,7 @@ public final class MessageIcon implements Icon {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        MessageIcon that = (MessageIcon) obj;
+        var that = (MessageIcon) obj;
         return this.width == that.width &&
                this.height == that.height &&
                this.u == that.u &&

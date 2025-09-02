@@ -30,7 +30,7 @@ public class UnixFileSystemProvider extends FileSystemProvider {
     @Override
     public FileSystem getFileSystem(URI uri) {
         if (uri.getScheme().equals(getScheme())) {
-            return new UnixFileSystem(uri, dev.ultreon.quantum.MapUtils.of());
+            return new UnixFileSystem(uri, Map.of());
         }
         throw new IllegalArgumentException("URI scheme is not " + getScheme());
     }
@@ -102,7 +102,7 @@ public class UnixFileSystemProvider extends FileSystemProvider {
 
     @Override
     public Map<String, Object> readAttributes(Path path, String attributes, LinkOption... options) throws IOException {
-        return dev.ultreon.quantum.MapUtils.of();
+        return Map.of();
     }
 
     @Override

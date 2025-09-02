@@ -31,11 +31,11 @@ public final class S2CPlayerPositionPacket implements Packet<InGameClientPacketH
     }
 
     public static S2CPlayerPositionPacket read(PacketIO buffer) {
-        UUID uuid = buffer.readUuid();
-        Vec3d pos = buffer.readVec3d(new Vec3d());
-        float xHeadRot = buffer.readFloat();
-        float xRot = buffer.readFloat();
-        float yRot = buffer.readFloat();
+        var uuid = buffer.readUuid();
+        var pos = buffer.readVec3d(new Vec3d());
+        var xHeadRot = buffer.readFloat();
+        var xRot = buffer.readFloat();
+        var yRot = buffer.readFloat();
 
         return new S2CPlayerPositionPacket(uuid, pos, xHeadRot, xRot, yRot);
     }
@@ -83,7 +83,7 @@ public final class S2CPlayerPositionPacket implements Packet<InGameClientPacketH
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CPlayerPositionPacket that = (S2CPlayerPositionPacket) obj;
+        var that = (S2CPlayerPositionPacket) obj;
         return Objects.equals(this.uuid, that.uuid) &&
                Objects.equals(this.pos, that.pos) &&
                Float.floatToIntBits(this.xHeadRot) == Float.floatToIntBits(that.xHeadRot) &&

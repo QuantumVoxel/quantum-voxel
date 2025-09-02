@@ -16,7 +16,7 @@ public final class C2SCommandPacket implements Packet<InGameServerPacketHandler>
     }
 
     public static C2SCommandPacket read(PacketIO buffer) {
-        String input = buffer.readString(32768);
+        var input = buffer.readString(32768);
 
         return new C2SCommandPacket(input);
     }
@@ -49,7 +49,7 @@ public final class C2SCommandPacket implements Packet<InGameServerPacketHandler>
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        C2SCommandPacket that = (C2SCommandPacket) obj;
+        var that = (C2SCommandPacket) obj;
         return Objects.equals(this.input, that.input);
     }
 

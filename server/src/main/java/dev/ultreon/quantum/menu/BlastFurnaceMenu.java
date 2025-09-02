@@ -9,7 +9,6 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -100,16 +99,16 @@ public class BlastFurnaceMenu extends BlockContainerMenu {
 
     @Override
     public @NotNull Iterator<ItemStack> iterator() {
-        return Arrays.asList(this.get(0).getItem(), this.get(1).getItem(), this.get(2).getItem()).iterator();
+        return List.of(this.get(0).getItem(), this.get(1).getItem(), this.get(2).getItem()).iterator();
     }
 
     @Override
     public List<ItemSlot> getInputs() {
-        return Arrays.asList(this.get(0));
+        return List.of(this.get(0));
     }
 
     @Override
     public List<ItemSlot> getOutputs() {
-        return Arrays.asList(this.get(1));
+        return List.of(this.get(1));
     }
 }

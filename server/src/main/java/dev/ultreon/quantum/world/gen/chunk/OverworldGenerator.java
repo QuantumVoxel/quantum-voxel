@@ -44,7 +44,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     public OverworldGenerator(Registry<Biome> biomeRegistry) {
         super(biomeRegistry);
 
-        Collection<Biome> overworldBiomes = biomeRegistry.getTag(NamespaceID.of("overworld_biomes")).get().getValues();
+        Collection<Biome> overworldBiomes = biomeRegistry.getTag(NamespaceID.of("overworld_biomes")).orElseThrow().getValues();
         for (Biome biome : overworldBiomes) {
             if (biome.doesNotGenerate()) continue;
             addBiome(biomeRegistry.getKey(biome));
@@ -77,11 +77,11 @@ public class OverworldGenerator extends SimpleChunkGenerator {
     @Override
     protected void generateTerrain(@NotNull BuilderChunk chunk, @NotNull Carver carver) {
         BlockVec offset = chunk.getOffset();
-        for (int x = 0; x < CS; x++) {
-            for (int z = 0; z < CS; z++) {
+        for (var x = 0; x < CS; x++) {
+            for (var z = 0; z < CS; z++) {
                 float groundPos = carver.carve(chunk, offset.x + x, offset.z + z);
 
-                BiomeGenerator.Index index = this.findGenerator(new Vec3i(offset.x + x, 0, offset.z + z), groundPos);
+                var index = this.findGenerator(new Vec3i(offset.x + x, 0, offset.z + z), groundPos);
                 chunk.setBiomeGenerator(x, z, index.biomeGenerator);
                 index.biomeGenerator.processColumn(chunk, x, (int) Math.floor(groundPos), z);
             }
@@ -116,9 +116,9 @@ public class OverworldGenerator extends SimpleChunkGenerator {
         if (this.humidNoise == null || this.tempNoise == null || this.variationNoise == null)
             throw new IllegalStateException("Biome generator noise has not been initialized yet!");
 
-        double humid = this.humidNoise.evaluateNoise(offset.x * this.noiseConfig.noiseZoom(), offset.z * this.noiseConfig.noiseZoom()) * 2.0f;
-        double temp = this.tempNoise.evaluateNoise(offset.x * this.noiseConfig.noiseZoom(), offset.z * this.noiseConfig.noiseZoom()) * 2.0f;
-        double variation = this.variationNoise.evaluateNoise(offset.x * this.noiseConfig.noiseZoom(), offset.z * this.noiseConfig.noiseZoom()) * 2.0f;
+        var humid = this.humidNoise.evaluateNoise(offset.x * this.noiseConfig.noiseZoom(), offset.z * this.noiseConfig.noiseZoom()) * 2.0f;
+        var temp = this.tempNoise.evaluateNoise(offset.x * this.noiseConfig.noiseZoom(), offset.z * this.noiseConfig.noiseZoom()) * 2.0f;
+        var variation = this.variationNoise.evaluateNoise(offset.x * this.noiseConfig.noiseZoom(), offset.z * this.noiseConfig.noiseZoom()) * 2.0f;
         BiomeGenerator biomeGen = selectGenerator(height, humid, temp, variation);
 
         return new BiomeGenerator.Index(biomeGen);
@@ -156,8 +156,8 @@ public class OverworldGenerator extends SimpleChunkGenerator {
             return this.biomeGenData.get(0).biomeGen();
         }
 
-        for (BiomeData data : this.biomeGenData) {
-            boolean currentlyOcean = height < World.SEA_LEVEL - 4;
+        for (var data : this.biomeGenData) {
+            var currentlyOcean = height < World.SEA_LEVEL - 4;
 
             boolean validHeight = height >= data.heightStartThreshold() && height < data.heightEndThreshold();
             boolean validHumid = humid >= data.humidityStartThreshold() && humid < data.humidityEndThreshold();

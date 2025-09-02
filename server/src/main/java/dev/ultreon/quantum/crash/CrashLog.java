@@ -4,10 +4,14 @@ import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.util.DataSizes;
 import dev.ultreon.quantum.util.Result;
+import org.apache.commons.lang3.SystemProperties;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,7 +86,7 @@ public final class CrashLog extends CrashCategory {
         Runtime runtime = Runtime.getRuntime();
 
         CrashCategory category = new CrashCategory("System Details");
-        category.add("OS", System.getProperty("os.name") + " " + System.getProperty("os.version") + " (" + System.getProperty("os.arch") + ")");
+        category.add("OS", SystemProperties.getOsName() + " " + SystemProperties.getOsVersion());
         category.add("Memory", DataSizes.format(runtime.totalMemory() - runtime.freeMemory()) + "/" + DataSizes.format(runtime.totalMemory()));
 
         crashLog.addCategory(category);
@@ -100,7 +104,7 @@ public final class CrashLog extends CrashCategory {
         StringBuilder sb = new StringBuilder();
 
         if (!this.entries.isEmpty()) {
-            sb.append("Details:").append(dev.ultreon.quantum.SystemUtils.lineSeparator());
+            sb.append("Details:").append(System.lineSeparator());
             for (AbstractMap.SimpleEntry<String, String> entry : this.entries) {
                 sb.append("  ").append(entry.getKey());
                 sb.append(": ");
@@ -110,7 +114,7 @@ public final class CrashLog extends CrashCategory {
         }
 
         for (CrashCategory category : this.categories) {
-            cs.append(dev.ultreon.quantum.SystemUtils.lineSeparator()).append(category);
+            cs.append(System.lineSeparator()).append(category);
         }
 
         StringWriter sw = new StringWriter();
@@ -126,13 +130,17 @@ public final class CrashLog extends CrashCategory {
 
     @NotNull
     public static String getFileNameWithoutExt() {
-        return "crash-"/* + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM.dd.yyyy-HH.mm.ss"))*/;
+        return "crash-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM.dd.yyyy-HH.mm.ss"));
     }
 
     public Result<@Nullable Void> defaultSave() {
         File file = new File("game-crashes");
         if (!file.exists()) {
-            file.mkdirs();
+            try {
+                Files.createDirectories(file.toPath());
+            } catch (IOException e) {
+                return Result.failure(e);
+            }
         }
 
         this.writeToFile(new File(file, CrashLog.getFileName()));
@@ -155,8 +163,6 @@ public final class CrashLog extends CrashCategory {
     }
 
     public void writeToLog() {
-        for (String s : StringUtils.splitIntoLines(this.toString())) {
-            CommonConstants.LOGGER.error(s);
-        }
+        StringUtils.splitIntoLines(this.toString()).forEach(CommonConstants.LOGGER::error);
     }
 }

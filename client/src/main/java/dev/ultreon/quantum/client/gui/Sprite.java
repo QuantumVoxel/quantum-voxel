@@ -17,7 +17,7 @@ public class Sprite {
         NamespaceID mappedId = id.mapPath(path -> "textures/" + path + ".png");
         this.handle = new ResourceFileHandle(mappedId);
         NamespaceID mappedSpriteId = id.mapPath(path -> "textures/" + path + ".sprite.yml");
-        ResourceFileHandle spriteRes = new ResourceFileHandle(mappedSpriteId);
+        var spriteRes = new ResourceFileHandle(mappedSpriteId);
         this.texture = new Texture(handle);
         this.width = this.texture.getWidth();
         this.height = this.texture.getHeight();

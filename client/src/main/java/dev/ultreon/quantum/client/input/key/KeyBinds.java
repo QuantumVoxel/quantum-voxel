@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.input.key;
 
 import com.badlogic.gdx.Input;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.OS;
 
 public class KeyBinds {
     private KeyBinds() {

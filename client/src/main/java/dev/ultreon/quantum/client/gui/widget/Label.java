@@ -191,8 +191,8 @@ public class Label extends Widget {
     public void renderBackground(Renderer renderer, float deltaTime) {
         this.size.idt();
         int scale = this.scale.get();
-        TextObject text = this.text.get();
-        Color textColor = this.textColor.get();
+        var text = this.text.get();
+        var textColor = this.textColor.get();
 
         if (text == null) return;
 

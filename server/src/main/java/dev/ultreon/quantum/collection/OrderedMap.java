@@ -124,11 +124,7 @@ public class OrderedMap<K, V> extends AbstractMap<K, V> {
 
     @Override
     public void putAll(@NotNull Map<? extends K, ? extends V> m) {
-        for (Entry<? extends K, ? extends V> entry : m.entrySet()) {
-            K key = entry.getKey();
-            V value = entry.getValue();
-            put(key, value);
-        }
+        m.forEach(this::put);
     }
 
     @Override
@@ -141,7 +137,7 @@ public class OrderedMap<K, V> extends AbstractMap<K, V> {
     @Override
     @Deprecated
     public Set<K> keySet() {
-        return new HashSet<>(this.keys);
+        return Set.copyOf(this.keys);
     }
 
     public List<K> keyList() {
@@ -169,7 +165,7 @@ public class OrderedMap<K, V> extends AbstractMap<K, V> {
 
     public boolean removeEntry(int index) {
         this.validateSizes();
-        if (index >= this.size()) throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for size");
+        if (index >= this.size()) throw new IndexOutOfBoundsException(index);
         this.keys.remove(index);
         this.values.remove(index);
         return true;

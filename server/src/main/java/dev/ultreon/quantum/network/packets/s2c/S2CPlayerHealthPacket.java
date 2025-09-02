@@ -15,7 +15,7 @@ public final class S2CPlayerHealthPacket implements Packet<InGameClientPacketHan
     }
 
     public static S2CPlayerHealthPacket read(PacketIO buffer) {
-        float newHealth = buffer.readFloat();
+        var newHealth = buffer.readFloat();
 
         return new S2CPlayerHealthPacket(newHealth);
     }
@@ -45,7 +45,7 @@ public final class S2CPlayerHealthPacket implements Packet<InGameClientPacketHan
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CPlayerHealthPacket that = (S2CPlayerHealthPacket) obj;
+        var that = (S2CPlayerHealthPacket) obj;
         return Float.floatToIntBits(this.newHealth) == Float.floatToIntBits(that.newHealth);
     }
 

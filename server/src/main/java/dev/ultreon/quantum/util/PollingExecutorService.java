@@ -2,15 +2,20 @@ package dev.ultreon.quantum.util;
 
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.debug.profiler.Profiler;
+import org.apache.commons.collections4.queue.SynchronizedQueue;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * PollingExecutorService is an implementation of the ExecutorService that uses polling for task execution.
@@ -19,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("NewApi")
 public class PollingExecutorService extends GameObject implements Executor {
     private static final Logger LOGGER = LoggerFactory.getLogger("PollingExecutorService");
-    private final List<Runnable> tasks = Collections.synchronizedList(new ArrayList<>());
+    private final Queue<Runnable> tasks = SynchronizedQueue.synchronizedQueue(new ArrayDeque<>(2000));
     private final List<CompletionPromise<?>> futures = new CopyOnWriteArrayList<>();
     protected Thread thread;
     private boolean isShutdown = false;
@@ -52,34 +57,20 @@ public class PollingExecutorService extends GameObject implements Executor {
     }
 
     public void shutdown(Runnable finalizer) {
-        if (this.isSameThread()) {
-            this.isShutdown = true;
-            for (CompletionPromise<?> future : this.futures) {
-                future.fail(new RejectedExecutionException("Executor has been shut down"));
-            }
-
-            this.tasks.clear();
-            this.futures.clear();
-
-            finalizer.run();
-        } else {
-            this.submit(() -> {
-                this.isShutdown = true;
-                for (CompletionPromise<?> future : this.futures) {
-                    future.fail(new RejectedExecutionException("Executor has been shut down"));
-                }
-
-                this.tasks.clear();
-                this.futures.clear();
-
-                finalizer.run();
-            });
+        this.isShutdown = true;
+        for (CompletionPromise<?> future : this.futures) {
+            future.fail(new RejectedExecutionException("Executor has been shut down"));
         }
+
+        this.tasks.clear();
+        this.futures.clear();
+
+        finalizer.run();
     }
 
     public @NotNull List<Runnable> shutdownNow() {
         this.isShutdown = true;
-        List<Runnable> remainingTasks = new ArrayList<>(this.tasks);
+        List<Runnable> remainingTasks = List.copyOf(this.tasks);
         this.tasks.clear();
 
         for (CompletionPromise<?> future : this.futures) {
@@ -99,13 +90,13 @@ public class PollingExecutorService extends GameObject implements Executor {
 
     @SuppressWarnings("BusyWait")
     public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-        long endTime = System.currentTimeMillis() + unit.toMillis(timeout);
+        var endTime = System.currentTimeMillis() + unit.toMillis(timeout);
         while (!this.isTerminated() && System.currentTimeMillis() < endTime) Thread.sleep(100);
         return this.isTerminated();
     }
 
     public <T> @NotNull CompletionPromise<T> submit(@NotNull Callable<T> task) {
-        CompletionPromise<T> future = CompletionPromise.<T>create();
+        var future = CompletionPromise.<T>create();
         Throwable exception = new Throwable();
         if (this.isSameThread()) {
             try {
@@ -123,7 +114,7 @@ public class PollingExecutorService extends GameObject implements Executor {
         }
         this.execute(() -> this.profiler.section(task.getClass().getName(), () -> {
             try {
-                T result = task.call();
+                var result = task.call();
                 future.complete(result);
             } catch (Throwable throwable) {
                 future.fail(throwable);
@@ -195,18 +186,13 @@ public class PollingExecutorService extends GameObject implements Executor {
     }
 
     public <T> @NotNull List<Promise<T>> invokeAll(Collection<? extends Callable<T>> tasks) {
-        List<CompletionPromise<T>> futures = new ArrayList<>();
-        for (Callable<T> task : tasks) {
-            CompletionPromise<T> submit = submit(task);
-            futures.add(submit);
-        }
-        List<Promise<T>> list = new ArrayList<>();
-        for (CompletionPromise<T> future : futures) {
-            T join = future.join();
-            CompletionPromise<T> tCompletionPromise = CompletionPromise.completedPromise(join);
-            list.add(tCompletionPromise);
-        }
-        return list;
+        List<CompletionPromise<T>> futures = tasks.stream()
+                .map(this::submit)
+                .collect(Collectors.toList());
+        return futures.stream()
+                .map(CompletionPromise::join)
+                .map(CompletionPromise::completedPromise)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -238,8 +224,7 @@ public class PollingExecutorService extends GameObject implements Executor {
     @ApiStatus.Internal
     public void poll() {
         this.profiler.section("pollTask", () -> {
-            if (this.tasks.isEmpty()) return;
-            if ((this.active = this.tasks.remove(0)) != null) {
+            if ((this.active = this.tasks.poll()) != null) {
                 try {
                     this.active.run();
                 } catch (Throwable t) {
@@ -260,10 +245,10 @@ public class PollingExecutorService extends GameObject implements Executor {
      * using the LOGGER instance.
      */
     public void pollAll() {
-        while ((this.active = (this.tasks.isEmpty() ? null : this.tasks.remove(0))) != null) {
+        while ((this.active = this.tasks.poll()) != null) {
             profiler.begin("pollTask");
             try {
-                Runnable task = this.active;
+                var task = this.active;
 
                 try {
                     task.run();

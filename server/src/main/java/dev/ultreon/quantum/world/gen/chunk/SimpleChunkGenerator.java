@@ -89,8 +89,8 @@ public abstract class SimpleChunkGenerator implements ChunkGenerator {
      * @param chunk The BuilderChunk instance where the structures will be generated. Must not be null.
      */
     protected void generateStructures(BuilderChunk chunk) {
-        for (int x = 0; x < CS; x++) {
-            for (int z = 0; z < CS; z++) {
+        for (var x = 0; x < CS; x++) {
+            for (var z = 0; z < CS; z++) {
                 chunk.getBiomeGenerator(x, z).generateStructureFeatures(chunk);
             }
         }

@@ -269,7 +269,7 @@ public abstract class Widget extends GameObject implements StaticWidget {
     }
 
     public void revalidate() {
-        for (RevalidateListener listener : this.revalidateListeners) {
+        for (var listener : this.revalidateListeners) {
             listener.revalidate(this);
         }
     }

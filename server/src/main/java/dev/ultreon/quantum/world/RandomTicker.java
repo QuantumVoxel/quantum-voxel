@@ -6,7 +6,6 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.TimerTask;
 import dev.ultreon.quantum.server.QuantumServer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RandomTicker implements Disposable {
@@ -27,7 +26,7 @@ public class RandomTicker implements Disposable {
 
     private void randomTick() {
         // TODO: Make this work without breaking the breaking coordinates de-indexation.
-        List<ServerChunk> loadedChunks = new ArrayList<>(world.getLoadedChunks());
+        List<ServerChunk> loadedChunks = List.copyOf(world.getLoadedChunks());
         if (loadedChunks.isEmpty()) return;
         int i = CommonConstants.RANDOM.nextInt(loadedChunks.size());
 

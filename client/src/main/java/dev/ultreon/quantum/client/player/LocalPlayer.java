@@ -4,11 +4,10 @@ import java.util.*;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.api.events.ClientPlayerEvent;
 import dev.ultreon.quantum.util.SanityCheck;
-import dev.ultreon.quantum.world.Direction;
+import dev.ultreon.quantum.world.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,22 +19,18 @@ import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.screens.ChunkLoadScreen;
 import dev.ultreon.quantum.client.gui.screens.DeathScreen;
 import dev.ultreon.quantum.client.gui.screens.container.ContainerScreen;
 import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.registry.MenuRegistry;
-import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorld;
-import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.menu.ContainerMenu;
 import dev.ultreon.quantum.menu.MenuType;
-import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SAbilitiesPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SCloseMenuPacket;
@@ -45,24 +40,13 @@ import dev.ultreon.quantum.network.packets.c2s.C2SOpenInventoryPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SOpenMenuPacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SPlayerMoveAndRotatePacket;
 import dev.ultreon.quantum.network.packets.c2s.C2SPlayerMovePacket;
-import dev.ultreon.quantum.network.packets.c2s.C2SRequestChunkLoadPacket;
-import dev.ultreon.quantum.network.packets.c2s.C2SUnloadChunkPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CTemperatureSyncPacket;
-import dev.ultreon.quantum.network.server.ServerPacketHandler;
-import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.sound.SoundType;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec2i;
 import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.world.Location;
-import dev.ultreon.quantum.world.SoundEvent;
 
-import static dev.ultreon.quantum.world.World.CS;
-
-import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 
 /**
  * Represents a local player entity in the game.
@@ -79,27 +63,18 @@ public class LocalPlayer extends ClientPlayer {
     private double swimSpeed = 0.06;
     public final QuantumClient client = QuantumClient.get();
     public boolean movedLastFrame;
-    private ClientWorldAccess clientWorld;
+    private ClientWorld clientWorld;
     private int oldSelected;
     private final ClientPermissionMap permissions = new ClientPermissionMap();
     private double lastWalkSound;
-    private final Vec2i tmp2I = new Vec2i();
-    private final Set<ChunkVec> chunksToLoad = Collections.synchronizedSet(new HashSet<>());
-    private long lastRefresh;
 
     /**
      * The set of pending chunks to be loaded.
      */
     public final Set<ChunkVec> pendingChunks = Collections.synchronizedSet(new HashSet<>());
 
-    /**
-     * The queue of chunks to be sent to the server.
-     */
-    private final Queue<ChunkVec> sendQueue = new ArrayDeque<>();
     private boolean isLoading;
     private final Vec3d vel = new Vec3d();
-    private boolean refreshing;
-    private final List<ChunkVec> unloading = new ArrayList<>();
 
     /**
      * Constructs a new LocalPlayer.
@@ -108,7 +83,7 @@ public class LocalPlayer extends ClientPlayer {
      * @param world      The client world access.
      * @param uuid       The UUID of the player.
      */
-    public LocalPlayer(EntityType<? extends Player> entityType, ClientWorldAccess world, UUID uuid) {
+    public LocalPlayer(EntityType<? extends Player> entityType, ClientWorld world, UUID uuid) {
         super(entityType, world);
         this.clientWorld = world;
         this.setUuid(uuid);
@@ -179,7 +154,7 @@ public class LocalPlayer extends ClientPlayer {
         // Determine if the player is jumping based on input
         this.jumping = !this.isDead() && (client.playerInput.up && Gdx.input.isCursorCatched());
 
-        IConnection<ClientPacketHandler, ServerPacketHandler> connection = this.client.connection;
+        var connection = this.client.connection;
         if (xRot != oXRot || yRot != oYRot || xHeadRot != oXHeadRot) {
             if (connection != null) {
                 connection.send(new C2SPlayerMoveAndRotatePacket(this.x, this.y, this.z, this.xHeadRot, this.xRot, this.yRot));
@@ -201,8 +176,6 @@ public class LocalPlayer extends ClientPlayer {
             this.x = this.ox;
             this.y = this.oy;
             this.z = this.oz;
-
-            this.refreshChunks();
         } else {
             if (Math.abs(this.x - this.ox) >= 0.01 || Math.abs(this.y - this.oy) >= 0.01 || Math.abs(this.z - this.oz) >= 0.01) {
                 double dst = tmp.set(this.x, this.y, this.z).dst(this.ox, this.oy, this.oz);
@@ -223,13 +196,6 @@ public class LocalPlayer extends ClientPlayer {
         }
 
         movedLastFrame = x != ox || y != oy || z != oz;
-
-        for (int i = 0; i < 9; i++) {
-            ChunkVec toLoad = this.sendQueue.poll();
-            if (toLoad != null && connection != null) {
-                connection.send(new C2SRequestChunkLoadPacket(toLoad));
-            }
-        }
     }
 
     /**
@@ -279,78 +245,6 @@ public class LocalPlayer extends ClientPlayer {
         this.ox = this.x;
         this.oy = this.y;
         this.oz = this.z;
-
-        this.refreshChunks();
-    }
-
-    /**
-     * Refreshes the chunks around the player based on the current chunk position and render distance.
-     * This method is designed to be called periodically to ensure the player has the correct chunks loaded and
-     * unload any chunks that are no longer within the render distance.
-     */
-    public void refreshChunks() {
-        if (!this.client.renderWorld) {
-            return;
-        }
-        if (lastRefresh + 1000 > System.currentTimeMillis() || refreshing) {
-            return;
-        }
-        refreshing = true;
-        lastRefresh = System.currentTimeMillis();
-        GamePlatform.get().runAsync(() -> {
-            IConnection<ClientPacketHandler, ServerPacketHandler> connection = this.client.connection;
-            ChunkVec chunkVec = this.getChunkVec();
-
-            if (connection == null) {
-                return;
-            }
-            int renderDistance = Math.max(2, ClientConfiguration.renderDistance.getValue() / CS);
-
-            unloading.clear();
-            Collection<? extends ClientChunkAccess> loadedChunks = new ArrayList<>(this.clientWorld.getLoadedChunks());
-            for (ClientChunkAccess chunk : loadedChunks) {
-                if (chunk.getVec().dst(chunkVec) > renderDistance) {
-                    unloading.add(chunkVec);
-                    this.unloadChunk(chunk);
-                }
-            }
-            this.client.connection.send(new C2SUnloadChunkPacket(unloading.toArray(new ChunkVec[0])));
-
-            Set<ChunkVec> loadingChunks = this.chunksToLoad;
-            loadingChunks.clear();
-            int renderDistanceSquared = renderDistance * renderDistance;
-            for (int deltaX = -renderDistance; deltaX <= renderDistance; deltaX++) {
-                for (int deltaY = -renderDistance; deltaY <= renderDistance; deltaY++) {
-                    for (int deltaZ = -renderDistance; deltaZ <= renderDistance; deltaZ++) {
-                        int distanceSquared = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
-                        if (distanceSquared > renderDistanceSquared) {
-                            continue;
-                        }
-
-                        ChunkVec relativePos = new ChunkVec(chunkVec.getIntX() + deltaX, chunkVec.getIntY() + deltaY, chunkVec.getIntZ() + deltaZ, ChunkVecSpace.WORLD);
-                        if (this.clientWorld.getChunk(relativePos) != null || this.pendingChunks.contains(relativePos)) {
-                            continue;
-                        }
-
-                        loadingChunks.add(relativePos);
-                    }
-                }
-            }
-            if (!this.chunksToLoad.isEmpty()) {
-                List<ChunkVec> sorted = new ArrayList<>(loadingChunks);
-                sorted.sort(Comparator.comparing(chunkVec1 -> this.tmp2I.set(chunkVec1.getIntX(), chunkVec1.getIntZ()).dst(chunkVec.getIntX(), chunkVec.getIntZ())));
-                sorted.forEach(e -> {
-                    this.pendingChunks.add(e);
-                    this.sendQueue.add(e);
-                });
-            }
-
-            this.isLoading = false;
-        }).thenRun(() -> refreshing = false).exceptionally(throwable -> {
-            CommonConstants.LOGGER.error("Failed to refresh chunks", throwable);
-            refreshing = false;
-            return null;
-        });
     }
 
     /**
@@ -364,8 +258,6 @@ public class LocalPlayer extends ClientPlayer {
     @Override
     public void setPosition(@NotNull Vec3d position) {
         super.setPosition(position);
-
-        this.refreshChunks();
     }
 
     /**
@@ -381,8 +273,6 @@ public class LocalPlayer extends ClientPlayer {
     @Override
     public void setPosition(double x, double y, double z) {
         super.setPosition(x, y, z);
-
-        this.refreshChunks();
     }
 
     @Override
@@ -395,18 +285,6 @@ public class LocalPlayer extends ClientPlayer {
         }
 
         super.rotateHead(x, y);
-    }
-
-    /**
-     * Unloads a chunk.
-     * <p>
-     * This method unloads a chunk from the client world.
-     * </p>
-     *
-     * @param chunk The chunk to unload.
-     */
-    public void unloadChunk(ClientChunkAccess chunk) {
-        this.clientWorld.unloadChunk(chunk.getVec());
     }
 
     /**
@@ -588,8 +466,7 @@ public class LocalPlayer extends ClientPlayer {
      * This method will return the client world.
      */
     @Override
-    public @NotNull
-    WorldAccess getWorld() {
+    public @NotNull ClientWorld getWorld() {
         return this.clientWorld;
     }
 
@@ -622,7 +499,7 @@ public class LocalPlayer extends ClientPlayer {
         } else if (openedBefore == null) {
             CommonConstants.LOGGER.warn("Opened server menu {} before opening any on client side", menuType);
             if (this.clientWorld instanceof ClientWorld) {
-                ClientWorld ourClientWorld = (ClientWorld) this.clientWorld;
+                ClientWorld ourClientWorld = this.clientWorld;
                 openedBefore = menuType.create(ourClientWorld, this, this.getBlockVec());
             }
         }
@@ -718,7 +595,7 @@ public class LocalPlayer extends ClientPlayer {
      *
      * @param world The new world to teleport the player to.
      */
-    public void onTeleportedDimension(ClientWorldAccess world) {
+    public void onTeleportedDimension(ClientWorld world) {
         super.onTeleportedDimension(world);
 
         pendingChunks.clear();
@@ -734,7 +611,7 @@ public class LocalPlayer extends ClientPlayer {
      */
     @Override
     @Deprecated
-    public void onTeleportedDimension(@NotNull WorldAccess world) {
+    public void onTeleportedDimension(World world) {
         super.onTeleportedDimension(world);
     }
 

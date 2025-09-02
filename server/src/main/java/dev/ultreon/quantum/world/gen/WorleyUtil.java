@@ -67,7 +67,7 @@ public class WorleyUtil {
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            Double3 that = (Double3) obj;
+            var that = (Double3) obj;
             return Double.doubleToLongBits(this.x) == Double.doubleToLongBits(that.x) &&
                    Double.doubleToLongBits(this.y) == Double.doubleToLongBits(that.y) &&
                    Double.doubleToLongBits(this.z) == Double.doubleToLongBits(that.z);

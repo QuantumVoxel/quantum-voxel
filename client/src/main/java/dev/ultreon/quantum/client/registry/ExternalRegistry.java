@@ -48,6 +48,11 @@ public class ExternalRegistry<T> implements IdRegistry<T> {
         return rawId;
     }
 
+    @Override
+    public T get(NamespaceID from) {
+        throw new UnsupportedOperationException("Objects not available in synced registries!");
+    }
+
     public Array<NamespaceID> ids() {
         throw new UnsupportedOperationException("Objects not available in synced registries!");
     }

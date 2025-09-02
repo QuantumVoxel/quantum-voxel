@@ -37,6 +37,7 @@ import dev.ultreon.quantum.debug.profiler.Profiler;
 import dev.ultreon.quantum.debug.profiler.Section;
 import dev.ultreon.quantum.debug.profiler.ThreadSection;
 import dev.ultreon.quantum.desktop.DesktopLauncher;
+import dev.ultreon.quantum.desktop.DesktopPlatform;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.resources.ResourceCategory;
@@ -69,6 +70,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -152,7 +154,10 @@ public class ImGuiOverlay {
     private static List<Thread> threads;
 
     public static void setupImGui() {
-        if (GamePlatform.get().isAngleGLES() || GamePlatform.get().isMacOSX()) return;
+        if (GamePlatform.get().isAngleGLES()) {
+            LoggerFactory.getLogger(ImGuiOverlay.class).trace("ImGui Disabled for Angle GLES");
+            return;
+        }
 
         QuantumClient.LOGGER.info("Setting up ImGui");
 
@@ -185,8 +190,12 @@ public class ImGuiOverlay {
     }
 
     public static void preInitImGui() {
-        if (GamePlatform.get().isAngleGLES() || GamePlatform.get().isMacOSX()) return;
+        if (GamePlatform.get().isAngleGLES()) {
+            LoggerFactory.getLogger(ImGuiOverlay.class).trace("ImGui Disabled for Angle GLES");
+            return;
+        }
 
+        LoggerFactory.getLogger(ImGuiOverlay.class).info("Pre-initializing ImGui");
         synchronized (ImGuiOverlay.class) {
             ImGuiOverlay.imGuiGlfw = new ImGuiImplGlfw();
             ImGuiOverlay.imGuiGl3 = new ImGuiImplGl3();
@@ -200,7 +209,10 @@ public class ImGuiOverlay {
 
     public static void renderImGui(QuantumClient client) {
         if (!ImGuiOverlay.SHOW_IM_GUI.get()) return;
-        if (GamePlatform.get().isAngleGLES() || GamePlatform.get().isMacOSX()) return;
+        if (GamePlatform.get().isAngleGLES()) {
+            LoggerFactory.getLogger(ImGuiOverlay.class).trace("ImGui Disabled for Angle GLES");
+            return;
+        }
 
         if (Gdx.input.isCursorCatched()) {
             ImGui.getIO().setMousePos(Float.MAX_VALUE, Float.MAX_VALUE);
@@ -1765,8 +1777,7 @@ public class ImGuiOverlay {
     }
 
     public static boolean isShown() {
-//        return ImGuiOverlay.SHOW_IM_GUI.get() && !GamePlatform.get().isMacOSX() && GamePlatform.get().isDesktop();
-        return true;
+        return ImGuiOverlay.SHOW_IM_GUI.get() && GamePlatform.get().isDesktop();
     }
 
     public static void setShowingImGui(boolean value) {
@@ -1778,7 +1789,10 @@ public class ImGuiOverlay {
     }
 
     public static void dispose() {
-        if (GamePlatform.get().isAngleGLES() || GamePlatform.get().isMacOSX()) return;
+        if (GamePlatform.get().isAngleGLES()) {
+            LoggerFactory.getLogger(ImGuiOverlay.class).trace("ImGui Disabled for Angle GLES");
+            return;
+        }
 
         synchronized (ImGuiOverlay.class) {
             if (ImGuiOverlay.isImplCreated) {

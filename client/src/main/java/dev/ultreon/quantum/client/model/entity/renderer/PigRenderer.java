@@ -1,7 +1,9 @@
 package dev.ultreon.quantum.client.model.entity.renderer;
 
 import com.badlogic.gdx.graphics.g3d.Model;
+import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.EntityModelInstance;
+import dev.ultreon.quantum.client.model.QVModel;
 import dev.ultreon.quantum.client.model.WorldRenderContext;
 import dev.ultreon.quantum.client.model.entity.EntityModel;
 import dev.ultreon.quantum.client.render.EntityTextures;

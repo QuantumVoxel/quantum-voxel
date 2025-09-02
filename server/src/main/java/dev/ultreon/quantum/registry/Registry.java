@@ -256,7 +256,7 @@ public abstract class Registry<T> implements IdRegistry<T>, RegistryMap<Registry
     public void sync(IntMap<NamespaceID> registryMap) {
         if (syncDisabled) return;
         idMap.clear();
-        for (IntMap.Entry<NamespaceID> e : registryMap.entries()) {
+        for (var e : registryMap.entries()) {
             idMap.put(e.key, get(e.value));
         }
     }

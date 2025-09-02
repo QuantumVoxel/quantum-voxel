@@ -17,7 +17,7 @@ import dev.ultreon.quantum.world.gen.layer.TerrainLayer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 /**
  * The Biome class represents a specific type of terrain with defined characteristics like temperature,
@@ -85,15 +85,9 @@ public abstract class Biome {
     public BiomeGenerator create(ServerWorld world) {
         EventSystem.postDefault(new WorldLifecycleEvent.CreateBiome(world, this, world.getGenerator().getLayerDomain(), this.layers, this.surfaceFeatures));
 
-        for (TerrainLayer layer : this.layers) {
-            layer.create(world);
-        }
-        for (TerrainFeature surfaceFeature : this.surfaceFeatures) {
-            surfaceFeature.create(world);
-        }
-        for (TerrainFeature feature : this.undergroundFeatures) {
-            feature.create(world);
-        }
+        this.layers.forEach(layer -> layer.create(world));
+        this.surfaceFeatures.forEach(feature -> feature.create(world));
+        this.undergroundFeatures.forEach(feature -> feature.create(world));
 
         return new BiomeGenerator(world, this, this.layers, this.surfaceFeatures, this.undergroundFeatures);
     }
@@ -123,32 +117,15 @@ public abstract class Biome {
 
     public boolean isTopBlock(BlockState currentBlock) {
         if (currentBlock.getBlock() == Blocks.AIR) return true;
-        for (TerrainLayer terrainLayer : layers) {
-            if (terrainLayer instanceof SurfaceTerrainLayer && ((SurfaceTerrainLayer) terrainLayer).surfaceBlock == currentBlock.getBlock()) {
-                return true;
-            }
-        }
-        return false;
+        return layers.stream().anyMatch(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer && ((SurfaceTerrainLayer) terrainLayer).surfaceBlock == currentBlock.getBlock());
     }
 
     public BlockState getTopMaterial() {
-        for (TerrainLayer terrainLayer : layers) {
-            Block block = terrainLayer instanceof SurfaceTerrainLayer ? ((SurfaceTerrainLayer) terrainLayer).surfaceBlock : null;
-            if (block != null) {
-                return Optional.of(block).map(Block::getDefaultState).orElse(null);
-            }
-        }
-        return Optional.<Block>empty().map(Block::getDefaultState).orElse(null);
+        return layers.stream().map(terrainLayer -> terrainLayer instanceof SurfaceTerrainLayer ? ((SurfaceTerrainLayer) terrainLayer).surfaceBlock : null).filter(Objects::nonNull).findFirst().map(Block::getDefaultState).orElse(null);
     }
 
     public BlockState getFillerMaterial() {
-        for (TerrainLayer terrainLayer : layers) {
-            Block block = terrainLayer instanceof GroundTerrainLayer ? ((GroundTerrainLayer) terrainLayer).block : null;
-            if (block != null) {
-                return Optional.of(block).map(Block::getDefaultState).orElse(null);
-            }
-        }
-        return Optional.<Block>empty().map(Block::getDefaultState).orElse(null);
+        return layers.stream().map(terrainLayer -> terrainLayer instanceof GroundTerrainLayer ? ((GroundTerrainLayer) terrainLayer).block : null).filter(Objects::nonNull).findFirst().map(Block::getDefaultState).orElse(null);
     }
 
     public float getHumidityStart() {

@@ -194,8 +194,8 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onBlockBroken(BlockVec pos) {
-        ServerWorld world = this.player.getWorld();
-        ChunkVec ChunkVec = pos.chunk();
+        var world = this.player.getWorld();
+        var ChunkVec = pos.chunk();
 
         if (!this.player.isChunkActive(ChunkVec)) {
             QuantumServer.LOGGER.warn("Player {} attempted to break block that is not loaded.", this.player.getName());
@@ -231,11 +231,11 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     }
 
     public void onItemUse(BlockHit hitResult) {
-        ServerPlayer player = this.player;
-        Inventory inventory = player.inventory;
+        var player = this.player;
+        var inventory = player.inventory;
         ItemSlot slot = inventory.hotbar[player.selected];
-        ItemStack stack = slot.getItem();
-        Item item = stack.getItem();
+        var stack = slot.getItem();
+        var item = stack.getItem();
 
         if (item == null) return;
 

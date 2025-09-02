@@ -47,7 +47,7 @@ public final class S2CBlockEntityUpdatePacket implements Packet<InGameClientPack
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CBlockEntityUpdatePacket that = (S2CBlockEntityUpdatePacket) obj;
+        var that = (S2CBlockEntityUpdatePacket) obj;
         return Objects.equals(this.pos, that.pos) &&
                Objects.equals(this.data, that.data);
     }

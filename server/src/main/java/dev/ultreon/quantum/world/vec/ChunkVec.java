@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import static dev.ultreon.quantum.world.World.CS;
 import static dev.ultreon.quantum.world.World.REGION_SIZE;
@@ -259,7 +260,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
      * @throws IllegalArgumentException if the region is null and the current space is in region space
      */
     public BlockVec blockInWorldSpace(int x, int y, int z, @Nullable RegionVec region) {
-        BlockVec start = start();
+        var start = start();
         return new BlockVec(start.x + x, start.y + y, start.z + z);
     }
 

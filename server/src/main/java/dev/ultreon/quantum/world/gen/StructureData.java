@@ -11,6 +11,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static java.util.List.copyOf;
+
 public class StructureData {
     private final List<BoundingBox> bounds = new ArrayList<>();
     private final List<Structure> structures = new ArrayList<>();
@@ -61,7 +63,7 @@ public class StructureData {
     }
 
     public final List<BoundingBox> getStructures() {
-        return new ArrayList<>(this.bounds);
+        return copyOf(this.bounds);
     }
 
     public Collection<StructureInstance> getStructuresAt(ChunkVec vec) {

@@ -1,9 +1,9 @@
 package dev.ultreon.quantum.network;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.libs.commons.v0.util.EnumUtils;
-import dev.ultreon.quantum.BitSetUtils;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.BlockState;
@@ -21,10 +21,12 @@ import dev.ultreon.quantum.world.vec.ChunkVecSpace;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ReadOnlyBufferException;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -60,6 +62,17 @@ public class PacketIO implements RegistryHandle {
         this.inputOrig = in;
         this.outputOrig = out;
         this.handle = handle;
+    }
+
+    /**
+     * Initializes a new PacketIO instance using the specified socket.
+     * The socket's input and output streams are used for reading and writing packets.
+     *
+     * @param socket the socket to be used for input and output streams.
+     * @throws IOException if an I/O error occurs when creating the input or output streams.
+     */
+    public PacketIO(Socket socket, RegistryHandle handle) throws IOException {
+        this(socket.getInputStream(), socket.getOutputStream(), handle);
     }
 
     public String readString(int max) {
@@ -118,8 +131,8 @@ public class PacketIO implements RegistryHandle {
     }
 
     public NamespaceID readId() {
-        String location = this.readString(100);
-        String path = this.readString(200);
+        var location = this.readString(100);
+        var path = this.readString(200);
         return new NamespaceID(location, path);
     }
 
@@ -318,15 +331,15 @@ public class PacketIO implements RegistryHandle {
     }
 
     public BitSet readBitSet() {
-        return BitSetUtils.fromByteArray(this.readByteArray(1000));
+        return BitSet.valueOf(this.readLongArray());
     }
 
     public BitSet readBitSet(int maxBytes) {
-        return BitSetUtils.fromByteArray(this.readByteArray(maxBytes));
+        return BitSet.valueOf(this.readLongArray(maxBytes / 8));
     }
 
     public PacketIO writeBitSet(BitSet value) {
-        this.writeByteArray(BitSetUtils.toByteArray(value), 1000);
+        this.writeLongArray(value.toLongArray());
         return this;
     }
 
@@ -482,7 +495,7 @@ public class PacketIO implements RegistryHandle {
         this.writeByte(ubo.id());
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (DataOutputStream output = new DataOutputStream(bos)) {
+        try (var output = new DataOutputStream(bos)) {
             ubo.write(output);
             bos.flush();
         } catch (IOException ignored) {
@@ -613,6 +626,20 @@ public class PacketIO implements RegistryHandle {
         return this;
     }
 
+    public CharSequence readCharSequence(int length, Charset charset) {
+        byte[] bytes = this.readByteArray(length * MathUtils.ceil(charset.newEncoder().maxBytesPerChar()));
+
+        return new String(bytes, charset);
+    }
+
+    public int readBytes(FileChannel out, long position, int length) {
+        try {
+            return out.write(ByteBuffer.wrap(readNBytes(length)), position);
+        } catch (IOException e) {
+            throw new PacketException(e);
+        }
+    }
+
     public PacketIO writeMedium(int value) {
         try {
             byte bits16 = (byte) ((value >> 16) & 0xFF);
@@ -665,6 +692,24 @@ public class PacketIO implements RegistryHandle {
                 bytes[i] = (byte) read;
             }
             this.output.write(bytes);
+        } catch (IOException e) {
+            throw new PacketException(e);
+        }
+    }
+
+    public void writeBytes(ScatteringByteChannel in, int length) {
+        try {
+            ByteBuffer allocate = ByteBuffer.allocate(length);
+            in.read(allocate);
+            this.output.write(allocate.array(), 0, length);
+        } catch (IOException e) {
+            throw new PacketException(e);
+        }
+    }
+
+    public int writeBytes(FileChannel in, long position, int length) {
+        try {
+            return in.read(ByteBuffer.wrap(readNBytes(length)), position);
         } catch (IOException e) {
             throw new PacketException(e);
         }
@@ -920,7 +965,7 @@ public class PacketIO implements RegistryHandle {
 
     public <T> List<T> readList(Function<PacketIO, T> decoder) {
         int size = this.readInt();
-        ArrayList<T> list = new ArrayList<T>();
+        var list = new ArrayList<T>();
 
         for (int i = 0; i < size; i++) {
             list.add(decoder.apply(this));
@@ -935,7 +980,7 @@ public class PacketIO implements RegistryHandle {
             throw new PacketException(String.format("List too large, max = %d, actual = %d", max, size));
         }
 
-        ArrayList<T> list = new ArrayList<T>();
+        var list = new ArrayList<T>();
 
         for (int i = 0; i < size; i++) {
             list.add(decoder.apply(this));
@@ -955,7 +1000,7 @@ public class PacketIO implements RegistryHandle {
 
     public <K, V> Map<K, V> readMap(Function<PacketIO, K> keyDecoder, Function<PacketIO, V> valueDecoder) {
         int size = this.readMedium();
-        HashMap<K, V> map = new HashMap<K, V>();
+        var map = new HashMap<K, V>();
 
         for (int i = 0; i < size; i++) {
             map.put(keyDecoder.apply(this), valueDecoder.apply(this));
@@ -970,7 +1015,7 @@ public class PacketIO implements RegistryHandle {
             throw new PacketException(String.format("Map too large, max = %d, actual = %d", max, size));
         }
 
-        HashMap<K, V> map = new HashMap<K, V>();
+        var map = new HashMap<K, V>();
 
         for (int i = 0; i < size; i++) {
             map.put(keyDecoder.apply(this), valueDecoder.apply(this));
@@ -1093,7 +1138,7 @@ public class PacketIO implements RegistryHandle {
 
     public <K, V> ObjectMap<K, V> readObjectMap(Function<PacketIO, K> keyDecoder, Function<PacketIO, V> valueDecoder) {
         int size = this.readMedium();
-        ObjectMap<K, V> map = new ObjectMap<K, V>(size);
+        var map = new ObjectMap<K, V>(size);
 
         for (int i = 0; i < size; i++) {
             map.put(keyDecoder.apply(this), valueDecoder.apply(this));

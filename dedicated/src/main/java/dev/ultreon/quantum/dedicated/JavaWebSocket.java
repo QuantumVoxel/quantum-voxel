@@ -11,27 +11,23 @@ import java.net.http.HttpClient;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 public class JavaWebSocket implements WebSocket, java.net.http.WebSocket.Listener {
-    private final HttpClient client;
-    private boolean connecting = true;
-    private boolean connected = false;
     private java.net.http.WebSocket socket;
     private final Set<WebSocket.CloseListener> closeListeners = new HashSet<>();
     private final Set<WebSocket.ReceiveListener> receiveListeners = new HashSet<>();
     private final Set<WebSocket.OpenListener> openListeners = new HashSet<>();
     private final ConnectedListener listener;
+    private final ExecutorService webSocketPool = Executors.newCachedThreadPool();
 
     public JavaWebSocket(String location, Consumer<Throwable> onError, InitializeListener initializeListener, ConnectedListener listener) {
-        this.client = HttpClient.newHttpClient();
+        HttpClient client = HttpClient.newHttpClient();
         initializeListener.handle(this);
         this.listener = listener;
 
-        this.client.newWebSocketBuilder().header("Ultreon-QuantumVoxel-Client", "Yes").buildAsync(URI.create(location), this).exceptionally(throwable -> {
+        client.newWebSocketBuilder().header("Ultreon-QuantumVoxel-Client", "Yes").buildAsync(URI.create(location), this).exceptionally(throwable -> {
             onError.accept(throwable);
             return null;
         });
@@ -92,6 +88,8 @@ public class JavaWebSocket implements WebSocket, java.net.http.WebSocket.Listene
     public void close() {
         if (socket == null) return;
         socket.abort();
+        socket = null;
+        webSocketPool.shutdown();
     }
 
     @Override
@@ -102,8 +100,6 @@ public class JavaWebSocket implements WebSocket, java.net.http.WebSocket.Listene
     @Override
     public void onOpen(java.net.http.WebSocket webSocket) {
         this.socket = webSocket;
-        this.connected = true;
-        this.connecting = false;
         listener.handle(this);
         java.net.http.WebSocket.Listener.super.onOpen(webSocket);
         for (OpenListener openListener : this.openListeners) {
@@ -142,7 +138,7 @@ public class JavaWebSocket implements WebSocket, java.net.http.WebSocket.Listene
         for (CloseListener closeListener : closeListeners) {
             closeListener.handle(statusCode, reason);
         }
-        return CompletableFuture.runAsync(webSocket::abort);
+        return CompletableFuture.runAsync(webSocket::abort, webSocketPool);
     }
 
     @Override

@@ -47,7 +47,7 @@ public class PlayerRenderer extends QVModelEntityRenderer<@NotNull Player> {
         }
 
         float duration = 0.15f;
-        float walkAnim = clientPlayer.walkAnim;
+        var walkAnim = clientPlayer.walkAnim;
         float delta = Gdx.graphics.getDeltaTime();
 
         if (clientPlayer.isWalking()) clientPlayer.walking = true;
@@ -55,7 +55,7 @@ public class PlayerRenderer extends QVModelEntityRenderer<@NotNull Player> {
         else QVModelEntityRenderer.updateWalkAnim(clientPlayer, walkAnim, delta, duration);
 
         float bopDuration = 3.4f;
-        float bop = clientPlayer.bop;
+        var bop = clientPlayer.bop;
         bop -= clientPlayer.inverseBop ? delta : -delta;
 
         if (bop > bopDuration) {
@@ -71,7 +71,7 @@ public class PlayerRenderer extends QVModelEntityRenderer<@NotNull Player> {
         clientPlayer.bop = bop;
 
         float bopZDuration = 2.7f;
-        float bopZ = clientPlayer.bopZ;
+        var bopZ = clientPlayer.bopZ;
         bopZ -= clientPlayer.inverseBopZ ? delta : -delta;
 
         if (bopZ > bopZDuration) {

@@ -114,7 +114,7 @@ public class MaterialManager implements Manager<Material> {
 
         JsonValue asJsonValue = parse;
         JsonValue attributesArr = asJsonValue.get("attributes");
-        for (JsonValue attributeElem : attributesArr) {
+        attributesArr.forEach(attributeElem -> {
             JsonValue attrObj = attributeElem;
             String type = attrObj.getString("type");
             Attribute attribute;
@@ -143,7 +143,7 @@ public class MaterialManager implements Manager<Material> {
             if (attribute != null) {
                 material.set(attribute);
             }
-        }
+        });
     }
 
     private Attribute loadCubemap(JsonValue attrObj, CubemapManager cubemapManager) {

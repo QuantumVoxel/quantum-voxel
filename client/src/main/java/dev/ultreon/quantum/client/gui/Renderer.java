@@ -19,7 +19,6 @@ import de.damios.guacamole.gdx.graphics.NestableFrameBuffer;
 import dev.ultreon.libs.commons.v0.Anchor;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.StringUtils;
 import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
@@ -40,8 +39,12 @@ import org.jetbrains.annotations.Nullable;
 import space.earlygrey.shapedrawer.JoinType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static dev.ultreon.quantum.CommonConstants.id;
 
@@ -134,21 +137,13 @@ public class Renderer implements Disposable {
         blurShader = new ShaderProgram(VERT, FRAG);
         String log = blurShader.getLog();
         if (!blurShader.isCompiled()) {
-            List<String> list = new ArrayList<>();
-            for (String s : log.split("(\r\n|\r|\n)")) {
-                list.add(s);
-            }
-            for (String line : list) {
+            for (String line : Arrays.stream(log.split("(\r\n|\r|\n)")).collect(Collectors.toList())) {
                 CommonConstants.LOGGER.error(line);
             }
             QuantumClient.crash(new IllegalStateException("Failed to compile blur shader!"));
         }
         if (!log.isEmpty()) {
-            List<String> list = new ArrayList<>();
-            for (String s : log.split("(\r\n|\r|\n)")) {
-                list.add(s);
-            }
-            for (String line : list) {
+            for (String line : Arrays.stream(log.split("(\r\n|\r|\n)")).collect(Collectors.toList())) {
                 CommonConstants.LOGGER.warn(line);
             }
         }
@@ -1570,12 +1565,7 @@ public class Renderer implements Disposable {
 
     @Deprecated
     private int textWidth(@NotNull List<FormattedText> text) {
-        StringBuilder sb = new StringBuilder();
-        for (FormattedText formattedText : text) {
-            String formattedTextText = formattedText.getText();
-            sb.append(formattedTextText);
-        }
-        return this.textWidth(sb.toString());
+        return this.textWidth(text.stream().map(FormattedText::getText).collect(Collectors.joining()));
     }
 
     public Renderer textCenter(@NotNull String text, int x, int y, Color color) {
@@ -3322,9 +3312,8 @@ public class Renderer implements Disposable {
             return false;
 
         this.shouldCheckMathDay = System.currentTimeMillis();
-//        LocalDateTime clock = LocalDateTime.now(Clock.systemUTC());
-//        return clock.getMonth() == Month.MARCH && clock.getDayOfMonth() == 14;
-        return false;
+        LocalDateTime clock = LocalDateTime.now(Clock.systemUTC());
+        return clock.getMonth() == Month.MARCH && clock.getDayOfMonth() == 14;
     }
 
     public void renderTooltip(ItemStack item, int x, int y) {
@@ -3333,12 +3322,7 @@ public class Renderer implements Disposable {
 
     @Deprecated
     public void renderTooltip(ItemStack item, int x, int y, List<TextObject> description) {
-        List<String> list = new ArrayList<>();
-        for (TextObject textObject : description) {
-            String text = textObject.getText();
-            list.add(text);
-        }
-        this.renderTooltip(x, y, item.getItem().getTranslation(), dev.ultreon.quantum.StringUtils.join("\n", list), item.getItem().getId().toString());
+        this.renderTooltip(x, y, item.getItem().getTranslation(), String.join("\n", description.stream().map(TextObject::getText).collect(Collectors.toList())), item.getItem().getId().toString());
     }
 
     public void renderTooltip(ItemStack item, int x, int y, String description) {
@@ -3353,7 +3337,7 @@ public class Renderer implements Disposable {
         x += 8;
         y += 8;
 
-        ArrayList<String> all = new ArrayList<>();
+        var all = new ArrayList<String>();
         all.add(0, title.getText());
         all.addAll(Arrays.asList(description.split("\n")));
         if (subTitle != null) all.add(subTitle);
@@ -3375,16 +3359,7 @@ public class Renderer implements Disposable {
             }
         }
         int textWidth = seen ? best : 0;
-        int descHeight;
-        if (StringUtils.isBlank(description)) {
-            descHeight = 0;
-        } else {
-            long result = 0L;
-            for (String s : description.split("(\r\n|\r|\n)")) {
-                result++;
-            }
-            descHeight = (int) (result * (this.font.getLineHeight() + 3) - 3);
-        }
+        int descHeight = description.isBlank() ? 0 : (int) (Arrays.stream(description.split("(\r\n|\r|\n)")).count() * (this.font.getLineHeight() + 3) - 3);
         int textHeight = 1 + descHeight + (int) (3 + this.font.getLineHeight());
 
         if (description.isEmpty() && subTitle == null) {
@@ -3408,17 +3383,13 @@ public class Renderer implements Disposable {
         this.textLeft("[#ffffff][*]" + title, x + 3, y + 3, RgbColor.WHITE);
 
         int lineNr = 0;
-        List<String> list = new ArrayList<>();
-        for (String s : description.split("(\r\n|\r|\n)")) {
-            list.add(s);
-        }
-        for (String line : list) {
+        for (String line : Arrays.stream(description.split("(\r\n|\r|\n)")).collect(Collectors.toList())) {
             this.textLeft("[#a0a0a0]" + line, x + 3, y + 3 + this.font.getLineHeight() + 3 + lineNr * (this.font.getLineHeight() + 3f) - 3);
             lineNr++;
         }
 
         if (subTitle != null)
-            this.textLeft("[#606060][/]" + subTitle, x + 3, y + 3 + this.font.getLineHeight() + 3 + (StringUtils.isBlank(description) ? 0 : lineNr * (this.font.getLineHeight() + 3f) - 3));
+            this.textLeft("[#606060][/]" + subTitle, x + 3, y + 3 + this.font.getLineHeight() + 3 + (description.isBlank() ? 0 : lineNr * (this.font.getLineHeight() + 3f) - 3));
 
         Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
     }
@@ -3484,12 +3455,7 @@ public class Renderer implements Disposable {
 
     @Deprecated
     private void drawText(@NotNull List<FormattedText> text, float x, float y, Color color, boolean shadow) {
-        StringJoiner joiner = new StringJoiner("");
-        for (FormattedText formattedText : text) {
-            String formattedTextText = formattedText.getText();
-            joiner.add(formattedTextText);
-        }
-        String string = joiner.toString();
+        String string = text.stream().map(FormattedText::getText).collect(Collectors.joining(""));
 
         int c = (color.getRed() & 0xff) << 16 + (color.getGreen() & 0xff) << 8 + (color.getBlue() & 0xff);
         Color darker = color.darker().darker();

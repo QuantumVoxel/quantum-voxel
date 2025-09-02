@@ -39,7 +39,7 @@ public class PacketContext {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        PacketContext that = (PacketContext) obj;
+        var that = (PacketContext) obj;
         return Objects.equals(this.player, that.player) &&
                 Objects.equals(this.connection, that.connection) &&
                 Objects.equals(this.destination, that.destination);

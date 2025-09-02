@@ -54,7 +54,7 @@ public class ItemSlot {
      * @return the item in the slot.
      */
     public ItemStack takeItem() {
-        ItemStack copy = this.getItem();
+        var copy = this.getItem();
         this.setItem(new ItemStack());
         return copy;
     }
@@ -69,13 +69,13 @@ public class ItemSlot {
     }
 
     public ItemStack split() {
-        ItemStack remainder = this.getItem().split();
+        var remainder = this.getItem().split();
         update();
         return remainder;
     }
 
     public ItemStack split(int amount) {
-        ItemStack remainder = this.getItem().split(amount);
+        var remainder = this.getItem().split(amount);
         update();
         return remainder;
     }

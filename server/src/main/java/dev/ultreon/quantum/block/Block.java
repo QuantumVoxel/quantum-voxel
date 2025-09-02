@@ -23,8 +23,8 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * Represents a block with specific properties and behaviors within the game.
@@ -89,7 +89,7 @@ public class Block implements BlockLike {
         this.soundType = properties.soundType;
         this.doesRandomTick = properties.doesRandomTick;
 
-        BlockStateDefinition.Builder definitionBuilder = BlockStateDefinition.builder(this);
+        var definitionBuilder = BlockStateDefinition.builder(this);
         defineState(definitionBuilder);
         this.definition = definitionBuilder.build();
         this.defaultState = BlockState.empty(definition);
@@ -471,12 +471,7 @@ public class Block implements BlockLike {
         }
 
         public Properties dropsItems(@NotNull Item @NotNull ... drops) {
-            List<ItemStack> list = new ArrayList<>();
-            for (Item drop : drops) {
-                ItemStack defaultStack = drop.defaultStack();
-                list.add(defaultStack);
-            }
-            this.loot = new ConstantLoot(list);
+            this.loot = new ConstantLoot(Arrays.stream(drops).map(Item::defaultStack).collect(Collectors.toList()));
             return this;
         }
 

@@ -7,10 +7,7 @@ import java.net.URI;
 import java.nio.file.*;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class UnixFileSystem extends FileSystem {
     private static UnixFileSystem defaultFileSystem;
@@ -28,7 +25,7 @@ public class UnixFileSystem extends FileSystem {
 
     public static UnixFileSystem getDefault() {
         if (defaultFileSystem == null) {
-            defaultFileSystem = new UnixFileSystem(URI.create("unix://"), dev.ultreon.quantum.MapUtils.of());
+            defaultFileSystem = new UnixFileSystem(URI.create("unix://"), Map.of());
         }
         return defaultFileSystem;
     }

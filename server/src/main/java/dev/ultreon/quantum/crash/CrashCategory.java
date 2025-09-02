@@ -37,7 +37,7 @@ public class CrashCategory {
     }
 
     private String detectThrowable(String details, Throwable throwable) {
-        Throwable current = throwable;
+        var current = throwable;
         if (current != null) {
             do {
                 if (current instanceof ApplicationCrash) {
@@ -96,7 +96,7 @@ public class CrashCategory {
                 sb.append(entry.getKey());
                 sb.append(": ");
                 sb.append(entry.getValue());
-                sb.append(dev.ultreon.quantum.SystemUtils.lineSeparator());
+                sb.append(System.lineSeparator());
             }
 
             AbstractMap.SimpleEntry<String, String> entry = simpleEntries.get(simpleEntries.size() - 1);
@@ -104,7 +104,7 @@ public class CrashCategory {
             sb.append(entry.getKey());
             sb.append(": ");
             sb.append(entry.getValue());
-            sb.append(dev.ultreon.quantum.SystemUtils.lineSeparator());
+            sb.append(System.lineSeparator());
         }
 
         if (this.throwable != null) {
@@ -123,12 +123,12 @@ public class CrashCategory {
 
             String output = outputBuf.toString();
             List<String> lines = StringUtils.splitIntoLines(output);
-            String finalResult = "   " + dev.ultreon.quantum.StringUtils.join(dev.ultreon.quantum.SystemUtils.lineSeparator() + "   ", lines);
+            String finalResult = "   " + String.join(System.lineSeparator() + "   ", lines);
 
             sb.append(finalResult);
         }
 
-        sb.append(dev.ultreon.quantum.SystemUtils.lineSeparator());
+        sb.append(System.lineSeparator());
 
         return sb.toString();
     }

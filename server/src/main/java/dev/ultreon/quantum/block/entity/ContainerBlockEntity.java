@@ -20,6 +20,7 @@ import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.capability.ItemStorageCapability;
 import dev.ultreon.quantum.world.container.ItemContainer;
 import dev.ultreon.quantum.world.vec.BlockVec;
+import org.apache.commons.collections4.iterators.ArrayIterator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

@@ -58,7 +58,7 @@ public class EntityTextures {
      */
     public Material createMaterial() {
         Material material = new Material();
-        for (LongMap.Entry<Texture> e : this.textureMap.entries()) {
+        for (var e : this.textureMap.entries()) {
             material.set(new TextureAttribute(e.key, e.value));
         }
         return material;

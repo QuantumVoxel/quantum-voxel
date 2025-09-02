@@ -20,8 +20,8 @@ public final class S2CPlayerHurtPacket implements Packet<InGameClientPacketHandl
     }
 
     public static S2CPlayerHurtPacket read(PacketIO buffer) {
-        float damage = buffer.readFloat();
-        DamageSource source = Registries.DAMAGE_SOURCE.get(buffer.readId());
+        var damage = buffer.readFloat();
+        var source = Registries.DAMAGE_SOURCE.get(buffer.readId());
         if (source == null) {
             source = DamageSource.NOTHING;
         }
@@ -62,7 +62,7 @@ public final class S2CPlayerHurtPacket implements Packet<InGameClientPacketHandl
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CPlayerHurtPacket that = (S2CPlayerHurtPacket) obj;
+        var that = (S2CPlayerHurtPacket) obj;
         return Float.floatToIntBits(this.damage) == Float.floatToIntBits(that.damage) &&
                Objects.equals(this.source, that.source);
     }

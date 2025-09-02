@@ -17,7 +17,7 @@ public class DisconnectedScreen extends Screen {
     private final boolean wasMultiplayer;
 
     public DisconnectedScreen(String message, boolean wasMultiplayer) {
-        super(TextObject.translation("quantum.screen.message.disconnected"));
+        super(TextObject.translation("quantum.screen.message.disconnected"), new TitleScreen());
         this.message = message;
         this.wasMultiplayer = wasMultiplayer;
     }

@@ -1,13 +1,13 @@
 package dev.ultreon.mixinprovider;
 
-import org.apache.commons.collections4.BidiMap;
-import org.apache.commons.collections4.bidimap.DualLinkedHashBidiMap;
+import ch.njol.util.coll.BidiHashMap;
+import ch.njol.util.coll.BidiMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 
 public class GdxRegistry<T> implements Iterable<T> {
-    private final BidiMap<Integer, T> map = new DualLinkedHashBidiMap<>();
+    private final BidiMap<Integer, T> map = new BidiHashMap<>();
     private int id;
 
     private void register(int id, @NotNull T object) {
@@ -39,6 +39,6 @@ public class GdxRegistry<T> implements Iterable<T> {
     }
 
     public void unregister(T model) {
-        map.removeValue(model);
+        map.getReverseView().remove(model);
     }
 }

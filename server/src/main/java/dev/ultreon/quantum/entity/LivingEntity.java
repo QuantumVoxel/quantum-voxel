@@ -1,7 +1,6 @@
 package dev.ultreon.quantum.entity;
 
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.ListUtils;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.api.events.entity.EntityEvent;
 import dev.ultreon.quantum.api.events.entity.LivingEntityEvent;
@@ -19,7 +18,7 @@ import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.Vec3d;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.SoundEvent;
-import dev.ultreon.quantum.world.WorldAccess;
+import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.particles.ParticleTypes;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.ApiStatus;
@@ -55,7 +54,7 @@ public abstract class LivingEntity extends Entity {
     protected double temperatureGoal;
     protected @Nullable Entity lastAttacker = null;
 
-    public LivingEntity(EntityType<? extends LivingEntity> entityType, WorldAccess world) {
+    public LivingEntity(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
 
@@ -514,7 +513,7 @@ public abstract class LivingEntity extends Entity {
     }
 
     public void removeEffect(StatusEffect effect) {
-        ListUtils.removeIf(this.appliedEffects, appliedEffect -> appliedEffect.getEffect() == effect);
+        this.appliedEffects.removeIf(appliedEffect -> appliedEffect.getEffect() == effect);
     }
 
     public Set<AppliedEffect> getAppliedEffects() {

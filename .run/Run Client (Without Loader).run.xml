@@ -2,6 +2,8 @@
   <configuration default="false" name="Run Client (Without Loader)" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="dev.ultreon.quantum.desktop.DesktopLauncher" />
     <module name="quantum-voxel.desktop.main" />
+    <option name="VM_PARAMETERS" value="-Dultreon.log.level=trace -Dquantum.dev=true" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run/client/main" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="dev.ultreon.quantum.desktop.bridge.gen.*" />

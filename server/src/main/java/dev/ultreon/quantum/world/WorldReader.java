@@ -4,6 +4,7 @@ import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.util.*;
+import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.NotNull;
 

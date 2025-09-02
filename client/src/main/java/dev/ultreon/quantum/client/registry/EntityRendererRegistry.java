@@ -2,7 +2,6 @@ package dev.ultreon.quantum.client.registry;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
@@ -102,7 +101,7 @@ public class EntityRendererRegistry implements ContextAwareReloadable, Disposabl
         this.finishedRegistry.clear();
 
         // Register entity renderers
-        for (Map.Entry<EntityType<?>, BiFunction<EntityModel<?>, Model, EntityRenderer<?>>> entry : REGISTRY.entrySet()) {
+        for (var entry : REGISTRY.entrySet()) {
             EntityType<?> entityType = entry.getKey();
             Model finished = modelManager.getFinished(entityType);
 
@@ -146,10 +145,10 @@ public class EntityRendererRegistry implements ContextAwareReloadable, Disposabl
                 if (model == null)
                     throw new RuntimeException("Failed to load entity model: " + key.mapPath(path -> "models/entity/" + path + ".g3dj"));
                 // Set blending and alpha test attributes for the model materials
-                for (Material modelModel : model.materials) {
+                model.materials.forEach(modelModel -> {
                     modelModel.set(new BlendingAttribute(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
                     modelModel.set(FloatAttribute.createAlphaTest(0.5f));
-                }
+                });
                 this.modelManager.registerFinished(type, model);
             } else {
                 // If the model does not exist, use the entity model and renderer

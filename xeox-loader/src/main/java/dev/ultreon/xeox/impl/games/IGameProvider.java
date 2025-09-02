@@ -6,6 +6,7 @@ import dev.ultreon.xeox.impl.EntryPoint;
 import dev.ultreon.xeox.impl.IPermissionProvider;
 import dev.ultreon.xeox.impl.ModClassLoader;
 
+import java.util.Arrays;
 import java.util.List;
 
 public interface IGameProvider {

@@ -8,7 +8,6 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.util.NamespaceID;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +25,7 @@ import java.util.function.Function;
  */
 public class ModelManager {
     public static final ModelManager INSTANCE = new ModelManager();
-    private final ThreadLocal<ModelBuilder> builder = new ThreadLocal<>();
+    private final ThreadLocal<ModelBuilder> builder = ThreadLocal.withInitial(() -> new ModelBuilder());
     private final Map<NamespaceID, Model> models = new ConcurrentHashMap<>();
 
     private ModelManager() {
@@ -43,18 +42,9 @@ public class ModelManager {
      * @return the created box model
      */
     public Model createBox(float width, float height, float depth, Material material) {
-        getModelBuilder().begin();
-        getModelBuilder().createBox(width, height, depth, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
-        return getModelBuilder().end();
-    }
-
-    private ModelBuilder getModelBuilder() {
-        ModelBuilder modelBuilder = builder.get();
-        if (modelBuilder == null) {
-            modelBuilder = new ModelBuilder();
-            builder.set(modelBuilder);
-        }
-        return modelBuilder;
+        builder.get().begin();
+        builder.get().createBox(width, height, depth, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
+        return builder.get().end();
     }
 
     /**
@@ -79,9 +69,9 @@ public class ModelManager {
      * @return a {@link Model} representing the created cylinder
      */
     public Model createCylinder(float width, float height, float depth, int divisions, Material material) {
-        getModelBuilder().begin();
-        getModelBuilder().createCylinder(width, height, depth, divisions, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
-        return getModelBuilder().end();
+        builder.get().begin();
+        builder.get().createCylinder(width, height, depth, divisions, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
+        return builder.get().end();
     }
 
     /**
@@ -95,9 +85,9 @@ public class ModelManager {
      * @return A {@link Model} instance representing the created cone.
      */
     public Model createCone(float width, float height, float depth, int divisions, Material material) {
-        getModelBuilder().begin();
-        getModelBuilder().createCone(width, height, depth, divisions, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
-        return getModelBuilder().end();
+        builder.get().begin();
+        builder.get().createCone(width, height, depth, divisions, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
+        return builder.get().end();
     }
 
     /**
@@ -112,9 +102,9 @@ public class ModelManager {
      * @return the created spherical model
      */
     public Model createSphere(float width, float height, float depth, int divisionsU, int divisionsV, Material material) {
-        getModelBuilder().begin();
-        getModelBuilder().createSphere(width, height, depth, divisionsU, divisionsV, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
-        return getModelBuilder().end();
+        builder.get().begin();
+        builder.get().createSphere(width, height, depth, divisionsU, divisionsV, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
+        return builder.get().end();
     }
 
     /**
@@ -154,12 +144,12 @@ public class ModelManager {
             return this.models.get(id);
         }
 
-        getModelBuilder().begin();
+        this.builder.get().begin();
         Model model;
         try {
-            builder.accept(getModelBuilder());
+            builder.accept(this.builder.get());
         } finally {
-            model = getModelBuilder().end();
+            model = this.builder.get().end();
         }
         this.models.put(id, model);
         return model;
@@ -173,7 +163,7 @@ public class ModelManager {
      * @return The generated Model instance.
      */
     public Model generateModel(NamespaceID id, Function<ModelBuilder, Model> builder) {
-        Model model = builder.apply(getModelBuilder());
+        Model model = builder.apply(this.builder.get());
 
         this.models.put(id, model);
 
@@ -219,7 +209,7 @@ public class ModelManager {
      * based on their stored NamespaceIDs.
      */
     public void reload() {
-        Set<NamespaceID> namespaceIDS = new HashSet<>(this.models.keySet());
+        Set<NamespaceID> namespaceIDS = Set.copyOf(this.models.keySet());
         this.models.clear();
 
         for (NamespaceID id : namespaceIDS) {

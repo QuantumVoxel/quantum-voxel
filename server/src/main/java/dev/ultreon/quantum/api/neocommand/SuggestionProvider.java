@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.api.neocommand;
 
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.Mod;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.NamespaceID;

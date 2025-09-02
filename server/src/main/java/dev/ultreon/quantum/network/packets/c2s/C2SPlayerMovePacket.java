@@ -19,9 +19,9 @@ public final class C2SPlayerMovePacket implements Packet<InGameServerPacketHandl
     }
 
     public static C2SPlayerMovePacket read(PacketIO buffer) {
-        double x = buffer.readDouble();
-        double y = buffer.readDouble();
-        double z = buffer.readDouble();
+        var x = buffer.readDouble();
+        var y = buffer.readDouble();
+        var z = buffer.readDouble();
 
         return new C2SPlayerMovePacket(x, y, z);
     }
@@ -54,7 +54,7 @@ public final class C2SPlayerMovePacket implements Packet<InGameServerPacketHandl
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        C2SPlayerMovePacket that = (C2SPlayerMovePacket) obj;
+        var that = (C2SPlayerMovePacket) obj;
         return Double.doubleToLongBits(this.x) == Double.doubleToLongBits(that.x) &&
                Double.doubleToLongBits(this.y) == Double.doubleToLongBits(that.y) &&
                Double.doubleToLongBits(this.z) == Double.doubleToLongBits(that.z);

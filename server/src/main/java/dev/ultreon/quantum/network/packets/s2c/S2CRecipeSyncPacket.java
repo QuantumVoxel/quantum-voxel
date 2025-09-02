@@ -55,7 +55,7 @@ public final class S2CRecipeSyncPacket<T extends Recipe> implements Packet<InGam
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CRecipeSyncPacket that = (S2CRecipeSyncPacket) obj;
+        var that = (S2CRecipeSyncPacket) obj;
         return Objects.equals(this.type, that.type) &&
                Objects.equals(this.recipes, that.recipes);
     }

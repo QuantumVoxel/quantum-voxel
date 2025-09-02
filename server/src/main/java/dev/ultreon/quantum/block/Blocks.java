@@ -8,6 +8,7 @@ import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.sound.SoundType;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.loot.RandomLoot;
+import org.apache.commons.lang3.IntegerRange;
 
 
 /**

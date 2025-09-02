@@ -211,7 +211,7 @@ public class XeoxLoader implements IXeoxLoader {
                     jarFile.toString(),
                     title,
                     message,
-                    dev.ultreon.quantum.StringUtils.join(",", options))
+                    String.join(",", options))
                     .directory(tempDirectory.toFile())
                     .redirectErrorStream(true)
                     .inheritIO()
@@ -433,7 +433,7 @@ public class XeoxLoader implements IXeoxLoader {
     }
 
     private void initMixins() {
-        if (!configurations.isEmpty() && choose("Warning", "Some mods can inject code into the game or other mods!\n\nThis may allow mods to bypass security policy, but can be used legitimately.\n\nThe following mixin configurations were loaded:\n" + dev.ultreon.quantum.StringUtils.join("\n", configurations), new String[]{"Continue", "Cancel"}) == 1) {
+        if (!configurations.isEmpty() && choose("Warning", "Some mods can inject code into the game or other mods!\n\nThis may allow mods to bypass security policy, but can be used legitimately.\n\nThe following mixin configurations were loaded:\n" + String.join("\n", configurations), new String[]{"Continue", "Cancel"}) == 1) {
             System.exit(0);
         }
 

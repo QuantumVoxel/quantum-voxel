@@ -23,8 +23,8 @@ public final class S2CPlaySoundPacket implements Packet<InGameClientPacketHandle
     }
 
     public static S2CPlaySoundPacket read(PacketIO buffer) {
-        NamespaceID sound = buffer.readId();
-        float volume = buffer.readFloat();
+        var sound = buffer.readId();
+        var volume = buffer.readFloat();
 
         return new S2CPlaySoundPacket(sound, volume);
     }
@@ -57,7 +57,7 @@ public final class S2CPlaySoundPacket implements Packet<InGameClientPacketHandle
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CPlaySoundPacket that = (S2CPlaySoundPacket) obj;
+        var that = (S2CPlaySoundPacket) obj;
         return Objects.equals(this.sound, that.sound) &&
                Float.floatToIntBits(this.volume) == Float.floatToIntBits(that.volume);
     }

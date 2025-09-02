@@ -2,8 +2,8 @@ package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.JsonValue;
+import dev.ultreon.libs.datetime.v0.Duration;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.CommonRegistries;
 import dev.ultreon.quantum.GamePlatform;
@@ -92,7 +92,7 @@ class QuantumClientLoader implements Runnable {
      */
     @SuppressWarnings("UnstableApiUsage")
     void load(QuantumClient client) {
-        List<String> argList = Arrays.asList(client.argv);
+        var argList = Arrays.asList(client.argv);
         client.isDevMode = argList.contains("--dev") && GamePlatform.get().isDevEnvironment();
 
         if (GamePlatform.get().isDevEnvironment()) client.gameEnv = GameEnvironment.DEVELOPMENT;
@@ -244,6 +244,9 @@ class QuantumClientLoader implements Runnable {
 
         progress(client, 1.0F);
 
+        client.bootTime = Duration.ofMilliseconds(System.currentTimeMillis() - QuantumClient.BOOT_TIMESTAMP);
+        QuantumClient.LOGGER.info("Game booted in {}.", client.bootTime.toSimpleString());
+
         QuantumClient.invokeAndWait(new Task<>(NamespaceID.of("main/show_title_screen"), () -> {
             if (client.devWorld) {
                 client.startDevWorld();
@@ -280,7 +283,7 @@ class QuantumClientLoader implements Runnable {
      * @param client The QuantumClient.
      */
     private void loadLanguages(QuantumClient client) {
-        FileHandle internal = QuantumClient.resource(new NamespaceID("languages.quant"));
+        var internal = QuantumClient.resource(new NamespaceID("languages.quant"));
         JsonValue asJsonObject = CommonConstants.JSON_READ.parse(internal.reader());
 
         String[] languagesJ5 = asJsonObject.get("Languages").asStringArray();
@@ -292,12 +295,12 @@ class QuantumClientLoader implements Runnable {
 
         List<String> languages = new ArrayList<>();
 
-        for (String language : languagesJ5) {
+        for (var language : languagesJ5) {
             if (language == null) continue;
             languages.add(language);
         }
 
-        for (String language : languages) {
+        for (var language : languages) {
             registerLanguage(NamespaceID.of(language), client);
         }
 
@@ -311,8 +314,8 @@ class QuantumClientLoader implements Runnable {
      * @param quantumClient The QuantumClient.
      */
     private void registerLanguage(NamespaceID id, QuantumClient quantumClient) {
-        String[] s = id.getPath().split("_", 2);
-        Locale locale = s.length == 1 ? new Locale(s[0]) : new Locale(s[0], s[1]);
+        var s = id.getPath().split("_", 2);
+        var locale = s.length == 1 ? new Locale(s[0]) : new Locale(s[0], s[1]);
         LanguageManager.INSTANCE.register(locale, id);
         LanguageManager.INSTANCE.load(locale, id, quantumClient.resourceManager);
     }

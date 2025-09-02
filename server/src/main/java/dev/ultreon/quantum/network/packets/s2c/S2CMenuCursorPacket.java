@@ -42,7 +42,7 @@ public final class S2CMenuCursorPacket implements Packet<InGameClientPacketHandl
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CMenuCursorPacket that = (S2CMenuCursorPacket) obj;
+        var that = (S2CMenuCursorPacket) obj;
         return Objects.equals(this.cursor, that.cursor);
     }
 

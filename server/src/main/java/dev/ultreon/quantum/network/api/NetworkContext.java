@@ -44,7 +44,7 @@ public final class NetworkContext {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        NetworkContext that = (NetworkContext) obj;
+        var that = (NetworkContext) obj;
         return Objects.equals(this.buffer, that.buffer) &&
                Objects.equals(this.direction, that.direction) &&
                Objects.equals(this.connection, that.connection) &&

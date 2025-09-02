@@ -209,6 +209,22 @@ public class MultiPrintStream extends PrintStream {
     }
 
     @Override
+    public PrintStream format(@NotNull String format, Object... args) {
+        for (PrintStream stream : streams) {
+            stream.format(format, args);
+        }
+        return this;
+    }
+
+    @Override
+    public PrintStream format(Locale l, @NotNull String format, Object... args) {
+        for (PrintStream stream : streams) {
+            stream.format(l, format, args);
+        }
+        return this;
+    }
+
+    @Override
     public PrintStream append(CharSequence csq) {
         for (PrintStream stream : streams) {
             stream.append(csq);

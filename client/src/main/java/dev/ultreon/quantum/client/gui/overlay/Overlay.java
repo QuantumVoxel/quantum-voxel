@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
+import com.github.tommyettinger.textra.Font;
 import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;

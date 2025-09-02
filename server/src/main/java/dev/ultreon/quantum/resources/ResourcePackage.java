@@ -47,7 +47,7 @@ public class ResourcePackage extends GameObject implements Closeable {
     }
 
     public List<ResourceCategory> getCategories() {
-        return new ArrayList<>(this.categories.values());
+        return List.copyOf(this.categories.values());
     }
 
     public void close() {

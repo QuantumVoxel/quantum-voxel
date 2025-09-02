@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
@@ -58,21 +57,21 @@ public final class ModelElement {
     }
 
     public void bakeInto(BoundingBox bounds, OpaqueFaces opaqueFaces, MeshPartBuilder builder, Map<String, NamespaceID> textureElements, int x, int y, int z, int cull, int[] ao, long light) {
-        final Vector3 from = this.from();
-        final Vector3 to = this.to();
+        final var from = this.from();
+        final var to = this.to();
 
-        final MeshPartBuilder.VertexInfo v00 = new MeshPartBuilder.VertexInfo();
-        final MeshPartBuilder.VertexInfo v01 = new MeshPartBuilder.VertexInfo();
-        final MeshPartBuilder.VertexInfo v10 = new MeshPartBuilder.VertexInfo();
-        final MeshPartBuilder.VertexInfo v11 = new MeshPartBuilder.VertexInfo();
-        for (Map.Entry<Direction, FaceElement> $ : blockFaceFaceElementMap.entrySet()) {
-            final Direction direction = $.getKey();
-            final FaceElement faceElement = $.getValue();
+        final var v00 = new MeshPartBuilder.VertexInfo();
+        final var v01 = new MeshPartBuilder.VertexInfo();
+        final var v10 = new MeshPartBuilder.VertexInfo();
+        final var v11 = new MeshPartBuilder.VertexInfo();
+        for (var $ : blockFaceFaceElementMap.entrySet()) {
+            final var direction = $.getKey();
+            final var faceElement = $.getValue();
             if (faceElement.cullface == direction && FaceCull.culls(faceElement.cullface, cull)) {
                 opaqueFaces.add(x, y, z, direction);
                 continue;
             }
-            final String texRef = faceElement.texture;
+            final var texRef = faceElement.texture;
             final @Nullable NamespaceID texture = Objects.equals(texRef, "#missing") ? NamespaceID.of("blocks/error")
                     : texRef.startsWith("#") ? textureElements.get(texRef.substring(1))
                     : NamespaceID.parse(texRef).mapPath(path -> path);
@@ -91,7 +90,7 @@ public final class ModelElement {
             v10.setNor(direction.getNormal());
             v11.setNor(direction.getNormal());
 
-            TextureRegion region = QuantumClient.get().blocksTextureAtlas.get(Objects.requireNonNull(texture), TextureAtlas.TextureAtlasType.DIFFUSE);
+            var region = QuantumClient.get().blocksTextureAtlas.get(Objects.requireNonNull(texture), TextureAtlas.TextureAtlasType.DIFFUSE);
             if (region == null) {
                 region = QuantumClient.get().blocksTextureAtlas.get(NamespaceID.of("blocks/error"), TextureAtlas.TextureAtlasType.DIFFUSE);
 
@@ -173,7 +172,7 @@ public final class ModelElement {
 
             builder.rect(v00, v10, v11, v01);
 
-            final Material material = new Material();
+            final var material = new Material();
             material.set(TextureAttribute.createDiffuse(QuantumClient.get().blocksTextureAtlas.getTexture()));
             material.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
             material.set(new FloatAttribute(FloatAttribute.AlphaTest));
@@ -197,7 +196,7 @@ public final class ModelElement {
             Direction direction = entry.getKey();
             FaceElement faceElement = entry.getValue();
 
-            final String texRef = faceElement.texture;
+            final var texRef = faceElement.texture;
             final @Nullable NamespaceID texture = (Objects.equals(texRef, "#missing") ? NamespaceID.of("blocks/error")
                     : texRef.startsWith("#") ? textureElements.get(texRef.substring(1))
                     : NamespaceID.parse(texRef)).mapPath(path -> "textures/" + path + ".png");
@@ -290,10 +289,10 @@ public final class ModelElement {
             MeshPartBuilder.VertexInfo v11,
             ElementRotation rotation
     ) {
-        final Vector3 originVec = rotation.originVec;
-        final Axis axis = rotation.axis;
-        final float angle = rotation.angle;
-        final boolean rescale = rotation.rescale; // TODO: implement
+        final var originVec = rotation.originVec;
+        final var axis = rotation.axis;
+        final var angle = rotation.angle;
+        final var rescale = rotation.rescale; // TODO: implement
 
         // Rotate the vertices
         rotate(v00.position, originVec, axis, angle, v00.position);
@@ -358,7 +357,7 @@ public final class ModelElement {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        ModelElement that = (ModelElement) obj;
+        var that = (ModelElement) obj;
         return Objects.equals(this.blockFaceFaceElementMap, that.blockFaceFaceElementMap) &&
                this.shade == that.shade &&
                Objects.equals(this.rotation, that.rotation) &&

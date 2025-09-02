@@ -184,6 +184,7 @@ dependencies {
     compileOnly("com.jagrosh:DiscordIPC:$discordIpcVersion")
     
     implementation api("ca.weblite:java-objc-bridge:1.2")
+    implementation api("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
 
     // SLF4J
     api "org.slf4j:slf4j-api:$slf4jVersion"
@@ -222,8 +223,6 @@ dependencies {
     implementation api("org.ow2.asm:asm-commons:${project.asmVersion}")
     implementation api("org.ow2.asm:asm-tree:${project.asmVersion}")
     implementation api("org.ow2.asm:asm-util:${project.asmVersion}")
-    
-    
 
     implementation 'org.mozilla:rhino:1.8.0'
     implementation 'party.iroiro.luajava:luajit:4.0.2'
@@ -233,6 +232,12 @@ dependencies {
     implementation 'org.graalvm.polyglot:polyglot:24.2.2'
     implementation 'org.graalvm.js:js:24.2.2'
     implementation 'org.graalvm.python:python:24.2.2'
+
+    implementation 'net.java.dev.jna:jna:5.15.0'
+    implementation 'net.java.dev.jna:jna-platform:5.15.0'
+    implementation 'com.github.oshi:oshi-core:6.4.8'
+
+
 }
 
 compileJava {

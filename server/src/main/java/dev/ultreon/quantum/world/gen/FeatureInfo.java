@@ -21,7 +21,7 @@ public final class FeatureInfo {
     public Set<ChunkVec> coveringChunks() {
         if (coveringChunks == null) {
             coveringChunks = new HashSet<>();
-            for (BlockPoint point : points) {
+            for (var point : points) {
                 coveringChunks.add(point.pos().chunk());
             }
         }
@@ -33,7 +33,7 @@ public final class FeatureInfo {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        FeatureInfo that = (FeatureInfo) obj;
+        var that = (FeatureInfo) obj;
         return Objects.equals(this.points, that.points);
     }
 

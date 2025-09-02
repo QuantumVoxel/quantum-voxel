@@ -17,7 +17,7 @@ public final class C2SChatPacket implements Packet<InGameServerPacketHandler> {
     }
 
     public static C2SChatPacket read(PacketIO buffer) {
-        String message = buffer.readString(1024);
+        var message = buffer.readString(1024);
 
         return new C2SChatPacket(message);
     }
@@ -47,7 +47,7 @@ public final class C2SChatPacket implements Packet<InGameServerPacketHandler> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        C2SChatPacket that = (C2SChatPacket) obj;
+        var that = (C2SChatPacket) obj;
         return Objects.equals(this.message, that.message);
     }
 

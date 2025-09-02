@@ -26,7 +26,6 @@ import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,7 +39,6 @@ import static java.lang.System.currentTimeMillis;
  */
 @NotThreadSafe
 public final class ServerChunk extends Chunk {
-    private final @NotNull ServerWorld world;
     private final @NotNull ServerWorld.Region region;
     public final ChunkBuildInfo info = new ChunkBuildInfo();
     boolean modified = false;
@@ -50,6 +48,8 @@ public final class ServerChunk extends Chunk {
     private long lastTracked = currentTimeMillis();
     private final long trackDuration = 10000L;
     private boolean scheduledSend = false;
+    private int keepAliveTicks = 20;
+    private ChunkLoadTicket lastTicket = null;
 
     public ServerChunk(@NotNull ServerWorld world,
                        @NotNull ChunkVec pos,
@@ -57,7 +57,6 @@ public final class ServerChunk extends Chunk {
                        @NotNull Storage<RegistryKey<Biome>> biomeStorage,
                        @NotNull ServerWorld.Region region) {
         super(world, pos, storage, biomeStorage);
-        this.world = world;
         this.region = region;
     }
 
@@ -70,8 +69,8 @@ public final class ServerChunk extends Chunk {
             LOGGER.debug("Loading chunk at {}", pos);
         }
 
-        PaletteStorage<@NotNull BlockState> storage = new PaletteStorage<>(CS_3, Blocks.AIR.getDefaultState());
-        PaletteStorage<RegistryKey<Biome>> biomeStorage = new PaletteStorage<>(CS_2, world.getServer().getBiomes().getDefaultKey());
+        var storage = new PaletteStorage<>(CS_3, Blocks.AIR.getDefaultState());
+        var biomeStorage = new PaletteStorage<>(CS_2, world.getServer().getBiomes().getDefaultKey());
 
         MapType blockData = chunkData.getMap("Blocks");
         storage.load(blockData, BlockState::load);
@@ -101,6 +100,17 @@ public final class ServerChunk extends Chunk {
             this.scheduledSend = true;
 
             return result;
+        }
+    }
+
+    @Override
+    protected void retrieveNeighbors() {
+        for (Direction direction : Direction.values()) {
+            Chunk chunk = ((ServerWorld) world).getChunkNoLoad(tmpCV.set(vec).add(direction.getOffset()));
+
+            this.neighbors[direction.ordinal()] = chunk;
+            if (chunk != null)
+                chunk.neighbors[direction.getOpposite().ordinal()] = this;
         }
     }
 
@@ -199,7 +209,7 @@ public final class ServerChunk extends Chunk {
 
     @Override
     public @NotNull ServerWorld getWorld() {
-        return this.world;
+        return (ServerWorld) this.world;
     }
 
     @Override
@@ -224,25 +234,19 @@ public final class ServerChunk extends Chunk {
             return;
         }
 
-        this.world.getServer().onChunkSent(this);
+        ((ServerWorld) this.world).getServer().onChunkSent(this);
         this.sendAllViewers(new S2CChunkDataPacket(this.vec, this.info, this.storage.clone(), this.biomeStorage.clone(), this.getBlockEntities()));
 
     }
 
     public void tick() {
         Collection<BlockEntity> blockEntities;
-
-        synchronized (this){
-            if (!isBeingTracked() && lastTracked + trackDuration < System.currentTimeMillis()) {
-                this.world.unloadChunk(this, this.vec);
-                return;
-            } else if (isBeingTracked()) {
-                if (scheduledSend) this.sendChunk();
-
-                lastTracked = System.currentTimeMillis();
+        synchronized (this) {
+            blockEntities = this.getBlockEntities();
+            keepAliveTicks--;
+            if (keepAliveTicks < 0) {
+                keepAliveTicks = 0;
             }
-
-            blockEntities = new ArrayList<>(this.getBlockEntities());
         }
 
         for (BlockEntity blockEntity : blockEntities) {
@@ -268,5 +272,18 @@ public final class ServerChunk extends Chunk {
 
     public boolean isEmpty() {
         return this.storage.isUniform() && this.storage.get(0).isAir();
+    }
+
+    public void consumeTicket(ChunkLoadTicket ticket) {
+        this.keepAliveTicks = Math.max(this.keepAliveTicks, ticket.getKeepAliveTicks());
+        this.lastTicket = ticket;
+    }
+
+    public ChunkLoadTicket getLastTicket() {
+        return lastTicket;
+    }
+
+    public boolean isUntracked() {
+        return this.keepAliveTicks <= 0;
     }
 }

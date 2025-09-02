@@ -47,7 +47,7 @@ public final class CommandContext {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        CommandContext that = (CommandContext) obj;
+        var that = (CommandContext) obj;
         return Objects.equals(this.server, that.server) &&
                Objects.equals(this.sender, that.sender) &&
                Objects.equals(this.args, that.args);

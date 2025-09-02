@@ -44,7 +44,7 @@ public final class S2CChangeDimensionPacket implements Packet<InGameClientPacket
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CChangeDimensionPacket that = (S2CChangeDimensionPacket) obj;
+        var that = (S2CChangeDimensionPacket) obj;
         return Objects.equals(this.dimension, that.dimension);
     }
 

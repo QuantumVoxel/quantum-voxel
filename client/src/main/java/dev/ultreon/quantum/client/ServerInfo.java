@@ -55,7 +55,7 @@ public final class ServerInfo {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        ServerInfo that = (ServerInfo) obj;
+        var that = (ServerInfo) obj;
         return Objects.equals(this.name, that.name) &&
                Objects.equals(this.address, that.address);
     }

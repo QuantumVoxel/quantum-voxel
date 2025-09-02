@@ -10,10 +10,9 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.EntityHit;
 import dev.ultreon.quantum.util.Hit;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class EntitiesArgumentType implements ArgumentType<List<Entity>> {
     private final Predicate<Entity> predicate;
@@ -32,14 +31,9 @@ public class EntitiesArgumentType implements ArgumentType<List<Entity>> {
             if (entity == null || !predicate.test(entity)) {
                 throw new CommandParseException("No entity with id " + selector.value(), ctx.tell());
             }
-            return Arrays.asList(entity);
+            return List.of(entity);
         } else if (type == Selector.Type.NAME) {
-            List<Entity> collect = new ArrayList<>();
-            for (Entity entity : ctx.getServer().getEntities()) {
-                if (entity.getName().equals(selector.value()) && predicate.test(entity)) {
-                    collect.add(entity);
-                }
-            }
+            List<Entity> collect = ctx.getServer().getEntities().filter(entity -> entity.getName().equals(selector.value()) && predicate.test(entity)).collect(Collectors.toList());
             if (collect.isEmpty()) {
                 throw new CommandParseException("No entity with name '" + selector.value() + "'", ctx.tell());
             }
@@ -52,7 +46,7 @@ public class EntitiesArgumentType implements ArgumentType<List<Entity>> {
                         if (!predicate.test(entity)) {
                             throw new CommandParseException("You don't seem to pass the conditions", ctx.tell());
                         }
-                        return Arrays.asList(entity);
+                        return List.of(entity);
                     } else throw new CommandParseException("You are not an entity", ctx.tell());
                 case "selection":
                     Selections selections = Selections.get(ctx.getSender());
@@ -63,7 +57,7 @@ public class EntitiesArgumentType implements ArgumentType<List<Entity>> {
                     if (!predicate.test(entity)) {
                         throw new CommandParseException("Selected entity doesn't pass the conditions", ctx.tell());
                     }
-                    return Arrays.asList(entity);
+                    return List.of(entity);
                 case "target":
                     if (ctx.getSender() instanceof Player) {
                         Player player = (Player) ctx.getSender();
@@ -73,7 +67,7 @@ public class EntitiesArgumentType implements ArgumentType<List<Entity>> {
                             if (!predicate.test(entity1)) {
                                 throw new CommandParseException("The target doesn't pass the conditions", ctx.tell());
                             }
-                            return Arrays.asList(entity1);
+                            return List.of(entity1);
                         } else {
                             throw new CommandParseException("You are not looking at an entity", ctx.tell());
                         }
@@ -82,12 +76,7 @@ public class EntitiesArgumentType implements ArgumentType<List<Entity>> {
                     throw new CommandParseException("Invalid entity tag: " + selector.value(), ctx.tell());
             }
         } else if (type == Selector.Type.UUID) {
-            List<Entity> collect = new ArrayList<>();
-            for (Entity entity : ctx.getServer().getEntities()) {
-                if (entity.getUuid().equals(selector.value())) {
-                    collect.add(entity);
-                }
-            }
+            List<Entity> collect = ctx.getServer().getEntities().filter(entity -> entity.getUuid().equals(selector.value())).collect(Collectors.toList());
             if (collect.isEmpty())
                 throw new CommandParseException("No entity with uuid " + selector.value(), ctx.tell());
             if (collect.size() > 1)
@@ -105,19 +94,14 @@ public class EntitiesArgumentType implements ArgumentType<List<Entity>> {
                 if (!predicate.test(entity)) {
                     throw new CommandParseException("Variable '" + selector.value() + "' doesn't pass the conditions", ctx.tell());
                 }
-                return Arrays.asList(entity);
+                return List.of(entity);
             }
             else if (variable instanceof List<?>) {
                 List<?> list = (List<?>) variable;
-                List<Entity> result = new ArrayList<>();
-                for (Object entity : list) {
-                    if (entity instanceof Entity) {
-                        result.add((Entity) entity);
-                    }
-                }
-                if (result.isEmpty())
+                List<Entity> collect = (List<Entity>) list.stream().filter(entity -> entity instanceof Entity).collect(Collectors.toList());
+                if (collect.isEmpty())
                     throw new CommandParseException("No entity in list variable '" + selector.value() + "'", ctx.tell());
-                return result;
+                return collect;
             }
             else throw new CommandParseException("Variable '" + selector.value() + "' is not an entity or a list of entities", ctx.tell());
         } else {
@@ -146,7 +130,7 @@ public class EntitiesArgumentType implements ArgumentType<List<Entity>> {
 
     @Override
     public List<String> getExamples() {
-        return Arrays.asList("#me", "#selection", "#target", "%123", "@name", ":012345678-1234-1234-1234-123456789012", "$variable-name_123");
+        return List.of("#me", "#selection", "#target", "%123", "@name", ":012345678-1234-1234-1234-123456789012", "$variable-name_123");
     }
 
     public static Parameter<List<Entity>> entities(String name) {

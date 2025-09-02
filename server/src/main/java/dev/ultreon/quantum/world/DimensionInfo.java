@@ -41,7 +41,7 @@ public final class DimensionInfo {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        DimensionInfo that = (DimensionInfo) obj;
+        var that = (DimensionInfo) obj;
         return Objects.equals(this.id, that.id) &&
                Objects.equals(this.seed, that.seed) &&
                Objects.equals(this.generatorKey, that.generatorKey);

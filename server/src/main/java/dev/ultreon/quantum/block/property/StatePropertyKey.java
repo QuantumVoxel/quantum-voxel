@@ -5,7 +5,6 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.ubo.types.DataType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.List;
 
 public abstract class StatePropertyKey<T> {
@@ -14,7 +13,7 @@ public abstract class StatePropertyKey<T> {
     private Class<T> type;
 
     public StatePropertyKey(String name, T[] values, Class<T> type) {
-        this.values = Arrays.asList(values);
+        this.values = List.of(values);
         this.name = name;
     }
 

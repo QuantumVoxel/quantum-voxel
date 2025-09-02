@@ -92,7 +92,7 @@ public class JarStreamFileSystem implements IFileSystem {
             String[] paths = new String[more.length + 1];
             paths[0] = first;
             System.arraycopy(more, 0, paths, 1, more.length);
-            return path(dev.ultreon.quantum.StringUtils.join("/", paths));
+            return path(String.join("/", paths));
         }
     }
 

@@ -24,10 +24,10 @@ public final class S2CAddPlayerPacket implements Packet<InGameClientPacketHandle
     }
 
     public static S2CAddPlayerPacket read(PacketIO buffer) {
-        int id = buffer.readInt();
-        UUID uuid = buffer.readUuid();
-        String name = buffer.readString(20);
-        Vec3d position = buffer.readVec3d(new Vec3d());
+        var id = buffer.readInt();
+        var uuid = buffer.readUuid();
+        var name = buffer.readString(20);
+        var position = buffer.readVec3d(new Vec3d());
 
         return new S2CAddPlayerPacket(id, uuid, name, position);
     }
@@ -74,7 +74,7 @@ public final class S2CAddPlayerPacket implements Packet<InGameClientPacketHandle
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CAddPlayerPacket that = (S2CAddPlayerPacket) obj;
+        var that = (S2CAddPlayerPacket) obj;
         return this.id == that.id &&
                Objects.equals(this.uuid, that.uuid) &&
                Objects.equals(this.name, that.name) &&

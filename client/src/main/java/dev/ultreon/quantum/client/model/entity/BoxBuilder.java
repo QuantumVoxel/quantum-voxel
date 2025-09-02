@@ -161,7 +161,7 @@ public class BoxBuilder {
         this.face(new Vec3i(ix, iy, iz2), Direction.SOUTH, new TextureRegion(texture, iu + id * 2 + iw, id + id), output);
 
         return QuantumClient.invokeAndWait(() -> {
-            ModelBuilder modelBuilder = new ModelBuilder();
+            var modelBuilder = new ModelBuilder();
             modelBuilder.begin();
             modelBuilder.part("cube",
                     new Mesh(false, output.size, 0, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0)),

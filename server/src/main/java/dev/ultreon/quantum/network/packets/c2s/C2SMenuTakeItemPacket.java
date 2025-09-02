@@ -17,8 +17,8 @@ public final class C2SMenuTakeItemPacket implements Packet<InGameServerPacketHan
     }
 
     public static C2SMenuTakeItemPacket read(PacketIO buffer) {
-        int index = buffer.readInt();
-        boolean rightClick = buffer.readBoolean();
+        var index = buffer.readInt();
+        var rightClick = buffer.readBoolean();
 
         return new C2SMenuTakeItemPacket(index, rightClick);
     }
@@ -46,7 +46,7 @@ public final class C2SMenuTakeItemPacket implements Packet<InGameServerPacketHan
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        C2SMenuTakeItemPacket that = (C2SMenuTakeItemPacket) obj;
+        var that = (C2SMenuTakeItemPacket) obj;
         return this.index == that.index &&
                this.rightClick == that.rightClick;
     }

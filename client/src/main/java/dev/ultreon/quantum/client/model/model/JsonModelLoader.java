@@ -3,7 +3,11 @@ package dev.ultreon.quantum.client.model.model;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.JsonValue;
+import dev.ultreon.libs.collections.v0.tables.HashTable;
+import dev.ultreon.libs.collections.v0.tables.Table;
 import dev.ultreon.quantum.block.Block;
+import dev.ultreon.quantum.block.property.BlockDataEntry;
+import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.item.BlockItem;
@@ -126,7 +130,7 @@ public class JsonModelLoader {
         JsonValue ambientocclusion = modelData.get("ambientocclusion");
         boolean ambientOcclusion = ambientocclusion == null || ambientocclusion.asBoolean();
 
-//        Table<String, BlockDataEntry<?>, JsonModel> overrides = null;
+        Table<String, BlockDataEntry<?>, JsonModel> overrides = null;
 
         JsonValue displayJson = modelData.get("display");
         if (displayJson == null)
@@ -135,7 +139,27 @@ public class JsonModelLoader {
         // TODO: Allow display properties.
         Display display = Display.read(displayJson);
 
-        return new JsonModel(key.id(), textureElements, modelElements, ambientOcclusion, display);
+        return new JsonModel(key.id(), textureElements, modelElements, ambientOcclusion, display, overrides);
+    }
+
+    private Table<String, Object, JsonModel> loadOverrides(RegistryKey<Block> key, JsonValue overridesJson5) {
+        Table<String, Object, JsonModel> overrides = new HashTable<>();
+        Block block = Registries.BLOCK.get(key);
+        BlockState meta = block.getDefaultState();
+
+        for (JsonValue overrideElem : overridesJson5) {
+            String keyName = overrideElem.name;
+
+            JsonModel model = load(key, overrideElem);
+            Object entry1 = meta.get(block.getDefinition().keyByName(keyName));
+
+            if (model == null)
+                throw new IllegalArgumentException("Invalid model override: " + keyName);
+
+            overrides.put(keyName, entry1, model);
+        }
+
+        return overrides;
     }
 
     private List<ModelElement> loadElements(JsonValue elements, int textureWidth, int textureHeight) {
@@ -188,7 +212,7 @@ public class JsonModelLoader {
     private Map<String, NamespaceID> loadTextures(JsonValue textures) {
         Map<String, NamespaceID> textureElements = new HashMap<>();
 
-        for (JsonValue entry : textures) {
+        for (var entry : textures) {
             String name = entry.name;
             String stringId = entry.asString();
             NamespaceID id = NamespaceID.parse(stringId);

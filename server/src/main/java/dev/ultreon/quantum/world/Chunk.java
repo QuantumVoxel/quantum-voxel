@@ -2,6 +2,7 @@ package dev.ultreon.quantum.world;
 
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
+import dev.ultreon.quantum.GameInsets;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
@@ -44,6 +45,8 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
 
     public final @NotNull ChunkVec vec;
     final @NotNull Map<BlockVec, Float> breaking = new HashMap<>();
+    protected final ChunkVec tmpCV = new ChunkVec();
+    public boolean dirty = true;
     protected boolean active;
     protected boolean ready;
 
@@ -52,9 +55,11 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     private boolean disposed;
     protected final @NotNull World world;
 
-    public final @NotNull Storage<BlockState> storage;
+    public final @NotNull Storage<@NotNull BlockState> storage;
     protected final @NotNull LightMap lightMap = new LightMap(CS_3);
-    public final @NotNull Storage<RegistryKey<Biome>> biomeStorage;
+    public final @NotNull Storage<@NotNull RegistryKey<Biome>> biomeStorage;
+
+    public final @Nullable Chunk[] neighbors = new Chunk[6];
 
     static {
         for (int i = 0; i <= Chunk.MAX_LIGHT_LEVEL; i++) {
@@ -84,7 +89,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
                     int size,
                     int height,
                     @NotNull ChunkVec vec,
-                    @NotNull Storage<BlockState> storage) {
+                    @NotNull Storage<@NotNull BlockState> storage) {
         this(world, size, height, vec, storage, new PaletteStorage<>(CS_2, RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("plains"))));
     }
 
@@ -96,8 +101,8 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
                     int ignoredSize,
                     int ignoredHeight,
                     @NotNull ChunkVec vec,
-                    @NotNull Storage<BlockState> storage,
-                    @NotNull Storage<RegistryKey<Biome>> biomeStorage) {
+                    @NotNull Storage<@NotNull BlockState> storage,
+                    @NotNull Storage<@NotNull RegistryKey<Biome>> biomeStorage) {
         this(world, vec, storage, biomeStorage);
     }
 
@@ -125,7 +130,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      */
     protected Chunk(@NotNull World world,
                     @NotNull ChunkVec vec,
-                    @NotNull Storage<BlockState> storage) {
+                    @NotNull Storage<@NotNull BlockState> storage) {
         this(world, vec, storage, new PaletteStorage<>(CS_2, RegistryKey.of(RegistryKeys.BIOME, new NamespaceID("plains"))));
     }
 
@@ -141,10 +146,9 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      */
     protected Chunk(@NotNull World world,
                     @NotNull ChunkVec vec,
-                    @NotNull Storage<BlockState> storage,
-                    @NotNull Storage<RegistryKey<Biome>> biomeStorage) {
+                    @NotNull Storage<@NotNull BlockState> storage,
+                    @NotNull Storage<@NotNull RegistryKey<Biome>> biomeStorage) {
         this.world = world;
-
         if (vec.getSpace() != ChunkVecSpace.WORLD)
             throw new IllegalArgumentException("ChunkVec must be in world space");
 
@@ -153,6 +157,18 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
         this.vec = vec;
         this.storage = storage;
         this.biomeStorage = biomeStorage;
+
+        this.retrieveNeighbors();
+    }
+
+    protected void retrieveNeighbors() {
+        for (Direction direction : Direction.values()) {
+            Chunk chunk = world.getChunk(tmpCV.set(vec).add(direction.getOffset()));
+
+            this.neighbors[direction.ordinal()] = chunk;
+            if (chunk != null)
+                chunk.neighbors[direction.getOpposite().ordinal()] = this;
+        }
     }
 
     /**
@@ -356,6 +372,16 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     public void dispose() {
         synchronized (this) {
             if (this.disposed) return;
+
+            Direction[] values = Direction.values();
+            for (int i = 0, neighborsLength = neighbors.length; i < neighborsLength; i++) {
+                Chunk chunk = neighbors[i];
+                if (chunk != null) {
+                    Direction direction = values[i];
+                    chunk.neighbors[direction.getOpposite().ordinal()] = null;
+                }
+            }
+
             this.disposed = true;
             this.ready = false;
             this.breaking.clear();
@@ -435,7 +461,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     }
 
     /**
-     * @deprecated use {@link #vec} instead.
+     * @deprecated use {@link #vec} instead
      */
     @Deprecated
     public @NotNull ChunkVec getVec() {

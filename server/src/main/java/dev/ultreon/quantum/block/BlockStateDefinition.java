@@ -5,7 +5,6 @@ import dev.ultreon.quantum.block.property.StatePropertyKey;
 import dev.ultreon.quantum.ubo.types.DataType;
 import dev.ultreon.quantum.ubo.types.MapType;
 
-import java.util.Arrays;
 import java.util.List;
 
 public final class BlockStateDefinition {
@@ -103,7 +102,7 @@ public final class BlockStateDefinition {
         }
 
         public BlockStateDefinition build() {
-            return new BlockStateDefinition(Arrays.asList(keys.toArray()), block);
+            return new BlockStateDefinition(List.of(keys.toArray()), block);
         }
     }
 }

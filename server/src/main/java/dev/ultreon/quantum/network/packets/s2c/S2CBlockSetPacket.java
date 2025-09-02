@@ -19,8 +19,8 @@ public final class S2CBlockSetPacket implements Packet<InGameClientPacketHandler
     }
 
     public static S2CBlockSetPacket read(PacketIO buffer) {
-        BlockVec pos = buffer.readBlockVec();
-        BlockState blockState = buffer.readBlockState();
+        var pos = buffer.readBlockVec();
+        var blockState = buffer.readBlockState();
 
         return new S2CBlockSetPacket(pos, blockState);
     }
@@ -52,7 +52,7 @@ public final class S2CBlockSetPacket implements Packet<InGameClientPacketHandler
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        S2CBlockSetPacket that = (S2CBlockSetPacket) obj;
+        var that = (S2CBlockSetPacket) obj;
         return Objects.equals(this.pos, that.pos) &&
                Objects.equals(this.blockState, that.blockState);
     }

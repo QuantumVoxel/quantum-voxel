@@ -27,7 +27,7 @@ public class JarStreamPath implements IPath {
 
     @Override
     public String path() {
-        return "/" + dev.ultreon.quantum.StringUtils.join("/", this.path);
+        return "/" + String.join("/", this.path);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class JarStreamPath implements IPath {
         } else {
             String[] parentPath = new String[this.path.length - 1];
             System.arraycopy(this.path, 0, parentPath, 0, parentPath.length);
-            return new JarStreamPath(this.fs, dev.ultreon.quantum.StringUtils.join("/", parentPath));
+            return new JarStreamPath(this.fs, String.join("/", parentPath));
         }
     }
 
@@ -67,7 +67,7 @@ public class JarStreamPath implements IPath {
             String[] childPath = new String[this.path.length + 1];
             System.arraycopy(this.path, 0, childPath, 0, this.path.length);
             childPath[childPath.length - 1] = name;
-            return new JarStreamPath(this.fs, dev.ultreon.quantum.StringUtils.join("/", childPath));
+            return new JarStreamPath(this.fs, String.join("/", childPath));
         }
     }
 
@@ -79,7 +79,7 @@ public class JarStreamPath implements IPath {
             String[] paths = new String[more.length + 1];
             paths[0] = first;
             System.arraycopy(more, 0, paths, 1, more.length);
-            return child(dev.ultreon.quantum.StringUtils.join("/", paths));
+            return child(String.join("/", paths));
         }
     }
 
@@ -91,7 +91,7 @@ public class JarStreamPath implements IPath {
     @Override
     public boolean exists() {
         try {
-            fs.channelFor(dev.ultreon.quantum.StringUtils.join("/", path)).close();
+            fs.channelFor(String.join("/", path)).close();
             return true;
         } catch (IOException e) {
             return false;
@@ -109,7 +109,7 @@ public class JarStreamPath implements IPath {
             return false;
         } else {
             try {
-                fs.channelFor(dev.ultreon.quantum.StringUtils.join("/", path)).close();
+                fs.channelFor(String.join("/", path)).close();
                 return true;
             } catch (IOException e) {
                 return false;
@@ -206,7 +206,7 @@ public class JarStreamPath implements IPath {
         if (this.path.length == 1) {
             return 0L;
         } else {
-            try (SeekableByteChannel seekableByteChannel = fs.channelFor(dev.ultreon.quantum.StringUtils.join("/", path))) {
+            try (SeekableByteChannel seekableByteChannel = fs.channelFor(String.join("/", path))) {
                 return seekableByteChannel.size();
             } catch (IOException e) {
                 return 0L;
@@ -227,7 +227,7 @@ public class JarStreamPath implements IPath {
     @Override
     public InputStream read() {
         try {
-            return fs.streamFor(dev.ultreon.quantum.StringUtils.join("/", path));
+            return fs.streamFor(String.join("/", path));
         } catch (IOException e) {
             return null;
         }
@@ -241,7 +241,7 @@ public class JarStreamPath implements IPath {
     @Override
     public ByteChannel channel() {
         try {
-            return fs.channelFor(dev.ultreon.quantum.StringUtils.join("/", path));
+            return fs.channelFor(String.join("/", path));
         } catch (IOException e) {
             return null;
         }
@@ -250,7 +250,7 @@ public class JarStreamPath implements IPath {
     @Override
     public @Nullable SeekableByteChannel seekableChannel() {
         try {
-            return fs.channelFor(dev.ultreon.quantum.StringUtils.join("/", path));
+            return fs.channelFor(String.join("/", path));
         } catch (IOException e) {
             return null;
         }

@@ -33,8 +33,8 @@ public final class BlastingRecipe implements Recipe {
 
     @Override
     public ItemStack craft(Menu inventory) {
-        ItemStack result = this.result.copy();
-        ItemStack input = this.input.copy();
+        var result = this.result.copy();
+        var input = this.input.copy();
 
         for (ItemSlot slot : inventory.getInputs()) {
             if (slot.isEmpty()) {
@@ -53,7 +53,7 @@ public final class BlastingRecipe implements Recipe {
 
     @Override
     public boolean canCraft(Menu menu) {
-        ItemStack input = this.input.copy();
+        var input = this.input.copy();
 
         for (ItemSlot slot : menu.getInputs()) {
             if (slot.isEmpty()) {
@@ -108,7 +108,7 @@ public final class BlastingRecipe implements Recipe {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        BlastingRecipe that = (BlastingRecipe) obj;
+        var that = (BlastingRecipe) obj;
         return Objects.equals(this.input, that.input) &&
                Objects.equals(this.result, that.result);
     }

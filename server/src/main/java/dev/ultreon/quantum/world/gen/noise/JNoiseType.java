@@ -34,7 +34,7 @@ public final class JNoiseType implements NoiseType {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        JNoiseType that = (JNoiseType) obj;
+        var that = (JNoiseType) obj;
         return Objects.equals(this.source, that.source);
     }
 

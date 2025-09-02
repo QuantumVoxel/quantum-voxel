@@ -58,7 +58,7 @@ public final class ImageIcon implements Icon {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        ImageIcon that = (ImageIcon) obj;
+        var that = (ImageIcon) obj;
         return Objects.equals(this.id, that.id) &&
                this.width == that.width &&
                this.height == that.height;

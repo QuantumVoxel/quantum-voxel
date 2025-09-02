@@ -9,7 +9,6 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.logging.API;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
@@ -24,7 +23,6 @@ import dev.ultreon.quantum.dedicated.XeoxMod;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.scripting.ScriptLoader;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
@@ -40,7 +38,6 @@ import party.iroiro.luajava.luajit.LuaJit;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.net.ConnectException;
 import java.net.URI;
@@ -58,27 +55,16 @@ public abstract class DesktopPlatform extends GamePlatform {
     private final boolean angleGLES;
     private final SafeLoadWrapper safeWrapper;
     private final LuaJit luaJit;
-    private final ScriptLoader scriptLoader = new ScriptLoader();
+    private final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
+        Thread thread = new Thread(r);
+        thread.setDaemon(true);
+
+        thread.setName("Game-Thread-" + thread.getId());
+        return thread;
+    });
 
     DesktopPlatform(boolean angleGLES, SafeLoadWrapper safeWrapper) {
         super();
-
-        API.PROPERTY.set(new API() {
-            @Override
-            public void addShutdownHook(Runnable runnable) {
-                Runtime.getRuntime().addShutdownHook(new Thread(runnable));
-            }
-
-            @Override
-            public void setOut(PrintStream oldOut) {
-                System.setOut(oldOut);
-            }
-
-            @Override
-            public void setErr(PrintStream oldErr) {
-                System.setErr(oldErr);
-            }
-        });
 
         this.angleGLES = angleGLES;
         this.safeWrapper = safeWrapper;
@@ -135,6 +121,8 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public void onGameDispose() {
         super.onGameDispose();
+        this.pool.shutdown();
+        this.getTimer().dispose();
         if (isImGuiSupported())
             ImGuiOverlay.dispose();
     }
@@ -142,7 +130,6 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public boolean isShowingImGui() {
         if (!isImGuiSupported()) return false;
-//        return ImGuiOverlay.isShown();
         return ImGuiOverlay.isShown();
     }
 
@@ -227,7 +214,7 @@ public abstract class DesktopPlatform extends GamePlatform {
     public boolean isDevEnvironment() {
         IXeoxLoader iXeoxLoader = IXeoxLoader.get();
         if (iXeoxLoader == null) {
-            return false;
+            return System.getProperty("quantum.dev", "false").equals("true");
         }
         return iXeoxLoader.isDevEnvironment();
     }
@@ -496,7 +483,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public boolean isGLES() {
-        return angleGLES || isMacOSX();
+        return angleGLES;
     }
 
     @Override
@@ -521,12 +508,12 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public @NotNull <T> Promise<T> supplyAsync(Supplier<T> o) {
-        return new JavaPromise<>(CompletableFuture.supplyAsync(o));
+        return new JavaPromise<>(CompletableFuture.supplyAsync(o, pool));
     }
 
     @Override
     public Promise<Void> runAsync(Runnable o) {
-        return new JavaPromise<>(CompletableFuture.runAsync(o));
+        return new JavaPromise<>(CompletableFuture.runAsync(o, pool));
     }
 
     @Override
@@ -546,9 +533,11 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void nukeThreads() {
+        onGameDispose();
+
         try {
             int secondsPassed = 0;
-            LongSet threadIds = new LongArraySet();
+            Set<Long> threadIds = new HashSet<>();
             while (true) {
                 Set<Thread> threads = new HashSet<>();
                 for (Thread thread : Thread.getAllStackTraces().keySet()) {
@@ -688,9 +677,9 @@ public abstract class DesktopPlatform extends GamePlatform {
     public boolean isImGuiSupported() {
         IXeoxLoader iXeoxLoader = IXeoxLoader.get();
         if (iXeoxLoader == null) {
-            return false;
+            return !isMacOSX() && isDevEnvironment();
         }
-        return isWindows() && iXeoxLoader.isDevEnvironment();
+        return !isMacOSX() && iXeoxLoader.isDevEnvironment();
     }
 
     @Override
@@ -797,7 +786,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void load(ResourceManager resourceManager) {
-        scriptLoader.reload(resourceManager);
+
     }
 
     @Override
@@ -846,11 +835,6 @@ public abstract class DesktopPlatform extends GamePlatform {
     }
 
     @Override
-    public String lineSep() {
-        return System.lineSeparator();
-    }
-
-    @Override
     public void handleCrash(ApplicationCrash crash) {
         safeWrapper.crash(crash);
     }
@@ -860,7 +844,7 @@ public abstract class DesktopPlatform extends GamePlatform {
         return Runtime.getRuntime().totalMemory();
     }
 
-    private static class JavaPromise<T> implements CompletionPromise<T> {
+    private class JavaPromise<T> implements CompletionPromise<T> {
         private final CompletableFuture<T> completableFuture;
 
         public JavaPromise(CompletableFuture<T> completableFuture) {
@@ -885,7 +869,7 @@ public abstract class DesktopPlatform extends GamePlatform {
             return new JavaPromise<>(completableFuture.thenApplyAsync(t -> {
                 runnable.run();
                 return t;
-            }));
+            }, pool));
         }
 
         @Override
@@ -895,7 +879,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
         @Override
         public <V> Promise<V> thenApplyAsync(Function<T, V> function) {
-            return new JavaPromise<>(completableFuture.thenApplyAsync(function));
+            return new JavaPromise<>(completableFuture.thenApplyAsync(function, pool));
         }
 
         @Override
@@ -911,7 +895,7 @@ public abstract class DesktopPlatform extends GamePlatform {
             return new JavaPromise<>(completableFuture.thenApplyAsync(t -> {
                 runnable.accept(t);
                 return null;
-            }));
+            }, pool));
         }
 
         @Override
@@ -939,8 +923,8 @@ public abstract class DesktopPlatform extends GamePlatform {
         }
 
         @Override
-        public <V> Promise<V> thenComposeAsync(Function<T, Promise<V>> function) {
-            return new JavaPromise<>(completableFuture.thenComposeAsync(t -> ((JavaPromise<V>) function.apply(t)).completableFuture));
+        public <V> Promise<? extends V> thenComposeAsync(Function<T, Promise<V>> function) {
+            return new JavaPromise<>(completableFuture.thenComposeAsync(t -> ((JavaPromise<V>) function.apply(t)).completableFuture, pool));
         }
 
         @Override
@@ -968,7 +952,7 @@ public abstract class DesktopPlatform extends GamePlatform {
                     return function.apply(throwable);
                 }
                 return null;
-            }));
+            }, pool));
         }
 
         @Override
@@ -986,7 +970,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
         @Override
         public Promise<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> runnable) {
-            return new JavaPromise<>(completableFuture.whenCompleteAsync(runnable));
+            return new JavaPromise<>(completableFuture.whenCompleteAsync(runnable, pool));
         }
 
         @Override
@@ -1017,8 +1001,8 @@ public abstract class DesktopPlatform extends GamePlatform {
         }
 
         @Override
-        public <V> Promise<V> applyAsync(BiFunction<? super T, ? super Throwable, ? extends V> function) {
-            return new JavaPromise<>(completableFuture.thenApplyAsync(t -> function.apply(t, null)));
+        public <V> Promise<? extends V> applyAsync(BiFunction<? super T, ? super Throwable, ? extends V> function) {
+            return new JavaPromise<>(completableFuture.thenApplyAsync(t -> function.apply(t, null), pool));
         }
 
         @Override
@@ -1035,7 +1019,7 @@ public abstract class DesktopPlatform extends GamePlatform {
         }
 
         @Override
-        public Promise<T> exceptionallyAsync(Function<Throwable, T> function) {
+        public Promise<?> exceptionallyAsync(Function<Throwable, T> function) {
             return new JavaPromise<>(completableFuture.exceptionally(throwable -> GamePlatform.get().supplyAsync(() -> function.apply(throwable)).get()));
         }
 

@@ -203,7 +203,7 @@ public class FastNoise {
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            Float2 that = (Float2) obj;
+            var that = (Float2) obj;
             return Float.floatToIntBits(this.x) == Float.floatToIntBits(that.x) &&
                    Float.floatToIntBits(this.y) == Float.floatToIntBits(that.y);
         }
@@ -249,7 +249,7 @@ public class FastNoise {
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            Float3 that = (Float3) obj;
+            var that = (Float3) obj;
             return Float.floatToIntBits(this.x) == Float.floatToIntBits(that.x) &&
                    Float.floatToIntBits(this.y) == Float.floatToIntBits(that.y) &&
                    Float.floatToIntBits(this.z) == Float.floatToIntBits(that.z);

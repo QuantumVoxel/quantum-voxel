@@ -27,7 +27,7 @@
 //    private String transform(String key) {
 //        String[] split = key.split("\\.");
 //
-//        return dev.ultreon.quantum.StringUtils.join(".", split);
+//        return String.join(".", split);
 //    }
 //
 //    public T get() {

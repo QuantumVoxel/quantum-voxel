@@ -29,6 +29,7 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.BitSet;
+import java.util.stream.IntStream;
 
 import static com.badlogic.gdx.Input.Keys.*;
 
@@ -68,7 +69,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
     @Override
     protected void switchOut() {
-        for (int key = 32; key < MAX_KEYCODE; key++) PRESSED.clear(key);
+        for (int key : PRESSED.stream().toArray()) this.keyUp(key);
 
         for (KeyBind keyBind : KeyBindRegistry.getAll()) keyBind.release();
     }
@@ -92,13 +93,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      * @return true if any mouse button is pressed, false otherwise
      */
     public static boolean isPressingAnyButton() {
-        int bound = Input.Buttons.FORWARD;
-        for (int i = 0; i <= bound; i++) {
-            if (Gdx.input.isButtonPressed(i)) {
-                return true;
-            }
-        }
-        return false;
+        return IntStream.rangeClosed(0, Input.Buttons.FORWARD).anyMatch(i -> Gdx.input.isButtonPressed(i));
     }
 
     /**

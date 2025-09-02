@@ -17,10 +17,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.widget.*;
-import com.kotcrab.vis.ui.widget.file.FileChooser;
-import com.kotcrab.vis.ui.widget.file.FileChooserListener;
 import dev.ultreon.libs.commons.v0.util.ExceptionUtils;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.Main;
@@ -42,8 +38,6 @@ public class SafeLoadWrapper implements ApplicationListener {
 
     @Override
     public void create() {
-        VisUI.load();
-
         batch = new SpriteBatch();
         whitePixel = createWhitePixel();
 
@@ -104,7 +98,7 @@ public class SafeLoadWrapper implements ApplicationListener {
         crash = ExceptionUtils.getStackTrace(e).replace("\t", "    ");
         quantum = null;
 
-        Gdx.app.postRunnable(() -> openScreen(new CrashScreen()));
+//        Gdx.app.postRunnable(() -> openScreen(new CrashScreen()));
     }
 
     void crash(ApplicationCrash crashLog) {
@@ -112,7 +106,7 @@ public class SafeLoadWrapper implements ApplicationListener {
         crash = crashLog.toString();
         quantum = null;
 
-        Gdx.app.postRunnable(() -> openScreen(new CrashScreen()));
+//        Gdx.app.postRunnable(() -> openScreen(new CrashScreen()));
     }
 
     void openScreen(ScreenAdapter screen) {
@@ -200,139 +194,139 @@ public class SafeLoadWrapper implements ApplicationListener {
         return crash != null;
     }
 
-    private class CrashScreen extends ScreenAdapter {
-        private final ScreenViewport viewport = new ScreenViewport();
-        private final Stage stage = new Stage(viewport, batch);
-        private final Window window;
-
-        public CrashScreen() {
-            viewport.setUnitsPerPixel(Gdx.graphics.getBackBufferScale());
-
-            stage.addActor(new Background());
-            window = new VisWindow("Game Crashed");
-            window.setResizable(true);
-            window.setMovable(false);
-            window.setSize(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f);
-            window.setPosition(Gdx.graphics.getWidth() / 4f, Gdx.graphics.getHeight() / 4f);
-            stage.addActor(window);
-
-            // Root table inside a window or stage
-            VisTable table = new VisTable();
-            table.setFillParent(true); // optional, if added to stage
-            table.defaults().pad(10);  // optional padding
-
-            VisTextArea textArea = new VisTextArea(crash, Utils.make(new VisTextField.VisTextFieldStyle(VisUI.getSkin().get(VisTextField.VisTextFieldStyle.class)), visTextFieldStyle -> {
-                visTextFieldStyle.disabledFontColor = Color.WHITE;
-            }));
-            textArea.setDisabled(true);
-            textArea.setPrefRows(crash.lines().count()); // Makes it taller than the ScrollPane
-
-            VisScrollPane scrollPane = new VisScrollPane(textArea);
-            scrollPane.setFadeScrollBars(false); // Optional: show scrollbars always
-            scrollPane.setScrollingDisabled(false, false); // Allow both scroll directions
-
-            textArea.setFillParent(false);
-
-            table.add(scrollPane).expand().fill().pad(10).row();
-
-            VisTable buttons = new VisTable();
-            buttons.right().defaults().pad(5);
-            VisTextButton button = new VisTextButton("Copy");
-            button.setClip(true);
-
-            button.addListener(new CopyClickListener(textArea));
-
-            buttons.add(button);
-
-            VisTextButton saveButton = new VisTextButton("Save As...");
-            saveButton.setClip(true);
-
-            saveButton.addListener(new SaveClickListener(textArea));
-
-            buttons.add(saveButton);
-            table.add(buttons).bottom().fillX().expandX().pad(5);
-
-            window.add(table).fill().expand().pad(10);
-        }
-
-        @Override
-        public void resize(int width, int height) {
-            super.resize(width, height);
-            stage.getViewport().update(width, height, true);
-        }
-
-        @Override
-        public void show() {
-            super.show();
-
-            Gdx.input.setInputProcessor(stage);
-        }
-
-        @Override
-        public void render(float delta) {
-            Gdx.gl.glClearColor(0, 0, 0, 1);
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-            window.setPosition(Gdx.graphics.getWidth() / 2f - window.getWidth() / 2f, Gdx.graphics.getHeight() / 2f - window.getHeight() / 2f);
-
-            stage.act(delta);
-            stage.draw();
-        }
-
-        private class Background extends Actor {
-            @Override
-            public void draw(Batch batch, float parentAlpha) {
-                super.draw(batch, 0.3f);
-
-                batch.setColor(1, 1, 1, 0.3f);
-                batch.draw(whitePixel, 0, 0, stage.getWidth(), stage.getHeight());
-                batch.setColor(1, 1, 1, 1f);
-            }
-        }
-
-        private class CopyClickListener extends ClickListener {
-            private final VisTextArea textArea;
-
-            public CopyClickListener(VisTextArea textArea) {
-                this.textArea = textArea;
-            }
-
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                String text = textArea.getText();
-                Gdx.app.getClipboard().setContents(text);
-            }
-        }
-
-        private class SaveClickListener extends ClickListener {
-            private final VisTextArea textArea;
-
-            public SaveClickListener(VisTextArea textArea) {
-                this.textArea = textArea;
-            }
-
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                String text = textArea.getText();
-                Gdx.app.getClipboard().setContents(text);
-
-                FileChooser actor = new FileChooser(new FileHandle(System.getProperty("user.dir", ".")).child("game-crashes"), FileChooser.Mode.SAVE);
-//                actor.setDefaultFileName("crash-" + DateTimeFormatter.ofPattern("dd.MM.yyyy_HH.mm.ss") + ".txt");
-                actor.setWatchingFilesEnabled(true);
-                actor.setListener(new FileChooserListener() {
-                    @Override
-                    public void selected(Array<FileHandle> files) {
-                        FileHandle fileHandle = files.get(0);
-                        fileHandle.writeString(crash, false);
-                    }
-
-                    @Override
-                    public void canceled() {
-                        // No need to cancel
-                    }
-                });
-                stage.addActor(actor);
-            }
-        }
-    }
+//    private class CrashScreen extends ScreenAdapter {
+//        private final ScreenViewport viewport = new ScreenViewport();
+//        private final Stage stage = new Stage(viewport, batch);
+//        private final Window window;
+//
+//        public CrashScreen() {
+//            viewport.setUnitsPerPixel(Gdx.graphics.getBackBufferScale());
+//
+//            stage.addActor(new Background());
+//            window = new VisWindow("Game Crashed");
+//            window.setResizable(true);
+//            window.setMovable(false);
+//            window.setSize(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f);
+//            window.setPosition(Gdx.graphics.getWidth() / 4f, Gdx.graphics.getHeight() / 4f);
+//            stage.addActor(window);
+//
+//            // Root table inside a window or stage
+//            VisTable table = new VisTable();
+//            table.setFillParent(true); // optional, if added to stage
+//            table.defaults().pad(10);  // optional padding
+//
+//            VisTextArea textArea = new VisTextArea(crash, Utils.make(new VisTextField.VisTextFieldStyle(VisUI.getSkin().get(VisTextField.VisTextFieldStyle.class)), visTextFieldStyle -> {
+//                visTextFieldStyle.disabledFontColor = Color.WHITE;
+//            }));
+//            textArea.setDisabled(true);
+//            textArea.setPrefRows(crash.lines().count()); // Makes it taller than the ScrollPane
+//
+//            VisScrollPane scrollPane = new VisScrollPane(textArea);
+//            scrollPane.setFadeScrollBars(false); // Optional: show scrollbars always
+//            scrollPane.setScrollingDisabled(false, false); // Allow both scroll directions
+//
+//            textArea.setFillParent(false);
+//
+//            table.add(scrollPane).expand().fill().pad(10).row();
+//
+//            VisTable buttons = new VisTable();
+//            buttons.right().defaults().pad(5);
+//            VisTextButton button = new VisTextButton("Copy");
+//            button.setClip(true);
+//
+//            button.addListener(new CopyClickListener(textArea));
+//
+//            buttons.add(button);
+//
+//            VisTextButton saveButton = new VisTextButton("Save As...");
+//            saveButton.setClip(true);
+//
+//            saveButton.addListener(new SaveClickListener(textArea));
+//
+//            buttons.add(saveButton);
+//            table.add(buttons).bottom().fillX().expandX().pad(5);
+//
+//            window.add(table).fill().expand().pad(10);
+//        }
+//
+//        @Override
+//        public void resize(int width, int height) {
+//            super.resize(width, height);
+//            stage.getViewport().update(width, height, true);
+//        }
+//
+//        @Override
+//        public void show() {
+//            super.show();
+//
+//            Gdx.input.setInputProcessor(stage);
+//        }
+//
+//        @Override
+//        public void render(float delta) {
+//            Gdx.gl.glClearColor(0, 0, 0, 1);
+//            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+//
+//            window.setPosition(Gdx.graphics.getWidth() / 2f - window.getWidth() / 2f, Gdx.graphics.getHeight() / 2f - window.getHeight() / 2f);
+//
+//            stage.act(delta);
+//            stage.draw();
+//        }
+//
+//        private class Background extends Actor {
+//            @Override
+//            public void draw(Batch batch, float parentAlpha) {
+//                super.draw(batch, 0.3f);
+//
+//                batch.setColor(1, 1, 1, 0.3f);
+//                batch.draw(whitePixel, 0, 0, stage.getWidth(), stage.getHeight());
+//                batch.setColor(1, 1, 1, 1f);
+//            }
+//        }
+//
+//        private class CopyClickListener extends ClickListener {
+//            private final VisTextArea textArea;
+//
+//            public CopyClickListener(VisTextArea textArea) {
+//                this.textArea = textArea;
+//            }
+//
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                String text = textArea.getText();
+//                Gdx.app.getClipboard().setContents(text);
+//            }
+//        }
+//
+//        private class SaveClickListener extends ClickListener {
+//            private final VisTextArea textArea;
+//
+//            public SaveClickListener(VisTextArea textArea) {
+//                this.textArea = textArea;
+//            }
+//
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                String text = textArea.getText();
+//                Gdx.app.getClipboard().setContents(text);
+//
+//                FileChooser actor = new FileChooser(new FileHandle(System.getProperty("user.dir", ".")).child("game-crashes"), FileChooser.Mode.SAVE);
+////                actor.setDefaultFileName("crash-" + DateTimeFormatter.ofPattern("dd.MM.yyyy_HH.mm.ss") + ".txt");
+//                actor.setWatchingFilesEnabled(true);
+//                actor.setListener(new FileChooserListener() {
+//                    @Override
+//                    public void selected(Array<FileHandle> files) {
+//                        FileHandle fileHandle = files.get(0);
+//                        fileHandle.writeString(crash, false);
+//                    }
+//
+//                    @Override
+//                    public void canceled() {
+//                        // No need to cancel
+//                    }
+//                });
+//                stage.addActor(actor);
+//            }
+//        }
+//    }
 }
