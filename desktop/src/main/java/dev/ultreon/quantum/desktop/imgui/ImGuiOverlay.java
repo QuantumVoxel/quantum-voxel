@@ -36,8 +36,8 @@ import dev.ultreon.quantum.debug.profiler.ProfileData;
 import dev.ultreon.quantum.debug.profiler.Profiler;
 import dev.ultreon.quantum.debug.profiler.Section;
 import dev.ultreon.quantum.debug.profiler.ThreadSection;
-import dev.ultreon.quantum.desktop.DesktopLauncher;
-import dev.ultreon.quantum.desktop.DesktopPlatform;
+import dev.ultreon.quantum.desktop.DesktopMain;
+import dev.ultreon.quantum.dev.DevPipe;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.resources.ResourceCategory;
@@ -63,8 +63,8 @@ import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.*;
-import jdk.jshell.JShell;
-import jdk.jshell.SnippetEvent;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -83,6 +83,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 @SuppressWarnings("t")
 public class ImGuiOverlay {
@@ -95,7 +96,25 @@ public class ImGuiOverlay {
     public static final ImInt U_ATLAS_SIZE = new ImInt(512);
     public static final ImInt MODEL_VIEWER_LIST_INDEX = new ImInt(0);
     public static final ImBoolean SHOW_RENDER_PIPELINE = new ImBoolean(false);
+    private static boolean crashHooked = false;
+    private static Throwable crash = null;
+    public static final Consumer<Throwable> CRASH_HOOK = (t) -> {
+        GamePlatform.get().disableGame();
+        crash = t;
+    };
     public static final ImInt SHADER_DEBUG_STATE = new ImInt(0);
+    public static String NET_PIPE_OUT = "";
+    public static final DevPipe DEV_PIPE = (tag, message) -> {
+        if (tag.equals("NetLog")) {
+            String s = NET_PIPE_OUT;
+            NET_PIPE_OUT += message + "\n";
+            if (NET_PIPE_OUT.length() > 1024) {
+                NET_PIPE_OUT = NET_PIPE_OUT.substring(NET_PIPE_OUT.indexOf("\n") + 1);
+            }
+        } else {
+            LoggerFactory.getLogger(ImGuiOverlay.class).warn("Unhandled DevPipe: {}", tag);
+        }
+    };
     private static final ImBoolean SHOW_IM_GUI = new ImBoolean(false);
     private static final ImBoolean SHOW_PLAYER_UTILS = new ImBoolean(false);
     private static final ImBoolean SHOW_GUI_UTILS = new ImBoolean(false);
@@ -108,6 +127,7 @@ public class ImGuiOverlay {
     private static final ImBoolean SHOW_CHUNK_DEBUGGER = new ImBoolean(false);
     private static final ImBoolean SHOW_PROFILER = new ImBoolean(false);
     private static final ImBoolean SHOW_OCCLUSION_DEBUG = new ImBoolean(false);
+    private static final ImBoolean SHOW_NETWORK_LOGGING = new ImBoolean(false);
 
     private static final ImBoolean SHOW_ABOUT = new ImBoolean(false);
     private static final ImBoolean SHOW_METRICS = new ImBoolean(false);
@@ -142,7 +162,7 @@ public class ImGuiOverlay {
     private static boolean firstLoop = true;
     private static final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     private static final PrintStream ps = new PrintStream(baos);
-    private static JShell jshell;
+    private static Context jshell;
     private static final ImString inputBuffer = new ImString(512);
     private static final ImString inputBuffer1 = new ImString(512);
     private static int selectedIndex;
@@ -179,7 +199,7 @@ public class ImGuiOverlay {
         io.addConfigFlags(ImGuiConfigFlags.DockingEnable);      // Enable Docking
         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);    // Enable Multi-Viewport / Platform Windows
 
-        long windowHandle = DesktopLauncher.getGameWindow().getHandle();
+        long windowHandle = DesktopMain.getGameWindow().getHandle();
 
         QuantumClient.invokeAndWait(() -> {
             ImGuiOverlay.imGuiGlfw.init(windowHandle, true);
@@ -344,9 +364,10 @@ public class ImGuiOverlay {
         if (ImGuiOverlay.SHOW_SKYBOX_EDITOR.get()) ImGuiOverlay.showSkyboxEditor();
         if (ImGuiOverlay.SHOW_MODEL_VIEWER.get()) ImGuiOverlay.showModelViewer();
         if (ImGuiOverlay.SHOW_CLASS_ATTACHER.get()) showClassAttacher();
+        if (ImGuiOverlay.SHOW_NETWORK_LOGGING.get()) ImGuiOverlay.showNetworkLogging();
         if (ImGuiOverlay.SHOW_JSHELL.get()) {
             if (jshell == null) {
-                jshell = JShell.builder().out(ps).build();
+                jshell = Context.newBuilder("js").allowAllAccess(true).out(ps).in(InputStream.nullInputStream()).err(ps).build();
             }
             ImGuiOverlay.showJShell(jshell);
         } else if (jshell != null) {
@@ -355,8 +376,17 @@ public class ImGuiOverlay {
         }
     }
 
+    private static void showNetworkLogging() {
+        if (ImGui.begin("Network Logging")) {
+            ImGui.beginChild("##network_log_area", ImGui.getContentRegionAvailX(), ImGui.getContentRegionAvailY(), true);
+            ImGui.text(NET_PIPE_OUT);
+            ImGui.endChild();
+        }
+        ImGui.end();
+    }
+
     private static void showClassAttacher() {
-        ImGui.begin("Class Autocomplete");
+        ImGui.begin("Class Attacher");
 
         // Input Field
         ImGui.setNextItemWidth(ImGui.getContentRegionAvailX());
@@ -415,13 +445,15 @@ public class ImGuiOverlay {
     }
 
     private static void updateFiltered() {
-        Set<String> allClasses = GamePlatform.get().getLoadedClasses();
+        Class<?>[] allClasses = GamePlatform.get().getLoadedClasses();
         filteredClasses.clear();
         if (!inputBuffer1.isEmpty()) {
             List<String> toSort = new ArrayList<>();
-            for (String cls : allClasses) {
-                if (cls.toLowerCase().contains(inputBuffer1.get().toLowerCase())) {
-                    toSort.add(cls);
+            for (Class<?> cls : allClasses) {
+                String name = cls.getName();
+                if (name.startsWith("[")) continue;
+                if (name.toLowerCase().contains(inputBuffer1.get().toLowerCase())) {
+                    toSort.add(name);
                 }
             }
             toSort.sort(null);
@@ -437,41 +469,26 @@ public class ImGuiOverlay {
         }
     }
 
-    private static void showJShell(JShell jshell) {
-        if (ImGui.begin("JShell")) {
+    private static void showJShell(Context jshell) {
+        if (ImGui.begin("Game Shell")) {
             // Output area
-            ImGui.beginChild("ConsoleOutput", 0, 300, true);
+            ImGui.begin("ConsoleOutput");
+            float scrollY = ImGui.getScrollY();
             ImGui.textWrapped(baos.toString());
-            ImGui.setScrollHereY(1.0f); // Auto-scroll
-            ImGui.endChild();
+            if (scrollY == 1.0f) ImGui.setScrollHereY(1.0f); // Auto-scroll
+            ImGui.end();
 
             // Input field
             ImGui.separator();
             ImGui.text("Enter Java expression:");
             ImGui.inputTextMultiline("##input", inputBuffer, 512);
+            if (ImGui.isItemFocused() && Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && Gdx.input.isKeyJustPressed(Input.Keys.ALT_LEFT) && !inputBuffer.get().isEmpty()) {
+                evaluateShell(jshell);
+            }
 
             // Evaluate button
             if (ImGui.button("Evaluate")) {
-                List<SnippetEvent> events = jshell.eval(inputBuffer.get());
-                for (SnippetEvent e : events) {
-                    if (e.value() != null) {
-                        ps.println("-> " + e.value());
-                        ps.println(" : STATUS: " + e.status());
-                        ps.println(e.value());
-                        ps.flush();
-                    } else if (e.exception() != null) {
-                        ps.println("-> Exception: " + e.exception().getMessage());
-                        e.exception().printStackTrace(ps);
-                        ps.println();
-                        ps.flush();
-                    } else {
-                        ps.println("-> No value returned");
-                        ps.println(" : " + e);
-                        ps.flush();
-                    }
-                }
-
-                inputBuffer.set(""); // Clear after evaluating
+                evaluateShell(jshell);
             }
 
             ImGui.sameLine();
@@ -480,6 +497,34 @@ public class ImGuiOverlay {
             }
         }
         ImGui.end();
+    }
+
+    private static void evaluateShell(Context jshell) {
+        try {
+            // Get JS bindings
+            Value js = jshell.getBindings("js");
+            
+            // Assign host class
+            Class<?> selClass = selectedClass;
+            if (selClass != null)
+                js.putMember("HostClass", jshell.eval("js", "Java.type('" + selClass.getCanonicalName() + "');"));
+
+            // Assign host object
+            Object sel = selected;
+            if (sel != null)
+                js.putMember("hostObject", Value.asValue(sel));
+
+            // Evaluate JS expression
+            Value java = jshell.eval("js", inputBuffer.get());
+            try {
+                String string = java.as(Object.class).toString() + "\n";
+                baos.write(string.getBytes());
+            } catch (IOException e) {
+                CommonConstants.LOGGER.error("Unable to write to output stream", e);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(ps);
+        }
     }
 
     private static void showGame(QuantumClient ignoredClient) {
@@ -1576,6 +1621,13 @@ public class ImGuiOverlay {
                 ImGui.menuItem("Gui Editor", "Ctrl+G", ImGuiOverlay.SHOW_GUI_UTILS);
                 ImGui.menuItem("Shader Editor", "", ImGuiOverlay.SHOW_SHADER_EDITOR);
                 ImGui.menuItem("Skybox Editor (Deprecated)", "", ImGuiOverlay.SHOW_SKYBOX_EDITOR);
+                ImGui.separator();
+                if (ImGui.menuItem("Hook Game Crash", "", crashHooked, !crashHooked)) {
+                    crashHooked = true;
+                    QuantumClient.setCrashHook(caller -> {
+                        CRASH_HOOK.accept(caller.getThrowable());
+                    });
+                }
                 ImGui.endMenu();
             }
             if (ImGui.beginMenu("View")) {
@@ -1587,6 +1639,7 @@ public class ImGuiOverlay {
                 ImGui.menuItem("InspectionRoot", "Ctrl+P", ImGuiOverlay.SHOW_PROFILER);
                 ImGui.menuItem("Render Pipeline", null, ImGuiOverlay.SHOW_RENDER_PIPELINE);
                 ImGui.menuItem("Model Viewer", null, ImGuiOverlay.SHOW_MODEL_VIEWER);
+                ImGui.menuItem("Network Logging", null, ImGuiOverlay.SHOW_NETWORK_LOGGING);
                 ImGui.separator();
                 ImGui.menuItem("Show Hidden Fields", null, SHOW_HIDDEN_FIELDS);
                 ImGui.menuItem("Show Occlusion Debug", null, SHOW_OCCLUSION_DEBUG);
@@ -1825,6 +1878,7 @@ public class ImGuiOverlay {
             case ShowModelViewer -> ImGuiOverlay.SHOW_MODEL_VIEWER.get();
             case ShowProfiler -> ImGuiOverlay.SHOW_PROFILER.get();
             case OcclusionDebug -> ImGuiOverlay.SHOW_OCCLUSION_DEBUG.get();
+            case NetworkLogging -> ImGuiOverlay.SHOW_NETWORK_LOGGING.get();
             default -> false;
         };
     }

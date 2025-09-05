@@ -143,20 +143,8 @@ void main() {
 
     vec3 light = vec3(u_globalSunlight) * sunLight;
 
-//    #if LOD_LEVEL < 2
-//    vec3 light = vec3(1.0-u_globalSunlight) * sunLight;
-//    light += blockLight.rgb * (1.0 - light);
-//    #else
-//    vec3 light = vec3(1.0-u_globalSunlight) * sunLight;
-//    #endif
-
     vec3 emissive = vec3(0.0);
-//    #if LOD_LEVEL < 1
-//    emissive = texture2D(u_emissiveTexture, v_emissiveTexUV).rgb;
-//    gl_FragColor.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
-//    #else
     gl_FragColor.rgb = (diffuse.rgb) * light;
-//    #endif
 
     #if LOD_LEVEL < 2
     gl_FragColor = vec4(gl_FragColor.xyz * gamma(sh_light(v_normal, groove)).r, gl_FragColor.w);

@@ -115,22 +115,7 @@ void main() {
 
     vec3 light = vec3(u_globalSunlight);
 
-//    vec3 emissive;
-//    emissive = vec3(0.0);
-//    gl_FragColor.rgb = (diffuse.rgb) * light + (emissive * (1.0 - light));
-
     gl_FragColor.rgb = (diffuse.rgb) * light;
-
-    vec3 depthIn3Channels;
-    depthIn3Channels.r = mod(depth, 1.0);
-    depth -= depthIn3Channels.r;
-    depth /= 256.0;
-
-    depthIn3Channels.g = mod(depth, 1.0);
-    depth -= depthIn3Channels.g;
-    depth /= 256.0;
-
-    depthIn3Channels.b = depth;
 
     gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(v_normal, groove)).r, gl_FragColor.w);
     gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(u_fogColor), v_fog);

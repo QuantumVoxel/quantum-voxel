@@ -9,6 +9,7 @@ import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.quantum.util.Env;
 import dev.ultreon.xeox.api.IMod;
 import dev.ultreon.xeox.api.IPath;
 import dev.ultreon.xeox.api.IXeoxLoader;
@@ -220,6 +221,11 @@ public class ServerPlatform extends GamePlatform {
     public boolean isDevEnvironment() {
         if (IXeoxLoader.get() == null) return false;
         return IXeoxLoader.get().isDevEnvironment();
+    }
+
+    @Override
+    public Env getEnv() {
+        return Env.SERVER;
     }
 
     @Override

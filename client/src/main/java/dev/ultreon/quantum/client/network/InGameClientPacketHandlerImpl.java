@@ -146,7 +146,6 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                         @Nullable ClientWorld world = this.client.world;
 
                         if (world == null) {
-                            this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
                             return null;
                         }
 
@@ -162,16 +161,12 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                     if (data != null) {
                         data.info.loadDuration = l;
                         data.info.build = info;
-
-                        this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.SUCCESS));
                     }
                 } catch (Throwable throwable) {
-                    this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
                     QuantumClient.LOGGER.error("Failed to load chunk:", throwable);
                     client.notifications.add("Failed to load chunk", "Check the log for more information", "Chunk: " + pos.toString());
                 }
             } catch (Exception e) {
-                this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
                 QuantumClient.LOGGER.error("Hard error while loading chunk:", e);
                 QuantumClient.LOGGER.debug("What, why? Pls no!!!");
 
@@ -182,7 +177,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
 
     @Override
     public void onChunkCancel(ChunkVec pos) {
-        this.client.connection.send(new C2SChunkStatusPacket(pos, Chunk.Status.FAILED));
+
     }
 
     public static String byteArrayToHexString(byte[] byteArray) {

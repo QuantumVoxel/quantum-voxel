@@ -21,6 +21,7 @@ import dev.ultreon.quantum.dedicated.JavaWebSocket;
 import dev.ultreon.quantum.dedicated.XeoxFileHandle;
 import dev.ultreon.quantum.dedicated.XeoxMod;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
+import dev.ultreon.quantum.dev.DevPipe;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.QuantumServer;
@@ -30,7 +31,6 @@ import dev.ultreon.xeox.api.IFileSystem;
 import dev.ultreon.xeox.api.IMod;
 import dev.ultreon.xeox.api.IPath;
 import dev.ultreon.xeox.api.IXeoxLoader;
-import dev.ultreon.xeox.impl.XeoxLoader;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.Platform;
@@ -48,7 +48,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 
-import static dev.ultreon.quantum.desktop.DesktopLauncher.LOGGER;
+import static dev.ultreon.quantum.desktop.DesktopMain.LOGGER;
 
 public abstract class DesktopPlatform extends GamePlatform {
     private final Map<String, XeoxMod> mods = new IdentityHashMap<>();
@@ -62,6 +62,7 @@ public abstract class DesktopPlatform extends GamePlatform {
         thread.setName("Game-Thread-" + thread.getId());
         return thread;
     });
+    private boolean gameDisabled = false;
 
     DesktopPlatform(boolean angleGLES, SafeLoadWrapper safeWrapper) {
         super();
@@ -230,17 +231,6 @@ public abstract class DesktopPlatform extends GamePlatform {
     }
 
     @Override
-    public Env getEnv() {
-        if (IXeoxLoader.get() == null) {
-            return Env.CLIENT;
-        }
-        return switch (IXeoxLoader.get().getEnvironment()) {
-            case CLIENT -> Env.CLIENT;
-            case SERVER -> Env.SERVER;
-        };
-    }
-
-    @Override
     public FileHandle getConfigDir() {
         if (IXeoxLoader.get() == null) {
             FileHandle config = Gdx.files.local("config");
@@ -382,7 +372,7 @@ public abstract class DesktopPlatform extends GamePlatform {
 
     @Override
     public void setVisible(boolean visible) {
-        DesktopLauncher.getGameWindow().setVisible(visible);
+        DesktopMain.getGameWindow().setVisible(visible);
     }
 
     @Override
@@ -677,7 +667,8 @@ public abstract class DesktopPlatform extends GamePlatform {
     public boolean isImGuiSupported() {
         IXeoxLoader iXeoxLoader = IXeoxLoader.get();
         if (iXeoxLoader == null) {
-            return !isMacOSX() && isDevEnvironment();
+//            return !isMacOSX() && isDevEnvironment();
+            return false;
         }
         return !isMacOSX() && iXeoxLoader.isDevEnvironment();
     }
@@ -754,12 +745,9 @@ public abstract class DesktopPlatform extends GamePlatform {
     }
 
     @Override
-    public Set<String> getLoadedClasses() {
-        XeoxLoader xeoxLoader = XeoxLoader.get();
-        if (xeoxLoader == null) {
-            return Collections.emptySet();
-        }
-        return xeoxLoader.classLoader.loadedClasses.keySet();
+    public Class<?>[] getLoadedClasses() {
+        if (isDevEnvironment()) return DesktopLauncher.getLoadedClasses();
+        return new Class[0];
     }
 
     @Override
@@ -832,6 +820,24 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public <T> List<T> createSyncList() {
         return new CopyOnWriteArrayList<>();
+    }
+
+    @Override
+    public DevPipe getDevPipe() {
+        return ImGuiOverlay.DEV_PIPE;
+    }
+
+    @Override
+    public void disableGame() {
+        this.gameDisabled = true;
+        Gdx.input.setInputProcessor(null);
+        Gdx.graphics.setContinuousRendering(false);
+        Gdx.input.setCursorCatched(false);
+        Gdx.input.closeTextInputField(true);
+    }
+
+    public boolean isGameDisabled() {
+        return this.gameDisabled;
     }
 
     @Override
@@ -1084,5 +1090,9 @@ public abstract class DesktopPlatform extends GamePlatform {
                 }
             }));
         }
+    }
+
+    public static DesktopPlatform get() {
+        return (DesktopPlatform) GamePlatform.get();
     }
 }

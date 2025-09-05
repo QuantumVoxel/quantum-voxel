@@ -75,19 +75,18 @@ public final class Main implements ApplicationListener {
             instance = this;
         }
 
-
         BaseSkript.main(args);
 
         quantumSkript = new QuantumSkript(() -> QuantumClient.get().registries);
         quantumClientSkript = new QuantumClientSkript();
 
-        BaseSkript.load();
-        quantumSkript.onLoad();
-        quantumSkript.onEnable();
-        quantumClientSkript.onLoad();
-        quantumClientSkript.onEnable();
-
-        BaseSkript.init();
+//        BaseSkript.load();
+//        quantumSkript.onLoad();
+//        quantumSkript.onEnable();
+//        quantumClientSkript.onLoad();
+//        quantumClientSkript.onEnable();
+//
+//        BaseSkript.init();
     }
 
     @ApiStatus.Internal

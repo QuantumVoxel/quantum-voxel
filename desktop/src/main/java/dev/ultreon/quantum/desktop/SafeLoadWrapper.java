@@ -2,26 +2,17 @@ package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import dev.ultreon.libs.commons.v0.util.ExceptionUtils;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.Main;
-import dev.ultreon.quantum.client.util.Utils;
+import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.crash.ApplicationCrash;
+import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
+import org.slf4j.LoggerFactory;
 
 public class SafeLoadWrapper implements ApplicationListener {
     private Main quantum;
@@ -55,6 +46,10 @@ public class SafeLoadWrapper implements ApplicationListener {
         Gdx.input.setCatchKey(Input.Keys.SYM, true);
         Gdx.input.setCatchKey(Input.Keys.SPACE, true);
 
+        if (DesktopPlatform.get().isGameDisabled()) {
+            return;
+        }
+
         try {
             quantum = Main.createInstance(args);
             quantum.create();
@@ -74,6 +69,10 @@ public class SafeLoadWrapper implements ApplicationListener {
 
     @Override
     public void resize(int width, int height) {
+        if (DesktopPlatform.get().isGameDisabled()) {
+            return;
+        }
+
         if (quantum != null) {
             try {
                 quantum.resize(width, height);
@@ -88,6 +87,11 @@ public class SafeLoadWrapper implements ApplicationListener {
     }
 
     void crash(Throwable e) {
+        if (DesktopPlatform.get().isGameDisabled()) {
+            ImGuiOverlay.CRASH_HOOK.accept(e);
+            return;
+        }
+
         if (crash != null) return;
         try {
             CommonConstants.LOGGER.error("Game Crashed:", e);
@@ -137,6 +141,13 @@ public class SafeLoadWrapper implements ApplicationListener {
     }
 
     private void unsafeRender() {
+        if (DesktopPlatform.get().isGameDisabled()) {
+            if (ImGuiOverlay.isShown()) {
+                ImGuiOverlay.renderImGui(QuantumClient.get());
+            }
+            return;
+        }
+
         if (crash != null) {
             if (currentScreen != null)
                 currentScreen.render(Gdx.graphics.getDeltaTime());
@@ -155,6 +166,10 @@ public class SafeLoadWrapper implements ApplicationListener {
 
     @Override
     public void pause() {
+        if (DesktopPlatform.get().isGameDisabled()) {
+            return;
+        }
+
         if (quantum != null) {
             try {
                 quantum.pause();
@@ -166,6 +181,10 @@ public class SafeLoadWrapper implements ApplicationListener {
 
     @Override
     public void resume() {
+        if (DesktopPlatform.get().isGameDisabled()) {
+            return;
+        }
+
         if (quantum != null) {
             try {
                 quantum.resume();
@@ -177,6 +196,11 @@ public class SafeLoadWrapper implements ApplicationListener {
 
     @Override
     public void dispose() {
+        if (DesktopPlatform.get().isGameDisabled()) {
+            LoggerFactory.getLogger(getClass()).warn("Game disabled, can't dispose! Terminating...");
+            Runtime.getRuntime().halt(1);
+        }
+
         if (quantum != null) {
             try {
                 quantum.dispose();

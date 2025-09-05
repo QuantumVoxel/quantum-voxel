@@ -7,5 +7,6 @@ public enum DevFlag {
     ShowMetrics,
     ShowModelViewer,
     ShowProfiler,
+    NetworkLogging,
     OcclusionDebug
 }

@@ -1289,7 +1289,9 @@ public class ServerWorld extends World implements Audience {
                 for (int z = playerChunk.getIntZ() - clientRenderDistance; z <= playerChunk.getIntZ() + clientRenderDistance; z++) {
                     this.getOrLoadChunk(new ChunkVec(x, y, z)).thenAccept(serverChunk -> {
                         if (!serverPlayer.isTracking(serverChunk) && serverChunk != null) {
+                            serverPlayer.startTracking(serverChunk);
                             serverPlayer.sendChunk(serverChunk.vec, serverChunk);
+                            serverChunk.consumeTicket(ChunkLoadTicket.PLAYER);
                         }
                     });
                 }

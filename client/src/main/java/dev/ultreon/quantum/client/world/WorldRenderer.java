@@ -1,10 +1,8 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
@@ -14,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -118,6 +117,8 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private final BoundingBox tmpBounds = new BoundingBox();
     private static final Vec3d TMP_3D1 = new Vec3d();
     private static final Vec3d TMP_3D3 = new Vec3d();
+    @Nullable
+    private PostProcessor postProcessor;
 
     /**
      * Constructs a WorldRenderer instance for rendering a given client world.
@@ -143,6 +144,17 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         this.setupBreaking();
         this.setupEnvironment();
         this.setupParticles();
+        this.setupPostProcessing();
+    }
+
+    private void setupPostProcessing() {
+        if (client.getGlslVersion().isAtLeast(3, 30)) {
+            CommonConstants.LOGGER.info("Enabling post-processing");
+            this.postProcessor = new PostProcessor();
+            this.disposables.add(this.postProcessor);
+        } else {
+            CommonConstants.LOGGER.info("Post-processing is not supported on this GPU");
+        }
     }
 
     private void setupParticles() {
@@ -366,13 +378,26 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     /**
      * Renders the world to the screen using the provided ModelBatch and RenderLayer.
      *
-     * @param batch     the ModelBatch to render with
+     * @param bufferSource     the ModelBatch to render with
      * @param deltaTime the time between the last and current frame
      */
     @Override
-    public void render(RenderBufferSource batch, float deltaTime) {
+    public void render(RenderBufferSource bufferSource, float deltaTime) {
         PROFILER.begin("world-renderer@render");
         try {
+            if (postProcessor != null) postProcessor.begin(client.getWidth(), client.getHeight());
+
+            Gdx.gl.glDepthMask(false);
+
+            bufferSource.begin(this.client.camera);
+
+            renderBackground(bufferSource, Gdx.graphics.getDeltaTime());
+
+            bufferSource.getBuffer(RenderPass.SKYBOX).flush();
+            bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).flush();
+
+            Gdx.gl.glDepthMask(true);
+
             var player = this.client.player;
             if (player == null) return;
             if (this.disposed) return;
@@ -389,16 +414,37 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             // Create a new ChunkRenderRef and an array of ChunkVec.
             var ref = new ChunkRenderRef();
 
-            batch.getBuffer(RenderPass.OPAQUE);
-            batch.getBuffer(RenderPass.WATER);
-            batch.getBuffer(RenderPass.TRANSPARENT);
-            batch.getBuffer(RenderPass.CUTOUT);
+            bufferSource.getBuffer(RenderPass.OPAQUE);
+            bufferSource.getBuffer(RenderPass.WATER);
+            bufferSource.getBuffer(RenderPass.TRANSPARENT);
+            bufferSource.getBuffer(RenderPass.CUTOUT);
 
             // Collect the chunks to render.
-            this.collectChunks(batch, chunks, player, ref);
+            this.collectChunks(bufferSource, chunks, player, ref);
 
-            renderSelf(batch);
+            renderSelf(bufferSource);
             renderGizmos(deltaTime);
+
+            var position = client.player.getPosition(client.partialTick);
+            Array<Entity> toSort = new Array<>(world.getAllEntities());
+            for (Entity entity : toSort.toArray(Entity.class)) {
+                if (entity instanceof LocalPlayer) continue;
+                collectEntity(entity, client.renderBuffers());
+            }
+
+            // Particles
+            ParticleSystem particleSystem = getParticleSystem();
+            particleSystem.begin();
+            particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
+            particleSystem.end();
+//        modelBatch.render(particleSystem);
+            // TODO add particle system
+
+            bufferSource.end();
+            if (postProcessor != null) {
+                postProcessor.end();
+                postProcessor.draw(this);
+            }
         } finally {
             PROFILER.end();
         }
@@ -484,8 +530,10 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 if (model == null) {
                     if (ref.chunkRendered) continue;
                     model = buildChunk(ref, chunk);
+                    chunk.dirty = false;
                 } else if (chunk.dirty) {
                     rebuildChunk(ref, chunk, model);
+                    chunk.dirty = false;
                 }
 
                 model.render(client.camera, bufferSource);
@@ -1070,6 +1118,14 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
     public Color getFogColor() {
         return fogColor;
+    }
+
+    public PerspectiveCamera getCamera() {
+        return client.camera;
+    }
+
+    public Matrix4 getLensProjection() {
+        return client.camera.getLensProjection();
     }
 
     private static class ChunkRenderRef {

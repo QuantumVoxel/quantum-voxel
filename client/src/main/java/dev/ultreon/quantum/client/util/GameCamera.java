@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.util;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
@@ -32,6 +33,7 @@ public class GameCamera extends PerspectiveCamera {
     private boolean walking;
     private static final Vector3 TMP_1 = new Vector3();
     private static final Vector3 TMP_2 = new Vector3();
+    private final Matrix4 lens = new Matrix4();
 
     public GameCamera(float fieldOfViewY, float viewportWidth, float viewportHeight) {
         super(fieldOfViewY, viewportWidth, viewportHeight);
@@ -217,4 +219,8 @@ public class GameCamera extends PerspectiveCamera {
 	public void setCameraBop(float cameraBop) {
 		this.cameraBop = cameraBop;
 	}
+
+    public Matrix4 getLensProjection() {
+        return this.lens.set(this.projection).mul(this.view);
+    }
 }

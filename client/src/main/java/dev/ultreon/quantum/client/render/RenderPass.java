@@ -711,7 +711,7 @@ public class RenderPass {
 
     public static final RenderPass CELESTIAL_BODIES = RenderPass.builder(Position(), TexCoords(0))
             .name("celestial_bodies")
-            .shader(Shaders.TRANSPARENT)
+            .shader(Shaders.CELESTIAL_BODIES)
             .blending(GL_SRC_ALPHA, GL_ONE)
             .cull(0)
             .depthTest(false)

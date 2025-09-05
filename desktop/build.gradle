@@ -7,31 +7,31 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 buildscript {
-    repositories {
-        mavenCentral()
+  repositories {
+    mavenCentral()
 
-        maven {
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-            name = "sonatype"
-        }
-
-        maven {
-            url = "https://maven.atlassian.com/3rdparty/"
-        }
-
-        gradlePluginPortal()
-
-        google()
+    maven {
+      url = "https://oss.sonatype.org/content/repositories/snapshots/"
+      name = "sonatype"
     }
 
-    dependencies {
-        classpath "com.google.code.gson:gson:2.10.1"
-        classpath("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.8")
+    maven {
+      url = "https://maven.atlassian.com/3rdparty/"
     }
+
+    gradlePluginPortal()
+
+    google()
+  }
+
+  dependencies {
+    classpath "com.google.code.gson:gson:2.10.1"
+    classpath("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.8")
+  }
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '2.2.0'
+  id 'org.jetbrains.kotlin.jvm' version '2.2.0'
 }
 
 //*****************//
@@ -55,232 +55,233 @@ evaluationDependsOn(":mixinprovider")
 evaluationDependsOn(":client")
 
 java {
-    withSourcesJar()
-    withJavadocJar()
+  withSourcesJar()
+  withJavadocJar()
 }
 
 repositories {
-    mavenCentral()
-    maven {
-        url = "https://maven.fabricmc.net"
-        name = "FabricMC"
-    }
-    maven {
-        url = "https://jitpack.io"
-        name = "JitPack"
-    }
-    maven {
-        url = "https://maven.pkg.github.com/graalvm/graalvm-ce-builds"
-        name = "GraalVM"
-    }
+  mavenCentral()
+  maven {
+    url = "https://maven.fabricmc.net"
+    name = "FabricMC"
+  }
+  maven {
+    url = "https://jitpack.io"
+    name = "JitPack"
+  }
+  maven {
+    url = "https://maven.pkg.github.com/graalvm/graalvm-ce-builds"
+    name = "GraalVM"
+  }
 }
 
 sourceSets {
-    lua {
-        allSource.srcDirs = []
-        resources {
-            srcDir 'src/lualib'
-        }
+  lua {
+    allSource.srcDirs = []
+    resources {
+      srcDir 'src/lualib'
     }
+  }
 }
 
 dependencies {
-    implementation api(project(":client"))
-    implementation api(project(":server"))
-    implementation api(project(":dedicated"))
-    implementation api(project(":xeox-loader"))
-    implementation api(project(":block-studio"))
-    runtimeOnly project(":mixinprovider")
+  implementation api(project(":client"))
+  implementation api(project(":server"))
+  implementation api(project(":dedicated"))
+  implementation api(project(":xeox-loader"))
+  implementation api(project(":block-studio"))
+  runtimeOnly project(":mixinprovider")
 
-    implementation api("com.formdev:flatlaf:3.2.1")
+  implementation api("com.formdev:flatlaf:3.2.1")
 
-    implementation api("com.badlogicgames.gdx:gdx:$gdxVersion")
-    implementation api("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
-    implementation api("com.badlogicgames.ashley:ashley:$ashleyVersion")
-    implementation api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
-    implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
-    implementation api("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
+  implementation api("com.badlogicgames.gdx:gdx:$gdxVersion")
+  implementation api("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
+  implementation api("com.badlogicgames.ashley:ashley:$ashleyVersion")
+  implementation api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
+  implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
+  implementation api("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")
 
-    implementation api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion") {
-        exclude group: "org.lwjgl", module: "lwjgl"
-        exclude group: "org.lwjgl", module: "lwjgl-glfw"
-        exclude group: "org.lwjgl", module: "lwjgl-egl"
-        exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
-        exclude group: "org.lwjgl", module: "lwjgl-openal"
-        exclude group: "org.lwjgl", module: "lwjgl-opengl"
-        exclude group: "org.lwjgl", module: "lwjgl-opengles"
-        exclude group: "org.lwjgl", module: "lwjgl-stb"
-    }
+  implementation("org.graalvm.sdk:graal-sdk:24.2.2")
 
-    implementation 'org.reflections:reflections:0.10.2'
-    implementation api("org.lwjgl:lwjgl:3.3.3!!") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-egl:3.3.3!!") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-openal:3.3.3!!") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-opencl:3.3.3!!") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-opengles:3.3.3!!") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-openxr:3.3.3!!") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-stb:3.3.3!!") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-openal:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-openxr:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-stb:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-openal:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-stb:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-openal:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-opengles:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-openxr:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
-    implementation api("org.lwjgl:lwjgl-stb:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
-    implementation api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
-    implementation api("com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop")
-    implementation api("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
-    implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion")
-    implementation api("com.badlogicgames.gdx-video:gdx-video:$gdxVideoVersion")
-    implementation api("com.badlogicgames.gdx-video:gdx-video:$gdxVideoVersion")
-    implementation api("com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion") {
-        exclude group: "org.lwjgl", module: "lwjgl"
-        exclude group: "org.lwjgl", module: "lwjgl-glfw"
-        exclude group: "org.lwjgl", module: "lwjgl-egl"
-        exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
-        exclude group: "org.lwjgl", module: "lwjgl-openal"
-        exclude group: "org.lwjgl", module: "lwjgl-opengl"
-        exclude group: "org.lwjgl", module: "lwjgl-opengles"
-        exclude group: "org.lwjgl", module: "lwjgl-stb"
-    }
-    
-    
+  implementation api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion") {
+    exclude group: "org.lwjgl", module: "lwjgl"
+    exclude group: "org.lwjgl", module: "lwjgl-glfw"
+    exclude group: "org.lwjgl", module: "lwjgl-egl"
+    exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
+    exclude group: "org.lwjgl", module: "lwjgl-openal"
+    exclude group: "org.lwjgl", module: "lwjgl-opengl"
+    exclude group: "org.lwjgl", module: "lwjgl-opengles"
+    exclude group: "org.lwjgl", module: "lwjgl-stb"
+  }
 
-    // --- Win32 Libraries ---
-    implementation api('com.github.Dgzt:gdx-lwjgl3-angle-vulkan:1.0.0') {
-        exclude group: "org.lwjgl", module: "lwjgl-opengles"
-    }
+  implementation 'org.reflections:reflections:0.10.2'
+  implementation api("org.lwjgl:lwjgl:3.3.3!!") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-egl:3.3.3!!") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-openal:3.3.3!!") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-opencl:3.3.3!!") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-opengles:3.3.3!!") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-openxr:3.3.3!!") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-stb:3.3.3!!") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-openal:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-openxr:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-stb:3.3.3!!:natives-linux") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-openal:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-stb:3.3.3!!:natives-macos") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-glfw:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-jemalloc:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-openal:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-opengl:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-opengles:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-openxr:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+  implementation api("org.lwjgl:lwjgl-stb:3.3.3!!:natives-windows") { version { strictly "3.3.3" } }
+  implementation api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
+  implementation api("com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop")
+  implementation api("com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop")
+  implementation api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion")
+  implementation api("com.badlogicgames.gdx-video:gdx-video:$gdxVideoVersion")
+  implementation api("com.badlogicgames.gdx-video:gdx-video:$gdxVideoVersion")
+  implementation api("com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion") {
+    exclude group: "org.lwjgl", module: "lwjgl"
+    exclude group: "org.lwjgl", module: "lwjgl-glfw"
+    exclude group: "org.lwjgl", module: "lwjgl-egl"
+    exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
+    exclude group: "org.lwjgl", module: "lwjgl-openal"
+    exclude group: "org.lwjgl", module: "lwjgl-opengl"
+    exclude group: "org.lwjgl", module: "lwjgl-opengles"
+    exclude group: "org.lwjgl", module: "lwjgl-stb"
+  }
 
-    // Others
-    implementation api("com.github.crykn.guacamole:gdx-desktop:v0.3.5") {
-        exclude group: "org.lwjgl", module: "lwjgl"
-        exclude group: "org.lwjgl", module: "lwjgl-glfw"
-        exclude group: "org.lwjgl", module: "lwjgl-egl"
-        exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
-        exclude group: "org.lwjgl", module: "lwjgl-openal"
-        exclude group: "org.lwjgl", module: "lwjgl-opengl"
-        exclude group: "org.lwjgl", module: "lwjgl-opengles"
-        exclude group: "org.lwjgl", module: "lwjgl-stb"
-    }
 
-    // Discord integration
-    compileOnly("com.jagrosh:DiscordIPC:$discordIpcVersion")
-    
-    implementation api("ca.weblite:java-objc-bridge:1.2")
-    implementation api("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
+  // --- Win32 Libraries ---
+  implementation api('com.github.Dgzt:gdx-lwjgl3-angle-vulkan:1.0.0') {
+    exclude group: "org.lwjgl", module: "lwjgl-opengles"
+  }
 
-    // SLF4J
-    api "org.slf4j:slf4j-api:$slf4jVersion"
+  // Others
+  implementation api("com.github.crykn.guacamole:gdx-desktop:v0.3.5") {
+    exclude group: "org.lwjgl", module: "lwjgl"
+    exclude group: "org.lwjgl", module: "lwjgl-glfw"
+    exclude group: "org.lwjgl", module: "lwjgl-egl"
+    exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
+    exclude group: "org.lwjgl", module: "lwjgl-openal"
+    exclude group: "org.lwjgl", module: "lwjgl-opengl"
+    exclude group: "org.lwjgl", module: "lwjgl-opengles"
+    exclude group: "org.lwjgl", module: "lwjgl-stb"
+  }
 
-    runtimeOnly project(":logging")
+  // Discord integration
+  compileOnly("com.jagrosh:DiscordIPC:$discordIpcVersion")
 
-    // Misc
-    implementation api("com.raylabz:opensimplex:1.0.3")
+  implementation api("ca.weblite:java-objc-bridge:1.2")
+  implementation api("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
 
-    implementation api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
+  // SLF4J
+  api "org.slf4j:slf4j-api:$slf4jVersion"
 
-    // ImGui
-    implementation api("io.github.spair:imgui-java-binding:$imGuiVersion")
-    implementation api("io.github.spair:imgui-java-lwjgl3:$imGuiVersion") {
-        exclude group: "org.lwjgl", module: "lwjgl"
-        exclude group: "org.lwjgl", module: "lwjgl-bom"
-        exclude group: "org.lwjgl", module: "lwjgl-glfw"
-        exclude group: "org.lwjgl", module: "lwjgl-egl"
-        exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
-        exclude group: "org.lwjgl", module: "lwjgl-openal"
-        exclude group: "org.lwjgl", module: "lwjgl-opengl"
-        exclude group: "org.lwjgl", module: "lwjgl-opengles"
-        exclude group: "org.lwjgl", module: "lwjgl-stb"
-    }
-    implementation api("io.github.spair:imgui-java-natives-linux:$imGuiVersion")
-    implementation api("io.github.spair:imgui-java-natives-macos:$imGuiVersion")
-    implementation api("io.github.spair:imgui-java-natives-windows:$imGuiVersion")
+  runtimeOnly project(":logging")
 
-    implementation api("com.google.code.findbugs:jsr305:$jsrVersion")
+  // Misc
+  implementation api("com.raylabz:opensimplex:1.0.3")
 
-    implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
+  implementation api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
 
-    // fabric-loader dependencies
-    implementation api("org.ow2.asm:asm:${project.asmVersion}")
-    implementation api("org.ow2.asm:asm-analysis:${project.asmVersion}")
-    implementation api("org.ow2.asm:asm-commons:${project.asmVersion}")
-    implementation api("org.ow2.asm:asm-tree:${project.asmVersion}")
-    implementation api("org.ow2.asm:asm-util:${project.asmVersion}")
+  // ImGui
+  implementation api("io.github.spair:imgui-java-binding:$imGuiVersion")
+  implementation api("io.github.spair:imgui-java-lwjgl3:$imGuiVersion") {
+    exclude group: "org.lwjgl", module: "lwjgl"
+    exclude group: "org.lwjgl", module: "lwjgl-bom"
+    exclude group: "org.lwjgl", module: "lwjgl-glfw"
+    exclude group: "org.lwjgl", module: "lwjgl-egl"
+    exclude group: "org.lwjgl", module: "lwjgl-jemalloc"
+    exclude group: "org.lwjgl", module: "lwjgl-openal"
+    exclude group: "org.lwjgl", module: "lwjgl-opengl"
+    exclude group: "org.lwjgl", module: "lwjgl-opengles"
+    exclude group: "org.lwjgl", module: "lwjgl-stb"
+  }
+  implementation api("io.github.spair:imgui-java-natives-linux:$imGuiVersion")
+  implementation api("io.github.spair:imgui-java-natives-macos:$imGuiVersion")
+  implementation api("io.github.spair:imgui-java-natives-windows:$imGuiVersion")
 
-    implementation 'org.mozilla:rhino:1.8.0'
-    implementation 'party.iroiro.luajava:luajit:4.0.2'
-    runtimeOnly 'party.iroiro.luajava:luajit-platform:4.0.2:natives-desktop'
+  implementation api("com.google.code.findbugs:jsr305:$jsrVersion")
 
-    implementation 'org.graalvm.sdk:graal-sdk:24.2.2'
-    implementation 'org.graalvm.polyglot:polyglot:24.2.2'
-    implementation 'org.graalvm.js:js:24.2.2'
-    implementation 'org.graalvm.python:python:24.2.2'
+  implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
 
-    implementation 'net.java.dev.jna:jna:5.15.0'
-    implementation 'net.java.dev.jna:jna-platform:5.15.0'
-    implementation 'com.github.oshi:oshi-core:6.4.8'
+  // fabric-loader dependencies
+  implementation api("org.ow2.asm:asm:${project.asmVersion}")
+  implementation api("org.ow2.asm:asm-analysis:${project.asmVersion}")
+  implementation api("org.ow2.asm:asm-commons:${project.asmVersion}")
+  implementation api("org.ow2.asm:asm-tree:${project.asmVersion}")
+  implementation api("org.ow2.asm:asm-util:${project.asmVersion}")
+
+  implementation 'org.mozilla:rhino:1.8.0'
+  implementation 'party.iroiro.luajava:luajit:4.0.2'
+  runtimeOnly 'party.iroiro.luajava:luajit-platform:4.0.2:natives-desktop'
+
+  implementation 'org.graalvm.sdk:graal-sdk:24.2.2'
+  implementation 'org.graalvm.polyglot:polyglot:24.2.2'
+  implementation 'org.graalvm.js:js:24.2.2'
+  implementation 'org.graalvm.python:python:24.2.2'
+
+  implementation 'net.java.dev.jna:jna:5.15.0'
+  implementation 'net.java.dev.jna:jna-platform:5.15.0'
+  implementation 'com.github.oshi:oshi-core:6.4.8'
 
 
 }
 
 compileJava {
-    dependsOn ":client:build"
+  dependsOn ":client:build"
 }
 
 processResources {
-    dependsOn ":client:build"
-    from(file("$rootProject.projectDir/LICENSE")) { into "META-INF/" }
-    exclude "*.pdn", "*.xcf", "*.ps"
+  dependsOn ":client:build"
+  from(file("$rootProject.projectDir/LICENSE")) { into "META-INF/" }
+  exclude "*.pdn", "*.xcf", "*.ps"
 
-    duplicatesStrategy DuplicatesStrategy.INCLUDE
+  duplicatesStrategy DuplicatesStrategy.INCLUDE
 }
 
 jar {
-    dependsOn ":client:build"
+  dependsOn ":client:build"
+  //noinspection GroovyAssignabilityCheck
+  manifest {
     //noinspection GroovyAssignabilityCheck
-    manifest {
-        //noinspection GroovyAssignabilityCheck
-        attributes 'Implementation-Title': 'Quantum Voxel',
-                'Implementation-Vendor': 'Ultreon Studios',
-                project_version: project.mavenVersion,
-                'Main-Class': 'dev.ultreon.quantum.DesktopLauncher'
-    }
+    attributes 'Implementation-Title': 'Quantum Voxel',
+      'Implementation-Vendor': 'Ultreon Studios',
+      project_version: project.mavenVersion,
+      'Main-Class': 'dev.ultreon.quantum.DesktopLauncher'
+  }
 }
 
 tasks.register('prepareRun', {
-    Files.createDirectories(Paths.get(rootProject.projectDir.getAbsolutePath(), "run"))
+  Files.createDirectories(Paths.get(rootProject.projectDir.getAbsolutePath(), "run"))
 })
 
 tasks.withType(ProcessResources).configureEach {
-    duplicatesStrategy DuplicatesStrategy.INCLUDE
+  duplicatesStrategy DuplicatesStrategy.INCLUDE
 }
 
 tasks.withType(Jar).configureEach {
-    duplicatesStrategy DuplicatesStrategy.INCLUDE
+  duplicatesStrategy DuplicatesStrategy.INCLUDE
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
 
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(17)
+  }
 }

@@ -76,7 +76,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     private final Tracker<ChunkVec> chunkTracker = new Tracker<>();
     private boolean isInactive;
     private final Vec3d tmp3Da = new Vec3d();
-    private long lastChunkRefreshTime;
+    private int lastChunkRefreshTime;
     private final Vec3d lastPosition = new Vec3d();
     private int clientRenderDistance = 8;
 
@@ -275,8 +275,8 @@ public class ServerPlayer extends Player implements CacheablePlayer {
 
         EventSystem.postDefault(new ServerPlayerTickEvent.Post(this));
 
-        if (this.lastChunkRefreshTime + 1000 < System.currentTimeMillis()) {
-            this.lastChunkRefreshTime = System.currentTimeMillis();
+        if (this.lastChunkRefreshTime++ >= 10) {
+            this.lastChunkRefreshTime = 0;
             if (this.lastPosition.x != this.x || this.lastPosition.y != this.y || this.lastPosition.z != this.z) {
                 this.lastPosition.set(this.x, this.y, this.z);
                 this.world.getChunksAround(this, clientRenderDistance);
@@ -989,5 +989,10 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     public boolean isTracking(@Nullable ServerChunk serverChunk) {
         if (serverChunk == null) return false;
         return this.chunkTracker.isTracking(serverChunk.vec);
+    }
+
+    public void startTracking(@Nullable ServerChunk serverChunk) {
+        if (serverChunk == null) return;
+        this.chunkTracker.startTracking(serverChunk.vec);
     }
 }

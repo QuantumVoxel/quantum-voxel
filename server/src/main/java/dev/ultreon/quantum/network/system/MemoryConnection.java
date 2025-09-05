@@ -1,16 +1,19 @@
 package dev.ultreon.quantum.network.system;
 
 import dev.ultreon.quantum.CommonConstants;
+import dev.ultreon.quantum.DevFlag;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.TimerTask;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.network.*;
+import dev.ultreon.quantum.network.packets.BundlePacket;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.stage.PacketStage;
 import dev.ultreon.quantum.network.stage.PacketStages;
 import dev.ultreon.quantum.registry.RegistryHandle;
 import dev.ultreon.quantum.server.CloseCodes;
+import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
@@ -62,10 +65,11 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
                 try {
                     receive();
-                } catch (Throwable e) {
-                    disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Error receiving packet");
+                } catch (Exception e) {
+                    CommonConstants.LOGGER.error("Failed to receive packet", e);
+                    disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "The remote connection failed to receive a packet");
+                    on3rdPartyDisconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Error receiving packet");
                     cancel();
-
                     closeSoon();
                 }
             }
@@ -78,10 +82,11 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
                 try {
                     send();
-                } catch (Throwable e) {
-                    disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Error sending packet");
+                } catch (Exception e) {
+                    CommonConstants.LOGGER.error("Failed to send packet", e);
+                    disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "The remote connection failed to send a packet");
+                    on3rdPartyDisconnect(CloseCodes.PROTOCOL_ERROR.getCode(), "Error sending packet");
                     cancel();
-
                     closeSoon();
                 }
             }
@@ -107,17 +112,27 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             return;
         }
 
+        if (GamePlatform.get().isDevFlagEnabled(DevFlag.NetworkLogging) && !sendQueue.isEmpty()) {
+            GamePlatform.get().getDevPipe().send("NetLog", "Sending " + sendQueue.size() + " packets");
+        }
+
         ArrayList<PacketInstance<@NotNull Packet<? extends TheirHandler>>> instance;
+
         synchronized (sendQueue) {
             if (sendQueue.isEmpty()) return;
+            if (sendQueue.size() > 5000) {
+                return;
+            }
             instance = new ArrayList<>(sendQueue);
             sendQueue.clear();
+            tx.set(tx.get() - instance.size());
         }
 
         try {
             if (instance.isEmpty()) return;
             if (instance.size() > 5000) {
                 CommonConstants.LOGGER.warn("Too many packets in send queue");
+                return;
             }
             List<Packet<TheirHandler>> packets = new ArrayList<>(instance.size());
             for (PacketInstance<@NotNull Packet<? extends TheirHandler>> packetInstance : instance) {
@@ -159,7 +174,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             CommonConstants.LOGGER.error("Failed to send packet", e);
             disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getMessage());
             if (!GamePlatform.get().isWeb()) throw new RuntimeException(e);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             for (PacketInstance<@NotNull Packet<? extends TheirHandler>> packetInstance : instance) {
                 PacketListener listener = packetInstance.listener();
                 if (listener != null) {
@@ -170,7 +185,6 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getClass().getName() + ":\n" + e.getMessage());
             if (!GamePlatform.get().isWeb()) throw new RuntimeException(e);
         }
-        tx.decrementAndGet();
     }
 
     private void receive() throws InterruptedException {
@@ -195,6 +209,10 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             receive();
         } catch (InterruptedException e) {
             if (!GamePlatform.get().isWeb()) throw new RuntimeException(e);
+        } catch (Exception e) {
+            CommonConstants.LOGGER.error("Failed to send/receive packet", e);
+            disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getClass().getName() + ":\n" + e.getMessage());
+            on3rdPartyDisconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getClass().getName() + ":\n" + e.getMessage());
         }
     }
 
@@ -257,10 +275,23 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
         }
 
         if (sendQueue.size() >= 5000) {
+            dumpQueue();
+
             CrashLog crashLog = new CrashLog("Too many packets in send queue", new Throwable(":("));
             crashLog.add("Send queue size", sendQueue.size());
-            throw new ApplicationCrash(crashLog);
+            QuantumServer.get().crash(crashLog);
         }
+    }
+
+    public void dumpQueue() {
+        CommonConstants.LOGGER.warn("Dumping packet queue...");
+        sendQueue.forEach(packetInstance -> {
+            CommonConstants.LOGGER.warn("[PACKET DUMP] [SND] " + packetInstance.packet().getClass().getName());
+        });
+        receiveQueue.forEach(packetInstance -> {
+            CommonConstants.LOGGER.warn("[PACKET DUMP] [RCV] " + packetInstance.getClass().getName());
+        });
+        CommonConstants.LOGGER.warn("Packet queue dumped!");
     }
 
     @Override
@@ -270,6 +301,16 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
 
     @SuppressWarnings("unchecked")
     protected void received(Packet<? extends OurHandler> packet, @Nullable PacketListener resultListener) {
+        if (GamePlatform.get().isDevFlagEnabled(DevFlag.NetworkLogging)) {
+            if (packet instanceof BundlePacket) {
+                for (Packet<?> p : ((BundlePacket<?>) packet).getPackets()) {
+                    GamePlatform.get().getDevPipe().send("NetLog", "Received packet [bundle]: " + p.getClass().getName());
+                }
+            } else {
+                GamePlatform.get().getDevPipe().send("NetLog", "Received packet: " + packet.getClass().getName());
+            }
+        }
+
         try {
             if (handler == null) throw new SanityCheck("No handler set");
             if (ourPacketData.getId(packet) < 0) {
@@ -277,7 +318,7 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             }
             ((Packet<OurHandler>) packet).handle(createPacketContext(), handler);
             rx.decrementAndGet();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             if (resultListener != null) {
                 resultListener.onFailure();
             }

@@ -4,10 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Cursor;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -171,6 +169,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private final Thread mainThread = Thread.currentThread();
 
     private final List<CrashLog> crashes = new CopyOnWriteArrayList<>();
+    private final GLSLVersion supportedGlslVersion;
     public int viewMode;
     public NamespaceID fontId = id("quantium");
     public final AsyncExecutor executor = new AsyncExecutor(Math.min(GamePlatform.get().cpuCores() / 2, 2), "ClientTask");
@@ -459,6 +458,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private long nextTpsCheck;
     private int targetWidth, targetHeight;
     private long lastUnpause;
+    private double clientTickRate;
+    private long lastClientTickTime;
 
     /**
      * Initializer for the Quantum Voxel Client.
@@ -682,9 +683,19 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.maximizeButton = new ControlButton(ControlIcon.Maximize);
         this.minimizeButton = new ControlButton(ControlIcon.Minimize);
 
-//        if (ClientConfiguration.skipSplashScreen.getValue()) {
+        String supportedGlslVersion = "1.00";
+        String[] split = Gdx.gl20.glGetString(GL_SHADING_LANGUAGE_VERSION).split(" ");
+        for (String s : split) {
+            if (s.matches("\\d+\\.\\d+")) {
+                supportedGlslVersion = s;
+                break;
+            }
+        }
+
+        this.supportedGlslVersion = GLSLVersion.parse(supportedGlslVersion);
+        CommonConstants.LOGGER.info("Supported GLSL version: " + this.supportedGlslVersion);
+
         this.startLoading();
-//        }
     }
 
     private String genUnicode() {
@@ -2115,6 +2126,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     @ApiStatus.Internal
     public void clientTick() {
         PROFILER.begin("clientTick");
+
+        long curTime = System.currentTimeMillis();
+        this.clientTickRate = (curTime - this.lastClientTickTime) / 1000.0;
+        this.lastClientTickTime = curTime;
+
         try {
             // Check if the pre-game tick event is canceled
             if (EventSystem.postCancelable(new ClientTickEvent.GameTickPre(this))) return;
@@ -3591,5 +3607,19 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
     public Screenshots getScreenshots() {
         return screenshots;
+    }
+
+    public static double getClientTickRate() {
+        QuantumClient client = instance;
+        if (client == null) return 0.0;
+        return client.clientTickRate;
+    }
+
+    public GLSLVersion getGlslVersion() {
+        return supportedGlslVersion;
+    }
+
+    public boolean isVibrant() {
+        return supportedGlslVersion.isAtLeast(3, 30);
     }
 }

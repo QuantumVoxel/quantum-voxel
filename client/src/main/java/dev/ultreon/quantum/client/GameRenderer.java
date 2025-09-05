@@ -309,8 +309,6 @@ public class GameRenderer implements Disposable {
         RenderBufferSource bufferSource = this.client.renderBuffers();
         PROFILER.begin("game-renderer@render-world-buffers");
         try {
-            bufferSource.begin(this.client.camera);
-
             // Background
             @Nullable ClientWorldAccess world = this.client.world;
             @Nullable TerrainRenderer worldRenderer = this.client.worldRenderer;
@@ -321,38 +319,8 @@ public class GameRenderer implements Disposable {
                 LOGGER.warn("worldRenderer or localPlayer is null");
                 return true;
             }
-            if (this.client.renderWorld) {
-                worldRenderer.renderBackground(bufferSource, Gdx.graphics.getDeltaTime());
-            }
 
-            bufferSource.getBuffer(RenderPass.SKYBOX).flush();
-            bufferSource.getBuffer(RenderPass.CELESTIAL_BODIES).flush();
-
-            var position = localPlayer.getPosition(client.partialTick);
-            Array<Entity> toSort = new Array<>(world.getAllEntities());
             worldRenderer.render(client.renderBuffers(), deltaTime);
-            for (Entity entity : toSort.toArray(Entity.class)) {
-                if (entity instanceof LocalPlayer) continue;
-                worldRenderer.collectEntity(entity, client.renderBuffers());
-            }
-
-            // Particles
-            ParticleSystem particleSystem = worldRenderer.getParticleSystem();
-            particleSystem.begin();
-            particleSystem.updateAndDraw(Gdx.graphics.getDeltaTime());
-            particleSystem.end();
-//        modelBatch.render(particleSystem);
-            // TODO add particle system
-
-            // Foreground
-            worldRenderer.renderForeground(client.renderBuffers(), deltaTime);
-
-            // Extract textures
-            if (vignetteTex == null) {
-                vignetteTex = client.getTextureManager().getTexture(new NamespaceID("textures/gui/vignette.png"));
-            }
-
-            bufferSource.end();
         } finally {
             PROFILER.end();
         }

@@ -124,7 +124,7 @@ public class LauncherConfig {
         try {
             Files.writeString(Path.of("config.quant"), json.prettyPrint(settings));
         } catch (IOException e) {
-            DesktopLauncher.LOGGER.warn("Failed to save launcher config", e);
+            DesktopMain.LOGGER.warn("Failed to save launcher config", e);
         }
     }
 }

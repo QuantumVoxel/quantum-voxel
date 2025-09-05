@@ -153,10 +153,6 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
             this.tmp.setZero();
             this.tmp1.setZero();
-
-            if (this.client.connection != null) {
-                this.client.connection.send(new C2SChunkStatusPacket(this.vec, Chunk.Status.UNLOADED));
-            }
         }
     }
 

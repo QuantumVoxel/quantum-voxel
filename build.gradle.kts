@@ -65,12 +65,13 @@ repositories {
   mavenCentral()
   mavenLocal()
   google()
+  maven("https://maven.ultreon.dev/releases/")
+  maven("https://maven.ultreon.dev/snapshots/")
   maven("https://maven.atlassian.com/3rdparty/")
   maven("https://repo1.maven.org/maven2/")
   maven("https://repo.runelite.net/")
   maven("https://repo.glaremasters.me/repository/public/")
   maven("https://teavm.org/maven/repository")
-  maven("https://jitpack.io")
   flatDir {
     name = "Project Libraries"
     dirs = setOf(file("${projectDir}/libs"))
@@ -160,6 +161,8 @@ allprojects {
     mavenLocal()
     mavenCentral()
     google()
+    maven("https://maven.ultreon.dev/releases")
+    maven("https://maven.ultreon.dev/snapshots")
     maven("https://maven.fabricmc.net/")
     maven("https://teavm.org/maven/repository")
     maven("https://oss.sonatype.org/content/repositories/releases")

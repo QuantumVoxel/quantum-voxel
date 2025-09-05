@@ -140,3 +140,7 @@ Thumbs.db
 /client/src/main/resources/assets.txt
 /xeox-loader/permission-helper/build/
 /.local/
+
+/bindings/
+/generated_bindings
+/.luarc.json

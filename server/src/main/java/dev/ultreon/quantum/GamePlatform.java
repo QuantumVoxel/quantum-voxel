@@ -5,6 +5,9 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
+import dev.ultreon.quantum.dev.DevPipe;
+import dev.ultreon.quantum.network.PacketHandler;
+import dev.ultreon.quantum.network.system.MemoryConnection;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.platform.PlatformFeature;
@@ -19,7 +22,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -421,8 +423,8 @@ public abstract class GamePlatform {
         return null;
     }
 
-    public Set<String> getLoadedClasses() {
-        return Collections.emptySet();
+    public Class<?>[] getLoadedClasses() {
+        return new Class[0];
     }
 
     public String getFileSep() {
@@ -477,6 +479,16 @@ public abstract class GamePlatform {
     }
 
     public abstract <T> List<T> createSyncList();
+
+    public DevPipe getDevPipe() {
+        return (tag, message) -> {
+
+        };
+    }
+
+    public void disableGame() {
+
+    }
 
     private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {
         private boolean done = false;

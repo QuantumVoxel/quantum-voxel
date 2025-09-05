@@ -14,14 +14,14 @@ import static dev.ultreon.quantum.client.QuantumClient.get;
 
 /**
  * The Shaders class provides a collection of shader providers for the game.
- * 
+ *
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
 @SuppressWarnings("SameParameterValue")
 public class Shaders {
     /**
      * The depth shader provider. Located in {@code shaders/depth.vert} and {@code shaders/depth.frag}.
-     * 
+     *
      * @see DepthShaderProvider
      */
     public static final Supplier<DepthShaderProvider> DEPTH = Shaders.register("depth", () -> new MyDepthShaderProvider(
@@ -31,19 +31,19 @@ public class Shaders {
 
     /**
      * The default shader provider. Located in {@code shaders/default.vert} and {@code shaders/default.frag}.
-     * 
+     *
      * @see DefaultShaderProvider
      */
     public static final Supplier<DefaultShaderProvider> DEFAULT = Shaders.register("default", MyDefaultShaderProvider::new);
 
     /**
      * The scene shader provider. Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
-     * 
+     *
      * @see SceneShaders
      */
     public static final Supplier<SceneShaders> WORLD = Shaders.register("world", () -> new SceneShaders(
-            QuantumClient.resource(NamespaceID.of("shaders/scene.vert")),
-            QuantumClient.resource(NamespaceID.of("shaders/scene.frag"))
+            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isVibrant() ? "shaders/vibrant/scene.vert" : "shaders/scene.vert")),
+            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isVibrant() ? "shaders/vibrant/scene.frag" : "shaders/scene.frag"))
     ));
 
     /**
@@ -53,8 +53,18 @@ public class Shaders {
      * @see SceneShaders
      */
     public static final Supplier<SceneShaders> TRANSPARENT = Shaders.register("transparent", () -> new SceneShaders(
-            QuantumClient.resource(NamespaceID.of("shaders/transparent.vert")),
-            QuantumClient.resource(NamespaceID.of("shaders/transparent.frag"))));
+            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isVibrant() ? "shaders/vibrant/transparent.vert" : "shaders/transparent.vert")),
+            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isVibrant() ? "shaders/vibrant/transparent.frag" : "shaders/transparent.frag"))));
+
+    /**
+     * The scene shader provider.
+     * Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
+     *
+     * @see SceneShaders
+     */
+    public static final Supplier<SceneShaders> CELESTIAL_BODIES = Shaders.register("transparent", () -> new SceneShaders(
+            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isVibrant() ? "shaders/vibrant/celestial_body.vert" : "shaders/transparent.vert")),
+            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isVibrant() ? "shaders/vibrant/celestial_body.frag" : "shaders/transparent.frag"))));
 
     /**
      * The scene shader provider.
@@ -63,8 +73,8 @@ public class Shaders {
      * @see SceneShaders
      */
     public static final Supplier<SceneShaders> WATER = Shaders.register("water", () -> new SceneShaders(
-            QuantumClient.resource(NamespaceID.of("shaders/water.vert")),
-            QuantumClient.resource(NamespaceID.of("shaders/water.frag"))));
+            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isVibrant() ? "shaders/vibrant/water.vert" : "shaders/water.vert")),
+            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isVibrant() ? "shaders/vibrant/water.frag" : "shaders/water.frag"))));
 
     /**
      * The scene shader provider.
@@ -73,21 +83,20 @@ public class Shaders {
      * @see SceneShaders
      */
     public static final Supplier<SceneShaders> CUTOUT = Shaders.register("cutout", () -> new SceneShaders(
-            QuantumClient.resource(NamespaceID.of("shaders/cutout.vert")),
-            QuantumClient.resource(NamespaceID.of("shaders/cutout.frag"))
-    ));
+            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isVibrant() ? "shaders/vibrant/cutout.vert" : "shaders/cutout.vert")),
+            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isVibrant() ? "shaders/vibrant/cutout.frag" : "shaders/cutout.frag"))));
 
     /**
      * The skybox shader provider. Located in {@code shaders/skybox.vert} and {@code shaders/skybox.frag}.
      */
     public static final Supplier<DefaultShaderProvider> SKYBOX = Shaders.register("skybox", () -> new SkyboxShaders(
-            QuantumClient.shader(NamespaceID.of("skybox.vert")),
-            QuantumClient.shader(NamespaceID.of("skybox.frag"))
+            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isVibrant() ? "shaders/vibrant/skybox.vert" : "shaders/skybox.vert")),
+            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isVibrant() ? "shaders/vibrant/skybox.frag" : "shaders/skybox.frag"))
     ));
 
     /**
      * The model view shader provider. Located in {@code shaders/model.vert}, {@code shaders/model.frag}, and {@code shaders/model.geom}.
-     * 
+     *
      * @see ModelShaders
      */
     public static final Supplier<ModelShaders> MODEL_VIEW = Shaders.register("model_view", () -> new ModelShaders(
@@ -96,7 +105,7 @@ public class Shaders {
 
     /**
      * The gizmo shader provider. Located in {@code shaders/gizmo.vert}, {@code shaders/gizmo.frag}, and {@code shaders/gizmo.geom}.
-     * 
+     *
      * @see GizmoShaders
      */
     public static final Supplier<GizmoShaders> GIZMO = Shaders.register("gizmo", () -> new GizmoShaders(
@@ -106,7 +115,7 @@ public class Shaders {
 
     /**
      * The gizmo outline shader provider. Located in {@code shaders/gizmo_outline.vert} and {@code shaders/gizmo_outline.frag}.
-     * 
+     *
      * @see GizmoOutlineShaders
      */
     public static final Supplier<GizmoOutlineShaders> GIZMO_OUTLINE = Shaders.register("gizmo_outline", () -> new GizmoOutlineShaders(
@@ -116,8 +125,8 @@ public class Shaders {
 
     /**
      * Registers a shader provider with the given name.
-     * 
-     * @param name The name of the shader provider.
+     *
+     * @param name     The name of the shader provider.
      * @param provider The shader provider.
      * @return The registered shader provider.
      */
@@ -127,15 +136,15 @@ public class Shaders {
 
     /**
      * Checks if a shader has been compiled successfully.
-     * 
-     * @param program The shader program.
+     *
+     * @param program  The shader program.
      * @param filename The filename of the shader.
      */
     public static void checkShaderCompilation(ShaderProgram program, String filename) {
         String shaderLog = program.getLog();
 //        if (program.isCompiled()) {
-            if (shaderLog.isEmpty()) QuantumClient.LOGGER.debug("Shader compilation for {} success", filename);
-            else QuantumClient.LOGGER.warn("Shader compilation warnings for {}:\n{}", filename, shaderLog);
+        if (shaderLog.isEmpty()) QuantumClient.LOGGER.debug("Shader compilation for {} success", filename);
+        else QuantumClient.LOGGER.warn("Shader compilation warnings for {}:\n{}", filename, shaderLog);
 //        } else {
 //            throw new GdxRuntimeException("Shader compilation failed for " + filename + ":\n" + shaderLog);
 //        }

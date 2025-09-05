@@ -101,7 +101,7 @@ public class WorldShader extends DefaultShader {
      * @param lod The level of detail used for rendering, influencing the #define LOD_LEVEL in the shader.
      */
     public WorldShader(Renderable renderable, Config config, int lod) {
-        this(renderable, config, String.format("#define LOD_LEVEL %s\n", lod));
+        this(renderable, config, (QuantumClient.get().isVibrant() ? "#version 330 core\n" : "") + String.format("#define LOD_LEVEL %s\n", lod));
         this.lod = lod;
     }
 
