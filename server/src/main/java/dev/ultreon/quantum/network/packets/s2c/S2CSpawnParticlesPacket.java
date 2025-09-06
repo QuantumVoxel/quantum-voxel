@@ -5,18 +5,18 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.particles.ParticleType;
 
 import java.util.Objects;
 
 public final class S2CSpawnParticlesPacket implements Packet<InGameClientPacketHandler> {
     private final int particleTypeId;
-    private final Vec3d position;
-    private final Vec3d motion;
+    private final DVec3 position;
+    private final DVec3 motion;
     private final int count;
 
-    public S2CSpawnParticlesPacket(int particleTypeId, Vec3d position, Vec3d motion,
+    public S2CSpawnParticlesPacket(int particleTypeId, DVec3 position, DVec3 motion,
                                    int count) {
         this.particleTypeId = particleTypeId;
         this.position = position;
@@ -24,14 +24,14 @@ public final class S2CSpawnParticlesPacket implements Packet<InGameClientPacketH
         this.count = count;
     }
 
-    public S2CSpawnParticlesPacket(ParticleType particleType, Vec3d position, Vec3d motion, int count) {
+    public S2CSpawnParticlesPacket(ParticleType particleType, DVec3 position, DVec3 motion, int count) {
         this(particleType.getRawId(), position, motion, count);
     }
 
     public static S2CSpawnParticlesPacket read(PacketIO packetIO) {
         var particleTypeId = packetIO.readVarInt();
-        var position = packetIO.readVec3d(new Vec3d());
-        var motion = packetIO.readVec3d(new Vec3d());
+        var position = packetIO.readVec3d(new DVec3());
+        var motion = packetIO.readVec3d(new DVec3());
         var count = packetIO.readVarInt();
 
         return new S2CSpawnParticlesPacket(particleTypeId, position, motion, count);
@@ -68,11 +68,11 @@ public final class S2CSpawnParticlesPacket implements Packet<InGameClientPacketH
         return particleTypeId;
     }
 
-    public Vec3d position() {
+    public DVec3 position() {
         return position;
     }
 
-    public Vec3d motion() {
+    public DVec3 motion() {
         return motion;
     }
 

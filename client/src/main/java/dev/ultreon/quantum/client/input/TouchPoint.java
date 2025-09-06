@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.input;
 
-import dev.ultreon.quantum.util.Vec2i;
+import dev.ultreon.quantum.util.IVec2;
 
 import java.util.Objects;
 
@@ -17,8 +17,8 @@ public final class TouchPoint {
         this.button = button;
     }
 
-    public Vec2i pos() {
-        return new Vec2i(mouseX, mouseY);
+    public IVec2 pos() {
+        return new IVec2(mouseX, mouseY);
     }
 
     @Override

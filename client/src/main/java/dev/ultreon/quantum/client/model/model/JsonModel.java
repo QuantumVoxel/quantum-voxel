@@ -23,7 +23,7 @@ import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.block.CubeModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.render.ModelManager;
-import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.render.RenderType;
 import dev.ultreon.quantum.client.world.OpaqueFaces;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.Direction;
@@ -151,8 +151,8 @@ public class JsonModel implements BlockModel, ItemModel {
     }
 
     @Override
-    public RenderPass getRenderPass() {
-        return RenderPass.byName(display.renderPass);
+    public RenderType getRenderPass() {
+        return RenderType.byName(display.renderPass);
     }
 
     @Override

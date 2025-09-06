@@ -8,7 +8,7 @@ import dev.ultreon.quantum.client.gui.screens.world.WorldLoadScreen;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.rpc.GameActivity;
 import dev.ultreon.quantum.client.world.ClientWorld;
-import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.client.render.world.WorldRenderer;
 import dev.ultreon.quantum.entity.EntityTypes;
 import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.client.ClientPacketHandler;
@@ -20,7 +20,7 @@ import dev.ultreon.quantum.network.system.IConnection;
 import dev.ultreon.quantum.registry.S2CRegistrySync;
 import dev.ultreon.quantum.server.S2CRegistriesSync;
 import dev.ultreon.quantum.util.GameMode;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -39,7 +39,7 @@ public class LoginClientPacketHandlerImpl implements LoginClientPacketHandler {
     @Override
     public void onLoginAccepted(S2CLoginAcceptedPacket packet) {
         UUID uuid = packet.uuid();
-        Vec3d spawnPos = packet.spawnPos();
+        DVec3 spawnPos = packet.spawnPos();
         GameMode gameMode = packet.gameMode();
         float health = packet.health();
         int hunger = packet.hunger(); // TODO

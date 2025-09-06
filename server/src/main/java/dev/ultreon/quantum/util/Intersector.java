@@ -3,10 +3,10 @@ package dev.ultreon.quantum.util;
 import org.jetbrains.annotations.Nullable;
 
 public class Intersector {
-    private final static Vec3d tmp = new Vec3d();
+    private final static DVec3 tmp = new DVec3();
 
     @SuppressWarnings({"UnqualifiedStaticUsage", "ConstantValue"})
-    public static boolean intersectRayBounds (Ray ray, BoundingBox box, @Nullable Vec3d intersection) {
+    public static boolean intersectRayBounds (Ray ray, BoundingBox box, @Nullable DVec3 intersection) {
         if (box.contains(ray.origin)) {
             if (intersection != null) intersection.set(ray.origin);
             return true;

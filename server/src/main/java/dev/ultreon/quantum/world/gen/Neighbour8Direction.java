@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world.gen;
 
-import dev.ultreon.quantum.util.Vec2i;
+import dev.ultreon.quantum.util.IVec2;
 
 public enum Neighbour8Direction {
     E(0, 1),
@@ -20,7 +20,7 @@ public enum Neighbour8Direction {
         this.y = y;
     }
 
-    public Vec2i vec() {
-        return new Vec2i(this.x, this.y);
+    public IVec2 vec() {
+        return new IVec2(this.x, this.y);
     }
 }

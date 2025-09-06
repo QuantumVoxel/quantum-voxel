@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.gui.overlay;
 
 import com.badlogic.gdx.graphics.Texture;
-import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec2;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.StaticWidget;
@@ -37,7 +37,7 @@ public class LoadingOverlay implements StaticWidget {
         this.curProgressX += (this.progress - this.curProgressX) * deltaTime;
 
         renderer.fill(0, 0, width, height, RgbColor.rgb(0x101010));
-        Vec2f thumbnail = this.resizer.fill(width * TO_ZOOM, height * TO_ZOOM);
+        Vec2 thumbnail = this.resizer.fill(width * TO_ZOOM, height * TO_ZOOM);
 
         float drawWidth = thumbnail.x;
         float drawHeight = thumbnail.y;

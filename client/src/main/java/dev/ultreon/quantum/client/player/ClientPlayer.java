@@ -3,12 +3,11 @@ package dev.ultreon.quantum.client.player;
 import dev.ultreon.quantum.api.commands.perms.Permission;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.world.ClientWorld;
-import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.util.MathHelper;
 import dev.ultreon.quantum.util.Vec;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class ClientPlayer extends Player {
@@ -141,9 +140,9 @@ public abstract class ClientPlayer extends Player {
      * @param partialTick The partial tick time used for interpolation, ranging from 0.0 to 1.0.
      * @return A normalized Vec3d representing the look direction of the player.
      */
-    public Vec3d getLookVector(float partialTick) {
+    public DVec3 getLookVector(float partialTick) {
         // Calculate the direction vector
-        Vec3d direction = new Vec3d();
+        DVec3 direction = new DVec3();
 
         float yRot = this.getYRot(partialTick);
         float xHeadRot = this.getHeadXRot(partialTick);

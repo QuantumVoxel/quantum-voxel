@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.client.input;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.quantum.client.config.ClientConfiguration;
 //import dev.ultreon.quantum.client.input.controller.ControllerContext;
 //import dev.ultreon.quantum.client.input.controller.ControllerInput;
 //import dev.ultreon.quantum.client.input.controller.context.InGameControllerContext;
@@ -11,7 +9,7 @@ import dev.ultreon.quantum.client.input.key.KeyBinds;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.util.Utils;
 import dev.ultreon.quantum.entity.player.Player;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import org.jetbrains.annotations.NotNull;
 
 public class PlayerInput {
@@ -120,7 +118,7 @@ public class PlayerInput {
     }
 
     @Deprecated
-    public Vec3d getVel() {
+    public DVec3 getVel() {
         return Utils.toCoreLibs(vel);
     }
 

@@ -5,19 +5,19 @@ import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.LoginClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.util.GameMode;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 
 import java.util.Objects;
 import java.util.UUID;
 
 public final class S2CLoginAcceptedPacket implements Packet<LoginClientPacketHandler> {
     private final UUID uuid;
-    private final Vec3d spawnPos;
+    private final DVec3 spawnPos;
     private final GameMode gameMode;
     private final float health;
     private final int hunger;
 
-    public S2CLoginAcceptedPacket(UUID uuid, Vec3d spawnPos, GameMode gameMode, float health,
+    public S2CLoginAcceptedPacket(UUID uuid, DVec3 spawnPos, GameMode gameMode, float health,
                                   int hunger) {
         this.uuid = uuid;
         this.spawnPos = spawnPos;
@@ -28,7 +28,7 @@ public final class S2CLoginAcceptedPacket implements Packet<LoginClientPacketHan
 
     public static S2CLoginAcceptedPacket read(PacketIO buffer) {
         var uuid = buffer.readUuid();
-        var spawnPos = buffer.readVec3d(new Vec3d());
+        var spawnPos = buffer.readVec3d(new DVec3());
         var gameMode = buffer.readEnum(GameMode.SURVIVAL);
         var health = buffer.readFloat();
         var hunger = buffer.readInt();
@@ -61,7 +61,7 @@ public final class S2CLoginAcceptedPacket implements Packet<LoginClientPacketHan
         return uuid;
     }
 
-    public Vec3d spawnPos() {
+    public DVec3 spawnPos() {
         return spawnPos;
     }
 

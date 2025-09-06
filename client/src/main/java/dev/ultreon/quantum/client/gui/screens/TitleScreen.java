@@ -14,7 +14,7 @@ import dev.ultreon.quantum.client.util.Resizer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -120,7 +120,7 @@ public class TitleScreen extends Screen {
     @Override
     protected void renderSolidBackground(Renderer renderer) {
         if (!GamePlatform.get().hasBackPanelRemoved()) {
-            Vec2f thumbnail = this.resizer.fill(this.size.width, this.size.height);
+            Vec2 thumbnail = this.resizer.fill(this.size.width, this.size.height);
 
             float drawWidth = thumbnail.x;
             float drawHeight = thumbnail.y;

@@ -1063,7 +1063,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec3i vec) {
+            } else if (object instanceof IVec3 vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1074,7 +1074,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec3f vec) {
+            } else if (object instanceof Vec3 vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1085,7 +1085,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec2i vec) {
+            } else if (object instanceof IVec2 vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1096,7 +1096,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec2f vec) {
+            } else if (object instanceof Vec2 vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1107,7 +1107,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec4i vec) {
+            } else if (object instanceof IVec4 vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1118,7 +1118,7 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec4f vec) {
+            } else if (object instanceof Vec4 vec) {
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1721,7 +1721,7 @@ public class ImGuiOverlay {
                 ImGuiEx.editDouble("FogStart", "Shader::World::FogStart", () -> ClientWorld.FOG_START, v -> ClientWorld.FOG_START = v);
                 ImGuiEx.editDouble("FogEnd", "Shader::World::FogEnd", () -> ClientWorld.FOG_END, v -> ClientWorld.FOG_END = v);
                 ImGuiEx.editVec2f("AtlasSize", "Shader::World::AtlasSize", ClientWorld.ATLAS_SIZE::get, ClientWorld.ATLAS_SIZE::set);
-                ImGuiEx.editVec3f("CameraUp", "Shader::World::CameraUp", () -> new Vec3f(WorldShader.CAMERA_UP.x, WorldShader.CAMERA_UP.y, WorldShader.CAMERA_UP.z), vec3f -> WorldShader.CAMERA_UP.set(vec3f.x, vec3f.y, vec3f.z));
+                ImGuiEx.editVec3f("CameraUp", "Shader::World::CameraUp", () -> new Vec3(WorldShader.CAMERA_UP.x, WorldShader.CAMERA_UP.y, WorldShader.CAMERA_UP.z), vec3f -> WorldShader.CAMERA_UP.set(vec3f.x, vec3f.y, vec3f.z));
                 ImGui.treePop();
             }
         }

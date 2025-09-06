@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.multiplayer;
 
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.RemotePlayer;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public class MultiplayerData {
         return null;
     }
 
-    public RemotePlayer addPlayer(int id, UUID uuid, String name, Vec3d position) {
+    public RemotePlayer addPlayer(int id, UUID uuid, String name, DVec3 position) {
         QuantumClient.LOGGER.info("{} joined the server.", name);
         RemotePlayer player = new RemotePlayer(this.client.world);
         player.setUuid(uuid);

@@ -22,12 +22,12 @@ public interface Point {
         return (int) getZ();
     }
 
-    default Vec3i getVec3i() {
-        return new Vec3i(getIntX(), getIntY(), getIntZ());
+    default IVec3 getVec3i() {
+        return new IVec3(getIntX(), getIntY(), getIntZ());
     }
 
-    default Vec2i getVec2i() {
-        return new Vec2i(getIntX(), getIntZ());
+    default IVec2 getVec2i() {
+        return new IVec2(getIntX(), getIntZ());
     }
 
     default ChunkVec chunk() {
@@ -50,7 +50,7 @@ public interface Point {
         return new Vec(x, y, z);
     }
 
-    default Point offset(Vec3i vec) {
+    default Point offset(IVec3 vec) {
         return offset(vec.x, vec.y, vec.z);
     }
 

@@ -6,11 +6,11 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.client.render.world.WorldRenderer;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Ray;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3f;
+import dev.ultreon.quantum.util.DVec3;
+import dev.ultreon.quantum.util.Vec3;
 
 /**
  * The camera used for the game.
@@ -25,7 +25,7 @@ public class GameCamera extends PerspectiveCamera {
     private float fovModifier = 1;
     private float fovModifierGoal = 1;
     private Vector3 hitPosition;
-    private Vec3d camPos;
+    private DVec3 camPos;
     private BlockHit hitResult;
     private LocalPlayer player;
     private float cameraBop;
@@ -100,7 +100,7 @@ public class GameCamera extends PerspectiveCamera {
         else this.updateWalkAnim(player, this.cameraBop, deltaTime, duration);
     }
 
-    private void updateFirstPerson(Vec3d lookVec) {
+    private void updateFirstPerson(DVec3 lookVec) {
         // Set the camera's position to zero, and set the camera's direction to the player's look vector.
         this.position.set(0, 0, 0);
         this.direction.set((float) lookVec.x, (float) lookVec.y, (float) lookVec.z);
@@ -144,7 +144,7 @@ public class GameCamera extends PerspectiveCamera {
         this.cameraBop = bop * 6;
     }
 
-    private void updateThirdPerson(Vec3d lookVec) {
+    private void updateThirdPerson(DVec3 lookVec) {
         // Move camera backwards when player is in third person.
         var ray = new Ray(this.camPos, lookVec.cpy().neg().nor());
         var world = this.client.world;
@@ -153,7 +153,7 @@ public class GameCamera extends PerspectiveCamera {
                 this.hitResult = world.rayCast(ray, 5.1f);
                 this.direction.set((float) lookVec.x, (float) lookVec.y, (float) lookVec.z);
                 if (this.hitResult.isCollide()) {
-                    Vec3f normal = this.hitResult.getNormal().f();
+                    Vec3 normal = this.hitResult.getNormal().f();
                     Vector3 gdxNormal = TMP_1.set(normal.x, normal.y, normal.z);
                     Vector3 hitOffset = TMP_2.set(this.direction).nor()
                             .scl(-this.hitResult.getDistance())
@@ -167,7 +167,7 @@ public class GameCamera extends PerspectiveCamera {
                 this.hitPosition = TMP_1.set(this.direction).nor().scl(-5.1f);
                 this.direction.set(-(float) lookVec.x, -(float) lookVec.y, -(float) lookVec.z);
                 if (this.hitResult.isCollide()) {
-                    Vec3f normal = this.hitResult.getNormal().f();
+                    Vec3 normal = this.hitResult.getNormal().f();
                     Vector3 gdxNormal = TMP_1.set(normal.x, normal.y, normal.z);
                     Vector3 hitOffset = TMP_2.set(this.direction).nor()
                             .scl(-this.hitResult.getDistance())
@@ -181,10 +181,10 @@ public class GameCamera extends PerspectiveCamera {
         }
     }
 
-    public Vector3 relative(Vec3d position, Vector3 tmp) {
+    public Vector3 relative(DVec3 position, Vector3 tmp) {
         LocalPlayer localPlayer = this.client.player;
         if (localPlayer == null) return null;
-        Vec3f sub = position.sub(this.player.getPosition(client.partialTick).add(0, this.player.getEyeHeight(), 0)).f();
+        Vec3 sub = position.sub(this.player.getPosition(client.partialTick).add(0, this.player.getEyeHeight(), 0)).f();
         return tmp.set(sub.x, sub.y, sub.z);
     }
 
@@ -204,11 +204,11 @@ public class GameCamera extends PerspectiveCamera {
 		this.fovModifierGoal = fovModifierGoal;
 	}
 
-	public Vec3d getCamPos() {
+	public DVec3 getCamPos() {
 		return camPos;
 	}
 
-	public void setCamPos(Vec3d camPos) {
+	public void setCamPos(DVec3 camPos) {
 		this.camPos = camPos;
 	}
 

@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.render.ModelManager;
-import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.render.RenderType;
 import dev.ultreon.quantum.client.render.NodeCategory;
 import dev.ultreon.quantum.client.resources.LoadableResource;
 import dev.ultreon.quantum.client.world.ClientChunk;
@@ -61,7 +61,7 @@ public interface BlockModel extends LoadableResource {
         return false;
     }
 
-    RenderPass getRenderPass();
+    RenderType getRenderPass();
 
     Collection<NamespaceID> getAllTextures();
 }

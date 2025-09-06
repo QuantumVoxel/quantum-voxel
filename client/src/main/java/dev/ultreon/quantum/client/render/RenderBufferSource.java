@@ -17,9 +17,9 @@ import static dev.ultreon.quantum.client.QuantumClient.PROFILER;
 public class RenderBufferSource extends GameObject implements Disposable {
     private static final Array<RenderBufferSource> MANAGED = new Array<>();
 
-    private final ObjectMap<RenderPass, RenderBuffer> buffers = new ObjectMap<>();
-    private final ObjectMap<RenderPass, RenderBuffer> backBuffers = new ObjectMap<>();
-    private final List<RenderPass> buffersSorted = new ArrayList<>();
+    private final ObjectMap<RenderType, RenderBuffer> buffers = new ObjectMap<>();
+    private final ObjectMap<RenderType, RenderBuffer> backBuffers = new ObjectMap<>();
+    private final List<RenderType> buffersSorted = new ArrayList<>();
     private @Nullable GameCamera camera;
     private boolean started;
     public long timeSpan;
@@ -43,7 +43,7 @@ public class RenderBufferSource extends GameObject implements Disposable {
         PROFILER.begin("render-buffer-source@flush");
         try {
             long start = System.nanoTime() / 1000;
-            for (RenderPass pass : this.buffersSorted) {
+            for (RenderType pass : this.buffersSorted) {
                 RenderBuffer buffer = buffers.get(pass);
                 if (buffer == null || !buffer.isStarted()) continue;
                 buffer.flush();
@@ -54,7 +54,7 @@ public class RenderBufferSource extends GameObject implements Disposable {
         }
     }
 
-    public RenderBuffer getBuffer(RenderPass pass) {
+    public RenderBuffer getBuffer(RenderType pass) {
         PROFILER.begin("render-buffer-source@get-buffer");
         try {
             if (!started) throw new IllegalStateException("RenderBuffer not started");
@@ -85,7 +85,7 @@ public class RenderBufferSource extends GameObject implements Disposable {
         PROFILER.begin("render-buffer-source@end");
         try {
             long start = System.nanoTime() / 1000;
-            for (RenderPass pass : this.buffersSorted) {
+            for (RenderType pass : this.buffersSorted) {
                 RenderBuffer buffer = buffers.get(pass);
                 if (buffer == null || !buffer.isStarted()) continue;
                 buffer.flush();

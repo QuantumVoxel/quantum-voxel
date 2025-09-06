@@ -4,7 +4,7 @@ import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -14,9 +14,9 @@ public final class S2CAddPlayerPacket implements Packet<InGameClientPacketHandle
     private final int id;
     private final UUID uuid;
     private final String name;
-    private final Vec3d position;
+    private final DVec3 position;
 
-    public S2CAddPlayerPacket(int id, @NotNull UUID uuid, String name, Vec3d position) {
+    public S2CAddPlayerPacket(int id, @NotNull UUID uuid, String name, DVec3 position) {
         this.id = id;
         this.uuid = uuid;
         this.name = name;
@@ -27,7 +27,7 @@ public final class S2CAddPlayerPacket implements Packet<InGameClientPacketHandle
         var id = buffer.readInt();
         var uuid = buffer.readUuid();
         var name = buffer.readString(20);
-        var position = buffer.readVec3d(new Vec3d());
+        var position = buffer.readVec3d(new DVec3());
 
         return new S2CAddPlayerPacket(id, uuid, name, position);
     }
@@ -66,7 +66,7 @@ public final class S2CAddPlayerPacket implements Packet<InGameClientPacketHandle
         return name;
     }
 
-    public Vec3d position() {
+    public DVec3 position() {
         return position;
     }
 

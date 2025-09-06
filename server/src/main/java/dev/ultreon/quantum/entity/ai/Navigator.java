@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.entity.ai;
 
 import dev.ultreon.quantum.entity.LivingEntity;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.rng.RNG;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,11 +14,11 @@ public class Navigator extends EntityAIComponent<LivingEntity> {
     private Path currentPath;
     private int pathIndex;
     private @Nullable LivingEntity target;
-    private final Vec3d tmp3D1 = new Vec3d();
-    private final Vec3d tmp3D2 = new Vec3d();
-    private final Vec3d tmp3D3 = new Vec3d();
-    private final Vec3d tmp3D4 = new Vec3d();
-    private final Vec3d tmp3D5 = new Vec3d();
+    private final DVec3 tmp3D1 = new DVec3();
+    private final DVec3 tmp3D2 = new DVec3();
+    private final DVec3 tmp3D3 = new DVec3();
+    private final DVec3 tmp3D4 = new DVec3();
+    private final DVec3 tmp3D5 = new DVec3();
 
     public Navigator(LivingEntity entity) {
         this.entity = entity;
@@ -43,8 +43,8 @@ public class Navigator extends EntityAIComponent<LivingEntity> {
             pathIndex++;
         }
 
-        Vec3d pos = this.currentPath.points().get(pathIndex);
-        Vec3d curPos = entity.getPosition(tmp3D4);
+        DVec3 pos = this.currentPath.points().get(pathIndex);
+        DVec3 curPos = entity.getPosition(tmp3D4);
 
         if (pos.x == curPos.x && pos.y == curPos.y && pos.z == curPos.z) {
             done();
@@ -73,8 +73,8 @@ public class Navigator extends EntityAIComponent<LivingEntity> {
     }
 
     public void randomPath(RNG rng) {
-        Vec3d position = entity.getPosition(tmp3D3);
-        List<Vec3d> points = new ArrayList<>();
+        DVec3 position = entity.getPosition(tmp3D3);
+        List<DVec3> points = new ArrayList<>();
         points.add(position);
         for (int i = 0; i < rng.randint(1, 3); i++) {
             position = randomPos(rng, position);
@@ -84,11 +84,11 @@ public class Navigator extends EntityAIComponent<LivingEntity> {
         this.setPath(new Path(points, currentPoint(), points.get(points.size() - 1)));
     }
 
-    private Vec3d randomPos(RNG rng, Vec3d pos) {
+    private DVec3 randomPos(RNG rng, DVec3 pos) {
         Direction[] directions = Direction.values();
-        Vec3d dir = directions[rng.randint(0, 3)].vector();
+        DVec3 dir = directions[rng.randint(0, 3)].vector();
 
-        return new Vec3d(pos.x + dir.x, pos.y, pos.z + dir.z);
+        return new DVec3(pos.x + dir.x, pos.y, pos.z + dir.z);
     }
 
     private void done() {
@@ -135,8 +135,8 @@ public class Navigator extends EntityAIComponent<LivingEntity> {
             this.y = y;
         }
 
-        public Vec3d vector() {
-            return new Vec3d(x, 0, y);
+        public DVec3 vector() {
+            return new DVec3(x, 0, y);
         }
     }
 }

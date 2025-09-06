@@ -2,7 +2,6 @@ package dev.ultreon.quantum.world;
 
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
-import dev.ultreon.quantum.GameInsets;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
@@ -234,7 +233,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      * @param pos the position of the block
      * @return the block at the given coordinates
      */
-    protected BlockState getFast(Vec3i pos) {
+    protected BlockState getFast(IVec3 pos) {
         return this.getFast(pos.x, pos.y, pos.z);
     }
 
@@ -284,7 +283,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      * @param pos   the position of the block
      * @param block the block to set
      */
-    protected void setFast(Vec3i pos, BlockState block) {
+    protected void setFast(IVec3 pos, BlockState block) {
         this.setFast(pos.x, pos.y, pos.z, block);
     }
 
@@ -630,7 +629,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      * @param localBlockVec the position in the chunk
      * @return the sunlight level at the given position between 0 and 15
      */
-    public int getSunlight(Vec3i localBlockVec) {
+    public int getSunlight(IVec3 localBlockVec) {
         return this.getSunlight(localBlockVec.x, localBlockVec.y, localBlockVec.z);
     }
 
@@ -657,7 +656,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
      * @return the block light level at the given position
      * @throws PosOutOfBoundsException if the position is out of bounds
      */
-    public int getBlockLight(Vec3i localBlockVec) {
+    public int getBlockLight(IVec3 localBlockVec) {
         return this.getBlockLight(localBlockVec.x, localBlockVec.y, localBlockVec.z);
     }
 
@@ -689,7 +688,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
         return this.blockEntities.get(new BlockVec(x, y, z));
     }
 
-    public BlockEntity getBlockEntity(Vec3i localBlockVec) {
+    public BlockEntity getBlockEntity(IVec3 localBlockVec) {
         return this.getBlockEntity(localBlockVec.x, localBlockVec.y, localBlockVec.z);
     }
 

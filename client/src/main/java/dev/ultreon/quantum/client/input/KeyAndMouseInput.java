@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.block.BlockState;
+import dev.ultreon.quantum.client.ClientPlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.InputEvent;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
@@ -194,7 +195,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             return;
         }
 
-        if (GamePlatform.get().isImGuiSupported() && KeyAndMouseInput.IM_GUI_KEY.is(keyCode)) this.handleImGuiKey();
+        if (ClientPlatform.get().isImGuiSupported() && KeyAndMouseInput.IM_GUI_KEY.is(keyCode)) this.handleImGuiKey();
         if (KeyAndMouseInput.DEBUG_KEY.is(keyCode)) handleDebugKey();
         devKeyHandler.handleViewMode(this);
 
@@ -376,10 +377,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         if (!ClientConfiguration.enableDebugUtils.getValue()) return;
 
         // Toggle ImGui visibility and cursor caught status
-        if (GamePlatform.get().isShowingImGui() && this.client.world != null)
+        if (ClientPlatform.get().isShowingImGui() && this.client.world != null)
             KeyAndMouseInput.setCursorCaught(true);
 
-        GamePlatform.get().setShowingImGui((!GamePlatform.get().isShowingImGui()));
+        ClientPlatform.get().setShowingImGui((!ClientPlatform.get().isShowingImGui()));
     }
 
     /**
@@ -400,7 +401,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
      * then toggles the cursor catch status.
      */
     private void handleImGuiFocus() {
-        if (GamePlatform.get().isShowingImGui() && this.client.world != null && this.client.screen == null)
+        if (ClientPlatform.get().isShowingImGui() && this.client.world != null && this.client.screen == null)
             KeyAndMouseInput.setCursorCaught(!Gdx.input.isCursorCatched());
     }
 

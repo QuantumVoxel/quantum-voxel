@@ -4,9 +4,9 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
-import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.render.RenderType;
 import dev.ultreon.quantum.client.world.AmbientOcclusion;
-import dev.ultreon.quantum.client.world.ChunkModelBuilder;
+import dev.ultreon.quantum.client.render.world.ChunkModelBuilder;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.OpaqueFaces;
 
@@ -73,11 +73,11 @@ public class FaceCullMesher implements Mesher {
     }
 
     private static boolean shouldMerge(BlockState block, BlockState other) {
-        RenderPass renderPass = BlockRenderPassRegistry.get(block);
-        return renderPass == BlockRenderPassRegistry.get(other)
+        RenderType renderType = BlockRenderPassRegistry.get(block);
+        return renderType == BlockRenderPassRegistry.get(other)
                 && !other.isAir()
                 && block.isTransparent() == other.isTransparent()
-                && renderPass.doesMerging();
+                && renderType.doesMerging();
     }
 
 }

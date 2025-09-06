@@ -62,6 +62,8 @@ import dev.ultreon.quantum.client.registry.EntityModelRegistry;
 import dev.ultreon.quantum.client.registry.EntityRendererRegistry;
 import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
 import dev.ultreon.quantum.client.render.*;
+import dev.ultreon.quantum.client.render.modes.GraphicsMode;
+import dev.ultreon.quantum.client.render.modes.GraphicsModes;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.resources.ResourceNotFoundException;
 import dev.ultreon.quantum.client.rpc.GameActivity;
@@ -74,7 +76,7 @@ import dev.ultreon.quantum.client.util.*;
 import dev.ultreon.quantum.client.world.AmbientOcclusion;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
-import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.client.render.world.WorldRenderer;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashCategory;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -446,7 +448,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     boolean loading = true;
 
     final String[] argv;
-    private Vec2i oldMode;
+    private IVec2 oldMode;
     private int oldSelected;
     private boolean wasClicking;
     private final Queue<Runnable> serverTickQueue = new ArrayDeque<>();
@@ -460,6 +462,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private long lastUnpause;
     private double clientTickRate;
     private long lastClientTickTime;
+    private GraphicsMode graphicsMode = GraphicsModes.BASIC;
 
     /**
      * Initializer for the Quantum Voxel Client.
@@ -630,10 +633,10 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         GamePlatform.get().enableRpc();
 
         // Initialize ImGui if necessary
-        this.imGui = GamePlatform.get().isImGuiSupported();
+        this.imGui = ClientPlatform.get().isImGuiSupported();
         if (this.imGui) {
-            GamePlatform.get().preInitImGui();
-            GamePlatform.get().setupImGui();
+            ClientPlatform.get().preInitImGui();
+            ClientPlatform.get().setupImGui();
         }
 
         // Initialize the model loader
@@ -1344,11 +1347,11 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         // Render to the target framebuffer
-        if (GamePlatform.get().isShowingImGui())
+        if (ClientPlatform.get().isShowingImGui())
             targetFbo.begin();
 
         // Handle music based on world and screen state
-        if (GamePlatform.get().isShowingImGui())
+        if (ClientPlatform.get().isShowingImGui())
             try {
                 doRender();
             } finally {
@@ -1358,8 +1361,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         else doRender();
 
         // If the ImGui flag is true, render the ImGui.
-        if (GamePlatform.get().isShowingImGui()) {
-            GamePlatform.get().renderImGui();
+        if (ClientPlatform.get().isShowingImGui()) {
+            ClientPlatform.get().renderImGui();
         }
     }
 
@@ -1822,7 +1825,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             if (videoTexture != null) {
                 // Calculate scaled thumbnail dimensions
                 resizer.set(videoTexture.getWidth(), videoTexture.getHeight());
-                Vec2f thumbnail = this.resizer.fill(this.getWidth(), this.getHeight());
+                Vec2 thumbnail = this.resizer.fill(this.getWidth(), this.getHeight());
                 float drawWidth = thumbnail.x;
                 float drawHeight = thumbnail.y;
 
@@ -1858,7 +1861,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             if (videoTexture != null) {
                 // Calculate scaled thumbnail dimensions
                 resizer.set(videoTexture.getWidth(), videoTexture.getHeight());
-                Vec2f thumbnail = this.resizer.fill(this.getWidth(), this.getHeight());
+                Vec2 thumbnail = this.resizer.fill(this.getWidth(), this.getHeight());
                 float drawWidth = thumbnail.x;
                 float drawHeight = thumbnail.y;
 
@@ -2478,7 +2481,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public int getWidth() {
         GameInsets insets = GamePlatform.get().getInsets();
         if (insets.right == 0) return Gdx.graphics.getWidth();
-        return GamePlatform.get().isShowingImGui() ? insets.right : Gdx.graphics.getWidth();
+        return ClientPlatform.get().isShowingImGui() ? insets.right : Gdx.graphics.getWidth();
     }
 
     /**
@@ -2489,7 +2492,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     public int getHeight() {
         GameInsets insets = GamePlatform.get().getInsets();
         if (insets.bottom == 0) return Gdx.graphics.getHeight();
-        return GamePlatform.get().isShowingImGui() ? insets.bottom : Gdx.graphics.getHeight();
+        return ClientPlatform.get().isShowingImGui() ? insets.bottom : Gdx.graphics.getHeight();
     }
 
     /**
@@ -2895,7 +2898,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      */
     public GridPoint2 getMousePos() {
         GameInsets insets = GamePlatform.get().getInsets();
-        return GamePlatform.get().isShowingImGui() && !Gdx.input.isCursorCatched()
+        return ClientPlatform.get().isShowingImGui() && !Gdx.input.isCursorCatched()
                 ? this.offset.set(insets.left, insets.top)
                 : this.offset.set(Gdx.input.getX(), Gdx.input.getY());
     }
@@ -3071,7 +3074,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             // Check if the desired fullscreen state is different from the current state
             if (fullScreen) {
                 // Save the current window size before switching to fullscreen
-                this.oldMode = new Vec2i(this.getWidth(), this.getHeight());
+                this.oldMode = new IVec2(this.getWidth(), this.getHeight());
 
                 // Set the display mode to fullscreen using the current display's mode
                 Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
@@ -3619,7 +3622,21 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         return supportedGlslVersion;
     }
 
-    public boolean isVibrant() {
+    public boolean isAdvancedGraphics() {
         return supportedGlslVersion.isAtLeast(3, 30);
+    }
+
+    public GraphicsMode getGraphicsMode() {
+        return graphicsMode;
+    }
+
+    public void switchGraphicsMode(GraphicsMode mode) {
+        if (mode.equals(this.graphicsMode)) return;
+
+        if (worldRenderer != null) {
+            worldRenderer.switchGraphicsMode(mode);
+        }
+
+        this.graphicsMode = mode;
     }
 }

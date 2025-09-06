@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FloatArray;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.IVec3;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.util.MathHelper;
 import dev.ultreon.quantum.world.Direction;
@@ -56,7 +56,7 @@ public class BoxBuilder {
         return this;
     }
 
-    private void face(Vec3i pos, Direction face, TextureRegion region, FloatArray output) {
+    private void face(IVec3 pos, Direction face, TextureRegion region, FloatArray output) {
         float[] vertices;
         switch (face) {
             case UP:
@@ -151,14 +151,14 @@ public class BoxBuilder {
         int id = (int) this.depth;
         int iu = this.u;
         int iv = this.v;
-        this.face(new Vec3i(ix, iy2, iz), Direction.UP, new TextureRegion(texture, iu + id, iv, iw, id), output);
-        this.face(new Vec3i(ix, iy, iz), Direction.DOWN, new TextureRegion(texture, iu + id, iv + id + ih, iw, id), output);
+        this.face(new IVec3(ix, iy2, iz), Direction.UP, new TextureRegion(texture, iu + id, iv, iw, id), output);
+        this.face(new IVec3(ix, iy, iz), Direction.DOWN, new TextureRegion(texture, iu + id, iv + id + ih, iw, id), output);
 
-        this.face(new Vec3i(ix, iy, iz), Direction.WEST, new TextureRegion(texture, iu, iv + id, id, ih), output);
-        this.face(new Vec3i(ix2, iy, iz), Direction.EAST, new TextureRegion(texture, iu + id + iw, iv + id + ih, id, ih), output);
+        this.face(new IVec3(ix, iy, iz), Direction.WEST, new TextureRegion(texture, iu, iv + id, id, ih), output);
+        this.face(new IVec3(ix2, iy, iz), Direction.EAST, new TextureRegion(texture, iu + id + iw, iv + id + ih, id, ih), output);
 
-        this.face(new Vec3i(ix, iy, iz), Direction.NORTH, new TextureRegion(texture, iu + id, id + id, iw, ih), output);
-        this.face(new Vec3i(ix, iy, iz2), Direction.SOUTH, new TextureRegion(texture, iu + id * 2 + iw, id + id), output);
+        this.face(new IVec3(ix, iy, iz), Direction.NORTH, new TextureRegion(texture, iu + id, id + id, iw, ih), output);
+        this.face(new IVec3(ix, iy, iz2), Direction.SOUTH, new TextureRegion(texture, iu + id * 2 + iw, id + id), output);
 
         return QuantumClient.invokeAndWait(() -> {
             var modelBuilder = new ModelBuilder();

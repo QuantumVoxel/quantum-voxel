@@ -1,23 +1,23 @@
 package dev.ultreon.quantum.client.api.events;
 
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.render.RenderType;
 
 public interface RenderPassEvent extends ClientEvent {
-    RenderPass getRenderPass();
+    RenderType getRenderPass();
 
     class Init implements RenderPassEvent {
         private final QuantumClient client;
-        private final RenderPass renderPass;
+        private final RenderType renderType;
 
-        public Init(QuantumClient client, RenderPass renderPass) {
+        public Init(QuantumClient client, RenderType renderType) {
             this.client = client;
-            this.renderPass = renderPass;
+            this.renderType = renderType;
         }
 
         @Override
-        public RenderPass getRenderPass() {
-            return renderPass;
+        public RenderType getRenderPass() {
+            return renderType;
         }
 
         public QuantumClient getClient() {

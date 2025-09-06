@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
-import dev.ultreon.quantum.client.shaders.Shaders;
+import dev.ultreon.quantum.client.shaders.ShaderProviders;
 import dev.ultreon.quantum.client.shaders.SkyboxShader;
 
 public class SkyboxShaders extends DefaultShaderProvider implements GameShaders {
@@ -37,7 +37,7 @@ public class SkyboxShaders extends DefaultShaderProvider implements GameShaders 
     @Override
     public Shader createShader(Renderable renderable) {
         SkyboxShader modelViewShader = new SkyboxShader(renderable, this.config);
-        Shaders.checkShaderCompilation(modelViewShader.program, "SkyboxShader");
+        ShaderProviders.checkShaderCompilation(modelViewShader.program, "SkyboxShader");
         
         return modelViewShader; 
     }

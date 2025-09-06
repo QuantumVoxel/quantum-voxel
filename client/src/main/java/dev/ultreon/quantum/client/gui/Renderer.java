@@ -32,7 +32,7 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Color;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
-import dev.ultreon.quantum.util.Vec4i;
+import dev.ultreon.quantum.util.IVec4;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -328,7 +328,7 @@ public class Renderer implements Disposable {
         return this;
     }
 
-    public Renderer fill(Vec4i r) {
+    public Renderer fill(IVec4 r) {
         this.rect(r.x, r.y, r.z, r.w);
         return this;
     }

@@ -4,28 +4,28 @@ import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.world.vec.RegionVec;
 
-public class Vec extends Vec3d implements Point {
+public class Vec extends DVec3 implements Point {
     public Vec(double x, double y, double z) {
         super(x, y, z);
     }
 
-    public Vec(Vec2d vec, double z) {
+    public Vec(DVec2 vec, double z) {
         super(vec, z);
     }
 
-    public Vec(double x, Vec2d vec) {
+    public Vec(double x, DVec2 vec) {
         super(x, vec);
     }
 
-    public Vec(Vec3i vec) {
+    public Vec(IVec3 vec) {
         super(vec);
     }
 
-    public Vec(Vec3f vec) {
+    public Vec(Vec3 vec) {
         super(vec);
     }
 
-    public Vec(Vec3d vec) {
+    public Vec(DVec3 vec) {
         super(vec);
     }
 
@@ -47,7 +47,7 @@ public class Vec extends Vec3d implements Point {
     }
 
     @Override
-    public Vec add(Vec3d vec) {
+    public Vec add(DVec3 vec) {
         return (Vec) super.add(vec);
     }
 
@@ -67,7 +67,7 @@ public class Vec extends Vec3d implements Point {
     }
 
     @Override
-    public Vec sub(Vec3d vec) {
+    public Vec sub(DVec3 vec) {
         return (Vec) super.sub(vec);
     }
 
@@ -87,7 +87,7 @@ public class Vec extends Vec3d implements Point {
     }
 
     @Override
-    public Vec scl(Vec3d vec) {
+    public Vec scl(DVec3 vec) {
         return (Vec) super.scl(vec);
     }
 
@@ -107,7 +107,7 @@ public class Vec extends Vec3d implements Point {
     }
 
     @Override
-    public Vec div(Vec3d vec) {
+    public Vec div(DVec3 vec) {
         return (Vec) super.div(vec);
     }
 
@@ -137,7 +137,7 @@ public class Vec extends Vec3d implements Point {
     }
 
     @Override
-    public Vec pow(Vec3d vec) {
+    public Vec pow(DVec3 vec) {
         return (Vec) super.pow(vec);
     }
 
@@ -156,7 +156,7 @@ public class Vec extends Vec3d implements Point {
     }
 
     @Override
-    public Vec offset(Vec3i vec) {
+    public Vec offset(IVec3 vec) {
         return (Vec) Point.super.offset(vec);
     }
 
@@ -206,17 +206,17 @@ public class Vec extends Vec3d implements Point {
     }
 
     @Override
-    public Vec2i getVec2i() {
-        return new Vec2i((int) x, (int) y);
+    public IVec2 getVec2i() {
+        return new IVec2((int) x, (int) y);
     }
 
     @Override
-    public Vec3i getVec3i() {
-        return new Vec3i((int) x, (int) y, (int) z);
+    public IVec3 getVec3i() {
+        return new IVec3((int) x, (int) y, (int) z);
     }
 
     @Override
-    public Vec set(Vec3d vec) {
+    public Vec set(DVec3 vec) {
         return (Vec) super.set(vec);
     }
 
@@ -236,7 +236,7 @@ public class Vec extends Vec3d implements Point {
     }
 
     @Override
-    public Vec mod(Vec3d vec) {
+    public Vec mod(DVec3 vec) {
         return (Vec) super.mod(vec);
     }
 

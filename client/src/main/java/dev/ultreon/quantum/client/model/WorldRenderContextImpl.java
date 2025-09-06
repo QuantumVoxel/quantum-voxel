@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.model;
 
 import dev.ultreon.quantum.client.render.RenderBufferSource;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.WorldAccess;
 
 
@@ -39,7 +39,7 @@ public class WorldRenderContextImpl<T> implements WorldRenderContext<T> {
     /**
      * The position of the camera.
      */
-    private final Vec3d cameraPos;
+    private final DVec3 cameraPos;
 
     /**
      * Constructs a new WorldRenderContextImpl.
@@ -50,7 +50,7 @@ public class WorldRenderContextImpl<T> implements WorldRenderContext<T> {
      * @param worldScale The scale of the world being rendered.
      * @param cameraPos The position of the camera.
      */
-    public WorldRenderContextImpl(RenderBufferSource modelBatch, T holder, WorldAccess world, float worldScale, Vec3d cameraPos) {
+    public WorldRenderContextImpl(RenderBufferSource modelBatch, T holder, WorldAccess world, float worldScale, DVec3 cameraPos) {
         this.modelBatch = modelBatch;
         this.holder = holder;
         this.world = world;
@@ -75,7 +75,7 @@ public class WorldRenderContextImpl<T> implements WorldRenderContext<T> {
      * @param tmp A temporary vector to store the result.
      * @return The relative translation of the given translation from the camera position.
      */
-    public Vec3d relative(Vec3d translation, Vec3d tmp) {
+    public DVec3 relative(DVec3 translation, DVec3 tmp) {
         return tmp.set(0).add(translation).sub(cameraPos).scl(1.0 / worldScale);
     }
 

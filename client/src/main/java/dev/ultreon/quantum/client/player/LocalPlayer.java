@@ -44,7 +44,7 @@ import dev.ultreon.quantum.network.packets.s2c.S2CPlayerHurtPacket;
 import dev.ultreon.quantum.network.packets.s2c.S2CTemperatureSyncPacket;
 import dev.ultreon.quantum.sound.SoundType;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 
 import dev.ultreon.quantum.world.vec.ChunkVec;
 
@@ -74,7 +74,7 @@ public class LocalPlayer extends ClientPlayer {
     public final Set<ChunkVec> pendingChunks = Collections.synchronizedSet(new HashSet<>());
 
     private boolean isLoading;
-    private final Vec3d vel = new Vec3d();
+    private final DVec3 vel = new DVec3();
 
     /**
      * Constructs a new LocalPlayer.
@@ -105,7 +105,7 @@ public class LocalPlayer extends ClientPlayer {
             return;
         }
 
-        Vec3d tmp = new Vec3d();
+        DVec3 tmp = new DVec3();
         Vector3 velocity = this.client.playerInput.getVelocity();
         if (client.detachedCam) {
             client.detachedPos.add(velocity.scl(4));
@@ -256,7 +256,7 @@ public class LocalPlayer extends ClientPlayer {
      * @param position The position to set.
      */
     @Override
-    public void setPosition(@NotNull Vec3d position) {
+    public void setPosition(@NotNull DVec3 position) {
         super.setPosition(position);
     }
 
@@ -570,8 +570,8 @@ public class LocalPlayer extends ClientPlayer {
      * @param partialTick the partial tick for interpolation
      * @return the interpolated position as a 3D vector object
      */
-    public Vec3d getPosition(float partialTick) {
-        return new Vec3d(
+    public DVec3 getPosition(float partialTick) {
+        return new DVec3(
                 Mth.lerp(this.ox, this.x, partialTick),
                 Mth.lerp(this.oy, this.y, partialTick),
                 Mth.lerp(this.oz, this.z, partialTick)
@@ -586,7 +586,7 @@ public class LocalPlayer extends ClientPlayer {
     @Override
     public @NotNull
     BlockState getBuriedBlock() {
-        Vec3d add = this.getPosition(this.client.partialTick).add(0, getEyeHeight(), 0);
+        DVec3 add = this.getPosition(this.client.partialTick).add(0, getEyeHeight(), 0);
         return this.clientWorld.get((int) Math.floor(add.x), (int) Math.floor(add.y), (int) Math.floor(add.z));
     }
 

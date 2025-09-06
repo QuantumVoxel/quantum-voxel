@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g3d.particles.renderers.ParticleControllerRende
 import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.github.tommyettinger.textra.Font;
 import dev.ultreon.quantum.client.gui.debug.DebugPage;
-import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.render.RenderType;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.registry.SimpleRegistry;
 
@@ -20,9 +20,9 @@ public class ClientRegistries {
     /**
      * The registry for render effects.
      * 
-     * @see RenderPass
+     * @see RenderType
      */
-    public static final Registry<RenderPass> RENDER_PASS = ClientRegistries.<RenderPass>builder("render_pass").build();
+    public static final Registry<RenderType> RENDER_PASS = ClientRegistries.<RenderType>builder("render_pass").build();
 
     /**
      * The registry for fonts.

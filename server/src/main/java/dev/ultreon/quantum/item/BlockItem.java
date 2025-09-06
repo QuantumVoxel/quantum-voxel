@@ -8,7 +8,7 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Suppliers;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.IVec3;
 import dev.ultreon.quantum.world.BlockFlags;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.World;
@@ -55,7 +55,7 @@ public class BlockItem extends Item {
     }
 
     @NotNull
-    private UseResult placeBlock(World world, Vec3i next, BlockVec blockVec, UseItemContext useItemContext) {
+    private UseResult placeBlock(World world, IVec3 next, BlockVec blockVec, UseItemContext useItemContext) {
         if (world.intersectEntities(this.getBlock().getBoundingBox(next)))
             return UseResult.DENY;
 

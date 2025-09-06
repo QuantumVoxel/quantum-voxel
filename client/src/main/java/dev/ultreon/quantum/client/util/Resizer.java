@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.util;
 
-import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec2;
 
 public class Resizer {
     private final float ratio;
@@ -31,7 +31,7 @@ public class Resizer {
         this(1, 1);
     }
 
-    public Vec2f fill(float maxWidth, float maxHeight) {
+    public Vec2 fill(float maxWidth, float maxHeight) {
         float aspectRatio;
         float width;
         float height;
@@ -61,7 +61,7 @@ public class Resizer {
             }
         }
 
-        return new Vec2f(width, height);
+        return new Vec2(width, height);
     }
 
     public void set(int width, int height) {
@@ -69,7 +69,7 @@ public class Resizer {
         this.sourceHeight = height;
     }
 
-    public Vec2f fit(float maxWidth, float maxHeight) {
+    public Vec2 fit(float maxWidth, float maxHeight) {
         float aspectRatio = this.sourceWidth / this.sourceHeight;
         float width;
         float height;
@@ -82,15 +82,15 @@ public class Resizer {
             height = width / aspectRatio;
         }
 
-        return new Vec2f(width, height);
+        return new Vec2(width, height);
     }
 
-    public Vec2f center(float maxWidth, float maxHeight) {
+    public Vec2 center(float maxWidth, float maxHeight) {
         float width = this.sourceWidth;
         float height = this.sourceHeight;
 
         return width < maxWidth && height < maxHeight
-                ? new Vec2f(width, height)
+                ? new Vec2(width, height)
                 : fit(maxWidth, maxHeight);
     }
 

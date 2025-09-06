@@ -15,7 +15,7 @@ import dev.ultreon.quantum.item.food.AppliedEffect;
 import dev.ultreon.quantum.item.food.StatusEffect;
 import dev.ultreon.quantum.network.packets.s2c.S2CRemoveEntityPacket;
 import dev.ultreon.quantum.ubo.types.MapType;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.SoundEvent;
 import dev.ultreon.quantum.world.World;
@@ -148,7 +148,7 @@ public abstract class LivingEntity extends Entity {
     }
 
     @Override
-    public Vec3d getLookVector(Vec3d direction) {
+    public DVec3 getLookVector(DVec3 direction) {
         this.yRot = Mth.clamp(this.yRot, -89.9F, 89.9F);
         direction.set(
                 (float) (Math.cos(Math.toRadians(this.yRot)) * Math.sin(Math.toRadians(this.xHeadRot))),
@@ -209,9 +209,9 @@ public abstract class LivingEntity extends Entity {
 
     @Override
     @Deprecated
-    public Vec3d getLookVector() {
+    public DVec3 getLookVector() {
         // Calculate the direction vector
-        Vec3d direction = new Vec3d();
+        DVec3 direction = new DVec3();
 
         this.yRot = Mth.clamp(this.yRot, -89.9F, 89.9F);
         direction.x = (float) (Math.cos(Math.toRadians(this.yRot)) * Math.sin(Math.toRadians(this.xHeadRot)));
@@ -329,7 +329,7 @@ public abstract class LivingEntity extends Entity {
 
         this.onDropItems(source);
 
-        this.world.spawnParticles(ParticleTypes.ENTITY_SMOKE, new Vec3d(this.x, this.y, this.z), new Vec3d(0, 0, 0), 20);
+        this.world.spawnParticles(ParticleTypes.ENTITY_SMOKE, new DVec3(this.x, this.y, this.z), new DVec3(0, 0, 0), 20);
 
         this.removeDead();
     }
@@ -475,7 +475,7 @@ public abstract class LivingEntity extends Entity {
     }
 
     public BlockState getBuriedBlock() {
-        Vec3d add = getPosition(tmp3D1).add(0, getEyeHeight(), 0);
+        DVec3 add = getPosition(tmp3D1).add(0, getEyeHeight(), 0);
         return world.get((int) Math.floor(add.x), (int) Math.floor(add.y), (int) Math.floor(add.z));
     }
 

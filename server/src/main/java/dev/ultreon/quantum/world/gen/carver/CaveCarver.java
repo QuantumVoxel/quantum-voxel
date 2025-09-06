@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import de.articdive.jnoise.core.api.functions.Interpolation;
 import de.articdive.jnoise.generators.noise_parameters.fade_functions.FadeFunction;
 import de.articdive.jnoise.pipeline.JNoise;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.ServerWorld.Region;
 import org.jetbrains.annotations.ApiStatus;
@@ -26,8 +26,8 @@ public class CaveCarver {
         double radius = 2.0f;
 
         for (int i = 0; i < wormCount; i++) {
-            Vec3d position = getRandomStartingPosition();
-            Vec3d direction = getRandomDirection();
+            DVec3 position = getRandomStartingPosition();
+            DVec3 direction = getRandomDirection();
 
             for (int j = 0; j < wormLength; j++) {
                 carveOutSphere(position, radius);
@@ -42,7 +42,7 @@ public class CaveCarver {
         }
     }
 
-    private void carveOutSphere(Vec3d position, double radius) {
+    private void carveOutSphere(DVec3 position, double radius) {
         int startX = (int) Math.floor(position.x - radius);
         int startY = (int) Math.floor(position.y - radius);
         int startZ = (int) Math.floor(position.z - radius);
@@ -53,7 +53,7 @@ public class CaveCarver {
         for (int x = startX; x <= endX; x++) {
             for (int y = startY; y <= endY; y++) {
                 for (int z = startZ; z <= endZ; z++) {
-                    Vec3d currentPos = new Vec3d(x, y, z);
+                    DVec3 currentPos = new DVec3(x, y, z);
                     if (currentPos.dst(position) <= radius) {
                         setCave(x, y, z); // Carve out by setting the voxel to AIR
                     }
@@ -62,7 +62,7 @@ public class CaveCarver {
         }
     }
 
-    private void adjustDirectionWithPerlinNoise(Vec3d position, Vec3d direction) {
+    private void adjustDirectionWithPerlinNoise(DVec3 position, DVec3 direction) {
         double noiseScale = 0.1f;
         double angleX = noiseGenerator.evaluateNoise(position.x, position.y, position.z) * noiseScale;
         double angleY = noiseGenerator.evaluateNoise(position.y, position.z, position.x) * noiseScale;
@@ -71,21 +71,21 @@ public class CaveCarver {
         direction.add(angleX, angleY, angleZ).nor();
     }
 
-    private Vec3d getRandomStartingPosition() {
+    private DVec3 getRandomStartingPosition() {
         double x = MathUtils.random(region.getStartX(), region.getEndX());
         double y = MathUtils.random(region.getStartY(), region.getEndY());
         double z = MathUtils.random(region.getStartZ(), region.getEndZ());
-        return new Vec3d(x, y, z);
+        return new DVec3(x, y, z);
     }
 
-    private Vec3d getRandomDirection() {
+    private DVec3 getRandomDirection() {
         double angleX = MathUtils.random(-1f, 1f);
         double angleY = MathUtils.random(-1f, 1f);
         double angleZ = MathUtils.random(-1f, 1f);
-        return new Vec3d(angleX, angleY, angleZ).nor();
+        return new DVec3(angleX, angleY, angleZ).nor();
     }
 
-    private boolean isWithinChunkBounds(Vec3d position) {
+    private boolean isWithinChunkBounds(DVec3 position) {
         return position.x >= region.getStartX() && position.x <= region.getEndX() &&
                position.y >= region.getStartY() && position.y <= region.getEndY() &&
                position.z >= region.getStartZ() && position.z <= region.getEndZ();

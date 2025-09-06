@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world.vec;
 
 import dev.ultreon.quantum.util.Point;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.IVec3;
 
 import java.util.Objects;
 
@@ -13,7 +13,7 @@ import static dev.ultreon.quantum.world.World.REGION_SIZE;
  *
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
-public final class RegionVec extends Vec3i {
+public final class RegionVec extends IVec3 {
     /**
      * Creates a new region position with the specified coordinates.
      *
@@ -57,7 +57,7 @@ public final class RegionVec extends Vec3i {
         return new BlockVec(this.x * REGION_SIZE * CS + cx, this.y * REGION_SIZE * CS + cy, this.z * REGION_SIZE * CS + cz);
     }
 
-    public BlockVec blockInChunk(Vec3i vec) {
+    public BlockVec blockInChunk(IVec3 vec) {
         return this.blockInChunk(vec.x, vec.y, vec.z);
     }
 
@@ -65,7 +65,7 @@ public final class RegionVec extends Vec3i {
         return new ChunkVec(this.x * REGION_SIZE + x, this.y * REGION_SIZE + y, this.z * REGION_SIZE + z, ChunkVecSpace.WORLD);
     }
 
-    public ChunkVec chunkInWorld(Vec3i vec) {
+    public ChunkVec chunkInWorld(IVec3 vec) {
         return new ChunkVec(this.x * REGION_SIZE + vec.x, this.y * REGION_SIZE + vec.y, this.z * REGION_SIZE + vec.z, ChunkVecSpace.WORLD);
     }
 
@@ -81,11 +81,11 @@ public final class RegionVec extends Vec3i {
         return new ChunkVec(rx, ry, rz, ChunkVecSpace.REGION);
     }
 
-    public ChunkVec chunkInRegion(Vec3i vec) {
+    public ChunkVec chunkInRegion(IVec3 vec) {
         return chunkInRegion(vec.x, vec.y, vec.z);
     }
 
-    public RegionVec offset(Vec3i vec) {
+    public RegionVec offset(IVec3 vec) {
         return new RegionVec(this.x + vec.x, this.y + vec.y, this.z + vec.z);
     }
 

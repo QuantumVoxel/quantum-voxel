@@ -8,7 +8,7 @@ import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.Point;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.IVec3;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
 import dev.ultreon.quantum.world.rng.JavaRNG;
 import dev.ultreon.quantum.world.rng.RNG;
@@ -28,7 +28,7 @@ import static dev.ultreon.quantum.world.World.CS_2;
 public final class BuilderChunk extends Chunk {
     private final @NotNull Thread thread;
     private final @NotNull Storage<@NotNull BiomeGenerator> biomeData;
-    private @Nullable List<Vec3i> biomeCenters;
+    private @Nullable List<IVec3> biomeCenters;
     private final @NotNull ServerWorld.Region region;
     private final @NotNull RNG rng;
     private final QuantumServer server;
@@ -70,7 +70,7 @@ public final class BuilderChunk extends Chunk {
     }
 
     @Override
-    protected void setFast(Vec3i pos, BlockState block) {
+    protected void setFast(IVec3 pos, BlockState block) {
         if (this.isOnInvalidThread()) throw new InvalidThreadException("Should be on the dedicated builder thread!");
         super.setFast(pos, block);
     }
@@ -112,11 +112,11 @@ public final class BuilderChunk extends Chunk {
         return this.biomeData.get(index);
     }
 
-    public void setBiomeCenters(@Nullable List<Vec3i> biomeCenters) {
+    public void setBiomeCenters(@Nullable List<IVec3> biomeCenters) {
         this.biomeCenters = biomeCenters;
     }
 
-    public @Nullable List<Vec3i> getBiomeCenters() {
+    public @Nullable List<IVec3> getBiomeCenters() {
         return this.biomeCenters;
     }
 

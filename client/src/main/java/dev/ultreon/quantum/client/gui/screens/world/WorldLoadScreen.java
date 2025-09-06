@@ -13,7 +13,7 @@ import dev.ultreon.quantum.client.gui.screens.DeathScreen;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.world.ClientWorld;
-import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.client.render.world.WorldRenderer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.world.DimensionInfo;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -236,17 +236,24 @@ public class WorldLoadScreen extends Screen {
     }
 
     public void onLogin() {
-        this.loggedIn = true;
-        this.done = true;
+        try {
+            this.loggedIn = true;
+            this.done = true;
 
-        this.client.renderWorld = true;
-        ClientWorld clientWorld = this.client.world;
-        if (clientWorld instanceof ClientWorld) {
-            this.client.worldRenderer = new WorldRenderer(clientWorld);
-        } else {
-            throw new IllegalStateException("Unexpected world type: " + null);
+            this.client.renderWorld = true;
+            ClientWorld clientWorld = this.client.world;
+            if (clientWorld instanceof ClientWorld) {
+                this.client.worldRenderer = new WorldRenderer(clientWorld);
+            } else {
+                throw new IllegalStateException("Unexpected world type: " + null);
+            }
+            this.client.showScreen(null);
+        } catch (Exception e) {
+            QuantumClient.LOGGER.error("Failed to handle login:", e);
+            this.client.exitWorldAndThen(() -> {
+                this.client.showScreen(new DisconnectedScreen("Internal error when handling login", false));
+            });
         }
-        this.client.showScreen(null);
     }
 
     public Label getTitleLabel() {

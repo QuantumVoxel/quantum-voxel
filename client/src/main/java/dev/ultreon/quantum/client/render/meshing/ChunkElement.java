@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.client.render.meshing;
 
-import dev.ultreon.quantum.client.world.ChunkModelBuilder;
+import dev.ultreon.quantum.client.render.world.ChunkModelBuilder;
 
 public interface ChunkElement {
 

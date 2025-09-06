@@ -66,6 +66,7 @@ public class AndroidLauncher extends AndroidApplication implements SensorEventLi
 
         this.uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
 
+        androidPlatform.launch(this, Main.createInstance(new String[]{"--android"}), config);
         initialize(Main.createInstance(new String[]{"--android"}), config);
     }
 

@@ -1,13 +1,13 @@
 package dev.ultreon.quantum.client.world;
 
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.IVec3;
 
 /**
  * Represents the light data associated with a specific position.
  * This class holds the position and light level at that position.
  */
 public class LightData {
-    Vec3i pos = new Vec3i();
+    IVec3 pos = new IVec3();
     byte level;
 
     /**

@@ -10,10 +10,10 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.render.RenderPassRenderComponent;
+import dev.ultreon.quantum.client.render.RenderType;
+import dev.ultreon.quantum.client.render.RenderTypeRenderComponent;
 import dev.ultreon.quantum.util.GameObject;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class Gizmo extends GameObject implements RenderableProvider {
@@ -27,7 +27,7 @@ public abstract class Gizmo extends GameObject implements RenderableProvider {
     private final QuantumClient client = QuantumClient.get();
     public final String category;
     public ModelInstance instance;
-    public final Vec3d position = new Vec3d();
+    public final DVec3 position = new DVec3();
     public final Vector3 size = new Vector3();
     public final Color color = new Color(1.0F, 1.0F, 1.0F, 1.0F);
     public boolean outline = false;
@@ -42,7 +42,7 @@ public abstract class Gizmo extends GameObject implements RenderableProvider {
         client.camera.relative(position.cpy(), rawPos);
         if (instance == null) {
             instance = createInstance();
-            this.set(RenderPassRenderComponent.class, new RenderPassRenderComponent(instance, outline ? RenderPass.GIZMO_OUTLINE : RenderPass.GIZMO));
+            this.set(RenderTypeRenderComponent.class, new RenderTypeRenderComponent(instance, outline ? RenderType.GIZMO_OUTLINE : RenderType.GIZMO));
         }
         instance.userData = this;
         instance.transform.setToTranslationAndScaling(rawPos, size);

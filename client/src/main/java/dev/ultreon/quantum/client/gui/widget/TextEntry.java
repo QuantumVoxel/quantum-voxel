@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.github.tommyettinger.textra.Layout;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.client.ClientPlatform;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Callback;
 import dev.ultreon.quantum.client.gui.Position;
@@ -34,7 +35,7 @@ public class TextEntry extends Widget {
     private int selectFrom = -1;
     private int selectTo = -1;
     private float yOffset = 0f;
-    private Layout layout = new Layout();
+    private final Layout layout = new Layout();
 
     /**
      * @param width  the width of the text entry.
@@ -434,7 +435,7 @@ public class TextEntry extends Widget {
 
         this.cursorX = this.textWidth(this.value.substring(0, this.cursorIdx)) + 2;
 
-        GamePlatform.get().setTextCursorPos((int) this.cursorX + getX(), getY());
+        ClientPlatform.get().setTextCursorPos((int) this.cursorX + getX(), getY());
 
         this.callback.call(this);
     }
@@ -449,7 +450,7 @@ public class TextEntry extends Widget {
     public void onFocusGained() {
         super.onFocusGained();
 
-        GamePlatform.get().onEnterTextInput();
+        ClientPlatform.get().onEnterTextInput();
         this.revalidateCursor();
     }
 
@@ -457,7 +458,7 @@ public class TextEntry extends Widget {
     public void onFocusLost() {
         super.onFocusLost();
 
-        GamePlatform.get().onExitTextInput();
+        ClientPlatform.get().onExitTextInput();
     }
 
     @Override

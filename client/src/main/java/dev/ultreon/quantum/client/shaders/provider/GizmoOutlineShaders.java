@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g3d.Shader;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.shaders.GeomShaderConfig;
 import dev.ultreon.quantum.client.shaders.GizmoOutlineShader;
-import dev.ultreon.quantum.client.shaders.Shaders;
+import dev.ultreon.quantum.client.shaders.ShaderProviders;
 
 public class GizmoOutlineShaders extends OutlineShaderProvider {
     public GizmoOutlineShaders(FileHandle resourceFileHandle, FileHandle resourceFileHandle1) {
@@ -30,7 +30,7 @@ public class GizmoOutlineShaders extends OutlineShaderProvider {
                 QuantumClient.shader(QuantumClient.id("gizmo_outline.geom")).readString()
         ), renderable);
 
-        Shaders.checkShaderCompilation(gizmoOutlineShader.program, "GizmoOutlineShader");
+        ShaderProviders.checkShaderCompilation(gizmoOutlineShader.program, "GizmoOutlineShader");
         return gizmoOutlineShader;
     }
 }

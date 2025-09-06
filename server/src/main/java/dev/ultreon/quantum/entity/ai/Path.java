@@ -1,23 +1,23 @@
 package dev.ultreon.quantum.entity.ai;
 
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 public final class Path {
-    private final List<Vec3d> points;
+    private final List<DVec3> points;
     private final PathPoint start;
-    private final Vec3d end;
+    private final DVec3 end;
 
-    public Path(List<Vec3d> points, PathPoint start, Vec3d end) {
+    public Path(List<DVec3> points, PathPoint start, DVec3 end) {
         this.points = points;
         this.start = start;
         this.end = end;
     }
 
-    public List<Vec3d> points() {
+    public List<DVec3> points() {
         return Collections.unmodifiableList(points);
     }
 
@@ -37,7 +37,7 @@ public final class Path {
         return start;
     }
 
-    public Vec3d end() {
+    public DVec3 end() {
         return end;
     }
 

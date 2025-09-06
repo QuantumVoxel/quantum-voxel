@@ -5,7 +5,7 @@ import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.util.Hit;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.World;
 
 public interface ItemStackEvent {
@@ -48,10 +48,10 @@ public interface ItemStackEvent {
 
     public class Drop implements ItemStackEvent, WorldEvent {
         private final ItemStack itemStack;
-        private final Vec3d position;
+        private final DVec3 position;
         private final World world;
 
-        public Drop(ItemStack itemStack, Vec3d position, World world) {
+        public Drop(ItemStack itemStack, DVec3 position, World world) {
             this.itemStack = itemStack;
             this.position = position;
             this.world = world;
@@ -61,7 +61,7 @@ public interface ItemStackEvent {
             return world;
         }
 
-        public Vec3d getPosition() {
+        public DVec3 getPosition() {
             return position;
         }
 

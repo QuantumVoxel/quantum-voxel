@@ -30,7 +30,7 @@ public class SkyboxShader extends DefaultShader {
     }
 
     public SkyboxShader(final Renderable renderable, final Config config) {
-        this(renderable, config, QuantumClient.get().isVibrant() ? "#version 330 core\n" : "");
+        this(renderable, config, QuantumClient.get().isAdvancedGraphics() ? "#version 330 core\n" : "");
     }
 
     public SkyboxShader(final Renderable renderable, final Config config, final String prefix) {

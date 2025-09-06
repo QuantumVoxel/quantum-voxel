@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector2;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.BlockState;
+import dev.ultreon.quantum.client.ClientPlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
@@ -347,7 +348,7 @@ public class TouchInput extends GameInput implements InputProcessor {
      * then toggles the cursor catch status.
      */
     private void handleImGuiFocus() {
-        if (GamePlatform.get().isShowingImGui() && this.client.world != null && this.client.screen == null)
+        if (ClientPlatform.get().isShowingImGui() && this.client.world != null && this.client.screen == null)
             TouchInput.setCursorCaught(!Gdx.input.isCursorCatched());
     }
 

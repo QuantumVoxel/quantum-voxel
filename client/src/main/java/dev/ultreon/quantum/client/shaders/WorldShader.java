@@ -9,16 +9,20 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.quantum.DebugKey;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
+import dev.ultreon.quantum.client.render.context.UniformSetter;
+import dev.ultreon.quantum.client.render.core.GameUniform;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
-import dev.ultreon.quantum.client.world.WorldRenderer;
-import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.client.render.world.WorldRenderer;
+import dev.ultreon.quantum.util.Vec2;
 import dev.ultreon.quantum.world.Chunk;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -45,7 +49,7 @@ import java.util.Objects;
  * Subclasses may provide further specifics for rendering their own objects by augmenting this class's methods or
  * adding additional uniforms and logic.
  */
-public class WorldShader extends DefaultShader {
+public class WorldShader extends BaseGameShader {
     public static final Vector3 CAMERA_UP = new Vector3();
     public final int u_globalSunlight;
     public final int u_atlasSize;
@@ -58,6 +62,7 @@ public class WorldShader extends DefaultShader {
     public final int u_debugState;
     private int lod = -1;
     protected String log;
+    private final ObjectMap<String, GameUniform> gameUniforms = new ObjectMap<>();
 
     /**
      * Constructs a new WorldShader instance with the specified renderable,
@@ -73,7 +78,7 @@ public class WorldShader extends DefaultShader {
      * Constructs a new WorldShader instance with the specified renderable and shader configuration.
      *
      * @param renderable The Renderable instance to be rendered.
-     * @param config The configuration for the geometry shader, containing shader sources and settings.
+     * @param config     The configuration for the geometry shader, containing shader sources and settings.
      */
     public WorldShader(final Renderable renderable, final GeomShaderConfig config) {
         this(renderable, config, "");
@@ -84,8 +89,8 @@ public class WorldShader extends DefaultShader {
      * and a prefix for resolving shader source paths.
      *
      * @param renderable The Renderable instance to be rendered.
-     * @param config The configuration for the geometry shader, containing shader sources and settings.
-     * @param prefix A string prefix used to resolve shader source paths.
+     * @param config     The configuration for the geometry shader, containing shader sources and settings.
+     * @param prefix     A string prefix used to resolve shader source paths.
      */
     public WorldShader(final Renderable renderable, final Config config, final String prefix) {
         this(renderable, config, prefix,
@@ -97,11 +102,11 @@ public class WorldShader extends DefaultShader {
      * Constructs a WorldShader instance with a specified renderable, shader configuration, and level of detail (LOD).
      *
      * @param renderable The Renderable instance to be rendered.
-     * @param config The configuration for the geometry shader, containing shader sources and settings.
-     * @param lod The level of detail used for rendering, influencing the #define LOD_LEVEL in the shader.
+     * @param config     The configuration for the geometry shader, containing shader sources and settings.
+     * @param lod        The level of detail used for rendering, influencing the #define LOD_LEVEL in the shader.
      */
     public WorldShader(Renderable renderable, Config config, int lod) {
-        this(renderable, config, (QuantumClient.get().isVibrant() ? "#version 330 core\n" : "") + String.format("#define LOD_LEVEL %s\n", lod));
+        this(renderable, config, (QuantumClient.get().isAdvancedGraphics() ? "#version 330 core\n" : "") + String.format("#define LOD_LEVEL %s\n", lod));
         this.lod = lod;
     }
 
@@ -132,8 +137,8 @@ public class WorldShader extends DefaultShader {
      */
     public static String getDefaultGeometryShader() {
         return "void main() {\n" +
-               "\n" +
-               "}\n";
+                "\n" +
+                "}\n";
     }
 
     /**
@@ -154,8 +159,8 @@ public class WorldShader extends DefaultShader {
     /**
      * Constructs a new WorldShader instance with the specified renderable, configuration, and geometry shader program.
      *
-     * @param renderable The Renderable instance to be rendered by this shader.
-     * @param config The configuration for the geometry shader, containing shader settings and parameters.
+     * @param renderable    The Renderable instance to be rendered by this shader.
+     * @param config        The configuration for the geometry shader, containing shader settings and parameters.
      * @param shaderProgram The ShaderProgram instance containing the vertex, fragment, and geometry shader programs.
      */
     public WorldShader(Renderable renderable, Config config, ShaderProgram shaderProgram) {
@@ -172,6 +177,41 @@ public class WorldShader extends DefaultShader {
         this.u_debugState = this.register(Inputs.debugState, Setters.debugState);
     }
 
+    @Override
+    public @Nullable GameUniform getUniform(String name) {
+        return this.gameUniforms.get(name);
+    }
+
+    @Override
+    public @NotNull GameUniform registerUniform(String name, boolean isGlobal) {
+        GameUniform gameUniform = new GameUniform(this, register(name), name, isGlobal);
+        this.gameUniforms.put(name, gameUniform);
+        return gameUniform;
+    }
+
+    @Override
+    public @NotNull GameUniform registerSetter(GameUniform uniform, UniformSetter setter) {
+        register(uniform.getName(), (shader, inputID, renderable) -> {
+            if (inputID != uniform.getLocation())
+                return false;
+            return setter.validate(context, renderable, uniform);
+        }, new Setter() {
+            @Override
+            public boolean isGlobal(BaseShader shader, int inputID) {
+                return uniform.isGlobal();
+            }
+
+            @Override
+            public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
+                if (inputID != uniform.getLocation() || !setter.validate(context, renderable, uniform))
+                    return;
+
+                setter.assign(context, renderable, uniform);
+            }
+        });
+        return uniform;
+    }
+
     public static class Inputs extends DefaultShader.Inputs {
         public final static Uniform globalSunlight = new Uniform("u_globalSunlight");
         public final static Uniform atlasSize = new Uniform("u_atlasSize");
@@ -184,6 +224,7 @@ public class WorldShader extends DefaultShader {
         public final static Uniform debugState = new Uniform("u_debugState");
 
     }
+
     public static class Setters extends DefaultShader.Setters {
         public final static Setter globalSunlight = new GlobalSetter() {
             @Override
@@ -200,7 +241,7 @@ public class WorldShader extends DefaultShader {
         public final static Setter atlasSize = new GlobalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
-                Vec2f f = ClientWorld.ATLAS_SIZE.get().f();
+                Vec2 f = ClientWorld.ATLAS_SIZE.get().f();
                 shader.set(inputID, new Vector2(f.x, f.y));
             }
         };
@@ -208,7 +249,7 @@ public class WorldShader extends DefaultShader {
         public final static Setter atlasOffset = new GlobalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
-                Vec2f f = ClientWorld.ATLAS_OFFSET.get().f();
+                Vec2 f = ClientWorld.ATLAS_OFFSET.get().f();
                 shader.set(inputID, new Vector2(f.x, f.y));
             }
         };

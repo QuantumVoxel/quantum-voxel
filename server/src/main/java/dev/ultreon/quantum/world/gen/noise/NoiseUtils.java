@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world.gen.noise;
 
-import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec2;
 
 public class NoiseUtils {
     private NoiseUtils() {
@@ -29,7 +29,7 @@ public class NoiseUtils {
         x += zoom;
         z += zoom;
 
-        Vec2f offset = settings.offset();
+        Vec2 offset = settings.offset();
 
         double total = 0.0F;
         double frequency = 1.0F;

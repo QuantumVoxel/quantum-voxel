@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.api.events;
 
 import dev.ultreon.quantum.client.world.ClientWorld;
-import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.client.render.world.WorldRenderer;
 
 public abstract class RenderWorldEvent implements ClientEvent, ClientWorldEvent {
     private final ClientWorld world;

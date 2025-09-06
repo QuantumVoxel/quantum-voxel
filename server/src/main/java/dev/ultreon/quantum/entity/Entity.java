@@ -82,11 +82,11 @@ public abstract class Entity extends GameObject implements CommandSender {
     private double oDz;
     private boolean wasOnGround;
 
-    protected final Vec3d tmp3D1 = new Vec3d();
-    protected final Vec3d tmp3D2 = new Vec3d();
-    protected final Vec3d tmp3D3 = new Vec3d();
-    protected final Vec3f tmp3F = new Vec3f();
-    protected final Vec3i tmp3I = new Vec3i();
+    protected final DVec3 tmp3D1 = new DVec3();
+    protected final DVec3 tmp3D2 = new DVec3();
+    protected final DVec3 tmp3D3 = new DVec3();
+    protected final Vec3 tmp3F = new Vec3();
+    protected final IVec3 tmp3I = new IVec3();
     protected final Vector3 tmpV3 = new Vector3();
 
     /**
@@ -594,14 +594,14 @@ public abstract class Entity extends GameObject implements CommandSender {
      * @param size The size of the entity, which includes width and height, as an {@code EntitySize}.
      * @return A {@code BoundingBox} object that represents the boundary defined by the dimensions centered on the given position.
      */
-    public static BoundingBox getBoundingBox(Vec3d pos, EntitySize size) {
+    public static BoundingBox getBoundingBox(DVec3 pos, EntitySize size) {
         double x1 = pos.x - size.width() / 2;
         double y1 = pos.y;
         double z1 = pos.z - size.width() / 2;
         double x2 = pos.x + size.width() / 2;
         double y2 = pos.y + size.height();
         double z2 = pos.z + size.width() / 2;
-        return new BoundingBox(new Vec3d(x1, y1, z1), new Vec3d(x2, y2, z2));
+        return new BoundingBox(new DVec3(x1, y1, z1), new DVec3(x2, y2, z2));
     }
 
     public double getX() {
@@ -645,16 +645,16 @@ public abstract class Entity extends GameObject implements CommandSender {
     }
 
     @Deprecated
-    public Vec3d getPosition() {
-        return new Vec3d(this.x, this.y, this.z);
+    public DVec3 getPosition() {
+        return new DVec3(this.x, this.y, this.z);
     }
 
-    public Vec3d getPosition(Vec3d position) {
+    public DVec3 getPosition(DVec3 position) {
         return position.set(this.x, this.y, this.z);
     }
 
     @ApiStatus.Internal
-    public void setPosition(Vec3d position) {
+    public void setPosition(DVec3 position) {
         this.x = position.x;
         this.y = position.y;
         this.z = position.z;
@@ -697,8 +697,8 @@ public abstract class Entity extends GameObject implements CommandSender {
      *
      * @return a Vec2f object containing the rotation on the x and y axes.
      */
-    public Vec2f getRotation() {
-        return new Vec2f(this.xRot, this.yRot);
+    public Vec2 getRotation() {
+        return new Vec2(this.xRot, this.yRot);
     }
 
     /**
@@ -707,9 +707,9 @@ public abstract class Entity extends GameObject implements CommandSender {
      * @return A normalized Vec3d representing the direction in which the entity is looking.
      */
     @Deprecated
-    public Vec3d getLookVector() {
+    public DVec3 getLookVector() {
         // Calculate the direction vector
-        Vec3d direction = new Vec3d();
+        DVec3 direction = new DVec3();
 
         this.yRot = Mth.clamp(this.yRot, -89.9F, 89.9F);
         direction.set(
@@ -723,7 +723,7 @@ public abstract class Entity extends GameObject implements CommandSender {
         return direction;
     }
 
-    public Vec3d getLookVector(Vec3d direction) {
+    public DVec3 getLookVector(DVec3 direction) {
         this.yRot = Mth.clamp(this.yRot, -89.9F, 89.9F);
         direction.set(
                 (float) (Math.cos(Math.toRadians(this.yRot)) * Math.sin(Math.toRadians(this.xRot))),
@@ -741,7 +741,7 @@ public abstract class Entity extends GameObject implements CommandSender {
      *
      * @param position a Vec2f object containing the x and y rotation values
      */
-    public void setRotation(Vec2f position) {
+    public void setRotation(Vec2 position) {
         this.xRot = position.x;
         this.yRot = Mth.clamp(position.y, -90, 90);
 
@@ -761,16 +761,16 @@ public abstract class Entity extends GameObject implements CommandSender {
      *
      * @return a Vec3d object representing the current velocity.
      */
-    public Vec3d getVelocity() {
-        return new Vec3d(this.velocityX, this.velocityY, this.velocityZ);
+    public DVec3 getVelocity() {
+        return new DVec3(this.velocityX, this.velocityY, this.velocityZ);
     }
 
     /**
      * Retrieves the current velocity vector.
      *
-     * @return a {@link Vec3d} object representing the current velocity.
+     * @return a {@link DVec3} object representing the current velocity.
      */
-    public Vec3d getVelocity(Vec3d velocity) {
+    public DVec3 getVelocity(DVec3 velocity) {
         return velocity.set(this.velocityX, this.velocityY, this.velocityZ);
     }
 
@@ -780,7 +780,7 @@ public abstract class Entity extends GameObject implements CommandSender {
      * @param velocity a Vec3d instance representing the new velocity
      *                 with components x, y, and z
      */
-    public void setVelocity(Vec3d velocity) {
+    public void setVelocity(DVec3 velocity) {
         this.velocityX = velocity.x;
         this.velocityY = velocity.y;
         this.velocityZ = velocity.z;
@@ -840,7 +840,7 @@ public abstract class Entity extends GameObject implements CommandSender {
         this.gravity = gravity;
     }
 
-    public void rotate(Vec2f rotation) {
+    public void rotate(Vec2 rotation) {
         this.xRot = this.xRot + rotation.x;
         this.yRot = Mth.clamp(this.yRot + rotation.y, -90, 90);
     }
@@ -1012,11 +1012,11 @@ public abstract class Entity extends GameObject implements CommandSender {
      *
      * @param target the target position
      */
-    public void teleportTo(Vec3d target) {
+    public void teleportTo(DVec3 target) {
         this.teleportTo(target.x, target.y, target.z);
     }
 
-    public void teleportDimension(Vec3d position, ServerWorld world) {
+    public void teleportDimension(DVec3 position, ServerWorld world) {
         this.getWorld().despawn(this);
         this.teleportTo(position);
         this.onTeleportedDimension(world);

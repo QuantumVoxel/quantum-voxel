@@ -11,25 +11,25 @@ import static org.gradle.api.file.DuplicatesStrategy.EXCLUDE
 import static org.gradle.api.file.DuplicatesStrategy.INCLUDE
 
 buildscript {
-    repositories {
-        mavenCentral()
+  repositories {
+    mavenCentral()
 
-        maven {
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-            name = "sonatype"
-        }
-
-        maven {
-            url = "https://maven.atlassian.com/3rdparty/"
-        }
-
-        google()
+    maven {
+      url = "https://oss.sonatype.org/content/repositories/snapshots/"
+      name = "sonatype"
     }
 
-    dependencies {
-        classpath group: 'commons-io', name: 'commons-io', version: '2.13.0'
-        classpath "com.google.code.gson:gson:2.10.1"
+    maven {
+      url = "https://maven.atlassian.com/3rdparty/"
     }
+
+    google()
+  }
+
+  dependencies {
+    classpath group: 'commons-io', name: 'commons-io', version: '2.13.0'
+    classpath "com.google.code.gson:gson:2.10.1"
+  }
 }
 
 apply plugin: 'java'
@@ -41,170 +41,172 @@ def mainClass = 'dev.ultreon.xeox.impl.main.Main'
 group projectGroup // https://maven.apache.org/guides/mini/guide-naming-conventions.html
 
 java {
-    withSourcesJar()
-    withJavadocJar()
+  withSourcesJar()
+  withJavadocJar()
 }
 
 dependencies {
-    implementation api("com.formdev:flatlaf:3.2.1")
-    implementation api("org.jetbrains:annotations:24.0.0")
+  project(":hydro")
 
-    annotationProcessor "com.google.errorprone:error_prone_annotations:2.18.0"
+  implementation api("com.formdev:flatlaf:3.2.1")
+  implementation api("org.jetbrains:annotations:24.0.0")
 
-    implementation api("org.projectlombok:lombok:1.18.34")
-    annotationProcessor "org.projectlombok:lombok:1.18.34"
+  annotationProcessor "com.google.errorprone:error_prone_annotations:2.18.0"
 
-    runtimeOnly "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+  implementation api("org.projectlombok:lombok:1.18.34")
+  annotationProcessor "org.projectlombok:lombok:1.18.34"
 
-    // CoreLibs
-    implementation api("dev.ultreon.corelibs:collections-v0:$coreLibsVersion")
-    implementation api("dev.ultreon.corelibs:commons-v0:$coreLibsVersion")
-    implementation api("dev.ultreon.corelibs:datetime-v0:$coreLibsVersion")
-    implementation api("dev.ultreon.corelibs:functions-v0:$coreLibsVersion")
-    implementation api("dev.ultreon:ubo:$uboVersion")
+  runtimeOnly "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
 
-    // KryoNet
-    implementation api("com.esotericsoftware.kryo:kryo5:5.5.0")
-    implementation api("com.esotericsoftware:kryonet:2.22.0-RC1")
+  // CoreLibs
+  implementation api("dev.ultreon.corelibs:collections-v0:$coreLibsVersion")
+  implementation api("dev.ultreon.corelibs:commons-v0:$coreLibsVersion")
+  implementation api("dev.ultreon.corelibs:datetime-v0:$coreLibsVersion")
+  implementation api("dev.ultreon.corelibs:functions-v0:$coreLibsVersion")
+  implementation api("dev.ultreon:ubo:$uboVersion")
 
-    // Apache Commons
-    implementation api("org.apache.commons:commons-lang3:3.13.0")
-    implementation api("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
+  // KryoNet
+  implementation api("com.esotericsoftware.kryo:kryo5:5.5.0")
+  implementation api("com.esotericsoftware:kryonet:2.22.0-RC1")
 
-    // Tukaani XZ
-    implementation api("org.tukaani:xz:$tukaaniXzVersion")
+  // Apache Commons
+  implementation api("org.apache.commons:commons-lang3:3.13.0")
+  implementation api("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
 
-    // SwingBits
-    implementation api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
+  // Tukaani XZ
+  implementation api("org.tukaani:xz:$tukaaniXzVersion")
 
-    // LibGDX
-    implementation api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
-    implementation api("com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion")
+  // SwingBits
+  implementation api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
 
-    // JNA
-    implementation api("net.java.dev.jna:jna:$jnaVersion")
-    implementation api("net.java.dev.jna:jna-platform:$jnaVersion")
+  // LibGDX
+  implementation api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
+  implementation api("com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion")
 
-    implementation api("org.tukaani:xz:$tukaaniXzVersion")
-    implementation api("com.jcraft:jzlib:1.1.3")
+  // JNA
+  implementation api("net.java.dev.jna:jna:$jnaVersion")
+  implementation api("net.java.dev.jna:jna-platform:$jnaVersion")
 
-    // JSON5
-    implementation api("dev.ultreon:json5-api:d0a559bc9b")
+  implementation api("org.tukaani:xz:$tukaaniXzVersion")
+  implementation api("com.jcraft:jzlib:1.1.3")
 
-    // Misc
-    implementation api("it.unimi.dsi:fastutil:8.5.12", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
-    implementation api("com.raylabz:opensimplex:1.0.3")
+  // JSON5
+  implementation api("dev.ultreon:json5-api:d0a559bc9b")
 
-    api "dev.ultreon.JNoiseJDK11:jnoise-core:a6507bcc7e", {
-        exclude group: "org.jspecify", module: "jspecify"
-    }
-    api "dev.ultreon.JNoiseJDK11:jnoise-pipeline:a6507bcc7e", {
-        exclude group: "org.jspecify", module: "jspecify"
-    }
-    api "dev.ultreon.JNoiseJDK11:jnoise-generators:a6507bcc7e", {
-        exclude group: "org.jspecify", module: "jspecify"
-    }
-    api "dev.ultreon.JNoiseJDK11:jnoise-modifiers:a6507bcc7e", {
-        exclude group: "org.jspecify", module: "jspecify"
-    }
-    api "dev.ultreon.JNoiseJDK11:jnoise-modules:a6507bcc7e", {
-        exclude group: "org.jspecify", module: "jspecify"
-    }
+  // Misc
+  implementation api("it.unimi.dsi:fastutil:8.5.12", { exclude group: "it.unimi.dsi", module: "fastutil-core" })
+  implementation api("com.raylabz:opensimplex:1.0.3")
 
-    api "org.apache.logging.log4j:log4j-core:2.22.1"
-    api "org.apache.logging.log4j:log4j-api:2.22.1"
+  api "dev.ultreon.JNoiseJDK11:jnoise-core:a6507bcc7e", {
+    exclude group: "org.jspecify", module: "jspecify"
+  }
+  api "dev.ultreon.JNoiseJDK11:jnoise-pipeline:a6507bcc7e", {
+    exclude group: "org.jspecify", module: "jspecify"
+  }
+  api "dev.ultreon.JNoiseJDK11:jnoise-generators:a6507bcc7e", {
+    exclude group: "org.jspecify", module: "jspecify"
+  }
+  api "dev.ultreon.JNoiseJDK11:jnoise-modifiers:a6507bcc7e", {
+    exclude group: "org.jspecify", module: "jspecify"
+  }
+  api "dev.ultreon.JNoiseJDK11:jnoise-modules:a6507bcc7e", {
+    exclude group: "org.jspecify", module: "jspecify"
+  }
 
-    api "dev.ultreon.skript:base-skript:$baseSkriptVersion"
+  api "org.apache.logging.log4j:log4j-core:2.22.1"
+  api "org.apache.logging.log4j:log4j-api:2.22.1"
 
-    implementation api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
+  api "dev.ultreon.skript:base-skript:$baseSkriptVersion"
 
-    implementation api("com.google.code.findbugs:jsr305:$jsrVersion")
+  implementation api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
+
+  implementation api("com.google.code.findbugs:jsr305:$jsrVersion")
 }
 
 processResources {
-    from(file("$rootProject.projectDir/LICENSE")) { into "META-INF/" }
-    exclude "*.pdn", "*.xcf", "*.ps", "*.cache", "*.tmp", "*.temp", "*.bak", "*.old"
+  from(file("$rootProject.projectDir/LICENSE")) { into "META-INF/" }
+  exclude "*.pdn", "*.xcf", "*.ps", "*.cache", "*.tmp", "*.temp", "*.bak", "*.old"
 
-    inputs.property "version", version
+  inputs.property "version", version
 
-    filesMatching("metadata.json") {
-        expand(["version": version])
-    }
-    duplicatesStrategy INCLUDE
+  filesMatching("metadata.json") {
+    expand(["version": version])
+  }
+  duplicatesStrategy INCLUDE
 }
 
 jar {
+  //noinspection GroovyAssignabilityCheck
+  manifest {
     //noinspection GroovyAssignabilityCheck
-    manifest {
-        //noinspection GroovyAssignabilityCheck
-        attributes 'Implementation-Title': 'Quantum Voxel',
-                'Implementation-Vendor': 'Ultreon Studios',
-                project_version: project.version,
-                'Main-Class': mainClass
-    }
+    attributes 'Implementation-Title': 'Quantum Voxel',
+      'Implementation-Vendor': 'Ultreon Studios',
+      project_version: project.version,
+      'Main-Class': mainClass
+  }
 
-    from(compileJava.outputs)
-    from(processResources.outputs)
+  from(compileJava.outputs)
+  from(processResources.outputs)
 
-    zip64 true
-    duplicatesStrategy INCLUDE
+  zip64 true
+  duplicatesStrategy INCLUDE
 }
 
 test {
-    useJUnitPlatform()
+  useJUnitPlatform()
 
-    // If the runClient task is executed, set the environment variable for RUNNING to true
-    afterEvaluate {
-        if (rootProject.gradle.taskGraph.hasTask(":runClient")) {
-            environment("RUNNING", "true")
-        }
+  // If the runClient task is executed, set the environment variable for RUNNING to true
+  afterEvaluate {
+    if (rootProject.gradle.taskGraph.hasTask(":runClient")) {
+      environment("RUNNING", "true")
     }
+  }
 }
 
 //noinspection ConfigurationAvoidance
 tasks.create("serverJar", Jar) {
-    dependsOn jar
+  dependsOn jar
 
-    archiveFileName = "server.jar"
+  archiveFileName = "server.jar"
 
-    from compileJava.outputs
-    from processResources.outputs
+  from compileJava.outputs
+  from processResources.outputs
 
-    duplicatesStrategy EXCLUDE
+  duplicatesStrategy EXCLUDE
 
-    manifest {
-        //noinspection GroovyAssignabilityCheck
-        attributes 'Implementation-Title': 'Quantum Voxel',
-                'Implementation-Vendor': 'Ultreon Studios',
-                project_version: project.version,
-                'Main-Class': mainClass
-    }
+  manifest {
+    //noinspection GroovyAssignabilityCheck
+    attributes 'Implementation-Title': 'Quantum Voxel',
+      'Implementation-Vendor': 'Ultreon Studios',
+      project_version: project.version,
+      'Main-Class': mainClass
+  }
 
-    zip64 true
+  zip64 true
 }
 
 tasks.register('prepareRun', {
-    Files.createDirectories(Paths.get(rootProject.projectDir.getAbsolutePath(), "run"))
+  Files.createDirectories(Paths.get(rootProject.projectDir.getAbsolutePath(), "run"))
 })
 
 tasks.withType(ProcessResources).configureEach {
-    duplicatesStrategy INCLUDE
+  duplicatesStrategy INCLUDE
 }
 
 tasks.withType(Jar).configureEach {
-    duplicatesStrategy INCLUDE
+  duplicatesStrategy INCLUDE
 }
 
 tasks.register('copyDependencies', Copy) {
-    from(configurations.runtimeClasspath)
-    into("$projectDir/build/jars")
+  from(configurations.runtimeClasspath)
+  into("$projectDir/build/jars")
 }
 
 tasks.register('copyJar', Copy) {
-    from(tasks.jar)
-    into("$projectDir/build/jars")
+  from(tasks.jar)
+  into("$projectDir/build/jars")
 }
 
 compileJava {
-    options.encoding = "UTF-8"
+  options.encoding = "UTF-8"
 }

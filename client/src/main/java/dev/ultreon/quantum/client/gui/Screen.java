@@ -11,7 +11,7 @@ import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.client.util.Resizer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec2;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -325,7 +325,7 @@ public abstract class Screen extends UIContainer<Screen> {
             renderer.clearColor(0, 0, 0, 1);
             renderer.clear();
             renderer.blurred(true, () -> {
-                Vec2f thumbnail = this.resizer.fill(this.client.getScaledWidth(), this.client.getScaledHeight());
+                Vec2 thumbnail = this.resizer.fill(this.client.getScaledWidth(), this.client.getScaledHeight());
 
                 float drawWidth = thumbnail.x;
                 float drawHeight = thumbnail.y;

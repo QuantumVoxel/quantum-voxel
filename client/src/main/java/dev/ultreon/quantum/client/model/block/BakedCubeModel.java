@@ -21,7 +21,7 @@ import dev.ultreon.quantum.client.model.BakedModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.model.model.JsonModel;
 import dev.ultreon.quantum.client.render.ModelManager;
-import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.render.RenderType;
 import dev.ultreon.quantum.client.render.meshing.FaceCull;
 import dev.ultreon.quantum.client.render.meshing.Light;
 import dev.ultreon.quantum.client.world.AmbientOcclusion;
@@ -51,7 +51,7 @@ public final class BakedCubeModel extends BakedModel implements BlockModel, Item
     public final ModelProperties properties;
 
     private final String renderPass;
-    private RenderPass renderPassObj;
+    private RenderType renderTypeObj;
     private BlockState block;
 
     private BakedCubeModel(NamespaceID resourceId, TextureRegion all, ModelProperties properties, Model model, String renderPass) {
@@ -269,9 +269,9 @@ public final class BakedCubeModel extends BakedModel implements BlockModel, Item
     }
 
     @Override
-    public RenderPass getRenderPass() {
-        if (renderPassObj != null) return renderPassObj;
-        return renderPassObj = RenderPass.byName(renderPass);
+    public RenderType getRenderPass() {
+        if (renderTypeObj != null) return renderTypeObj;
+        return renderTypeObj = RenderType.byName(renderPass);
     }
 
     @Override

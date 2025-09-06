@@ -40,7 +40,7 @@ import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
  * @see QuantumServer#getCachedPlayer(String)
  */
 public class ServerPlayer extends Player implements CacheablePlayer {
-    private final Vec3d tmp3d$1 = new Vec3d();
+    private final DVec3 tmp3d$1 = new DVec3();
     public @Nullable IConnection<ServerPacketHandler, ClientPacketHandler> connection;
     private ServerWorld world;
     public int hotbarIdx;
@@ -75,9 +75,9 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     private boolean isAdmin;
     private final Tracker<ChunkVec> chunkTracker = new Tracker<>();
     private boolean isInactive;
-    private final Vec3d tmp3Da = new Vec3d();
+    private final DVec3 tmp3Da = new DVec3();
     private int lastChunkRefreshTime;
-    private final Vec3d lastPosition = new Vec3d();
+    private final DVec3 lastPosition = new DVec3();
     private int clientRenderDistance = 8;
 
     public ServerPlayer(EntityType<? extends @NotNull Player> entityType,
@@ -128,7 +128,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
             @NotNull BlockVec spawnPoint = this.server.submit(this.world::getSpawnPoint).join();
 
             // Calculate the spawn position
-            @NotNull Vec3d spawnAt = spawnPoint.vec().d().add(0.5, 0, 0.5);
+            @NotNull DVec3 spawnAt = spawnPoint.vec().d().add(0.5, 0, 0.5);
 
             // Set the player's position, health, and status
             this.setPosition(spawnAt);
@@ -188,7 +188,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      * @param connection The connection used for spawning
      */
     @ApiStatus.Internal
-    public void spawn(Vec3d position, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
+    public void spawn(DVec3 position, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
         // Set the entity's connection and health, and position it at the specified position
         this.connection = connection;
         this.setHealth(this.getMaxHealth());
@@ -299,7 +299,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     @ApiStatus.Internal
     public void sendAllData() {
-        Vec3d position = getPosition();
+        DVec3 position = getPosition();
         if (connection != null) {
             connection.send(new S2CPlayerPositionPacket(uuid, position, xHeadRot, xRot, yRot));
             connection.send(new S2CPlayerHealthPacket(health));
@@ -700,7 +700,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         this.xRot = xRot;
         this.yRot = yRot;
 
-        this.world.sendAllTrackingExcept((int) x, (int) y, (int) z, new S2CPlayerPositionPacket(this.getUuid(), new Vec3d(x, y, z), xHeadRot, xRot, yRot), this);
+        this.world.sendAllTrackingExcept((int) x, (int) y, (int) z, new S2CPlayerPositionPacket(this.getUuid(), new DVec3(x, y, z), xHeadRot, xRot, yRot), this);
     }
 
     public boolean isSpawned() {

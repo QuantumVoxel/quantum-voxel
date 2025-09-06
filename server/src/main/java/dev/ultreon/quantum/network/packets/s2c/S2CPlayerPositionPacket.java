@@ -4,19 +4,19 @@ import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 
 import java.util.Objects;
 import java.util.UUID;
 
 public final class S2CPlayerPositionPacket implements Packet<InGameClientPacketHandler> {
     private final UUID uuid;
-    private final Vec3d pos;
+    private final DVec3 pos;
     private final float xHeadRot;
     private final float xRot;
     private final float yRot;
 
-    public S2CPlayerPositionPacket(UUID uuid, Vec3d pos,
+    public S2CPlayerPositionPacket(UUID uuid, DVec3 pos,
                                    float xHeadRot, float xRot,
                                    float yRot) {
         this.uuid = uuid;
@@ -26,13 +26,13 @@ public final class S2CPlayerPositionPacket implements Packet<InGameClientPacketH
         this.yRot = yRot;
     }
 
-    public S2CPlayerPositionPacket(UUID uuid, Vec3d pos) {
+    public S2CPlayerPositionPacket(UUID uuid, DVec3 pos) {
         this(uuid, pos, 0, 0, 0);
     }
 
     public static S2CPlayerPositionPacket read(PacketIO buffer) {
         var uuid = buffer.readUuid();
-        var pos = buffer.readVec3d(new Vec3d());
+        var pos = buffer.readVec3d(new DVec3());
         var xHeadRot = buffer.readFloat();
         var xRot = buffer.readFloat();
         var yRot = buffer.readFloat();
@@ -63,7 +63,7 @@ public final class S2CPlayerPositionPacket implements Packet<InGameClientPacketH
         return uuid;
     }
 
-    public Vec3d pos() {
+    public DVec3 pos() {
         return pos;
     }
 

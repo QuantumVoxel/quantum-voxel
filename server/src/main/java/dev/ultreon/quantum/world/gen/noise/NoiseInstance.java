@@ -1,14 +1,14 @@
 package dev.ultreon.quantum.world.gen.noise;
 
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec2;
 
 public class NoiseInstance implements Disposable {
     private final NoiseType noise;
     private final long seed;
     private final double noiseZoom;
     private final double octaves;
-    private final Vec2f offset;
+    private final Vec2 offset;
     private final double redistributionModifier;
     private final double exponent;
     private final double persistence;
@@ -16,10 +16,10 @@ public class NoiseInstance implements Disposable {
     private final double base;
 
     public NoiseInstance(NoiseType noise, long seed) {
-        this(noise, seed, 1, 0, new Vec2f(), 1, 1, 0, 1, 0);
+        this(noise, seed, 1, 0, new Vec2(), 1, 1, 0, 1, 0);
     }
 
-    public NoiseInstance(NoiseType noise, long seed, double noiseZoom, double octaves, Vec2f offset, double redistributionModifier, double exponent, double persistence, double amplitude, double base) {
+    public NoiseInstance(NoiseType noise, long seed, double noiseZoom, double octaves, Vec2 offset, double redistributionModifier, double exponent, double persistence, double amplitude, double base) {
         this.noise = noise;
         this.seed = seed;
         this.noiseZoom = noiseZoom;
@@ -52,7 +52,7 @@ public class NoiseInstance implements Disposable {
         return this.octaves;
     }
 
-    public Vec2f offset() {
+    public Vec2 offset() {
         return this.offset;
     }
 

@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.server.util;
 
 import dev.ultreon.libs.datetime.v0.Duration;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 
@@ -21,7 +21,7 @@ public class Utils {
         return object;
     }
 
-    public static ChunkVec ChunkVecFromBlockCoords(Vec3d pos) {
+    public static ChunkVec ChunkVecFromBlockCoords(DVec3 pos) {
         return new BlockVec((int)pos.x, (int)pos.y, (int)pos.z).chunk();
     }
 

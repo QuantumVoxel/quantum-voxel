@@ -10,13 +10,13 @@ import static dev.ultreon.quantum.world.World.CS;
 
 @SuppressWarnings("UnqualifiedStaticUsage")
 public class WorldRayCaster {
-    private static final Vec3i abs = new Vec3i();
-    private static final Vec3i origin = new Vec3i();
-    private static final Vec3i loc = new Vec3i();
-    private static final Vec3d dir = new Vec3d();
-    private static final Vec3d ext = new Vec3d();
-    private static final Vec3d intersection = new Vec3d();
-    private static final Vec3d local = new Vec3d();
+    private static final IVec3 abs = new IVec3();
+    private static final IVec3 origin = new IVec3();
+    private static final IVec3 loc = new IVec3();
+    private static final DVec3 dir = new DVec3();
+    private static final DVec3 ext = new DVec3();
+    private static final DVec3 intersection = new DVec3();
+    private static final DVec3 local = new DVec3();
     private static final BoundingBox box = new BoundingBox();
 
     public static BlockHit rayCast(WorldReader map) {

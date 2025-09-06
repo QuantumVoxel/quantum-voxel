@@ -6,9 +6,9 @@ import com.badlogic.gdx.math.Vector3;
 import dev.ultreon.quantum.block.property.StringSerializable;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Axis;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3f;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.DVec3;
+import dev.ultreon.quantum.util.Vec3;
+import dev.ultreon.quantum.util.IVec3;
 import dev.ultreon.quantum.world.rng.RNG;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +35,7 @@ public enum Direction implements StringSerializable {
         this.rotation = rotation;
     }
 
-    public static @Nullable Direction ofNormal(Vec3f normal) {
+    public static @Nullable Direction ofNormal(Vec3 normal) {
         for (Direction face : Direction.values()) {
             if (face.normal.x == normal.x && face.normal.y == normal.y && face.normal.z == normal.z) {
                 return face;
@@ -44,7 +44,7 @@ public enum Direction implements StringSerializable {
         return null;
     }
 
-    public static Direction fromVec3d(Vec3d direction) {
+    public static Direction fromVec3d(DVec3 direction) {
         double[] comps = new double[]{direction.x, direction.y, direction.z};
         double max;
 
@@ -63,7 +63,7 @@ public enum Direction implements StringSerializable {
         return Direction.values()[random.nextInt(6)];
     }
 
-    public static Direction ofNormalNew(Vec3f set) {
+    public static Direction ofNormalNew(Vec3 set) {
         float[] comps = new float[]{set.x, set.y, set.z};
         float max = Math.max(comps[0], Math.max(comps[1], comps[2]));
         if (max == comps[0]) return max < 0 ? SOUTH : NORTH;
@@ -192,20 +192,20 @@ public enum Direction implements StringSerializable {
         }
     }
 
-    public Vec3i getOffset() {
+    public IVec3 getOffset() {
         switch (this) {
             case UP:
-                return new Vec3i(0, 1, 0);
+                return new IVec3(0, 1, 0);
             case DOWN:
-                return new Vec3i(0, -1, 0);
+                return new IVec3(0, -1, 0);
             case WEST:
-                return new Vec3i(-1, 0, 0);
+                return new IVec3(-1, 0, 0);
             case EAST:
-                return new Vec3i(1, 0, 0);
+                return new IVec3(1, 0, 0);
             case NORTH:
-                return new Vec3i(0, 0, -1);
+                return new IVec3(0, 0, -1);
             case SOUTH:
-                return new Vec3i(0, 0, 1);
+                return new IVec3(0, 0, 1);
             default:
                 throw new IllegalArgumentException();
         }

@@ -2,7 +2,7 @@ package dev.ultreon.quantum.client.gui.debug;
 
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.text.TextObject;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.IVec3;
 import dev.ultreon.quantum.world.vec.BlockVec;
 
 public interface DebugPageContext {
@@ -30,7 +30,7 @@ public interface DebugPageContext {
 
     QuantumClient client();
 
-    default Vec3i block2sectionPos(BlockVec blockVec) {
-        return new Vec3i(blockVec.getIntX() / 16, blockVec.getIntY() / 16, blockVec.getIntZ() / 16);
+    default IVec3 block2sectionPos(BlockVec blockVec) {
+        return new IVec3(blockVec.getIntX() / 16, blockVec.getIntY() / 16, blockVec.getIntZ() / 16);
     }
 }

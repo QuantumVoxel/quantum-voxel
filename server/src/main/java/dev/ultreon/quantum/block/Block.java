@@ -14,8 +14,8 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.BoundingBox;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.DVec3;
+import dev.ultreon.quantum.util.IVec3;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.loot.ConstantLoot;
 import dev.ultreon.quantum.world.loot.LootGenerator;
@@ -133,7 +133,7 @@ public class Block implements BlockLike {
     }
 
     public BoundingBox getBoundingBox(int x, int y, int z, BlockState blockState) {
-        return new BoundingBox(new Vec3d(x, y, z), new Vec3d(x + 1, y + 1, z + 1));
+        return new BoundingBox(new DVec3(x, y, z), new DVec3(x + 1, y + 1, z + 1));
     }
 
     public BoundingBox boundingBox(int x, int y, int z, BlockState blockState, BoundingBox box) {
@@ -144,7 +144,7 @@ public class Block implements BlockLike {
         return this.transparent;
     }
 
-    public BoundingBox getBoundingBox(Vec3i pos) {
+    public BoundingBox getBoundingBox(IVec3 pos) {
         return this.getBoundingBox(pos.x, pos.y, pos.z, this.getDefaultState());
     }
 

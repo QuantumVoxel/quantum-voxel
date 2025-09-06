@@ -19,12 +19,11 @@ import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.meshing.FaceCullMesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
 import dev.ultreon.quantum.collection.Storage;
-import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
 import dev.ultreon.quantum.util.ShowInNodeView;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.IVec3;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -46,7 +45,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private static final int[] dy = {0, -1, 0, 1, 0, 0};
     private static final int[] dz = {0, 0, 0, 0, -1, 1};
 
-    final Mesher mesher;
+    public final Mesher mesher;
     private final ClientWorld clientWorld;
     public final Vector3 renderOffset = new Vector3();
     public final Vector3 deltaOffset = new Vector3();
@@ -60,7 +59,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     private final Map<BlockVec, ModelInstance> addedModels = new ConcurrentHashMap<>();
     private final Map<BlockVec, BlockObject> models = new ConcurrentHashMap<>();
     private final Array<BlockVec> removedModels = new Array<>();
-    private final ObjectMap<Vec3i, LightSource> lights = new ObjectMap<>();
+    private final ObjectMap<IVec3, LightSource> lights = new ObjectMap<>();
     private final Stack<Integer> stack = new Stack<>();
     public final ClientChunkInfo info = new ClientChunkInfo();
     public int lod;
@@ -162,7 +161,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    protected void setFast(Vec3i pos, BlockState block) {
+    protected void setFast(IVec3 pos, BlockState block) {
         if (!QuantumClient.isOnRenderThread())
             throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
@@ -332,11 +331,11 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         this.lightMap.setBlockLight(x, y, z, level);
     }
 
-    public void setBlockLight(Vec3i pos, int light) {
+    public void setBlockLight(IVec3 pos, int light) {
         this.setBlockLight(pos.x, pos.y, pos.z, light);
     }
 
-    public void setLightSource(Vec3i tmp, int light) {
+    public void setLightSource(IVec3 tmp, int light) {
         if (light == 0) {
             this.lights.remove(tmp);
         }

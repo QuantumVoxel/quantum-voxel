@@ -343,80 +343,80 @@ public class PacketIO implements RegistryHandle {
         return this;
     }
 
-    public Vec2f readVec2f(Vec2f vector) {
+    public Vec2 readVec2f(Vec2 vector) {
         return vector.set(this.readFloat(), this.readFloat());
     }
 
-    public void writeVec2f(Vec2f vec) {
+    public void writeVec2f(Vec2 vec) {
         this.writeFloat(vec.x).writeFloat(vec.y);
     }
 
-    public Vec3f readVec3f(Vec3f vector) {
+    public Vec3 readVec3f(Vec3 vector) {
         return vector.set(this.readFloat(), this.readFloat(), this.readFloat());
     }
 
-    public void writeVec3f(Vec3f vec) {
+    public void writeVec3f(Vec3 vec) {
         this.writeFloat(vec.x).writeFloat(vec.y).writeFloat(vec.z);
     }
 
-    public Vec4f readVec4f(Vec4f vector) {
+    public Vec4 readVec4f(Vec4 vector) {
         return vector.set(this.readFloat(), this.readFloat(), this.readFloat(), this.readFloat());
     }
 
-    public void writeVec4f(Vec4f vec) {
+    public void writeVec4f(Vec4 vec) {
         this.writeFloat(vec.x).writeFloat(vec.y).writeFloat(vec.z).writeFloat(vec.w);
     }
 
-    public Vec2d readVec2d(Vec2d vector) {
+    public DVec2 readVec2d(DVec2 vector) {
         return vector.set(this.readDouble(), this.readDouble());
     }
 
-    public void writeVec2f(Vec2d vec) {
+    public void writeVec2f(DVec2 vec) {
         this.writeDouble(vec.x).writeDouble(vec.y);
     }
 
-    public Vec3d readVec3d(Vec3d vector) {
+    public DVec3 readVec3d(DVec3 vector) {
         return vector.set(this.readDouble(), this.readDouble(), this.readDouble());
     }
 
-    public void writeVec3d(Vec3d vec) {
+    public void writeVec3d(DVec3 vec) {
         this.writeDouble(vec.x).writeDouble(vec.y).writeDouble(vec.z);
     }
 
-    public Vec4d readVec4d(Vec4d vector) {
+    public DVec4 readVec4d(DVec4 vector) {
         return vector.set(this.readDouble(), this.readDouble(), this.readDouble(), this.readDouble());
     }
 
-    public void writeVec4d(Vec4d vec) {
+    public void writeVec4d(DVec4 vec) {
         this.writeDouble(vec.x).writeDouble(vec.y).writeDouble(vec.z).writeDouble(vec.w);
     }
 
-    public Vec2i readVec2i(Vec2i vector) {
+    public IVec2 readVec2i(IVec2 vector) {
         return vector.set(this.readInt(), this.readInt());
     }
 
-    public void writeVec2i(Vec2i vec) {
+    public void writeVec2i(IVec2 vec) {
         this.writeInt(vec.x).writeInt(vec.y);
     }
 
-    public Vec3i readVec3i(Vec3i vector) {
+    public IVec3 readVec3i(IVec3 vector) {
         return vector.set(this.readInt(), this.readInt(), this.readInt());
     }
 
-    public void writeVec3i(Vec3i vec) {
+    public void writeVec3i(IVec3 vec) {
         this.writeInt(vec.x).writeInt(vec.y).writeInt(vec.z);
     }
 
-    public Vec4i readVec4i() {
+    public IVec4 readVec4i() {
         int x = this.readInt();
         int y = this.readInt();
         int z = this.readInt();
         int w = this.readInt();
 
-        return new Vec4i(x, y, z, w);
+        return new IVec4(x, y, z, w);
     }
 
-    public void writeVec4i(Vec4i vec) {
+    public void writeVec4i(IVec4 vec) {
         try {
             this.output.writeInt(vec.x);
             this.output.writeInt(vec.y);

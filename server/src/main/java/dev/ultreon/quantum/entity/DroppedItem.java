@@ -5,7 +5,7 @@ import dev.ultreon.quantum.item.ItemStack;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.ubo.types.IntType;
 import dev.ultreon.quantum.ubo.types.MapType;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.World;
 
 public class DroppedItem extends Entity {
@@ -19,7 +19,7 @@ public class DroppedItem extends Entity {
         this.stack = new ItemStack();
     }
 
-    public DroppedItem(World world, ItemStack stack, Vec3d position, Vec3d velocity) {
+    public DroppedItem(World world, ItemStack stack, DVec3 position, DVec3 velocity) {
         super(EntityTypes.DROPPED_ITEM, world);
         this.stack = stack;
         this.setPosition(position);

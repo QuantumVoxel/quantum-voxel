@@ -1057,7 +1057,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
 
     }
 
-    public void onChunkFailedToLoad(Vec3d d) {
+    public void onChunkFailedToLoad(DVec3 d) {
 
     }
 

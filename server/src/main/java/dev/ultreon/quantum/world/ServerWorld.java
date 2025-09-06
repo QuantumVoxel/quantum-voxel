@@ -21,7 +21,6 @@ import dev.ultreon.quantum.api.events.world.ServerWorldEvent;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.entity.BlockEntity;
 import dev.ultreon.quantum.block.BlockState;
-import dev.ultreon.quantum.collection.PaletteStorage;
 import dev.ultreon.quantum.config.QuantumServerConfig;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
@@ -92,7 +91,7 @@ public class ServerWorld extends World implements Audience {
     private final StructureData structureData = new StructureData();
 
     private final RandomTicker randomTicker;
-    private final Vec3d tmp3D = new Vec3d();
+    private final DVec3 tmp3D = new DVec3();
 
     public ServerWorld(QuantumServer server, RegistryKey<DimensionInfo> key, WorldStorage storage, ChunkGenerator generator, long seed, MapType worldData) {
         super(seed);
@@ -284,7 +283,7 @@ public class ServerWorld extends World implements Audience {
     }
 
     @Override
-    public void spawnParticles(@NotNull ParticleType particleType, @NotNull Vec3d position, @NotNull Vec3d motion, int count) {
+    public void spawnParticles(@NotNull ParticleType particleType, @NotNull DVec3 position, @NotNull DVec3 motion, int count) {
         super.spawnParticles(particleType, position, motion, count);
 
         this.sendAllTracking((int) position.x, (int) position.y, (int) position.z, new S2CSpawnParticlesPacket(particleType, position, motion, count));
@@ -1068,7 +1067,7 @@ public class ServerWorld extends World implements Audience {
 
         if (entity instanceof ServerPlayer) {
             ServerPlayer player = (ServerPlayer) entity;
-            sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddPlayerPacket(player.getId(), player.getUuid(), player.getName(), new Vec3d(spawn.getBlockVec().getIntX() + 0.5, spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ() + 0.5)));
+            sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddPlayerPacket(player.getId(), player.getUuid(), player.getName(), new DVec3(spawn.getBlockVec().getIntX() + 0.5, spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ() + 0.5)));
         } else
             sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddEntityPacket(spawn));
 
@@ -1084,7 +1083,7 @@ public class ServerWorld extends World implements Audience {
 
         if (entity instanceof ServerPlayer) {
             ServerPlayer player = (ServerPlayer) entity;
-            sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddPlayerPacket(player.getId(), player.getUuid(), player.getName(), new Vec3d(spawn.getBlockVec().getIntX() + 0.5, spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ() + 0.5)));
+            sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddPlayerPacket(player.getId(), player.getUuid(), player.getName(), new DVec3(spawn.getBlockVec().getIntX() + 0.5, spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ() + 0.5)));
         } else
             sendAllTracking(spawn.getBlockVec().getIntX(), spawn.getBlockVec().getIntY(), spawn.getBlockVec().getIntZ(), new S2CAddEntityPacket(spawn));
 
@@ -1163,7 +1162,7 @@ public class ServerWorld extends World implements Audience {
      *
      * @param pos the position of the block
      */
-    public void sync(Vec3i pos) {
+    public void sync(IVec3 pos) {
         this.sync(pos.x, pos.y, pos.z, this.get(pos.x, pos.y, pos.z));
     }
 
@@ -1218,7 +1217,7 @@ public class ServerWorld extends World implements Audience {
         }
     }
 
-    public Stream<Vec3d> getCavePointsFor(@NotNull ChunkVec vec) {
+    public Stream<DVec3> getCavePointsFor(@NotNull ChunkVec vec) {
         return getOrOpenRegionAt(vec).caveCache.stream().filter(vec3d -> {
             BlockVec start = vec.start().regionLocal();
             return vec3d.x >= start.x && vec3d.y >= start.y && vec3d.z >= start.z &&
@@ -1321,7 +1320,7 @@ public class ServerWorld extends World implements Audience {
         private final Object buildLock = new Object();
         private boolean dirty;
         private int chunkCount;
-        private final Set<Vec3d> caveCache = new HashSet<>();
+        private final Set<DVec3> caveCache = new HashSet<>();
         private Set<ServerChunk> toUnload = new HashSet<>();
 
         /**
@@ -1848,7 +1847,7 @@ public class ServerWorld extends World implements Audience {
         }
 
         public void setCave(int x, int y, int z) {
-            this.caveCache.add(new Vec3d(x, y, z));
+            this.caveCache.add(new DVec3(x, y, z));
         }
     }
 

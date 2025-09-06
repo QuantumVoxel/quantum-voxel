@@ -10,12 +10,12 @@ import dev.ultreon.quantum.client.render.RenderBuffer;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3f;
+import dev.ultreon.quantum.util.DVec3;
+import dev.ultreon.quantum.util.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class EntityModelInstance<T extends Entity> {
-    private static final Vec3d TMP = new Vec3d();
+    private static final DVec3 TMP = new DVec3();
     private static final Vector3 TMP_1 = new Vector3();
     private final @Nullable QVModel model;
     private final T entity;
@@ -60,11 +60,11 @@ public class EntityModelInstance<T extends Entity> {
         this.transform.setTranslation((float) x, (float) y, (float) z);
     }
 
-    public void translate(Vec3d translation) {
+    public void translate(DVec3 translation) {
         translate(translation.x, translation.y, translation.z);
     }
 
-    public void translate(Vec3f translation) {
+    public void translate(Vec3 translation) {
         this.transform.translate(translation.x, translation.y, translation.z);
     }
 
@@ -92,7 +92,7 @@ public class EntityModelInstance<T extends Entity> {
             instance = model.getInstance();
             instance.transform.set(transform);
 
-            Vec3f translation = ctx.relative(entity.getPosition(), TMP).f();
+            Vec3 translation = ctx.relative(entity.getPosition(), TMP).f();
             Vector3 tmp = instance.transform.getTranslation(TMP_1).add(translation.x, translation.y, translation.z);
             instance.transform.setTranslation(tmp);
 
@@ -114,15 +114,15 @@ public class EntityModelInstance<T extends Entity> {
         return entity;
     }
 
-    public void setTranslation(Vec3d position) {
+    public void setTranslation(DVec3 position) {
         setTranslation(position.x, position.y, position.z);
     }
 
-    public void scale(Vec3d scale) {
+    public void scale(DVec3 scale) {
         scale(scale.x, scale.y, scale.z);
     }
 
-    public void scale(Vec3f scale) {
+    public void scale(Vec3 scale) {
         scale(scale.x, scale.y, scale.z);
     }
 

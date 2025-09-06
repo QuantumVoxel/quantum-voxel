@@ -319,12 +319,12 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
             ((Packet<OurHandler>) packet).handle(createPacketContext(), handler);
             rx.decrementAndGet();
         } catch (Exception e) {
+            CommonConstants.LOGGER.error("Failed to handle packet", e);
             if (resultListener != null) {
                 resultListener.onFailure();
             }
             this.disconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getClass().getName() + ":\n" + e.getMessage());
             this.on3rdPartyDisconnect(CloseCodes.PROTOCOL_ERROR.getCode(), e.getClass().getName() + ":\n" + e.getMessage());
-            CommonConstants.LOGGER.error("Failed to handle packet", e);
             rx.decrementAndGet();
             return;
         }

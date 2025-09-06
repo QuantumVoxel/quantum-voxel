@@ -5,12 +5,10 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.DevFlag;
@@ -27,14 +25,11 @@ import dev.ultreon.quantum.client.gui.overlay.OverlayManager;
 import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
 import dev.ultreon.quantum.client.input.TouchInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.render.RenderBufferSource;
-import dev.ultreon.quantum.client.render.RenderPass;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
-import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.client.render.world.WorldRenderer;
 import dev.ultreon.quantum.debug.timing.Timing;
-import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.World;
@@ -63,11 +58,11 @@ public class GameRenderer implements Disposable {
     private boolean disposed;
     private final float[] mouseVec = new float[2];
     private final Vector3 tmpV3 = new Vector3();
-    private final Vec3f tmp3F1 = new Vec3f();
-    private final Vec3f tmp3F2 = new Vec3f();
-    private final Vec3d tmp3D1 = new Vec3d();
-    private final Vec3d tmp3D2 = new Vec3d();
-    private final Vec3d pos = new Vec3d();
+    private final Vec3 tmp3F1 = new Vec3();
+    private final Vec3 tmp3F2 = new Vec3();
+    private final DVec3 tmp3D1 = new DVec3();
+    private final DVec3 tmp3D2 = new DVec3();
+    private final DVec3 pos = new DVec3();
 
     /**
      * Constructs a new GameRenderer with the specified client, model batch, and render pipeline.
@@ -306,7 +301,6 @@ public class GameRenderer implements Disposable {
     }
 
     private boolean renderWorldBuffers(float deltaTime) {
-        RenderBufferSource bufferSource = this.client.renderBuffers();
         PROFILER.begin("game-renderer@render-world-buffers");
         try {
             // Background
@@ -373,8 +367,8 @@ public class GameRenderer implements Disposable {
 
         try (var ignored = QuantumClient.PROFILER.start("screen")) {
             GridPoint2 mouseOffset = this.client.getMousePos();
-            mouseVec[0] = GamePlatform.get().isShowingImGui() ? mouseOffset.x / this.client.getGuiScale() : Gdx.input.getX() / this.client.getGuiScale();
-            mouseVec[1] = GamePlatform.get().isShowingImGui() ? mouseOffset.y / this.client.getGuiScale() : Gdx.input.getY() / this.client.getGuiScale();
+            mouseVec[0] = ClientPlatform.get().isShowingImGui() ? mouseOffset.x / this.client.getGuiScale() : Gdx.input.getX() / this.client.getGuiScale();
+            mouseVec[1] = ClientPlatform.get().isShowingImGui() ? mouseOffset.y / this.client.getGuiScale() : Gdx.input.getY() / this.client.getGuiScale();
 
             processMouseCoords(mouseVec);
 

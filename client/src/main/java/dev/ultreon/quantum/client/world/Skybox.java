@@ -11,13 +11,15 @@ import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
-import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.shaders.Shaders;
-import dev.ultreon.quantum.client.util.RenderObject;
+import dev.ultreon.quantum.client.render.VisualGameObject;
+import dev.ultreon.quantum.client.render.context.ObjectType;
+import dev.ultreon.quantum.client.render.context.RenderMaterial;
+import dev.ultreon.quantum.client.render.pass.RenderPass;
+import dev.ultreon.quantum.client.shaders.ShaderProviders;
 import dev.ultreon.quantum.util.InvalidThreadException;
 import org.jetbrains.annotations.Nullable;
 
-public class Skybox extends RenderObject implements RenderableProvider, Disposable {
+public class Skybox extends VisualGameObject implements RenderableProvider, Disposable {
     public static final Color NULL_COLOR = new Color(0, 0, 0, 0);
     private final static int riseSetDuration = ClientWorld.DAY_CYCLE / 24;
 
@@ -32,7 +34,7 @@ public class Skybox extends RenderObject implements RenderableProvider, Disposab
     public static boolean debug = false;
 
     public Skybox() {
-        renderPass = RenderPass.SKYBOX;
+        renderMaterial = new RenderMaterial(new SkyRenderMaterial(), ObjectType.SKYBOX, "Sky");
     }
 
     public void update(long daytime) {
@@ -93,7 +95,7 @@ public class Skybox extends RenderObject implements RenderableProvider, Disposab
 
         for (int i = 0; i < renderables.size; i++) {
             Renderable renderable = renderables.get(i);
-            renderable.userData = Shaders.SKYBOX.get();
+            renderable.userData = ShaderProviders.SKYBOX.get();
         }
     }
 
@@ -109,12 +111,12 @@ public class Skybox extends RenderObject implements RenderableProvider, Disposab
             model.dispose();
     }
 
-    public void render0(RenderBufferSource bufferSource) {
-        super.render(bufferSource);
-    }
-
     @Override
-    public void render(RenderBufferSource bufferSource) {
+    public void render(RenderBufferSource bufferSource, RenderPass renderPass) {
+        if (!QuantumClient.isOnRenderThread())
+            throw new InvalidThreadException(CommonConstants.EX_NOT_ON_RENDER_THREAD);
 
+        if (modelInstance == null) return;
+        bufferSource.getBuffer(renderPass.renderTypeFor(renderMaterial)).render(modelInstance);
     }
 }

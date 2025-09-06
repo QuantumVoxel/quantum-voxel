@@ -5,7 +5,7 @@ import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.EntityType;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.WorldAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -26,7 +26,7 @@ public interface ClientWorldAccess extends WorldAccess {
 
     void setDaytime(long time);
 
-    void addEntity(int id, EntityType<?> type, Vec3d position, MapType pipeline);
+    void addEntity(int id, EntityType<?> type, DVec3 position, MapType pipeline);
 
     Array<Entity> getAllEntities();
 

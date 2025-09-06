@@ -20,14 +20,13 @@ import dev.ultreon.quantum.ubo.DataTypes;
 import dev.ultreon.quantum.ubo.types.ListType;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.IVec3;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Collection;
-import java.util.List;
 
 import static dev.ultreon.quantum.world.World.*;
 import static java.lang.System.currentTimeMillis;
@@ -115,7 +114,7 @@ public final class ServerChunk extends Chunk {
     }
 
     @Override
-    protected void setFast(Vec3i pos, BlockState block) {
+    protected void setFast(IVec3 pos, BlockState block) {
         setFast(pos.x, pos.y, pos.z, block);
     }
 

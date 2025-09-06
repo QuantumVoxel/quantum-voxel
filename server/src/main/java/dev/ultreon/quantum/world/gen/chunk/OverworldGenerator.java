@@ -5,8 +5,8 @@ import dev.ultreon.quantum.Modifications;
 import dev.ultreon.quantum.registry.Registry;
 import dev.ultreon.quantum.util.MathHelper;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec2i;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.IVec2;
+import dev.ultreon.quantum.util.IVec3;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.gen.biome.BiomeData;
 import dev.ultreon.quantum.world.gen.biome.BiomeGenerator;
@@ -81,7 +81,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
             for (var z = 0; z < CS; z++) {
                 float groundPos = carver.carve(chunk, offset.x + x, offset.z + z);
 
-                var index = this.findGenerator(new Vec3i(offset.x + x, 0, offset.z + z), groundPos);
+                var index = this.findGenerator(new IVec3(offset.x + x, 0, offset.z + z), groundPos);
                 chunk.setBiomeGenerator(x, z, index.biomeGenerator);
                 index.biomeGenerator.processColumn(chunk, x, (int) Math.floor(groundPos), z);
             }
@@ -95,7 +95,7 @@ public class OverworldGenerator extends SimpleChunkGenerator {
      * @param height the height to determine which generator to use
      * @return the biome generator index for the specified offset and height
      */
-    public BiomeGenerator.Index findGenerator(Vec3i offset, float height) {
+    public BiomeGenerator.Index findGenerator(IVec3 offset, float height) {
         return this.findGenerator(offset, height, Modifications.enableDomainWarping);
     }
 
@@ -107,9 +107,9 @@ public class OverworldGenerator extends SimpleChunkGenerator {
      * @param useDomainWarping flag indicating whether to apply domain warping to the offset
      * @return the biome generator index for the specified offset and height
      */
-    public BiomeGenerator.Index findGenerator(Vec3i offset, float height, boolean useDomainWarping) {
+    public BiomeGenerator.Index findGenerator(IVec3 offset, float height, boolean useDomainWarping) {
         if (useDomainWarping) {
-            Vec2i domainOffset = MathHelper.round(this.biomeDomain.generateDomainOffset(offset.x, offset.z));
+            IVec2 domainOffset = MathHelper.round(this.biomeDomain.generateDomainOffset(offset.x, offset.z));
             offset.add(domainOffset.x, 0, domainOffset.y);
         }
 

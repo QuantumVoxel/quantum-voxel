@@ -11,7 +11,7 @@ import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
-import dev.ultreon.quantum.client.world.WorldRenderer;
+import dev.ultreon.quantum.client.render.world.WorldRenderer;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
@@ -20,7 +20,7 @@ import dev.ultreon.quantum.registry.RegistryKey;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.EntityHit;
 import dev.ultreon.quantum.util.Hit;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.IVec3;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.ChunkBuildInfo;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -67,7 +67,7 @@ public class GenericDebugPage implements DebugPage {
             if (player != null) {
                 context.left("Player");
                 BlockVec blockVec = player.getBlockVec();
-                Vec3i sectionPos = context.block2sectionPos(blockVec);
+                IVec3 sectionPos = context.block2sectionPos(blockVec);
                 @Nullable ClientChunkAccess chunk = world.getChunkAt(blockVec);
                 BlockVec localBlockVec = blockVec.chunkLocal();
 

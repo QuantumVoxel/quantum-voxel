@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.Array;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.util.Resizer;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec2;
 import imgui.ImGui;
 import imgui.extension.texteditor.TextEditor;
 import imgui.extension.texteditor.TextEditorCoordinates;
@@ -314,7 +314,7 @@ public class ImGuiHandler {
                                     ImGui.beginTooltip();
                                     ImGui.text("Texture: " + region.getTexture().getTextureObjectHandle() + " (" + region.getRegionWidth() + "x" + region.getRegionHeight() + "+" + region.getRegionX() + "x" + region.getRegionY() + ")");
                                     resizer.set(region.getRegionWidth(), region.getRegionHeight());
-                                    Vec2f fit = resizer.fit(256, 128);
+                                    Vec2 fit = resizer.fit(256, 128);
                                     ImGui.image(region.getTexture().getTextureObjectHandle(), fit.x, fit.y, region.getU(), region.getV(), region.getU2(), region.getV2());
                                     ImGui.endTooltip();
                                 }
@@ -345,7 +345,7 @@ public class ImGuiHandler {
                 if (texture != null) {
                     ImGui.text("Texture: " + texture.getTexture().getTextureObjectHandle() + " (" + texture.getRegionWidth() + "x" + texture.getRegionHeight() + ")");
                     resizer.set(texture.getRegionWidth(), texture.getRegionHeight());
-                    Vec2f fit = resizer.fit(ImGui.getContentRegionAvail().x, ImGui.getContentRegionAvail().y);
+                    Vec2 fit = resizer.fit(ImGui.getContentRegionAvail().x, ImGui.getContentRegionAvail().y);
                     ImGui.image(texture.getTexture().getTextureObjectHandle(), fit.x, fit.y, texture.getU(), texture.getV(), texture.getU2(), texture.getV2());
                 }
             } catch (Exception e) {
@@ -382,7 +382,7 @@ public class ImGuiHandler {
                         ImGui.beginTooltip();
                         ImGui.text("Texture: " + texture.getTextureObjectHandle());
                         resizer.set(texture.getWidth(), texture.getHeight());
-                        Vec2f fit = resizer.fit(256, 128);
+                        Vec2 fit = resizer.fit(256, 128);
                         ImGui.image(texture.getTextureObjectHandle(), fit.x, fit.y);
                         ImGui.endTooltip();
                     }

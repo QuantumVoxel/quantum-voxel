@@ -1,8 +1,8 @@
 package dev.ultreon.quantum.world.gen.noise;
 
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.quantum.util.Vec2d;
-import dev.ultreon.quantum.util.Vec2i;
+import dev.ultreon.quantum.util.DVec2;
+import dev.ultreon.quantum.util.IVec2;
 import dev.ultreon.quantum.util.MathHelper;
 
 public class DomainWarping implements Disposable {
@@ -21,17 +21,17 @@ public class DomainWarping implements Disposable {
     }
 
     public double generateDomainNoise(int x, int z, NoiseInstance defaultNoiseSettings) {
-        Vec2d domainOffset = this.generateDomainOffset(x, z);
+        DVec2 domainOffset = this.generateDomainOffset(x, z);
         return NoiseUtils.octavePerlin(x + domainOffset.x, z + domainOffset.y, this.domainX);
     }
 
-    public Vec2d generateDomainOffset(int x, int z) {
+    public DVec2 generateDomainOffset(int x, int z) {
         double noiseX = NoiseUtils.octavePerlin(x, z, this.domainX) * this.amplitudeX;
         double noiseY = NoiseUtils.octavePerlin(x, z, this.domainY) * this.amplitudeY;
-        return new Vec2d(noiseX, noiseY);
+        return new DVec2(noiseX, noiseY);
     }
 
-    public Vec2i generateDomainOffsetInt(int x, int z) {
+    public IVec2 generateDomainOffsetInt(int x, int z) {
         return MathHelper.round(this.generateDomainOffset(x, z));
     }
 

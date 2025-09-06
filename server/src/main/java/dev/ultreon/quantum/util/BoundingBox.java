@@ -31,29 +31,29 @@ public class BoundingBox implements Serializable {
      * Minimum vector. All XYZ components should be inferior to corresponding {@link #max} components. Call {@link #update()} if
      * you manually change this vector.
      */
-    public final Vec3d min = new Vec3d();
+    public final DVec3 min = new DVec3();
     /**
      * Maximum vector. All XYZ components should be superior to corresponding {@link #min} components. Call {@link #update()} if
      * you manually change this vector.
      */
-    public final Vec3d max = new Vec3d();
+    public final DVec3 max = new DVec3();
 
-    private final Vec3d cnt = new Vec3d();
-    private final Vec3d dim = new Vec3d();
+    private final DVec3 cnt = new DVec3();
+    private final DVec3 dim = new DVec3();
 
     public Object userData;
 
 
     // NOTE: Added 6-parameter constructor for use in Block#getBoundingBox - by XyperCode (Ultreon)
     public BoundingBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-        this(new Vec3d(minX, minY, minZ), new Vec3d(maxX, maxY, maxZ));
+        this(new DVec3(minX, minY, minZ), new DVec3(maxX, maxY, maxZ));
     }
 
     /**
-     * @param out The {@link Vec3d} to receive the center of the bounding box.
+     * @param out The {@link DVec3} to receive the center of the bounding box.
      * @return The vector specified with the out argument.
      */
-    public Vec3d getCenter(Vec3d out) {
+    public DVec3 getCenter(DVec3 out) {
         return out.set(this.cnt);
     }
 
@@ -69,43 +69,43 @@ public class BoundingBox implements Serializable {
         return this.cnt.z;
     }
 
-    public Vec3d getCorner000(final Vec3d out) {
+    public DVec3 getCorner000(final DVec3 out) {
         return out.set(this.min.x, this.min.y, this.min.z);
     }
 
-    public Vec3d getCorner001(final Vec3d out) {
+    public DVec3 getCorner001(final DVec3 out) {
         return out.set(this.min.x, this.min.y, this.max.z);
     }
 
-    public Vec3d getCorner010(final Vec3d out) {
+    public DVec3 getCorner010(final DVec3 out) {
         return out.set(this.min.x, this.max.y, this.min.z);
     }
 
-    public Vec3d getCorner011(final Vec3d out) {
+    public DVec3 getCorner011(final DVec3 out) {
         return out.set(this.min.x, this.max.y, this.max.z);
     }
 
-    public Vec3d getCorner100(final Vec3d out) {
+    public DVec3 getCorner100(final DVec3 out) {
         return out.set(this.max.x, this.min.y, this.min.z);
     }
 
-    public Vec3d getCorner101(final Vec3d out) {
+    public DVec3 getCorner101(final DVec3 out) {
         return out.set(this.max.x, this.min.y, this.max.z);
     }
 
-    public Vec3d getCorner110(final Vec3d out) {
+    public DVec3 getCorner110(final DVec3 out) {
         return out.set(this.max.x, this.max.y, this.min.z);
     }
 
-    public Vec3d getCorner111(final Vec3d out) {
+    public DVec3 getCorner111(final DVec3 out) {
         return out.set(this.max.x, this.max.y, this.max.z);
     }
 
     /**
-     * @param out The {@link Vec3d} to receive the dimensions of this bounding box on all three axis.
+     * @param out The {@link DVec3} to receive the dimensions of this bounding box on all three axis.
      * @return The vector specified with the out argument
      */
-    public Vec3d getDimensions(final Vec3d out) {
+    public DVec3 getDimensions(final DVec3 out) {
         return out.set(this.dim);
     }
 
@@ -122,18 +122,18 @@ public class BoundingBox implements Serializable {
     }
 
     /**
-     * @param out The {@link Vec3d} to receive the minimum values.
+     * @param out The {@link DVec3} to receive the minimum values.
      * @return The vector specified with the out argument
      */
-    public Vec3d getMin(final Vec3d out) {
+    public DVec3 getMin(final DVec3 out) {
         return out.set(this.min);
     }
 
     /**
-     * @param out The {@link Vec3d} to receive the maximum values.
+     * @param out The {@link DVec3} to receive the maximum values.
      * @return The vector specified with the out argument
      */
-    public Vec3d getMax(final Vec3d out) {
+    public DVec3 getMax(final DVec3 out) {
         return out.set(this.max);
     }
 
@@ -159,7 +159,7 @@ public class BoundingBox implements Serializable {
      * @param minimum The minimum vector
      * @param maximum The maximum vector
      */
-    public BoundingBox(Vec3d minimum, Vec3d maximum) {
+    public BoundingBox(DVec3 minimum, DVec3 maximum) {
         this.set(minimum, maximum);
     }
 
@@ -180,7 +180,7 @@ public class BoundingBox implements Serializable {
      * @param maximum The maximum vector
      * @return This bounding box for chaining.
      */
-    public BoundingBox set(Vec3d minimum, Vec3d maximum) {
+    public BoundingBox set(DVec3 minimum, DVec3 maximum) {
         this.min.set(minimum.x < maximum.x ? minimum.x : maximum.x, minimum.y < maximum.y ? minimum.y : maximum.y, minimum.z < maximum.z ? minimum.z : maximum.z);
         this.max.set(minimum.x > maximum.x ? minimum.x : maximum.x, minimum.y > maximum.y ? minimum.y : maximum.y, minimum.z > maximum.z ? minimum.z : maximum.z);
         this.update();
@@ -201,9 +201,9 @@ public class BoundingBox implements Serializable {
      * @param points The points.
      * @return This bounding box for chaining.
      */
-    public BoundingBox set(Vec3d[] points) {
+    public BoundingBox set(DVec3[] points) {
         this.inf();
-        for (Vec3d l_point : points)
+        for (DVec3 l_point : points)
             this.ext(l_point);
         return this;
     }
@@ -214,9 +214,9 @@ public class BoundingBox implements Serializable {
      * @param points The points.
      * @return This bounding box for chaining.
      */
-    public BoundingBox set(List<Vec3d> points) {
+    public BoundingBox set(List<DVec3> points) {
         this.inf();
-        for (Vec3d l_point : points)
+        for (DVec3 l_point : points)
             this.ext(l_point);
         return this;
     }
@@ -235,12 +235,12 @@ public class BoundingBox implements Serializable {
     }
 
     /**
-     * Extends the bounding box to incorporate the given {@link Vec3d}.
+     * Extends the bounding box to incorporate the given {@link DVec3}.
      *
      * @param point The vector
      * @return This bounding box for chaining.
      */
-    public BoundingBox ext(Vec3d point) {
+    public BoundingBox ext(DVec3 point) {
         return this.set(this.min.set(BoundingBox.min(this.min.x, point.x), BoundingBox.min(this.min.y, point.y), BoundingBox.min(this.min.z, point.z)), this.max.set(Math.max(this.max.x, point.x), Math.max(this.max.y, point.y), Math.max(this.max.z, point.z)));
     }
 
@@ -279,7 +279,7 @@ public class BoundingBox implements Serializable {
      * @param radius Sphere radius
      * @return This bounding box for chaining.
      */
-    public BoundingBox ext(Vec3d center, double radius) {
+    public BoundingBox ext(DVec3 center, double radius) {
         return this.set(this.min.set(BoundingBox.min(this.min.x, center.x - radius), BoundingBox.min(this.min.y, center.y - radius), BoundingBox.min(this.min.z, center.z - radius)), this.max.set(BoundingBox.max(this.max.x, center.x + radius), BoundingBox.max(this.max.y, center.y + radius), BoundingBox.max(this.max.z, center.z + radius)));
     }
 
@@ -347,7 +347,7 @@ public class BoundingBox implements Serializable {
      * @param v The vector
      * @return Whether the vector is contained or not.
      */
-    public boolean contains(Vec3d v) {
+    public boolean contains(DVec3 v) {
         return this.min.x <= v.x && this.max.x >= v.x && this.min.y <= v.y && this.max.y >= v.y && this.min.z <= v.z && this.max.z >= v.z;
     }
 

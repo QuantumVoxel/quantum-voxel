@@ -2,9 +2,8 @@ package dev.ultreon.quantum.client.util;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
-import dev.ultreon.quantum.OS;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
@@ -33,8 +32,8 @@ public class Utils {
         return b < 0 ? (int)b + 128 : b;
     }
 
-    public static Vec3d toCoreLibs(Vector3 vector) {
-        return new Vec3d(vector.x, vector.y, vector.z);
+    public static DVec3 toCoreLibs(Vector3 vector) {
+        return new DVec3(vector.x, vector.y, vector.z);
     }
 
     public static boolean openURL(@Nullable String url) {

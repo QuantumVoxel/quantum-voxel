@@ -206,7 +206,7 @@ public interface WorldAccess extends Disposable, WorldReader, BlockSetter {
      * @param itemStack the item stack to be dropped
      * @param position the position where the item stack should be dropped
      */
-    void drop(ItemStack itemStack, Vec3d position);
+    void drop(ItemStack itemStack, DVec3 position);
 
     /**
      * Drops an item stack into the world at a specified position with a given velocity.
@@ -215,7 +215,7 @@ public interface WorldAccess extends Disposable, WorldReader, BlockSetter {
      * @param position the position where the item stack will be dropped
      * @param velocity the initial velocity of the dropped item stack
      */
-    void drop(ItemStack itemStack, Vec3d position, Vec3d velocity);
+    void drop(ItemStack itemStack, DVec3 position, DVec3 velocity);
 
     /**
      * Finds and returns all entities within a certain distance from the specified entity.
@@ -244,7 +244,7 @@ public interface WorldAccess extends Disposable, WorldReader, BlockSetter {
      * @param count The number of particles to spawn.
      */
     @ApiStatus.Experimental
-    void spawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count);
+    void spawnParticles(ParticleType particleType, DVec3 position, DVec3 motion, int count);
 
     /**
      * Destroys a block at the specified position, optionally considering the player who is breaking it.
@@ -286,7 +286,7 @@ public interface WorldAccess extends Disposable, WorldReader, BlockSetter {
      * @return a Hit object representing the first entity or block hit, or a default hit object if no collision occurs
      */
     @NotNull
-    default Hit rayCast(Ray ray, Entity caster, float distance, Vec3d tmp) {
+    default Hit rayCast(Ray ray, Entity caster, float distance, DVec3 tmp) {
         Entity closestToOrigin = null;
         double closestDst = Double.MAX_VALUE;
         for (Entity entity : getEntities()) {

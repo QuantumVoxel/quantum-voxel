@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import dev.ultreon.quantum.client.shaders.GeomShaderConfig;
 import dev.ultreon.quantum.client.shaders.ModelViewShader;
-import dev.ultreon.quantum.client.shaders.Shaders;
+import dev.ultreon.quantum.client.shaders.ShaderProviders;
 
 public class ModelShaders extends DefaultShaderProvider implements GameShaders {
     protected final DefaultShader.Config config;
@@ -41,7 +41,7 @@ public class ModelShaders extends DefaultShaderProvider implements GameShaders {
     @Override
     public Shader createShader(Renderable renderable) {
         ModelViewShader modelViewShader = new ModelViewShader(renderable, this.config);
-        Shaders.checkShaderCompilation(modelViewShader.program, "ModelViewShader");
+        ShaderProviders.checkShaderCompilation(modelViewShader.program, "ModelViewShader");
         
         return modelViewShader; 
     }

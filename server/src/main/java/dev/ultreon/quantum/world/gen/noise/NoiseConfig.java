@@ -1,6 +1,6 @@
 package dev.ultreon.quantum.world.gen.noise;
 
-import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec2;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex3DVariant;
 import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex4DVariant;
@@ -12,7 +12,7 @@ import java.util.Objects;
 public final class NoiseConfig {
     private final float noiseZoom;
     private final float octaves;
-    private final Vec2f offset;
+    private final Vec2 offset;
     private long seed;
     private final float persistence;
     private final float redistributionModifier;
@@ -31,7 +31,7 @@ public final class NoiseConfig {
      * @param amplitude
      * @param base
      */
-    public NoiseConfig(float noiseZoom, float octaves, Vec2f offset, long seed, float persistence,
+    public NoiseConfig(float noiseZoom, float octaves, Vec2 offset, long seed, float persistence,
                        float redistributionModifier, float exponent, float amplitude, float base) {
         this.noiseZoom = noiseZoom;
         this.octaves = octaves;
@@ -65,7 +65,7 @@ public final class NoiseConfig {
         return this.octaves;
     }
 
-    public Vec2f offset() {
+    public Vec2 offset() {
         return this.offset;
     }
 

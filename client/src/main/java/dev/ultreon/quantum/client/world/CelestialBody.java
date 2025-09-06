@@ -7,8 +7,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Pool;
-import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.shaders.Shaders;
+import dev.ultreon.quantum.client.render.RenderType;
+import dev.ultreon.quantum.client.render.context.RenderMaterial;
 import dev.ultreon.quantum.client.util.RenderObject;
 import dev.ultreon.quantum.util.NamespaceID;
 import org.jetbrains.annotations.NotNull;
@@ -23,9 +23,11 @@ public class CelestialBody extends RenderObject {
 
     private final Model model;
     private final ModelInstance modelInstance;
+    public final RenderMaterial material;
 
-    public CelestialBody(Model model) {
-        this.renderPass = RenderPass.CELESTIAL_BODIES;
+    public CelestialBody(Model model, RenderMaterial material) {
+        this.material = material;
+        this.renderType = RenderType.CELESTIAL_BODIES;
         this.model = model;
         this.modelInstance = new ModelInstance(model);
     }

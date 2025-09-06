@@ -36,7 +36,7 @@ public class RenderBuffer extends GameObject implements Disposable {
     public long timePerRender;
     private final MeshBuilder builder = new MeshBuilder();
 
-    RenderBuffer(RenderPass pass) {
+    RenderBuffer(RenderType pass) {
         this.shader = pass.createShader();
         this.modelBatch = new ModelBatch(shader);
         this.material = pass.createMaterial();

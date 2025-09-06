@@ -3,8 +3,8 @@ package dev.ultreon.quantum.client.render.meshing;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import dev.ultreon.quantum.block.BlockLike;
 import dev.ultreon.quantum.client.model.block.BlockModel;
-import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.world.ChunkModelBuilder;
+import dev.ultreon.quantum.client.render.RenderType;
+import dev.ultreon.quantum.client.render.world.ChunkModelBuilder;
 import dev.ultreon.quantum.client.world.OpaqueFaces;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +35,7 @@ public interface Mesher {
          * @param pass
          * @return True if the block should be used in this mesh
          */
-        boolean shouldUse(@Nullable BlockLike block, BlockModel model, RenderPass pass);
+        boolean shouldUse(@Nullable BlockLike block, BlockModel model, RenderType pass);
     }
 
 }

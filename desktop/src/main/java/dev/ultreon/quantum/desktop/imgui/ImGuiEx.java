@@ -13,12 +13,10 @@ import imgui.type.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.*;
 import java.util.function.DoubleConsumer;
 import java.util.function.LongConsumer;
-import java.util.stream.Collectors;
 
 public class ImGuiEx {
     public static void text(String label, Supplier<Object> value) {
@@ -244,159 +242,159 @@ public class ImGuiEx {
         }
     }
 
-    public static void editVec2f(String label, String strId, Supplier<Vec2f> getter, Consumer<Vec2f> setter) {
+    public static void editVec2f(String label, String strId, Supplier<Vec2> getter, Consumer<Vec2> setter) {
         ImGui.text(label);
         ImGui.sameLine();
         try {
-            Vec2f v = getter.get();
+            Vec2 v = getter.get();
             float[] vec = {v.getX(), v.getY()};
             if (ImGui.inputFloat2("##" + strId, vec)) {
-                setter.accept(new Vec2f(vec[0], vec[1]));
+                setter.accept(new Vec2(vec[0], vec[1]));
             }
         } catch (Exception e) {
             ImGui.text(String.valueOf(e));
         }
     }
 
-    public static void editVec3f(String label, String strId, Supplier<Vec3f> getter, Consumer<Vec3f> setter) {
+    public static void editVec3f(String label, String strId, Supplier<Vec3> getter, Consumer<Vec3> setter) {
         ImGui.text(label);
         ImGui.sameLine();
         try {
-            Vec3f v = getter.get();
+            Vec3 v = getter.get();
             float[] vec = {v.getX(), v.getY(), v.getZ()};
             if (ImGui.inputFloat3("##" + strId, vec)) {
-                setter.accept(new Vec3f(vec[0], vec[1], vec[2]));
+                setter.accept(new Vec3(vec[0], vec[1], vec[2]));
             }
         } catch (Exception e) {
             ImGui.text(String.valueOf(e));
         }
     }
 
-    public static void editVec4f(String label, String strId, Supplier<Vec4f> getter, Consumer<Vec4f> setter) {
+    public static void editVec4f(String label, String strId, Supplier<Vec4> getter, Consumer<Vec4> setter) {
         ImGui.text(label);
         ImGui.sameLine();
         try {
-            Vec4f v = getter.get();
+            Vec4 v = getter.get();
             float[] vec = {v.getX(), v.getY(), v.getZ(), v.getW()};
             if (ImGui.inputFloat4("##" + strId, vec)) {
-                setter.accept(new Vec4f(vec[0], vec[1], vec[2], vec[3]));
+                setter.accept(new Vec4(vec[0], vec[1], vec[2], vec[3]));
             }
         } catch (Exception e) {
             ImGui.text(String.valueOf(e));
         }
     }
 
-    public static void editVec2i(String label, String strId, Supplier<Vec2i> getter, Consumer<Vec2i> setter) {
+    public static void editVec2i(String label, String strId, Supplier<IVec2> getter, Consumer<IVec2> setter) {
         ImGui.text(label);
         ImGui.sameLine();
         try {
-            Vec2i v = getter.get();
+            IVec2 v = getter.get();
             int[] vec = {v.getX(), v.getY()};
             if (ImGui.inputInt2("##" + strId, vec)) {
-                setter.accept(new Vec2i(vec[0], vec[1]));
+                setter.accept(new IVec2(vec[0], vec[1]));
             }
         } catch (Exception e) {
             ImGui.text(String.valueOf(e));
         }
     }
 
-    public static void editVec3i(String label, String strId, Supplier<Vec3i> getter, Consumer<Vec3i> setter) {
+    public static void editVec3i(String label, String strId, Supplier<IVec3> getter, Consumer<IVec3> setter) {
         ImGui.text(label);
         ImGui.sameLine();
         try {
-            Vec3i v = getter.get();
+            IVec3 v = getter.get();
             int[] vec = {v.getIntX(), v.getIntY(), v.getIntZ()};
             if (ImGui.inputInt3("##" + strId, vec)) {
-                setter.accept(new Vec3i(vec[0], vec[1], vec[2]));
+                setter.accept(new IVec3(vec[0], vec[1], vec[2]));
             }
         } catch (Exception e) {
             ImGui.text(String.valueOf(e));
         }
     }
 
-    public static void editVec4i(String label, String strId, Supplier<Vec4i> getter, Consumer<Vec4i> setter) {
+    public static void editVec4i(String label, String strId, Supplier<IVec4> getter, Consumer<IVec4> setter) {
         ImGui.text(label);
         ImGui.sameLine();
         try {
-            Vec4i v = getter.get();
+            IVec4 v = getter.get();
             int[] vec = {v.getX(), v.getY(), v.getZ(), v.getW()};
             if (ImGui.inputInt4("##" + strId, vec)) {
-                setter.accept(new Vec4i(vec[0], vec[1], vec[2], vec[3]));
+                setter.accept(new IVec4(vec[0], vec[1], vec[2], vec[3]));
             }
         } catch (Exception e) {
             ImGui.text(String.valueOf(e));
         }
     }
 
-    public static void editVec2d(String label, String strId, Supplier<Vec2d> getter, Consumer<Vec2d> setter) {
+    public static void editVec2d(String label, String strId, Supplier<DVec2> getter, Consumer<DVec2> setter) {
         ImGui.text(label);
         ImGui.sameLine();
         try {
-            Vec2d v = getter.get();
+            DVec2 v = getter.get();
             ImDouble x = new ImDouble(v.getX());
             ImDouble y = new ImDouble(v.getY());
 
             if (ImGui.inputDouble("##" + strId + "[0]", x)) {
-                setter.accept(new Vec2d(x.get(), y.get()));
+                setter.accept(new DVec2(x.get(), y.get()));
             }
 
             if (ImGui.inputDouble("##" + strId + "[1]", y)) {
-                setter.accept(new Vec2d(x.get(), y.get()));
+                setter.accept(new DVec2(x.get(), y.get()));
             }
         } catch (Exception e) {
             ImGui.text(String.valueOf(e));
         }
     }
 
-    public static void editVec3d(String label, String strId, Supplier<Vec3d> getter, Consumer<Vec3d> setter) {
+    public static void editVec3d(String label, String strId, Supplier<DVec3> getter, Consumer<DVec3> setter) {
         ImGui.text(label);
         ImGui.sameLine();
         try {
-            Vec3d v = getter.get();
+            DVec3 v = getter.get();
             ImDouble x = new ImDouble(v.getX());
             ImDouble y = new ImDouble(v.getY());
             ImDouble z = new ImDouble(v.getZ());
 
             if (ImGui.inputDouble("##" + strId + "[0]", x)) {
-                setter.accept(new Vec3d(x.get(), y.get(), z.get()));
+                setter.accept(new DVec3(x.get(), y.get(), z.get()));
             }
 
             if (ImGui.inputDouble("##" + strId + "[1]", y)) {
-                setter.accept(new Vec3d(x.get(), y.get(), z.get()));
+                setter.accept(new DVec3(x.get(), y.get(), z.get()));
             }
 
             if (ImGui.inputDouble("##" + strId + "[2]", z)) {
-                setter.accept(new Vec3d(x.get(), y.get(), z.get()));
+                setter.accept(new DVec3(x.get(), y.get(), z.get()));
             }
         } catch (Exception e) {
             ImGui.text(String.valueOf(e));
         }
     }
 
-    public static void editVec4d(String label, String strId, Supplier<Vec4d> getter, Consumer<Vec4d> setter) {
+    public static void editVec4d(String label, String strId, Supplier<DVec4> getter, Consumer<DVec4> setter) {
         ImGui.text(label);
         ImGui.sameLine();
         try {
-            Vec4d v = getter.get();
+            DVec4 v = getter.get();
             ImDouble x = new ImDouble(v.getX());
             ImDouble y = new ImDouble(v.getY());
             ImDouble z = new ImDouble(v.getZ());
             ImDouble w = new ImDouble(v.getW());
 
             if (ImGui.inputDouble("##" + strId + "[0]", x)) {
-                setter.accept(new Vec4d(x.get(), y.get(), z.get(), w.get()));
+                setter.accept(new DVec4(x.get(), y.get(), z.get(), w.get()));
             }
 
             if (ImGui.inputDouble("##" + strId + "[1]", y)) {
-                setter.accept(new Vec4d(x.get(), y.get(), z.get(), w.get()));
+                setter.accept(new DVec4(x.get(), y.get(), z.get(), w.get()));
             }
 
             if (ImGui.inputDouble("##" + strId + "[2]", z)) {
-                setter.accept(new Vec4d(x.get(), y.get(), z.get(), w.get()));
+                setter.accept(new DVec4(x.get(), y.get(), z.get(), w.get()));
             }
 
             if (ImGui.inputDouble("##" + strId + "[3]", w)) {
-                setter.accept(new Vec4d(x.get(), y.get(), z.get(), w.get()));
+                setter.accept(new DVec4(x.get(), y.get(), z.get(), w.get()));
             }
         } catch (Exception e) {
             ImGui.text(String.valueOf(e));

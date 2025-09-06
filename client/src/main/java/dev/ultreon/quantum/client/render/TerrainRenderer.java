@@ -5,12 +5,13 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.client.management.MaterialManager;
+import dev.ultreon.quantum.client.render.pass.RenderPass;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.world.Skybox;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.resources.ReloadContext;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,14 +37,6 @@ public interface TerrainRenderer extends Disposable {
     void free(ClientChunkAccess chunk);
 
     /**
-     * Renders the background of the terrain.
-     *
-     * @param bufferSource The {@link RenderBufferSource} used for rendering models.
-     * @param deltaTime The time elapsed since the last frame, in seconds.
-     */
-    void renderBackground(RenderBufferSource bufferSource, float deltaTime);
-
-    /**
      * Renders the terrain using the specified model batch and render layer with a given delta time.
      *
      * @param batch       the model batch used for rendering
@@ -54,10 +47,11 @@ public interface TerrainRenderer extends Disposable {
     /**
      * Gathers rendering data for a specified entity to be processed by the renderer.
      *
+     * @param batch  The ModelBatch used to handle the rendering of the specified entity.
+     * @param pass
      * @param entity The entity that needs to be collected for rendering.
-     * @param batch The ModelBatch used to handle the rendering of the specified entity.
      */
-    void collectEntity(Entity entity, RenderBufferSource batch);
+    void renderEntity(RenderBufferSource batch, RenderPass pass, Entity entity);
 
     /**
      * Returns the number of currently loaded chunks by the terrain renderer.
@@ -118,7 +112,7 @@ public interface TerrainRenderer extends Disposable {
      * @param motion   The motion vector for the particle effect.
      * @param count    The number of particles to be added.
      */
-    void addParticles(ParticleEffect obtained, Vec3d position, Vec3d motion, int count);
+    void addParticles(ParticleEffect obtained, DVec3 position, DVec3 motion, int count);
 
     /**
      * Unloads the specified client chunk from memory, freeing up any associated resources.

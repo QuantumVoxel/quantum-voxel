@@ -16,7 +16,7 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.Biome;
 import dev.ultreon.quantum.world.ChunkBuildInfo;
 import dev.ultreon.quantum.world.particles.ParticleType;
@@ -35,21 +35,21 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onPlayerHealth(float newHealth);
 
-    void onRespawn(Vec3d pos);
+    void onRespawn(DVec3 pos);
 
-    void onPlayerSetPos(Vec3d pos);
+    void onPlayerSetPos(DVec3 pos);
 
     void onChunkCancel(ChunkVec pos);
 
     void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities);
 
-    void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, float xHeadRot, float xRot, float yRot);
+    void onPlayerPosition(PacketContext ctx, UUID player, DVec3 pos, float xHeadRot, float xRot, float yRot);
 
     void onKeepAlive();
 
     void onPlaySound(NamespaceID sound, float volume);
 
-    void onAddPlayer(int id, UUID uuid, String name, Vec3d position);
+    void onAddPlayer(int id, UUID uuid, String name, DVec3 position);
 
     void onRemovePlayer(UUID u);
 
@@ -83,7 +83,7 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onBlockEntitySet(BlockVec pos, BlockEntityType<?> blockEntity);
 
-    void onAddEntity(int id, EntityType<?> type, Vec3d position, MapType pipeline);
+    void onAddEntity(int id, EntityType<?> type, DVec3 position, MapType pipeline);
 
     void onEntityPipeline(int id, MapType pipeline);
 
@@ -93,7 +93,7 @@ public interface InGameClientPacketHandler extends ClientPacketHandler {
 
     void onPlayerAttack(int playerId, int entityId);
 
-    void onSpawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count);
+    void onSpawnParticles(ParticleType particleType, DVec3 position, DVec3 motion, int count);
 
     void onChunkUnload(ChunkVec chunkVec);
 

@@ -13,7 +13,7 @@ import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
-import dev.ultreon.quantum.util.Vec2f;
+import dev.ultreon.quantum.util.Vec2;
 import org.jetbrains.annotations.Nullable;
 
 public class OutlineShader extends DefaultShader {
@@ -86,7 +86,7 @@ public class OutlineShader extends DefaultShader {
         public final static Setter atlasSize = new LocalSetter() {
             @Override
             public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes) {
-                Vec2f f = ClientWorld.ATLAS_SIZE.get().f();
+                Vec2 f = ClientWorld.ATLAS_SIZE.get().f();
                 shader.set(inputID, new Vector2(f.x, f.y));
             }
         };

@@ -169,13 +169,13 @@ public abstract class Player extends LivingEntity {
     }
 
     @Override
-    public void setRotation(@NotNull Vec2f position) {
+    public void setRotation(@NotNull Vec2 position) {
         super.setRotation(position);
         this.xHeadRot = position.x;
     }
 
     @Override
-    public void setPosition(@NotNull Vec3d position) {
+    public void setPosition(@NotNull DVec3 position) {
         position.x = Mth.clamp(position.x, -30000000, 30000000);
         position.z = Mth.clamp(position.z, -30000000, 30000000);
         super.setPosition(position);

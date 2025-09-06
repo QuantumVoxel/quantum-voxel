@@ -269,7 +269,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
      * @param tmp a temporary vector to store the result
      * @return the block position in chunk space
      */
-    public static BlockVec toLocalBlockVec(int x, int y, int z, Vec3i tmp) {
+    public static BlockVec toLocalBlockVec(int x, int y, int z, IVec3 tmp) {
         BlockVec worldSpace = new BlockVec(x, y, z);
         return worldSpace.chunkLocal();
     }
@@ -860,13 +860,13 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     }
 
     @Override
-    public void drop(ItemStack itemStack, Vec3d position) {
+    public void drop(ItemStack itemStack, DVec3 position) {
         EventSystem.postDefault(new ItemStackEvent.Drop(itemStack, position, this));
-        drop(itemStack, position, new Vec3d());
+        drop(itemStack, position, new DVec3());
     }
 
     @Override
-    public void drop(ItemStack itemStack, Vec3d position, Vec3d velocity) {
+    public void drop(ItemStack itemStack, DVec3 position, DVec3 velocity) {
         if (this.isClientSide()) {
             CommonConstants.LOGGER.warn("Tried to drop an item on the client side!");
             return;
@@ -886,7 +886,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     }
 
     @Override
-    public void spawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count) {
+    public void spawnParticles(ParticleType particleType, DVec3 position, DVec3 motion, int count) {
 
     }
 

@@ -2,11 +2,8 @@ package dev.ultreon.quantum.client.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.utils.Disposable;
-import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.api.events.ItemStackEvent;
@@ -22,7 +19,7 @@ import dev.ultreon.quantum.item.UseItemContext;
 import dev.ultreon.quantum.network.packets.c2s.C2SItemUsePacket;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Hit;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.UseResult;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.ApiStatus;
@@ -42,7 +39,7 @@ public abstract class GameInput implements Disposable {
     protected long itemUse;
     protected boolean breaking;
     protected boolean using;
-    protected final Vec3d vel = new Vec3d();
+    protected final DVec3 vel = new DVec3();
     @Nullable
     protected Hit hit;
     private long itemUseCooldown;

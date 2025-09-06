@@ -13,20 +13,24 @@ import dev.ultreon.quantum.client.model.EntityModelInstance;
 import dev.ultreon.quantum.client.model.QVModel;
 import dev.ultreon.quantum.client.model.WorldRenderContext;
 import dev.ultreon.quantum.client.render.EntityTextures;
-import dev.ultreon.quantum.client.render.RenderPass;
-import dev.ultreon.quantum.client.shaders.Shaders;
+import dev.ultreon.quantum.client.render.RenderType;
+import dev.ultreon.quantum.client.render.context.ObjectType;
+import dev.ultreon.quantum.client.render.context.RenderMaterial;
+import dev.ultreon.quantum.client.render.material.EntityMaterial;
+import dev.ultreon.quantum.client.render.pass.RenderPass;
+import dev.ultreon.quantum.client.shaders.ShaderProviders;
 import dev.ultreon.quantum.entity.Entity;
-import dev.ultreon.quantum.util.Vec3d;
-import dev.ultreon.quantum.util.Vec3f;
+import dev.ultreon.quantum.util.DVec3;
+import dev.ultreon.quantum.util.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class EntityRenderer<E extends Entity> implements Disposable {
-    protected static Vec3d tmp0 = new Vec3d();
-    protected static Vec3d tmp1 = new Vec3d();
-    protected static Vec3d tmp2 = new Vec3d();
-    protected static Vec3f tmp0f = new Vec3f();
-    protected static Vec3f tmp1f = new Vec3f();
-    protected static Vec3f tmp2f = new Vec3f();
+    protected static DVec3 tmp0 = new DVec3();
+    protected static DVec3 tmp1 = new DVec3();
+    protected static DVec3 tmp2 = new DVec3();
+    protected static Vec3 tmp0f = new Vec3();
+    protected static Vec3 tmp1f = new Vec3();
+    protected static Vec3 tmp2f = new Vec3();
 
     protected QuantumClient client = QuantumClient.get();
     protected Matrix4 tmp = new Matrix4();
@@ -35,7 +39,7 @@ public abstract class EntityRenderer<E extends Entity> implements Disposable {
 
     }
 
-    public void render(EntityModelInstance<E> instance, WorldRenderContext<E> context) {
+    public void render(RenderPass pass, EntityModelInstance<E> instance, WorldRenderContext<E> context) {
         if (instance.getModel() == null)
             throw new IllegalStateException("Cannot render entity " + instance.getEntity().getType().getId() + " without model");
 
@@ -51,13 +55,13 @@ public abstract class EntityRenderer<E extends Entity> implements Disposable {
             m.set(FloatAttribute.createAlphaTest(0.01f));
         });
         if (instance.getModel().getInstance().userData == null)
-            instance.getModel().getInstance().userData = Shaders.MODEL_VIEW.get();
+            instance.getModel().getInstance().userData = ShaderProviders.MODEL_VIEW.get();
         instance.translate(0, -1.625, 0);
-        instance.render(context, context.getBufferSource().getBuffer(getRenderPass(context)));
+        instance.render(context, context.getBufferSource().getBuffer(pass.renderTypeFor(getRenderMaterial())));
     }
 
-    private RenderPass getRenderPass(WorldRenderContext<E> context) {
-        return RenderPass.ENTITY_TRANSPARENT;
+    private RenderMaterial getRenderMaterial() {
+        return new RenderMaterial(new EntityMaterial(), ObjectType.ENTITY, "Entity");
     }
 
     public abstract void animate(EntityModelInstance<E> instance, WorldRenderContext<E> context);

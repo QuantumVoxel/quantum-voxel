@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 import static dev.ultreon.quantum.world.World.CS;
 import static dev.ultreon.quantum.world.World.REGION_SIZE;
@@ -16,7 +15,7 @@ import static dev.ultreon.quantum.world.World.REGION_SIZE;
  *
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
-public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Serializable {
+public final class ChunkVec extends IVec3 implements Comparable<ChunkVec>, Serializable {
     // Region chunk size
     public static final int RCS = REGION_SIZE * CS;
 
@@ -35,7 +34,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     }
 
     @Override
-    public ChunkVec set(Vec3i vec) {
+    public ChunkVec set(IVec3 vec) {
         return (ChunkVec) set(vec.x, vec.y, vec.z);
     }
 
@@ -45,8 +44,8 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     }
 
     @Override
-    public Vec3i set(int v) {
-        return (Vec3i) super.set(v);
+    public IVec3 set(int v) {
+        return (IVec3) super.set(v);
     }
 
     public ChunkVec(int x, int y, int z, ChunkVecSpace space) {
@@ -109,8 +108,8 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     /**
      * @return The origin of the chunk.
      */
-    public Vec3d getChunkOrigin() {
-        return new Vec3d(this.x * CS, this.y * CS, this.z * CS);
+    public DVec3 getChunkOrigin() {
+        return new DVec3(this.x * CS, this.y * CS, this.z * CS);
     }
 
     /**
@@ -126,12 +125,12 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     }
 
     @Deprecated
-    public Vec2d vec() {
-        return new Vec2d(this.x, this.z);
+    public DVec2 vec() {
+        return new DVec2(this.x, this.z);
     }
 
-    public Vec3d vec3d() {
-        return new Vec3d(this.x, this.y, this.z);
+    public DVec3 vec3d() {
+        return new DVec3(this.x, this.y, this.z);
     }
 
     public ChunkVec offset(int x, int y, int z) {
@@ -353,7 +352,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     }
 
     @Override
-    public ChunkVec add(Vec3i vec) {
+    public ChunkVec add(IVec3 vec) {
         return new ChunkVec(this.x + vec.x, this.y + vec.y, this.z + vec.z);
     }
 
@@ -367,7 +366,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     }
 
     @Override
-    public ChunkVec sub(Vec3i vec) {
+    public ChunkVec sub(IVec3 vec) {
         return new ChunkVec(this.x - vec.x, this.y - vec.y, this.z - vec.z);
     }
 
@@ -381,7 +380,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     }
 
     @Override
-    public ChunkVec mul(Vec3i vec) {
+    public ChunkVec mul(IVec3 vec) {
         return new ChunkVec(this.x * vec.x, this.y * vec.y, this.z * vec.z);
     }
 
@@ -395,7 +394,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     }
 
     @Override
-    public ChunkVec div(Vec3i vec) {
+    public ChunkVec div(IVec3 vec) {
         return new ChunkVec(this.x / vec.x, this.y / vec.y, this.z / vec.z);
     }
 
@@ -409,7 +408,7 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     }
 
     @Override
-    public ChunkVec mod(Vec3i vec) {
+    public ChunkVec mod(IVec3 vec) {
         return new ChunkVec(this.x % vec.x, this.y % vec.y, this.z % vec.z);
     }
 
@@ -497,23 +496,23 @@ public final class ChunkVec extends Vec3i implements Comparable<ChunkVec>, Seria
     }
 
     @Override
-    public ChunkVec pow(Vec3i vec) {
+    public ChunkVec pow(IVec3 vec) {
         return new ChunkVec((int) Math.pow(this.x, vec.x), (int) Math.pow(this.y, vec.y), (int) Math.pow(this.z, vec.z));
     }
 
-    public ChunkVec pow(Vec3f vec) {
+    public ChunkVec pow(Vec3 vec) {
         return new ChunkVec((int) Math.pow(this.x, vec.x), (int) Math.pow(this.y, vec.y), (int) Math.pow(this.z, vec.z));
     }
 
-    public ChunkVec pow(Vec3d vec) {
+    public ChunkVec pow(DVec3 vec) {
         return new ChunkVec((int) Math.pow(this.x, vec.x), (int) Math.pow(this.y, vec.y), (int) Math.pow(this.z, vec.z));
     }
 
-    public ChunkVec max(Vec3i vec) {
+    public ChunkVec max(IVec3 vec) {
         return new ChunkVec(Math.max(this.x, vec.x), Math.max(this.y, vec.y), Math.max(this.z, vec.z));
     }
 
-    public ChunkVec min(Vec3i vec) {
+    public ChunkVec min(IVec3 vec) {
         return new ChunkVec(Math.min(this.x, vec.x), Math.min(this.y, vec.y), Math.min(this.z, vec.z));
     }
 

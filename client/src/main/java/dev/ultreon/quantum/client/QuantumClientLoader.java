@@ -36,9 +36,9 @@ import dev.ultreon.quantum.client.particle.ParticleControllers;
 import dev.ultreon.quantum.client.particle.ParticleEmitters;
 import dev.ultreon.quantum.client.registry.LanguageRegistry;
 import dev.ultreon.quantum.client.registry.MenuRegistry;
-import dev.ultreon.quantum.client.render.RenderPass;
+import dev.ultreon.quantum.client.render.RenderType;
 import dev.ultreon.quantum.client.render.ShaderPrograms;
-import dev.ultreon.quantum.client.shaders.Shaders;
+import dev.ultreon.quantum.client.shaders.ShaderProviders;
 import dev.ultreon.quantum.client.text.LanguageManager;
 import dev.ultreon.quantum.entity.player.Player;
 import dev.ultreon.quantum.menu.MenuTypes;
@@ -164,7 +164,7 @@ class QuantumClientLoader implements Runnable {
 
 
         LoadingContext.withinContext(new LoadingContext(CommonConstants.NAMESPACE), () -> {
-            RenderPass.nopInit();
+            RenderType.nopInit();
             Registries.nopInit();
 
             EventSystem.postDefault(new RegistryCreationEvent(CommonConstants.NAMESPACE));
@@ -178,7 +178,7 @@ class QuantumClientLoader implements Runnable {
 
             // Stuff that needs to be initialized on the render thread
             QuantumClient.invokeAndWait(() -> {
-                Shaders.init();
+                ShaderProviders.init();
                 ShaderPrograms.init();
                 ParticleEmitters.init();
                 ParticleControllerRenderers.init();

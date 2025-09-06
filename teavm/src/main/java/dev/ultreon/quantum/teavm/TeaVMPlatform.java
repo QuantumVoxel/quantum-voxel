@@ -3,6 +3,7 @@ package dev.ultreon.quantum.teavm;
 import com.badlogic.gdx.Gdx;
 import com.github.xpenatan.gdx.backends.teavm.TeaApplication;
 import dev.ultreon.quantum.*;
+import dev.ultreon.quantum.client.ClientPlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.crash.ApplicationCrash;
@@ -26,7 +27,7 @@ import java.util.function.Supplier;
 
 import static dev.ultreon.quantum.CommonConstants.NAMESPACE;
 
-public class TeaVMPlatform extends GamePlatform {
+public class TeaVMPlatform extends ClientPlatform {
 
     private final Supplier<TeaVMMod> value = Suppliers.memoize(TeaVMMod::new);
     private SafeLoadWrapper safeWrapper;

@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.*;
+import dev.ultreon.quantum.client.ClientPlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
 import dev.ultreon.quantum.client.rpc.GameActivity;
@@ -25,7 +26,6 @@ import dev.ultreon.quantum.dev.DevPipe;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.QuantumServer;
-import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
 import dev.ultreon.xeox.api.IFileSystem;
 import dev.ultreon.xeox.api.IMod;
@@ -50,7 +50,7 @@ import java.util.function.*;
 
 import static dev.ultreon.quantum.desktop.DesktopMain.LOGGER;
 
-public abstract class DesktopPlatform extends GamePlatform {
+public abstract class DesktopPlatform extends ClientPlatform {
     private final Map<String, XeoxMod> mods = new IdentityHashMap<>();
     private final boolean angleGLES;
     private final SafeLoadWrapper safeWrapper;
@@ -626,11 +626,6 @@ public abstract class DesktopPlatform extends GamePlatform {
     @Override
     public UUID constructUuid(long msb, long lsb) {
         return new UUID(msb, lsb);
-    }
-
-    @Override
-    public boolean hasImGui() {
-        return false;
     }
 
     @Override

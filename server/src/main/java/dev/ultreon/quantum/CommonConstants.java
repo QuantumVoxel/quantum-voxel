@@ -17,7 +17,7 @@ public class CommonConstants {
     public static final NamespaceID DEFAULT_FONT = new NamespaceID("quantium");
     
     // Client Vec3D
-    public static final Vec3d VEC3D = new Vec3d();
+    public static final DVec3 VEC3D = new DVec3();
 
     public static final JavaRNG RANDOM = new JavaRNG();
     public static final int DEFAULT_LOD_LEVEL = 0;

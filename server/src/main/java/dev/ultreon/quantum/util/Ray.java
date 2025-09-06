@@ -25,8 +25,8 @@ import java.io.Serializable;
  *
  * @author badlogicgames@gmail.com */
 public class Ray implements Serializable {
-	public final Vec3d origin = new Vec3d();
-	public final Vec3d direction = new Vec3d();
+	public final DVec3 origin = new DVec3();
+	public final DVec3 direction = new DVec3();
 
 	public Ray () {
 	}
@@ -35,7 +35,7 @@ public class Ray implements Serializable {
 	 *
 	 * @param origin The starting position
 	 * @param direction The direction */
-	public Ray (Vec3d origin, Vec3d direction) {
+	public Ray (DVec3 origin, DVec3 direction) {
 		this.origin.set(origin);
 		this.direction.set(direction).nor();
 	}
@@ -59,11 +59,11 @@ public class Ray implements Serializable {
 	 * @param out The vector to set to the result
 	 * @param distance The distance from the end point to the start point.
 	 * @return The out param */
-	public Vec3d getEndPoint (final Vec3d out, final float distance) {
+	public DVec3 getEndPoint (final DVec3 out, final float distance) {
 		return out.set(this.direction).scl(distance).add(this.origin);
 	}
 
-	static Vec3d tmp = new Vec3d();
+	static DVec3 tmp = new DVec3();
 
 	/** {@inheritDoc} */
 	public String toString () {
@@ -75,7 +75,7 @@ public class Ray implements Serializable {
 	 * @param origin The starting position
 	 * @param direction The direction
 	 * @return this ray for chaining */
-	public Ray set (Vec3d origin, Vec3d direction) {
+	public Ray set (DVec3 origin, DVec3 direction) {
 		this.origin.set(origin);
 		this.direction.set(direction).nor();
 		return this;

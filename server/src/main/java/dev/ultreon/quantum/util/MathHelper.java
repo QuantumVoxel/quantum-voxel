@@ -6,16 +6,16 @@ import com.badlogic.gdx.math.Vector3;
 public final class MathHelper {
     private static final String EX_INVALID_NUMBER_OF_VERTICES = "Invalid number of vertices";
 
-    public static Vec2i round(Vec2f vec) {
-        return new Vec2i(Math.round(vec.x), Math.round(vec.y));
+    public static IVec2 round(Vec2 vec) {
+        return new IVec2(Math.round(vec.x), Math.round(vec.y));
     }
 
-    public static Vec2i round(Vec2d vec) {
-        return new Vec2i((int) Math.round(vec.x), (int) Math.round(vec.y));
+    public static IVec2 round(DVec2 vec) {
+        return new IVec2((int) Math.round(vec.x), (int) Math.round(vec.y));
     }
 
-    public static Vec3i round(Vec3f vec) {
-        return new Vec3i(Math.round(vec.x), Math.round(vec.y), Math.round(vec.z));
+    public static IVec3 round(Vec3 vec) {
+        return new IVec3(Math.round(vec.x), Math.round(vec.y), Math.round(vec.z));
     }
 
     /**

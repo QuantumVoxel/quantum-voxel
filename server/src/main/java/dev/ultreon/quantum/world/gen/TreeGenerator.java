@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.world.gen;
 
-import dev.ultreon.quantum.util.Vec2f;
-import dev.ultreon.quantum.util.Vec2i;
+import dev.ultreon.quantum.util.Vec2;
+import dev.ultreon.quantum.util.IVec2;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.gen.noise.DomainWarping;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfig;
@@ -32,13 +32,13 @@ public class TreeGenerator {
         this.noise = this.treeNoiseConfig.create(seed);
     }
 
-    public static List<Vec2i> findLocalMaxima(double[][] dataMatrix, int x, int z) {
-        var maxima = new ArrayList<Vec2i>();
+    public static List<IVec2> findLocalMaxima(double[][] dataMatrix, int x, int z) {
+        var maxima = new ArrayList<IVec2>();
         for (var matrixX = 0; matrixX < dataMatrix.length; matrixX++) {
             for (var matrixZ = 0; matrixZ < dataMatrix[matrixX].length; matrixZ++) {
                 var noiseVal = dataMatrix[matrixX][matrixZ];
                 if (TreeGenerator.checkNeighbours(dataMatrix, matrixX, matrixZ, (neighbourNoise) -> neighbourNoise < noiseVal)) {
-                    maxima.add(new Vec2i(x + matrixX, z + matrixZ));
+                    maxima.add(new IVec2(x + matrixX, z + matrixZ));
                 }
 
             }
@@ -49,7 +49,7 @@ public class TreeGenerator {
     private static boolean checkNeighbours(double[][] matrix, int x, int y, Double2BooleanFunction successCondition) {
         for (var direction : Neighbour8Direction.values()) {
             var dir = direction.vec();
-            var newPost = new Vec2f(x + dir.x, y + dir.y);
+            var newPost = new Vec2(x + dir.x, y + dir.y);
 
             if (newPost.x < 0 || newPost.x >= matrix.length || newPost.y < 0 || newPost.y >= matrix[0].length) {
                 continue;

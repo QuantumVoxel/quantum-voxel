@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.client.api.events;
 
 import dev.ultreon.quantum.api.events.chunk.ChunkEvent;
-import dev.ultreon.quantum.client.world.ChunkModel;
+import dev.ultreon.quantum.client.render.world.ChunkModel;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.world.ChunkBuildInfo;

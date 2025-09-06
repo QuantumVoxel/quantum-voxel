@@ -8,7 +8,6 @@ import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvent;
 import dev.ultreon.quantum.client.api.events.ClientPlayerEvent;
-import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.ChatScreen;
 import dev.ultreon.quantum.client.gui.screens.DisconnectedScreen;
@@ -39,7 +38,6 @@ import dev.ultreon.quantum.network.packets.AbilitiesPacket;
 import dev.ultreon.quantum.network.packets.AddPermissionPacket;
 import dev.ultreon.quantum.network.packets.InitialPermissionsPacket;
 import dev.ultreon.quantum.network.packets.RemovePermissionPacket;
-import dev.ultreon.quantum.network.packets.c2s.C2SChunkStatusPacket;
 import dev.ultreon.quantum.network.packets.s2c.*;
 import dev.ultreon.quantum.network.server.ServerPacketHandler;
 import dev.ultreon.quantum.network.system.IConnection;
@@ -50,9 +48,8 @@ import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.GameMode;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.Biome;
-import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.ChunkBuildInfo;
 import dev.ultreon.quantum.world.Timing;
 import dev.ultreon.quantum.world.particles.ParticleType;
@@ -70,8 +67,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import dev.ultreon.quantum.Promise;
-
-import static dev.ultreon.quantum.world.World.CS;
 
 public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler {
     private final IConnection<ClientPacketHandler, ServerPacketHandler> connection;
@@ -111,7 +106,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onRespawn(Vec3d pos) {
+    public void onRespawn(DVec3 pos) {
         LocalPlayer player = this.client.player;
         if (this.client.player != null) {
             player.setPosition(pos);
@@ -124,11 +119,11 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onPlayerSetPos(Vec3d pos) {
+    public void onPlayerSetPos(DVec3 pos) {
         LocalPlayer player = this.client.player;
         if (player != null) {
             player.setPosition(pos);
-            player.setVelocity(new Vec3d());
+            player.setVelocity(new DVec3());
         }
     }
 
@@ -253,7 +248,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onPlayerPosition(PacketContext ctx, UUID player, Vec3d pos, float xHeadRot, float xRot, float yRot) {
+    public void onPlayerPosition(PacketContext ctx, UUID player, DVec3 pos, float xHeadRot, float xRot, float yRot) {
         // Update the remote player's position in the local multiplayer data.
         var data = this.client.getMultiplayerData();
         RemotePlayer remotePlayer = data != null ? data.getRemotePlayerByUuid(player) : null;
@@ -275,7 +270,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onAddPlayer(int id, UUID uuid, String name, Vec3d position) {
+    public void onAddPlayer(int id, UUID uuid, String name, DVec3 position) {
         if (this.client.getMultiplayerData() != null) {
             this.client.getMultiplayerData().addPlayer(id, uuid, name, position);
         } else {
@@ -444,7 +439,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onAddEntity(int id, EntityType<?> type, Vec3d position, MapType pipeline) {
+    public void onAddEntity(int id, EntityType<?> type, DVec3 position, MapType pipeline) {
         if (this.client.world != null) {
             this.client.world.addEntity(id, type, position, pipeline);
         } else {
@@ -487,7 +482,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onSpawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count) {
+    public void onSpawnParticles(ParticleType particleType, DVec3 position, DVec3 motion, int count) {
         @Nullable ClientWorldAccess world = this.client.world;
         if (world == null) return;
 

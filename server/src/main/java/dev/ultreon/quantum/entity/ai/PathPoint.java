@@ -1,15 +1,15 @@
 package dev.ultreon.quantum.entity.ai;
 
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 
 import java.util.Objects;
 
 public final class PathPoint {
-    public final Vec3d position = new Vec3d();
-    public final Vec3d motion = new Vec3d();
-    public final Vec3d look = new Vec3d();
+    public final DVec3 position = new DVec3();
+    public final DVec3 motion = new DVec3();
+    public final DVec3 look = new DVec3();
 
-    public PathPoint(Vec3d position, Vec3d motion, Vec3d look) {
+    public PathPoint(DVec3 position, DVec3 motion, DVec3 look) {
         this.position.set(position);
         this.motion.set(motion);
         this.look.set(look);

@@ -30,8 +30,8 @@
 
 package dev.ultreon.quantum.world.gen;
 
-import dev.ultreon.quantum.util.Vec2f;
-import dev.ultreon.quantum.util.Vec3f;
+import dev.ultreon.quantum.util.Vec2;
+import dev.ultreon.quantum.util.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -2605,11 +2605,11 @@ public class FastNoise {
         }
     }
 
-    public void GradientPerturb(Vec3f v3) {
+    public void GradientPerturb(Vec3 v3) {
         SingleGradientPerturb(m_seed, m_gradientPerturbAmp, m_frequency, v3);
     }
 
-    public void GradientPerturbFractal(Vec3f v3) {
+    public void GradientPerturbFractal(Vec3 v3) {
         int seed = m_seed;
         float amp = m_gradientPerturbAmp * m_fractalBounding;
         float freq = m_frequency;
@@ -2623,7 +2623,7 @@ public class FastNoise {
         }
     }
 
-    private void SingleGradientPerturb(int seed, float perturbAmp, float frequency, Vec3f v3) {
+    private void SingleGradientPerturb(int seed, float perturbAmp, float frequency, Vec3 v3) {
         float xf = v3.x * frequency;
         float yf = v3.y * frequency;
         float zf = v3.z * frequency;
@@ -2692,11 +2692,11 @@ public class FastNoise {
         v3.z += Lerp(lz0y, Lerp(lz0x, lz1x, ys), zs) * perturbAmp;
     }
 
-    public void GradientPerturb(Vec2f v2) {
+    public void GradientPerturb(Vec2 v2) {
         SingleGradientPerturb(m_seed, m_gradientPerturbAmp, m_frequency, v2);
     }
 
-    public void GradientPerturbFractal(Vec2f v2) {
+    public void GradientPerturbFractal(Vec2 v2) {
         int seed = m_seed;
         float amp = m_gradientPerturbAmp * m_fractalBounding;
         float freq = m_frequency;
@@ -2710,7 +2710,7 @@ public class FastNoise {
         }
     }
 
-    private void SingleGradientPerturb(int seed, float perturbAmp, float frequency, Vec2f v2) {
+    private void SingleGradientPerturb(int seed, float perturbAmp, float frequency, Vec2 v2) {
         float xf = v2.x * frequency;
         float yf = v2.y * frequency;
 

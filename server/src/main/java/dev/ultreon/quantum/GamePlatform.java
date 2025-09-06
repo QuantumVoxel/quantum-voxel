@@ -2,12 +2,11 @@ package dev.ultreon.quantum;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.dev.DevPipe;
-import dev.ultreon.quantum.network.PacketHandler;
-import dev.ultreon.quantum.network.system.MemoryConnection;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.platform.PlatformFeature;
@@ -34,10 +33,6 @@ public abstract class GamePlatform {
 
     protected GamePlatform() {
         instance = this;
-
-        if (isDevEnvironment()) {
-            this.setShowingImGui(true);
-        }
     }
 
     public static GamePlatform get() {
@@ -48,47 +43,11 @@ public abstract class GamePlatform {
         runnable.run();
     }
 
-    public void preInitImGui() {
-        // Implemented in subclasses
-    }
-
-    public void setTextCursorPos(int x, int y) {
-        // Implemented in subclasses
-    }
-
-    public void onEnterTextInput() {
-        Gdx.input.setOnscreenKeyboardVisible(true);
-    }
-
-    public void onExitTextInput() {
-        Gdx.input.setOnscreenKeyboardVisible(false);
-    }
-
-    public void setupImGui() {
-        // Implemented in subclasses
-    }
-
-    public void renderImGui() {
-        // Implemented in subclasses
-    }
-
-    public void onFirstRender() {
-        // Implemented in subclasses
-    }
-
     public void onGameDispose() {
         timer.dispose();
     }
 
-    public boolean isShowingImGui() {
-        return false;
-    }
-
     public abstract WebSocket newWebSocket(String location, Consumer<Throwable> onError, WebSocket.InitializeListener initializeListener, WebSocket.ConnectedListener connectedListener);
-
-    public void setShowingImGui(boolean value) {
-        // Implemented in subclasses
-    }
 
     public boolean areChunkBordersVisible() {
         return false;
@@ -366,11 +325,6 @@ public abstract class GamePlatform {
         return false;
     }
 
-    @Deprecated
-    public boolean hasImGui() {
-        return isImGuiSupported();
-    }
-
     public String getUserAgent() {
         return "Unknown";
     }
@@ -401,10 +355,6 @@ public abstract class GamePlatform {
 
     public TimerInstance getTimer() {
         return timer;
-    }
-
-    public boolean isImGuiSupported() {
-        return false;
     }
 
     public boolean isDevFlagEnabled(DevFlag devFlag) {
@@ -488,6 +438,10 @@ public abstract class GamePlatform {
 
     public void disableGame() {
 
+    }
+
+    public SpriteBatch createSpriteBatch() {
+        return new SpriteBatch();
     }
 
     private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {

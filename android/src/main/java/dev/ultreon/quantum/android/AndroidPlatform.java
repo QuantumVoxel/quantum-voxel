@@ -5,7 +5,9 @@ import android.hardware.SensorEvent;
 import android.os.Looper;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Version;
+import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.utils.IntMap;
@@ -13,14 +15,15 @@ import com.badlogic.gdx.utils.IntSet;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.android.log.AndroidLogger;
+import dev.ultreon.quantum.client.ClientPlatform;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.platform.GraphicsEngine;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.dedicated.JavaWebSocket;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.scripting.ScriptLoader;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Result;
 
@@ -28,7 +31,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
-public class AndroidPlatform extends GamePlatform {
+public class AndroidPlatform extends ClientPlatform {
     public static final int IMPORT_MOD_CODE = 0x00000001;
     private final Map<String, Mod> mods = new IdentityHashMap<>();
     private final AndroidLauncher launcher;
@@ -38,7 +41,7 @@ public class AndroidPlatform extends GamePlatform {
     private final IntMap<MouseDevice> motions = new IntMap<MouseDevice>();
     private AndroidMouseDevice mouseDevice;
     private final Map<Integer, Device> gameDevices = new HashMap<>();
-    private final ScriptLoader scriptLoader = new ScriptLoader();
+    private LibGDXGraphicsEngine graphicsEngine;
 
     AndroidPlatform(AndroidLauncher launcher) {
         super();
@@ -49,12 +52,17 @@ public class AndroidPlatform extends GamePlatform {
         this.mods.put("xeox", new BuiltinAndroidMod("xeox", "Xeox Loader", "0.1.0", "The modloader for Quantum Voxel on Android", Arrays.asList("Ultreon Studios")));
     }
 
+    void launch(AndroidLauncher launcher, ApplicationListener app, AndroidApplicationConfiguration config) {
+        this.graphicsEngine = new LibGDXGraphicsEngine(this, app);
+        this.graphicsEngine.start(() -> {
+            launcher.initialize(app, config);
+            return launcher;
+        });
+    }
+
     @Override
     public Collection<? extends Mod> getMods() {
-        ArrayList<Mod> list = new ArrayList<Mod>();
-        list.addAll(super.getMods());
-        list.addAll(this.mods.values());
-        return list;
+        return new ArrayList<Mod>(this.mods.values());
     }
 
     @Override
@@ -64,16 +72,12 @@ public class AndroidPlatform extends GamePlatform {
 
     @Override
     public Optional<Mod> getMod(String id) {
-        if (super.getMod(id).isPresent()) {
-            return super.getMod(id);
-        }
-
         return Optional.ofNullable(this.mods.get(id));
     }
 
     @Override
     public boolean isModLoaded(String id) {
-        return super.isModLoaded(id) || this.mods.containsKey(id);
+        return this.mods.containsKey(id);
     }
 
     @Override
@@ -290,11 +294,13 @@ public class AndroidPlatform extends GamePlatform {
             case JsInterop:
                 return true;
         }
+
+        return false;
     }
 
     @Override
     public void load(ResourceManager resourceManager) {
-        scriptLoader.reload(resourceManager);
+
     }
 
     @Override
@@ -322,4 +328,8 @@ public class AndroidPlatform extends GamePlatform {
         return new CopyOnWriteArrayList<>();
     }
 
+    @Override
+    public GraphicsEngine getGraphicsEngine() {
+        return graphicsEngine;
+    }
 }

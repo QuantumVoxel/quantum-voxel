@@ -32,7 +32,7 @@ import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.NamespaceID;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.BreakResult;
 import dev.ultreon.quantum.world.Chunk;
 import dev.ultreon.quantum.world.ServerWorld;
@@ -49,7 +49,7 @@ public class InGameServerPacketHandler implements ServerPacketHandler {
     private final IConnection<ServerPacketHandler, ClientPacketHandler> connection;
     private final PacketContext context;
     private boolean disconnected;
-    private final Vec3d tmpPos = new Vec3d();
+    private final DVec3 tmpPos = new DVec3();
 
     public InGameServerPacketHandler(QuantumServer server, ServerPlayer player, IConnection<ServerPacketHandler, ClientPacketHandler> connection) {
         this.server = server;

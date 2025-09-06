@@ -3,7 +3,7 @@ package dev.ultreon.quantum.world.gen.carver;
 import de.articdive.jnoise.core.api.pipeline.NoiseSource;
 import dev.ultreon.quantum.block.Blocks;
 import dev.ultreon.quantum.block.BlockState;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.IVec3;
 import dev.ultreon.quantum.world.BuilderChunk;
 import dev.ultreon.quantum.world.HeightmapType;
 import dev.ultreon.quantum.world.World;
@@ -43,7 +43,7 @@ public class OverworldCarver implements Carver {
     @Override
     public float carve(BuilderChunk chunk, int x, int z) {
         long start = System.currentTimeMillis();
-        Vec3i offset = chunk.getOffset();
+        IVec3 offset = chunk.getOffset();
         double hilliness = this.hillinessNoise.evaluateNoise(offset.x + x, offset.z + z) - 2.0f;
         float groundPos = (float) ((this.getSurfaceHeightNoise(x, z) - 64) * (hilliness / 4.0f + 0.5f) + 64);
         float height = groundPos;

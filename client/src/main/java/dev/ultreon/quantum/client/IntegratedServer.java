@@ -534,7 +534,7 @@ public class IntegratedServer extends QuantumServer {
     }
 
     @Override
-    public void onChunkFailedToLoad(Vec3d d) {
+    public void onChunkFailedToLoad(DVec3 d) {
         super.onChunkFailedToLoad(d);
 
         QuantumClient.invoke(() -> {

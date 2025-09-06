@@ -8,17 +8,17 @@ import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.registry.Registries;
 import dev.ultreon.quantum.ubo.types.MapType;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 
 import java.util.Objects;
 
 public final class S2CAddEntityPacket implements Packet<InGameClientPacketHandler> {
     private final int id;
     private final EntityType<?> type;
-    private final Vec3d position;
+    private final DVec3 position;
     private final MapType pipeline;
 
-    public S2CAddEntityPacket(int id, EntityType<?> type, Vec3d position, MapType pipeline) {
+    public S2CAddEntityPacket(int id, EntityType<?> type, DVec3 position, MapType pipeline) {
         this.id = id;
         this.type = type;
         this.position = position;
@@ -32,7 +32,7 @@ public final class S2CAddEntityPacket implements Packet<InGameClientPacketHandle
     public static S2CAddEntityPacket read(PacketIO buffer) {
         var id = buffer.readVarInt();
         var type = Registries.ENTITY_TYPE.byRawId(buffer.readVarInt());
-        var position = new Vec3d(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
+        var position = new DVec3(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
         MapType pipeline = buffer.readUbo();
 
         return new S2CAddEntityPacket(id, type, position, pipeline);
@@ -73,7 +73,7 @@ public final class S2CAddEntityPacket implements Packet<InGameClientPacketHandle
         return type;
     }
 
-    public Vec3d position() {
+    public DVec3 position() {
         return position;
     }
 

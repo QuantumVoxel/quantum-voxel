@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.*;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.quantum.LoggerFactory;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
@@ -14,6 +13,7 @@ import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.RemotePlayer;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
+import dev.ultreon.quantum.client.render.world.WorldRenderer;
 import dev.ultreon.quantum.client.util.Renderable;
 import dev.ultreon.quantum.client.util.Rot;
 import dev.ultreon.quantum.debug.DebugFlags;
@@ -46,7 +46,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     public static final int DAY_CYCLE = 24000;
 
     public static final AtomicReference<RgbColor> FOG_COLOR = new AtomicReference<>(RgbColor.rgb(0x7fb0fe));
-    public static final AtomicReference<Vec2f> ATLAS_SIZE = new AtomicReference<>(new Vec2f(2048, 2048));
+    public static final AtomicReference<Vec2> ATLAS_SIZE = new AtomicReference<>(new Vec2(2048, 2048));
     public static double FOG_DENSITY = 0.001;
     public static double FOG_START = 0.0;
     public static double FOG_END = 1.0;
@@ -58,7 +58,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     public static final Color SUN_RISE_COLOR = new Color(0xff6000ff);
     public static final Color VOID_COLOR = new Color(0x0a0a0aff);
 
-    public static final AtomicReference<Vec2f> ATLAS_OFFSET = new AtomicReference<>(new Vec2f(1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x)), ATLAS_SIZE.get().y));
+    public static final AtomicReference<Vec2> ATLAS_OFFSET = new AtomicReference<>(new Vec2(1 + 1 - (ATLAS_SIZE.get().x / (ATLAS_SIZE.get().x)), ATLAS_SIZE.get().y));
 
     public static Rot SKYBOX_ROTATION = Rot.deg(-60);
     public static int VOID_Y_START = 20;
@@ -70,7 +70,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     private ChunkVec oldChunkVec = new ChunkVec(0, 0, 0, ChunkVecSpace.WORLD);
     private long time = 0;
     private int totalChunks;
-    private final Vec3i tmp = new Vec3i();
+    private final IVec3 tmp = new IVec3();
     private final Queue<LightData> panelQueue = new Queue<>();
     private final ObjectIntMap<LightData> panelMap = new ObjectIntMap<>();
 
@@ -413,7 +413,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
         panelMap.clear();
     }
 
-    public int getBlockLight(Vec3i pos) {
+    public int getBlockLight(IVec3 pos) {
         return getBlockLight(pos.x, pos.y, pos.z);
     }
 
@@ -421,7 +421,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
         this.setBlockLight(data.pos, level);
     }
 
-    public void setBlockLight(Vec3i pos, int level) {
+    public void setBlockLight(IVec3 pos, int level) {
         this.setBlockLight(pos.x, pos.y, pos.z, level);
     }
 
@@ -452,7 +452,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
 
     @Override
     @ApiStatus.Experimental
-    public void spawnParticles(ParticleType particleType, Vec3d position, Vec3d motion, int count) {
+    public void spawnParticles(ParticleType particleType, DVec3 position, DVec3 motion, int count) {
 //        if (!QuantumClient.isOnRenderThread()) {
 //            QuantumClient.invokeAndWait(() -> this.spawnParticles(particleType, position, motion, count));
 //        }
@@ -673,7 +673,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     }
 
     @Override
-    public void addEntity(int id, EntityType<?> type, Vec3d position, MapType pipeline) {
+    public void addEntity(int id, EntityType<?> type, DVec3 position, MapType pipeline) {
         QuantumClient.LOGGER.debug("Adding entity with id {} of type {} at {}", id, type.getId(), position);
 
         Entity entity = type.create(this);

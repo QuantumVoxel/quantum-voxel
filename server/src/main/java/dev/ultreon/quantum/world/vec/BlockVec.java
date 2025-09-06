@@ -4,8 +4,6 @@ import dev.ultreon.quantum.ubo.types.MapType;
 import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.Direction;
 
-import java.util.Objects;
-
 import static dev.ultreon.quantum.world.World.CS;
 import static dev.ultreon.quantum.world.World.REGION_SIZE;
 
@@ -14,9 +12,9 @@ import static dev.ultreon.quantum.world.World.REGION_SIZE;
  *
  * @author <a href="https://github.com/XyperCode">Qubilux</a>
  */
-public final class BlockVec extends Vec3i implements Point, Cloneable {
+public final class BlockVec extends IVec3 implements Point, Cloneable {
     @Override
-    public BlockVec set(Vec3i vec) {
+    public BlockVec set(IVec3 vec) {
         this.x = vec.x;
         this.y = vec.y;
         this.z = vec.z;
@@ -48,7 +46,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         this(data.getInt("x"), data.getInt("y"), data.getInt("z"));
     }
 
-    public BlockVec(Vec3i vec) {
+    public BlockVec(IVec3 vec) {
         this(vec.getX(), vec.getY(), vec.getZ());
     }
 
@@ -69,12 +67,12 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     /**
-     * Converts this block position to a {@link Vec3i vector}.
+     * Converts this block position to a {@link IVec3 vector}.
      *
      * @return The vector.
      */
-    public Vec3i vec() {
-        return new Vec3i(this.x, this.y, this.z);
+    public IVec3 vec() {
+        return new IVec3(this.x, this.y, this.z);
     }
 
     @Override
@@ -114,12 +112,12 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
         return this.offset(direction.getOffset());
     }
 
-    public BlockVec offset(Vec3i vec) {
+    public BlockVec offset(IVec3 vec) {
         return new BlockVec(this.x + vec.getX(), this.y + vec.getY(), this.z + vec.getZ());
     }
 
     public BlockVec offset(Direction direction, int distance) {
-        Vec3i offset = direction.getOffset();
+        IVec3 offset = direction.getOffset();
         if (distance == 0) return this;
 
         return this.offset(offset.x * distance, offset.y * distance, offset.z * distance);
@@ -282,7 +280,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     @Override
-    public BlockVec add(Vec3i vec) {
+    public BlockVec add(IVec3 vec) {
         return new BlockVec(this.x + vec.x, this.y + vec.y, this.z + vec.z);
     }
 
@@ -296,7 +294,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     @Override
-    public BlockVec sub(Vec3i vec) {
+    public BlockVec sub(IVec3 vec) {
         return new BlockVec(this.x - vec.x, this.y - vec.y, this.z - vec.z);
     }
 
@@ -310,7 +308,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     @Override
-    public BlockVec mul(Vec3i vec) {
+    public BlockVec mul(IVec3 vec) {
         return new BlockVec(this.x * vec.x, this.y * vec.y, this.z * vec.z);
     }
 
@@ -324,7 +322,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     @Override
-    public BlockVec div(Vec3i vec) {
+    public BlockVec div(IVec3 vec) {
         return new BlockVec(this.x / vec.x, this.y / vec.y, this.z / vec.z);
     }
 
@@ -338,7 +336,7 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     @Override
-    public BlockVec mod(Vec3i vec) {
+    public BlockVec mod(IVec3 vec) {
         return new BlockVec(this.x % vec.x, this.y % vec.y, this.z % vec.z);
     }
 
@@ -426,23 +424,23 @@ public final class BlockVec extends Vec3i implements Point, Cloneable {
     }
 
     @Override
-    public BlockVec pow(Vec3i vec) {
+    public BlockVec pow(IVec3 vec) {
         return new BlockVec((int) Math.pow(this.x, vec.x), (int) Math.pow(this.y, vec.y), (int) Math.pow(this.z, vec.z));
     }
 
-    public BlockVec pow(Vec3f vec) {
+    public BlockVec pow(Vec3 vec) {
         return new BlockVec((int) Math.pow(this.x, vec.x), (int) Math.pow(this.y, vec.y), (int) Math.pow(this.z, vec.z));
     }
 
-    public BlockVec pow(Vec3d vec) {
+    public BlockVec pow(DVec3 vec) {
         return new BlockVec((int) Math.pow(this.x, vec.x), (int) Math.pow(this.y, vec.y), (int) Math.pow(this.z, vec.z));
     }
 
-    public BlockVec max(Vec3i vec) {
+    public BlockVec max(IVec3 vec) {
         return new BlockVec(Math.max(this.x, vec.x), Math.max(this.y, vec.y), Math.max(this.z, vec.z));
     }
 
-    public BlockVec min(Vec3i vec) {
+    public BlockVec min(IVec3 vec) {
         return new BlockVec(Math.min(this.x, vec.x), Math.min(this.y, vec.y), Math.min(this.z, vec.z));
     }
 

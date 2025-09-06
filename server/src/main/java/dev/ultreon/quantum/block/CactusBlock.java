@@ -1,7 +1,7 @@
 package dev.ultreon.quantum.block;
 
 import dev.ultreon.quantum.util.BoundingBox;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 import dev.ultreon.quantum.world.BlockFlags;
 import dev.ultreon.quantum.world.ServerWorld;
 import dev.ultreon.quantum.world.vec.BlockVec;
@@ -19,7 +19,7 @@ public class CactusBlock extends Block {
 
     @Override
     public BoundingBox getBoundingBox(int x, int y, int z, BlockState blockState) {
-        return new BoundingBox(new Vec3d(x + 1 / 16.0, y, z + 1 / 16.0), new Vec3d(x + 1 - 1 / 16.0, y + 1, z + 1 - 1 / 16.0));
+        return new BoundingBox(new DVec3(x + 1 / 16.0, y, z + 1 / 16.0), new DVec3(x + 1 - 1 / 16.0, y + 1, z + 1 - 1 / 16.0));
     }
 
     @Override

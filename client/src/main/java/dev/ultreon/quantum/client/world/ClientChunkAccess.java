@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.util.PosOutOfBoundsException;
-import dev.ultreon.quantum.util.Vec3i;
+import dev.ultreon.quantum.util.IVec3;
 import dev.ultreon.quantum.world.ChunkAccess;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -27,11 +27,11 @@ public interface ClientChunkAccess extends Disposable, ChunkAccess {
     @Override
     ClientWorldAccess getWorld();
 
-    int getSunlight(Vec3i pos);
+    int getSunlight(IVec3 pos);
 
     int getSunlight(int x, int y, int z);
 
-    int getBlockLight(Vec3i pos);
+    int getBlockLight(IVec3 pos);
 
     int getBlockLight(int x, int y, int z);
 

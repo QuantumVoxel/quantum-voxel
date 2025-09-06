@@ -4,19 +4,19 @@ import dev.ultreon.quantum.network.PacketContext;
 import dev.ultreon.quantum.network.PacketIO;
 import dev.ultreon.quantum.network.client.InGameClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
-import dev.ultreon.quantum.util.Vec3d;
+import dev.ultreon.quantum.util.DVec3;
 
 import java.util.Objects;
 
 public final class S2CRespawnPacket implements Packet<InGameClientPacketHandler> {
-    private final Vec3d pos;
+    private final DVec3 pos;
 
-    public S2CRespawnPacket(Vec3d pos) {
+    public S2CRespawnPacket(DVec3 pos) {
         this.pos = pos;
     }
 
     public static S2CRespawnPacket read(PacketIO buffer) {
-        var pos = buffer.readVec3d(new Vec3d());
+        var pos = buffer.readVec3d(new DVec3());
 
         return new S2CRespawnPacket(pos);
     }
@@ -38,7 +38,7 @@ public final class S2CRespawnPacket implements Packet<InGameClientPacketHandler>
                '}';
     }
 
-    public Vec3d pos() {
+    public DVec3 pos() {
         return pos;
     }
 
