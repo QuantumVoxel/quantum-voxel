@@ -20,17 +20,19 @@ class BasicShaders implements Toggleable {
 
     public void enable() {
         opaque = new WorldShaderProvider(QuantumClient.resource(NamespaceID.of("shaders/scene.vert")),
-                QuantumClient.resource(NamespaceID.of("shaders/scene.frag")));
+                QuantumClient.resource(NamespaceID.of("shaders/scene.frag")), null, "Opaque (basic)");
         transparent = new WorldShaderProvider(QuantumClient.resource(NamespaceID.of("shaders/transparent.vert")),
-                QuantumClient.resource(NamespaceID.of("shaders/transparent.frag")));
+                QuantumClient.resource(NamespaceID.of("shaders/transparent.frag")), null, "Transparent (basic)");
+        entityTransparent = new WorldShaderProvider(QuantumClient.resource(NamespaceID.of("shaders/transparent.vert")),
+                QuantumClient.resource(NamespaceID.of("shaders/transparent.frag")), null, "Entity Transparent (basic)");
         celestialBodies = new WorldShaderProvider(QuantumClient.resource(NamespaceID.of("shaders/transparent.vert")),
-                QuantumClient.resource(NamespaceID.of("shaders/transparent.frag")));
+                QuantumClient.resource(NamespaceID.of("shaders/transparent.frag")), null, "Celestial Bodies (basic)");
         water = new WorldShaderProvider(QuantumClient.resource(NamespaceID.of("shaders/water.vert")),
-                QuantumClient.resource(NamespaceID.of("shaders/water.frag")));
+                QuantumClient.resource(NamespaceID.of("shaders/water.frag")), null, "Water (basic)");
         cutout = new WorldShaderProvider(QuantumClient.resource(NamespaceID.of("shaders/cutout.vert")),
-                QuantumClient.resource(NamespaceID.of("shaders/cutout.frag")));
+                QuantumClient.resource(NamespaceID.of("shaders/cutout.frag")), null, "Cutout (basic)");
         skyBox = new SkyboxShaders(QuantumClient.resource(NamespaceID.of("shaders/skybox.vert")),
-                QuantumClient.resource(NamespaceID.of("shaders/skybox.frag")));
+                QuantumClient.resource(NamespaceID.of("shaders/skybox.frag")), null, "Skybox (basic)");
     }
 
     public void disable() {

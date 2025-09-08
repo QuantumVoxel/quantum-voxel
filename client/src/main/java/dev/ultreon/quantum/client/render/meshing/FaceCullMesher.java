@@ -5,6 +5,8 @@ import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
 import dev.ultreon.quantum.client.render.RenderType;
+import dev.ultreon.quantum.client.render.context.RenderMaterial;
+import dev.ultreon.quantum.client.render.pass.RenderPass;
 import dev.ultreon.quantum.client.world.AmbientOcclusion;
 import dev.ultreon.quantum.client.render.world.ChunkModelBuilder;
 import dev.ultreon.quantum.client.world.ClientChunk;
@@ -20,14 +22,14 @@ public class FaceCullMesher implements Mesher {
     }
 
     @Override
-    public boolean buildMesh(BoundingBox bounds, OpaqueFaces opaqueFaces, UseCondition condition, ChunkModelBuilder builder1) {
+    public boolean buildMesh(BoundingBox bounds, OpaqueFaces opaqueFaces, UseCondition condition, ChunkModelBuilder builder1, RenderPass pass) {
         // Part 1: Default world
         boolean flag = false;
         AmbientOcclusion ambientOcclusion = chunk.getClient().ambientOcclusion;
         for (int x = 0; x < CS; x++) {
             for (int y = 0; y < CS; y++) {
                 for (int z = 0; z < CS; z++) {
-                    flag |= loadBlockInto(bounds, opaqueFaces, builder1, x, y, z, ambientOcclusion);
+                    flag |= loadBlockInto(bounds, opaqueFaces, builder1, x, y, z, ambientOcclusion, pass);
                 }
             }
         }
@@ -37,7 +39,7 @@ public class FaceCullMesher implements Mesher {
 
     private boolean loadBlockInto(
             BoundingBox bounds, OpaqueFaces opaqueFaces, ChunkModelBuilder meshPartBuilder,
-            int x, int y, int z, AmbientOcclusion ambientOcclusion
+            int x, int y, int z, AmbientOcclusion ambientOcclusion, RenderPass pass
     ) {
         final var block = chunk.getSafe(x, y, z);
         if (!block.isAir()) {
@@ -59,7 +61,7 @@ public class FaceCullMesher implements Mesher {
             );
 
             model.bakeInto(bounds, opaqueFaces,
-                    meshPartBuilder.get(BlockRenderPassRegistry.get(block)), x, y, z, FaceCull.of(
+                    meshPartBuilder.get(pass.renderTypeFor(BlockRenderPassRegistry.get(block))), x, y, z, FaceCull.of(
                             shouldMerge(block, top),
                             shouldMerge(block, bottom),
                             shouldMerge(block, front),
@@ -73,11 +75,11 @@ public class FaceCullMesher implements Mesher {
     }
 
     private static boolean shouldMerge(BlockState block, BlockState other) {
-        RenderType renderType = BlockRenderPassRegistry.get(block);
+        RenderMaterial renderType = BlockRenderPassRegistry.get(block);
         return renderType == BlockRenderPassRegistry.get(other)
                 && !other.isAir()
                 && block.isTransparent() == other.isTransparent()
-                && renderType.doesMerging();
+                && renderType.getMaterialType().doesMerging();
     }
 
 }

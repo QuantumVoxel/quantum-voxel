@@ -662,8 +662,7 @@ public abstract class DesktopPlatform extends ClientPlatform {
     public boolean isImGuiSupported() {
         IXeoxLoader iXeoxLoader = IXeoxLoader.get();
         if (iXeoxLoader == null) {
-//            return !isMacOSX() && isDevEnvironment();
-            return false;
+            return !isMacOSX() && isDevEnvironment();
         }
         return !isMacOSX() && iXeoxLoader.isDevEnvironment();
     }

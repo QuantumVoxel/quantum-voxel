@@ -27,7 +27,6 @@ public class OutputRenderPass extends RenderPass {
     private @Nullable FrameBuffer outFbo;
     private boolean enabled = false;
     private final SpriteBatch spriteBatch = GamePlatform.get().createSpriteBatch();
-    private Texture @Nullable [] textures;
 
     protected OutputRenderPass(WorldRenderPass worldPassIn, ReflectionRenderPass reflectionPassIn) {
         super("Output");
@@ -72,12 +71,12 @@ public class OutputRenderPass extends RenderPass {
                 .addBasicStencilDepthPackedRenderBuffer()
                 .build();
 
-        textures = new Texture[]{outFbo.getColorBufferTexture()};
+        this.spriteBatch.setProjectionMatrix(spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, newWidth, newHeight));
     }
 
     @Override
     public void render(RenderBufferSource bufferSource, RenderContext context) {
-        if (!enabled) return;
+        if (!enabled) throw notEnabled();
 
         assert outFbo != null;
         assert outputShader != null;
@@ -112,9 +111,7 @@ public class OutputRenderPass extends RenderPass {
 
     @Override
     public Texture @NotNull [] getTextures() {
-        if (textures == null) {
-            throw notEnabled();
-        }
-        return textures;
+        if (outFbo == null) throw notEnabled();
+        return new Texture[]{outFbo.getColorBufferTexture()};
     }
 }

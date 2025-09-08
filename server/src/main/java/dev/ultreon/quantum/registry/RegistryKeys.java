@@ -5,6 +5,7 @@ import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.entity.Attribute;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
+import dev.ultreon.quantum.featureflags.FeatureFlag;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.menu.MenuType;
 import dev.ultreon.quantum.recipe.RecipeType;
@@ -37,4 +38,5 @@ public class RegistryKeys {
     public static final RegistryKey<Registry<CapabilityType<?, ?>>> CAPABILITY_TYPE = RegistryKey.registry(new NamespaceID("capability_type"));
     public static final RegistryKey<Registry<ChunkGenerator>> CHUNK_GENERATOR = RegistryKey.registry(new NamespaceID("chunk_generator"));
     public static final RegistryKey<Registry<DimensionInfo>> DIMENSION = RegistryKey.registry(new NamespaceID("dimension"));
+    public static final RegistryKey<Registry<FeatureFlag>> FEATURE_FLAG = RegistryKey.registry(new NamespaceID("feature_flag"));
 }

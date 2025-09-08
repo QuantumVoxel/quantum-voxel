@@ -10,4 +10,8 @@ public interface MaterialType {
     @Nullable ColorSource getAmbient();
     @Nullable ColorSource getShininess();
     @Nullable ColorSource getTransparency();
+
+    default boolean doesMerging() {
+        return false;
+    }
 }

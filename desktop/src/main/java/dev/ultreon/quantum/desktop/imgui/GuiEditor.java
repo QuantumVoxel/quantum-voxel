@@ -84,8 +84,8 @@ public class GuiEditor {
             }
             if (ImGui.collapsingHeader("Size")) {
                 ImGui.treePush();
-                ImGuiEx.editInt("Width: ", path + "::size::width", widget::getWidth, widget::width);
-                ImGuiEx.editInt("Height: ", path + "::size::height", widget::getHeight, widget::height);
+                ImGuiEx.editInt("Width: ", path + "::size::width", widget::getWidth, widget::setWidth);
+                ImGuiEx.editInt("Height: ", path + "::size::height", widget::getHeight, widget::setHeight);
                 ImGui.treePop();
             }
 

@@ -117,7 +117,7 @@ public class CrashScreen extends Screen {
     public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
         super.renderWidget(renderer, deltaTime);
 
-        this.list.width(QuantumClient.get().getScaledWidth());
+        this.list.setWidth(QuantumClient.get().getScaledWidth());
     }
 
     /**

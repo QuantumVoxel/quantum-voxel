@@ -26,6 +26,7 @@ import dev.ultreon.quantum.client.gui.overlay.wm.WindowManager;
 import dev.ultreon.quantum.client.input.TouchInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
+import dev.ultreon.quantum.client.render.modes.GraphicsMode;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
 import dev.ultreon.quantum.client.render.world.WorldRenderer;
@@ -76,7 +77,10 @@ public class GameRenderer implements Disposable {
     }
 
     public void resize(int width, int height) {
-
+        if (client == null) return;
+        GraphicsMode graphicsMode = client.getGraphicsMode();
+        if (graphicsMode == null) return;
+        graphicsMode.setSize(width, height);
     }
 
     /**

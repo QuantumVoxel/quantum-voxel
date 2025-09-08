@@ -573,12 +573,13 @@ public abstract class Screen extends UIContainer<Screen> {
         this.client.showScreen(null);
     }
 
-    public void showDialog(DialogBuilder message) {
+    public Dialog showDialog(DialogBuilder message) {
         this.dialog = message.build();
         this.dialog.init();
         this.dialog.mouseEnter(mousePos.x - this.dialog.getX(), mousePos.y - this.dialog.getY());
         if (this.hoveredWidget != null) this.hoveredWidget.mouseExit();
         this.hoveredWidget = this.dialog;
+        return this.dialog;
     }
 
     public void showDialog(Dialog dialog) {

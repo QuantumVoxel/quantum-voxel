@@ -3,7 +3,7 @@ package dev.ultreon.quantum.client.render.meshing;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import dev.ultreon.quantum.block.BlockLike;
 import dev.ultreon.quantum.client.model.block.BlockModel;
-import dev.ultreon.quantum.client.render.RenderType;
+import dev.ultreon.quantum.client.render.pass.RenderPass;
 import dev.ultreon.quantum.client.render.world.ChunkModelBuilder;
 import dev.ultreon.quantum.client.world.OpaqueFaces;
 import org.jetbrains.annotations.Nullable;
@@ -21,9 +21,10 @@ public interface Mesher {
      * @param opaqueFaces
      * @param condition   The condition to determine which blocks should be used for the mesh.
      * @param builder     The MeshPartBuilder to construct the mesh.
+     * @param pass
      * @return
      */
-    boolean buildMesh(BoundingBox bounds, OpaqueFaces opaqueFaces, UseCondition condition, ChunkModelBuilder builder);
+    boolean buildMesh(BoundingBox bounds, OpaqueFaces opaqueFaces, UseCondition condition, ChunkModelBuilder builder, RenderPass pass);
 
     /**
      * Determines whether a block should be used in the mesh.
@@ -35,7 +36,7 @@ public interface Mesher {
          * @param pass
          * @return True if the block should be used in this mesh
          */
-        boolean shouldUse(@Nullable BlockLike block, BlockModel model, RenderType pass);
+        boolean shouldUse(@Nullable BlockLike block, BlockModel model, RenderPass pass);
     }
 
 }

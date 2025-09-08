@@ -173,11 +173,11 @@ public abstract class Widget extends GameObject implements StaticWidget {
         this.pos.y = y;
     }
 
-    public void width(int width) {
+    public void setWidth(int width) {
         this.size.width = width;
     }
 
-    public void height(int height) {
+    public void setHeight(int height) {
         this.size.height = height;
     }
 

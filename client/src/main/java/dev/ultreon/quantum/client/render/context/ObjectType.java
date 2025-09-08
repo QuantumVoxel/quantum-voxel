@@ -1,9 +1,7 @@
 package dev.ultreon.quantum.client.render.context;
 
 public enum ObjectType {
-    SOLID_BLOCK,
-    TRANSPARENT_BLOCK,
-    CUTOUT_BLOCK,
+    BLOCK,
     WATER,
     LAVA,
     CUSTOM_LIQUID,
@@ -15,4 +13,5 @@ public enum ObjectType {
     CELESTIAL_BODIES,
     GIZMO,
     CUSTOM,
+    BLOCK_OVERLAY,
 }

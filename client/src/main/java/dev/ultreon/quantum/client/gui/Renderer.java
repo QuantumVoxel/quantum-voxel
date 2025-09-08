@@ -3,19 +3,16 @@ package dev.ultreon.quantum.client.gui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.GL30;
-import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Disposable;
 import com.github.tommyettinger.textra.Font;
 import com.github.tommyettinger.textra.Layout;
-import de.damios.guacamole.gdx.graphics.NestableFrameBuffer;
 import dev.ultreon.libs.commons.v0.Anchor;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
@@ -71,7 +68,7 @@ public class Renderer implements Disposable {
     private float strokeWidth = 1;
     private GameFont font;
     private final Matrices matrices;
-    private Color blitColor = RgbColor.rgb(0xffffff);
+    private final com.badlogic.gdx.graphics.Color blitColor = new com.badlogic.gdx.graphics.Color(1,1,1,1);
     private final Vector2 tmp2A = new Vector2();
     private final Vector3 tmp3A = new Vector3();
     private final GlStateStack glState = new GlStateStack();
@@ -80,9 +77,6 @@ public class Renderer implements Disposable {
     private int scissorOffsetX;
     private int scissorOffsetY;
     private boolean blurred;
-
-    private FrameBuffer blurTargetA = GamePlatform.get().isWeb() ? null : new NestableFrameBuffer(Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), false);
-    private FrameBuffer blurTargetB = GamePlatform.get().isWeb() ? null : new NestableFrameBuffer(Format.RGBA8888, QuantumClient.get().getWidth(), QuantumClient.get().getHeight(), false);
 
     public static final int FBO_SIZE = 1024;
 
@@ -94,6 +88,7 @@ public class Renderer implements Disposable {
     private final com.badlogic.gdx.graphics.Color fontColor = new com.badlogic.gdx.graphics.Color();
     private final Layout layout = new Layout();
     private String layoutText = "";
+    private final com.badlogic.gdx.graphics.Color tmpColor = new com.badlogic.gdx.graphics.Color(1,1,1,1);
 
     /**
      * Constructs a new Renderer object with the specified ShapeDrawer.
@@ -427,7 +422,7 @@ public class Renderer implements Disposable {
      */
     public Renderer blit(TextureRegion tex, float x, float y) {
         if (tex == null) tex = TextureManager.DEFAULT_TEX_REG;
-        this.batch.setColor(this.blitColor.toGdx());
+        this.batch.setColor(this.blitColor);
         this.batch.draw(tex, x, y + tex.getRegionHeight(), tex.getRegionWidth(), -tex.getRegionHeight());
         return this;
     }
@@ -446,7 +441,7 @@ public class Renderer implements Disposable {
      */
     public Renderer blit(TextureRegion tex, float x, float y, float width, float height) {
         if (tex == null) tex = TextureManager.DEFAULT_TEX_REG;
-        this.batch.setColor(this.blitColor.toGdx());
+        this.batch.setColor(this.blitColor);
         this.batch.draw(tex, x, y + height, width, -height);
         return this;
     }
@@ -463,7 +458,7 @@ public class Renderer implements Disposable {
      */
     @ApiStatus.Internal
     public Renderer blit(Texture tex, float x, float y) {
-        this.batch.setColor(this.blitColor.toGdx());
+        this.batch.setColor(this.blitColor);
         this.batch.draw(tex, x, y + tex.getHeight(), tex.getWidth(), -tex.getHeight());
         return this;
     }
@@ -483,7 +478,7 @@ public class Renderer implements Disposable {
     public Renderer blit(Texture tex, float x, float y, Color backgroundColor) {
         this.setColor(backgroundColor);
         this.rect(x, y, tex.getWidth(), tex.getHeight());
-        this.batch.setColor(this.blitColor.toGdx());
+        this.batch.setColor(this.blitColor);
         this.batch.draw(tex, x, y + tex.getHeight(), tex.getWidth(), -tex.getHeight());
         return this;
     }
@@ -577,7 +572,7 @@ public class Renderer implements Disposable {
     public Renderer blit(Texture tex, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int texWidth, int texHeight, Color backgroundColor) {
         this.setColor(backgroundColor);
         this.rect(x, y, width, height);
-        this.batch.setColor(this.blitColor.toGdx());
+        this.batch.setColor(this.blitColor);
         tmpUv.setTexture(tex);
         tmpUv.setRegion(texWidth / u, texHeight / v, texWidth / (u + uWidth), texHeight / (v + vHeight));
         this.batch.draw(tmpUv, x, y + height, width, -height);
@@ -663,7 +658,7 @@ public class Renderer implements Disposable {
     public Renderer blit(Texture tex, float x, float y, float width, float height,
                          float u, float v, float uWidth, float vHeight,
                          int texWidth, int texHeight) {
-        this.batch.setColor(this.blitColor.toGdx());
+        this.batch.setColor(this.blitColor);
 
         // Normalize UV coordinates (convert from pixel coordinates to 0.0 - 1.0)
         float u1 = u / texWidth;
@@ -805,7 +800,7 @@ public class Renderer implements Disposable {
      * @return this
      */
     public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v, float uWidth, float vHeight, int texWidth, int texHeight) {
-        this.batch.setColor(this.blitColor.toGdx());
+        this.batch.setColor(this.blitColor);
         Texture tex = this.textureManager.getTexture(id);
 
         // Normalize UV coordinates (convert from pixel coordinates to 0.0 - 1.0)
@@ -846,7 +841,7 @@ public class Renderer implements Disposable {
         this.setColor(backgroundColor);
         this.rect(x, y, width, height);
         Texture tex = this.textureManager.getTexture(id);
-        this.batch.setColor(this.blitColor.toGdx());
+        this.batch.setColor(this.blitColor);
         this.tmpUv.setTexture(tex);
         this.tmpUv.setRegion(texWidth / u, texHeight / v, texWidth / (u + uWidth), texHeight / (v + vHeight));
         this.batch.draw(tmpUv, x, y + height, width, -height);
@@ -878,7 +873,7 @@ public class Renderer implements Disposable {
                          float vHeight, float texWidth, float texHeight, Color backgroundColor) {
         this.setColor(backgroundColor);
         this.rect(x, y, width, height);
-        this.batch.setColor(this.blitColor.toGdx());
+        this.batch.setColor(this.blitColor);
         tmpUv.setTexture(tex);
         tmpUv.setRegion(texWidth / u, texHeight / v, texWidth / (u + uWidth), texHeight / (v + vHeight));
         this.batch.draw(tmpUv, x, y + height, width, -height);
@@ -905,7 +900,7 @@ public class Renderer implements Disposable {
     @ApiStatus.Internal
     public Renderer blit(Texture tex, float x, float y, float width, float height, float u, float v, float uWidth,
                          float vHeight, float texWidth, float texHeight) {
-        this.batch.setColor(this.blitColor.toGdx());
+        this.batch.setColor(this.blitColor);
         this.tmpUv.setTexture(tex);
         this.tmpUv.setRegion(1 * u / texWidth, 1 * v / texHeight, 1 * (u + uWidth) / texWidth, 1 * (v + vHeight) / texHeight);
         this.batch.draw(tmpUv, x, y + height, width, -height);
@@ -930,7 +925,7 @@ public class Renderer implements Disposable {
      */
     public Renderer blit(NamespaceID id, float x, float y, float width, float height, float u, float v,
                          float uWidth, float vHeight, float texWidth, float texHeight) {
-        this.batch.setColor(this.blitColor.toGdx());
+        this.batch.setColor(this.blitColor);
         Texture tex = this.textureManager.getTexture(id);
         this.tmpUv.setTexture(tex);
         this.tmpUv.setRegion(1 * u / texWidth, 1 * v / texHeight, 1 * (u + uWidth) / texWidth, 1 * (v + vHeight) / texHeight);
@@ -960,7 +955,7 @@ public class Renderer implements Disposable {
         this.setColor(backgroundColor);
         this.rect(x, y, width, height);
         Texture tex = this.textureManager.getTexture(id);
-        this.batch.setColor(this.blitColor.toGdx());
+        this.batch.setColor(this.blitColor);
         this.tmpUv.setTexture(tex);
         this.tmpUv.setRegion(texWidth / u, texHeight / v, texWidth / (u + uWidth), texHeight / (v + vHeight));
         this.batch.draw(tmpUv, x, y + height, width, -height);
@@ -1031,6 +1026,20 @@ public class Renderer implements Disposable {
      * @param color the color
      * @return this
      */
+    public Renderer textLeft(@NotNull String text, int x, int y, com.badlogic.gdx.graphics.Color color) {
+        this.textLeft(text, x, y, color, true);
+        return this;
+    }
+
+    /**
+     * Draws text anchored to the left
+     *
+     * @param text  the text
+     * @param x     the setX coordinate
+     * @param y     the setY coordinate
+     * @param color the color
+     * @return this
+     */
     public Renderer textLeft(@NotNull String text, int x, int y, ColorCode color) {
         this.textLeft(text, x, y, RgbColor.of(color), true);
         return this;
@@ -1061,6 +1070,21 @@ public class Renderer implements Disposable {
      * @return this
      */
     public Renderer textLeft(@NotNull String text, int x, int y, Color color, boolean shadow) {
+        this.drawText(text, x, y, color, shadow);
+        return this;
+    }
+
+    /**
+     * Draws text anchored to the left
+     *
+     * @param text   the text
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
+     * @param color  the color
+     * @param shadow if the text should be drawn with a shadow
+     * @return this
+     */
+    public Renderer textLeft(@NotNull String text, int x, int y, com.badlogic.gdx.graphics.Color color, boolean shadow) {
         this.drawText(text, x, y, color, shadow);
         return this;
     }
@@ -1381,6 +1405,11 @@ public class Renderer implements Disposable {
         return this;
     }
 
+    public Renderer textLeft(@NotNull TextObject text, int x, int y, com.badlogic.gdx.graphics.Color color) {
+        this.textLeft(text, x, y, color, true);
+        return this;
+    }
+
     public Renderer textLeft(@NotNull TextObject text, int x, int y, ColorCode color) {
         this.textLeft(String.valueOf(text), x, y, color, true);
         return this;
@@ -1392,6 +1421,11 @@ public class Renderer implements Disposable {
     }
 
     public Renderer textLeft(@NotNull TextObject text, int x, int y, Color color, boolean shadow) {
+        this.drawText(text, x, y, color, shadow);
+        return this;
+    }
+
+    public Renderer textLeft(@NotNull TextObject text, int x, int y, com.badlogic.gdx.graphics.Color color, boolean shadow) {
         this.drawText(text, x, y, color, shadow);
         return this;
     }
@@ -1568,7 +1602,13 @@ public class Renderer implements Disposable {
         return this.textWidth(text.stream().map(FormattedText::getText).collect(Collectors.joining()));
     }
 
+    @Deprecated
     public Renderer textCenter(@NotNull String text, int x, int y, Color color) {
+        this.textLeft(text, x - this.textWidth(text) / 2, y, color);
+        return this;
+    }
+
+    public Renderer textCenter(@NotNull String text, int x, int y, com.badlogic.gdx.graphics.Color color) {
         this.textLeft(text, x - this.textWidth(text) / 2, y, color);
         return this;
     }
@@ -1609,6 +1649,11 @@ public class Renderer implements Disposable {
     }
 
     public Renderer textCenter(@NotNull TextObject text, int x, int y, Color color) {
+        this.textLeft(text, x - this.textWidth(text) / 2, y, color);
+        return this;
+    }
+
+    public Renderer textCenter(@NotNull TextObject text, int x, int y, com.badlogic.gdx.graphics.Color color) {
         this.textLeft(text, x - this.textWidth(text) / 2, y, color);
         return this;
     }
@@ -2508,18 +2553,37 @@ public class Renderer implements Disposable {
         return this;
     }
 
+    @Deprecated
     public Renderer blitColor(Color color) {
-        this.blitColor = color;
+        this.blitColor.set(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
         return this;
     }
 
-    public Color getBlitColor() {
+    @Deprecated
+    public Renderer blitColor(com.badlogic.gdx.graphics.Color color) {
+        this.blitColor.set(color);
+        return this;
+    }
+
+    public com.badlogic.gdx.graphics.Color getBlitColor() {
         return this.blitColor;
     }
 
     public void setBlitColor(Color blitColor) {
-        this.batch.setColor(this.blitColor.toGdx());
-        this.blitColor = blitColor;
+        this.blitColor.set(blitColor.getRed() / 255f, blitColor.getGreen() / 255f, blitColor.getBlue() / 255f, blitColor.getAlpha() / 255f);
+        this.batch.setColor(this.blitColor);
+    }
+
+    public Renderer blitColor(float r, float g, float b, float a) {
+        this.blitColor.set(r, g, b, a);
+        this.batch.setColor(this.blitColor);
+        return this;
+    }
+
+    public Renderer blitColor(float r, float g, float b) {
+        this.blitColor.set(r, g, b, 1f);
+        this.batch.setColor(this.blitColor);
+        return this;
     }
 
     public Renderer pushMatrix() {
@@ -3208,8 +3272,7 @@ public class Renderer implements Disposable {
 
     @Override
     public void dispose() {
-        if (blurTargetA != null) blurTargetA.dispose();
-        if (blurTargetB != null) blurTargetB.dispose();
+
     }
 
     public int getWidth() {
@@ -3412,6 +3475,22 @@ public class Renderer implements Disposable {
         this.drawText0(this.batch, text, x, y, c);
     }
 
+    private void drawText(@NotNull String text, float x, float y, com.badlogic.gdx.graphics.Color color, boolean shadow) {
+        this.tmpColor.set(color).mul(0.8f).mul(0.8f);
+
+        if (shadow) {
+            batch.setColor(0.5f, 0.5f, 0.5f, 1.0f);
+            if (ClientConfiguration.diagonalFontShadow.getValue()) {
+                this.drawText0(this.batch, text, x + 1, y + 1, tmpColor.toIntBits());
+            } else {
+                this.drawText0(this.batch, text, x, y + 1, tmpColor.toIntBits());
+            }
+        }
+
+        batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        this.drawText0(this.batch, text, x, y, tmpColor.toIntBits());
+    }
+
     public void drawText(@NotNull TextObject text, float x, float y, Color color, boolean shadow) {
         String string = text.getText();
 
@@ -3430,6 +3509,11 @@ public class Renderer implements Disposable {
 
         batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         this.drawText0(this.batch, string, x, y, c);
+    }
+
+    public void drawText(@NotNull TextObject text, float x, float y, com.badlogic.gdx.graphics.Color color, boolean shadow) {
+        String string = text.getText();
+        drawText(string, x, y, color, shadow);
     }
 
     @Deprecated
@@ -3475,6 +3559,12 @@ public class Renderer implements Disposable {
     }
 
     private void drawText0(Batch batch, String string, float x, float y, int c) {
+        // Remove alpha
+        final int alphaMask = 0xff000000;
+        c = ~alphaMask & c;
+
+        // Draw Text with formatting
+        // TODO: Explain this stuff
         String formatted = String.format("[#%06x]%s", c, string);
 
         if (this.layoutText.equals(formatted)) {
@@ -3490,5 +3580,9 @@ public class Renderer implements Disposable {
     public void drawText(CompatTypingLabel label, float x, float y) {
         label.act(Gdx.graphics.getDeltaTime());
         label.draw(batch, 1f);
+    }
+
+    public void setBlitColor(int r, int g, int b, float a) {
+        this.blitColor.set(r, g, b, a);
     }
 }

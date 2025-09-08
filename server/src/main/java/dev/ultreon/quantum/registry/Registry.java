@@ -136,7 +136,7 @@ public abstract class Registry<T> implements IdRegistry<T>, RegistryMap<Registry
      * @param rl  the resource location.
      * @param val the register item value.
      */
-    public void register(NamespaceID rl, T val) {
+    public T register(NamespaceID rl, T val) {
         if (!this.type.isAssignableFrom(val.getClass()))
             throw new IllegalArgumentException("Not allowed type detected, got " + val.getClass() + " expected assignable to " + this.type);
 
@@ -148,6 +148,7 @@ public abstract class Registry<T> implements IdRegistry<T>, RegistryMap<Registry
         this.idMap.put(setId, val);
         this.ogIdMap.put(setId, val);
         this.registry.put(key, val);
+        return val;
     }
 
     public boolean isOverrideAllowed() {

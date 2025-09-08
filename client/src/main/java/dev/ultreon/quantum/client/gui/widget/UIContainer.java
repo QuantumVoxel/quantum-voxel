@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 public class UIContainer<T extends UIContainer<T>> extends Widget {
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "GDXJavaStaticResource"})
     public static final UIContainer<?> ROOT = new UIContainer(Integer.MAX_VALUE, Integer.MAX_VALUE) {
         @Override
         public UIPath path() {

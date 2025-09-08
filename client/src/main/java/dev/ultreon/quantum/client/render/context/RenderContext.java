@@ -49,8 +49,8 @@ public class RenderContext {
         worldRenderer.consumeInfo(loadedChunks, visibleChunks);
     }
 
-    public void renderTerrain(RenderBufferSource bufferSource, List<ClientChunk> chunks, LocalPlayer player, ChunkRenderState ref) {
-        worldRenderer.renderTerrain(bufferSource, chunks, player, ref);
+    public void renderTerrain(RenderBufferSource bufferSource, List<ClientChunk> chunks, LocalPlayer player, ChunkRenderState ref, RenderPass pass) {
+        worldRenderer.renderTerrain(bufferSource, chunks, player, ref, pass);
     }
 
     public void renderEntity(RenderBufferSource bufferSource, RenderPass pass, @Nullable Entity player) {

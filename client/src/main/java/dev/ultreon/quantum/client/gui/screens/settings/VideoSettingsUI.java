@@ -2,15 +2,12 @@ package dev.ultreon.quantum.client.gui.screens.settings;
 
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
-import dev.ultreon.quantum.client.gui.Alignment;
-import dev.ultreon.quantum.client.gui.Bounds;
-import dev.ultreon.quantum.client.gui.Position;
+import dev.ultreon.quantum.client.gui.*;
 import dev.ultreon.quantum.client.gui.screens.options.BooleanEnum;
 import dev.ultreon.quantum.client.gui.screens.options.Scale;
 import dev.ultreon.quantum.client.gui.screens.tabs.TabBuilder;
-import dev.ultreon.quantum.client.gui.widget.CycleButton;
-import dev.ultreon.quantum.client.gui.widget.Label;
-import dev.ultreon.quantum.client.gui.widget.Slider;
+import dev.ultreon.quantum.client.gui.widget.*;
+import dev.ultreon.quantum.client.render.modes.GraphicsModes;
 import dev.ultreon.quantum.text.TextObject;
 
 import java.util.Objects;
@@ -69,6 +66,23 @@ public class VideoSettingsUI {
                 .value(ClientConfiguration.fpsLimit.getValue())
                 .withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 175, 150, 21))
                 .setCallback(this::setFrameRate));
+
+        builder.add(TextObject.translation("quantum.graphics.mode"), TextButton.of(TextObject.translation(client.getGraphicsMode().getTranslationId())).withCallback(caller -> {
+            if (client.worldRenderer != null) {
+                Dialog dialog = builder.content().parent().showDialog(new DialogBuilder(builder.content().parent()).title(TextObject.translation("quantum.ui.error")).message(TextObject.translation("quantum.ui.error.message.graphicsModeInWorld")).button(TextObject.translation("quantum.ui.ok"), Dialog::close));
+                dialog.setWidth(200);
+                dialog.setHeight(100);
+                return;
+            }
+
+            if (client.getGraphicsMode() == GraphicsModes.BASIC) {
+                client.switchGraphicsMode(GraphicsModes.ADVANCED);
+                caller.text().set(TextObject.translation(client.getGraphicsMode().getTranslationId()));
+            } else {
+                client.switchGraphicsMode(GraphicsModes.BASIC);
+                caller.text().set(TextObject.translation(client.getGraphicsMode().getTranslationId()));
+            }
+        }).withBounding(() -> new Bounds(builder.content().getX() + 160, builder.content().getY() + 200, 150, 21)));
     }
 
     private void setFpsCounter(CycleButton<BooleanEnum> cycleButton) {

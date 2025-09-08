@@ -10,42 +10,53 @@ import dev.ultreon.quantum.client.model.QVModel;
 import dev.ultreon.quantum.client.model.block.BlockModel;
 import dev.ultreon.quantum.client.model.item.ItemModel;
 import dev.ultreon.quantum.client.render.ModelObject;
+import dev.ultreon.quantum.client.render.VisualGameObject;
 import dev.ultreon.quantum.client.shaders.GeomShaderConfig;
+import dev.ultreon.quantum.client.shaders.ModelViewShader;
 import dev.ultreon.quantum.client.shaders.ShaderProviders;
 import dev.ultreon.quantum.client.shaders.WorldShader;
 import dev.ultreon.quantum.client.world.ClientChunk;
+import dev.ultreon.quantum.client.world.Skybox;
+import org.jetbrains.annotations.Nullable;
 
 public class WorldShaderProvider extends DefaultShaderProvider implements GameShaders {
     private final DefaultShader.Config config;
+    @Nullable
+    private final String version;
+    private final String name;
 
-    public WorldShaderProvider(final DefaultShader.Config config) {
+    public WorldShaderProvider(final String vertexShader, final String fragmentShader, @Nullable String version, String name) {
+        this(new DefaultShader.Config(vertexShader, fragmentShader), version, name);
+    }
+
+    public WorldShaderProvider(final FileHandle vertexShader, final FileHandle fragmentShader, @Nullable String version, String name) {
+        this(vertexShader.readString(), fragmentShader.readString(), version, name);
+    }
+
+    public WorldShaderProvider(final DefaultShader.Config config, @Nullable String version, String name) {
         super(config);
         this.config = config;
+        this.version = version;
+        this.name = name;
     }
 
-    public WorldShaderProvider(final String vertexShader, final String fragmentShader) {
-        this(new DefaultShader.Config(vertexShader, fragmentShader));
-    }
-
-    public WorldShaderProvider(final FileHandle vertexShader, final FileHandle fragmentShader) {
-        this(vertexShader.readString(), fragmentShader.readString());
-    }
-
-    public WorldShaderProvider() {
-        this(new GeomShaderConfig());
+    public WorldShaderProvider(@Nullable String version, String name) {
+        this(new GeomShaderConfig(), version, name);
     }
 
     @Override
     public Shader createShader(Renderable renderable) {
-        if (renderable != null && renderable.userData instanceof ClientChunk) {
-            ClientChunk chunk = (ClientChunk) renderable.userData;
-            WorldShader worldShader = new WorldShader(renderable, this.config, chunk.lod);
-            ShaderProviders.checkShaderCompilation(worldShader.program, "WorldShader");
-            return worldShader;
-        }
-
         if (renderable != null) {
-            return getShaderFromUserData(renderable, renderable.userData);
+            if (renderable.userData instanceof ClientChunk) {
+                ClientChunk chunk = (ClientChunk) renderable.userData;
+                WorldShader worldShader = new WorldShader(renderable, this.config, chunk.lod, version);
+                ShaderProviders.checkShaderCompilation(worldShader.program, name);
+                return worldShader;
+            }
+
+            WorldShader worldShader = new WorldShader(renderable, this.config, version != null ? "#version " + version + "\n" : "");
+            ShaderProviders.checkShaderCompilation(worldShader.program, name);
+            return worldShader;
         }
 
         throw new NullPointerException("Renderable cannot be null");
@@ -61,29 +72,10 @@ public class WorldShaderProvider extends DefaultShaderProvider implements GameSh
     }
 
     private static Shader getShaderFromUserData(Renderable renderable, Object userData) {
-        if (userData instanceof Gizmo) {
-            Gizmo gizmo = (Gizmo) userData;
-            return gizmo.outline ? ShaderProviders.GIZMO_OUTLINE.get().createShader(renderable) : ShaderProviders.GIZMO.get().createShader(renderable);
-        } else if (userData instanceof QVModel) {
-            QVModel qvModel = (QVModel) userData;
-            return qvModel.getShaderProvider().createShader(renderable);
-        } else if (userData instanceof SkyboxShaders) {
-            SkyboxShaders provider = (SkyboxShaders) userData;
-            return provider.createShader(renderable);
-        } else if (userData instanceof GameShaders) {
-            GameShaders provider = (GameShaders) userData;
-            return provider.createShader(renderable);
-        } else if (userData instanceof ItemModel) {
-            return ShaderProviders.MODEL_VIEW.get().createShader(renderable);
-        } else if (userData instanceof BlockModel) {
-            return ShaderProviders.MODEL_VIEW.get().createShader(renderable);
-        } else if (userData instanceof Shader) {
-            Shader shader = (Shader) userData;
-            return shader;
-        } else if (userData instanceof ModelObject) {
-            ModelObject modelObject = (ModelObject) userData;
-            return modelObject.shaderProvider().createShader(renderable);
-        }
         return new DefaultShader(renderable, new DefaultShader.Config());
+    }
+
+    public @Nullable String getVersion() {
+        return version;
     }
 }

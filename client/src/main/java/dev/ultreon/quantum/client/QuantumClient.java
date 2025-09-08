@@ -64,6 +64,7 @@ import dev.ultreon.quantum.client.registry.ModIconOverrideRegistry;
 import dev.ultreon.quantum.client.render.*;
 import dev.ultreon.quantum.client.render.modes.GraphicsMode;
 import dev.ultreon.quantum.client.render.modes.GraphicsModes;
+import dev.ultreon.quantum.client.render.modes.advanced.AdvancedGraphicsMode;
 import dev.ultreon.quantum.client.resources.ResourceFileHandle;
 import dev.ultreon.quantum.client.resources.ResourceNotFoundException;
 import dev.ultreon.quantum.client.rpc.GameActivity;
@@ -605,7 +606,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         // Initialize the game camera
         this.camera = new GameCamera(67, this.getWidth(), this.getHeight());
-        this.camera.near = 0.1f;
+        this.camera.near = 0.05f;
         this.camera.far = 2;
 
         // Initialize the game camera
@@ -1694,7 +1695,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
             // Render debug overlay if enabled
             try (var ignored = QuantumClient.PROFILER.start("debug")) {
-                if (this.hideHud || !debugOverlayShown || this.isLoading()) return;
+                if (this.hideHud || !debugOverlayShown || this.isLoading() || screen != null) return;
                 renderer.begin();
                 renderer.scale(2, 2);
                 this.debugGui.render(renderer, 2);
@@ -3623,7 +3624,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     }
 
     public boolean isAdvancedGraphics() {
-        return supportedGlslVersion.isAtLeast(3, 30);
+        return getGraphicsMode() instanceof AdvancedGraphicsMode;
     }
 
     public GraphicsMode getGraphicsMode() {

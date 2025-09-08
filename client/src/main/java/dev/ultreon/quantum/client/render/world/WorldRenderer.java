@@ -35,6 +35,7 @@ import dev.ultreon.quantum.client.model.WorldRenderContextImpl;
 import dev.ultreon.quantum.client.model.block.BakedCubeModel;
 import dev.ultreon.quantum.client.model.entity.renderer.EntityRenderer;
 import dev.ultreon.quantum.client.player.LocalPlayer;
+import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
 import dev.ultreon.quantum.client.render.*;
 import dev.ultreon.quantum.client.render.context.ObjectType;
 import dev.ultreon.quantum.client.render.context.RenderContext;
@@ -123,7 +124,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     private static final DVec3 TMP_3D1 = new DVec3();
     private static final DVec3 TMP_3D3 = new DVec3();
     private GraphicsMode graphicsMode;
-    private RenderContext context;
+    private final RenderContext context;
 
     /**
      * Constructs a WorldRenderer instance for rendering a given client world.
@@ -137,6 +138,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
         this.graphicsMode = client.getGraphicsMode();
         this.graphicsMode.enable();
+        this.graphicsMode.setSize(client.getWidth(), client.getHeight());
         context = new RenderContext(client, this, world);
     }
 
@@ -210,7 +212,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         this.skybox.model = modelBuilder.createBox(60, 60, 60, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked);
 
         ModelInstance modelInstance = new ModelInstance(this.skybox.model, 0, 0, 0);
-        modelInstance.userData = ShaderProviders.SKYBOX.get();
+        modelInstance.userData = skybox;
         this.skybox.modelInstance = modelInstance;
     }
 
@@ -404,7 +406,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     @SuppressWarnings("t")
-    public void renderTerrain(RenderBufferSource bufferSource, List<ClientChunk> chunks, LocalPlayer player, ChunkRenderState ref) {
+    public void renderTerrain(RenderBufferSource bufferSource, List<ClientChunk> chunks, LocalPlayer player, ChunkRenderState ref, RenderPass pass) {
         PROFILER.begin("collect-chunks");
         try {
             occlusionBounds.clear();
@@ -431,16 +433,16 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
                 ChunkModel model = this.chunkModels.get(chunk.vec);
                 if (model == null) {
                     if (ref.chunkRendered) continue;
-                    model = buildChunk(ref, chunk);
+                    model = buildChunk(ref, chunk, pass);
                     chunk.dirty = false;
                 } else if (chunk.dirty) {
-                    rebuildChunk(ref, chunk, model);
+                    rebuildChunk(ref, chunk, model, pass);
                     chunk.dirty = false;
                 }
 
                 model.render(client.camera, bufferSource);
 
-                this.renderBlockBreaking(bufferSource, chunk);
+                this.renderBlockBreaking(bufferSource, chunk, pass);
 
                 Vector3 renderOffset = chunk.renderOffset;
                 model.setTranslation(renderOffset.x, renderOffset.y, renderOffset.z);
@@ -498,15 +500,16 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      *
      * @param ref   the reference object that tracks information about the chunk rendering state
      * @param chunk the client chunk for which the model is to be built
+     * @param pass  the render pass that is being used to render the chunk
      * @return the created chunk model
      */
-    private ChunkModel buildChunk(ChunkRenderState ref, ClientChunk chunk) {
+    private ChunkModel buildChunk(ChunkRenderState ref, ClientChunk chunk, RenderPass pass) {
         ChunkModel model;
         this.client.profiler.begin("build-chunk");
         try {
             chunk.dirty = false;
             model = new ChunkModel(chunk.vec, chunk, this);
-            BoundingBox build = model.buildSync();
+            BoundingBox build = model.buildSync(pass);
             if (build != null) {
                 chunk.tightBounds.set(build);
             }
@@ -529,12 +532,13 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      * @param chunk the client chunk containing data that needs to be rendered
      * @param model the rendering model associated with the chunk,
      *              which will be rebuilt during this method
+     * @param pass
      */
-    private void rebuildChunk(ChunkRenderState ref, ClientChunk chunk, ChunkModel model) {
+    private void rebuildChunk(ChunkRenderState ref, ClientChunk chunk, ChunkModel model, RenderPass pass) {
         PROFILER.begin("rebuild-chunk");
         try {
             chunk.dirty = false;
-            model.rebuild();
+            model.rebuild(pass);
             ref.chunkRendered = true;
             chunk.dirty = false;
 
@@ -585,7 +589,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
      * @param batch the buffer source used for rendering the breaking block models
      * @param chunk the client chunk that contains the blocks and their breaking states
      */
-    private void renderBlockBreaking(RenderBufferSource batch, ClientChunk chunk) {
+    private void renderBlockBreaking(RenderBufferSource batch, ClientChunk chunk, RenderPass pass) {
         for (var entry : chunk.getBreaking().entrySet()) {
             BlockVec pos = entry.getKey();
 
@@ -595,7 +599,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
             modelInstance.transform.setToTranslationAndScaling(translation, this.tmp2.set(1.1f, 1.1f, 1.1f));
             modelInstance.userData = ShaderProviders.MODEL_VIEW.get();
 
-            batch.getBuffer(RenderType.TRANSPARENT).render(modelInstance);
+            batch.getBuffer(pass.renderTypeFor(RenderMaterials.BLOCK_OVERlAY)).render(modelInstance);
         }
     }
 
@@ -903,16 +907,16 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
     }
 
     @Nullable
-    public Boolean rebuild(ClientChunk chunk) {
+    public Boolean rebuild(ClientChunk chunk, RenderPass pass) {
         if (!QuantumClient.isOnRenderThread()) {
-            QuantumClient.invoke(() -> this.rebuild(chunk));
+            QuantumClient.invoke(() -> this.rebuild(chunk, pass));
             return null;
         }
 
         ChunkModel model = this.chunkModels.get(chunk.vec);
 
         if (model != null) {
-            model.rebuild();
+            model.rebuild(pass);
             return true;
         }
 

@@ -236,10 +236,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
             throw new IllegalArgumentException("Chunk must be a ClientChunk but was " + chunk.getClass().getSimpleName());
         ClientChunk clientChunk = (ClientChunk) chunk;
 
-        if (this.client.worldRenderer instanceof WorldRenderer) {
-            WorldRenderer worldRenderer = this.client.worldRenderer;
-            worldRenderer.rebuild(clientChunk);
-        }
+        clientChunk.dirty = true;
 
         super.updateChunk(chunk);
     }

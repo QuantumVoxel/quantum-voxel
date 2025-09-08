@@ -35,6 +35,9 @@ public class ReflectionRenderPass extends RenderPass {
 
     @Override
     protected void create() {
+        if (enabled) return;
+        enabled = true;
+
         this.reflectionShader = new ShaderProgram(
                 QuantumClient.resource(NamespaceID.of("shaders/basic/flat.glsl")),
                 QuantumClient.resource(NamespaceID.of("shaders/postprocessing/ssr_reflect.glsl"))
@@ -69,13 +72,14 @@ public class ReflectionRenderPass extends RenderPass {
                 .addBasicColorTextureAttachment(Pixmap.Format.RGBA8888) // Color
                 .addBasicStencilDepthPackedRenderBuffer()
                 .build();
+
+        this.spriteBatch.setProjectionMatrix(spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, newWidth, newHeight));
     }
 
     @Override
     public void render(RenderBufferSource bufferSource, RenderContext context) {
-        if (!enabled) return;
+        if (!enabled) throw notEnabled();
         if (reflectionShader == null || reflectionFbo == null) return;
-
 
         reflectionFbo.begin();
         Gdx.gl.glClearColor(0, 0, 0, 0);
@@ -121,6 +125,7 @@ public class ReflectionRenderPass extends RenderPass {
 
     @Override
     public Texture[] getTextures() {
+        if (!enabled) throw notEnabled();
         return textures;
     }
 }

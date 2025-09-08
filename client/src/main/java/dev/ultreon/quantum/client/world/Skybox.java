@@ -95,7 +95,7 @@ public class Skybox extends VisualGameObject implements RenderableProvider, Disp
 
         for (int i = 0; i < renderables.size; i++) {
             Renderable renderable = renderables.get(i);
-            renderable.userData = ShaderProviders.SKYBOX.get();
+            renderable.userData = this;
         }
     }
 

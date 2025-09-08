@@ -18,6 +18,7 @@ import dev.ultreon.quantum.client.render.context.ObjectType;
 import dev.ultreon.quantum.client.render.context.RenderMaterial;
 import dev.ultreon.quantum.client.render.material.EntityMaterial;
 import dev.ultreon.quantum.client.render.pass.RenderPass;
+import dev.ultreon.quantum.client.render.world.RenderMaterials;
 import dev.ultreon.quantum.client.shaders.ShaderProviders;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.util.DVec3;
@@ -61,7 +62,7 @@ public abstract class EntityRenderer<E extends Entity> implements Disposable {
     }
 
     private RenderMaterial getRenderMaterial() {
-        return new RenderMaterial(new EntityMaterial(), ObjectType.ENTITY, "Entity");
+        return RenderMaterials.ENTITY;
     }
 
     public abstract void animate(EntityModelInstance<E> instance, WorldRenderContext<E> context);

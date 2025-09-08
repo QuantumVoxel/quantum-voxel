@@ -38,64 +38,6 @@ public class ShaderProviders {
     public static final Supplier<DefaultShaderProvider> DEFAULT = ShaderProviders.register("default", MyDefaultShaderProvider::new);
 
     /**
-     * The scene shader provider. Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
-     *
-     * @see WorldShaderProvider
-     */
-    public static final Supplier<WorldShaderProvider> WORLD = ShaderProviders.register("world", () -> new WorldShaderProvider(
-            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isAdvancedGraphics() ? "shaders/vibrant/scene.vert" : "shaders/scene.vert")),
-            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isAdvancedGraphics() ? "shaders/vibrant/scene.frag" : "shaders/scene.frag"))
-    ));
-
-    /**
-     * The scene shader provider.
-     * Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
-     *
-     * @see WorldShaderProvider
-     */
-    public static final Supplier<WorldShaderProvider> TRANSPARENT = ShaderProviders.register("transparent", () -> new WorldShaderProvider(
-            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isAdvancedGraphics() ? "shaders/vibrant/transparent.vert" : "shaders/transparent.vert")),
-            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isAdvancedGraphics() ? "shaders/vibrant/transparent.frag" : "shaders/transparent.frag"))));
-
-    /**
-     * The scene shader provider.
-     * Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
-     *
-     * @see WorldShaderProvider
-     */
-    public static final Supplier<WorldShaderProvider> CELESTIAL_BODIES = ShaderProviders.register("transparent", () -> new WorldShaderProvider(
-            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isAdvancedGraphics() ? "shaders/vibrant/celestial_body.vert" : "shaders/transparent.vert")),
-            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isAdvancedGraphics() ? "shaders/vibrant/celestial_body.frag" : "shaders/transparent.frag"))));
-
-    /**
-     * The scene shader provider.
-     * Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
-     *
-     * @see WorldShaderProvider
-     */
-    public static final Supplier<WorldShaderProvider> WATER = ShaderProviders.register("water", () -> new WorldShaderProvider(
-            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isAdvancedGraphics() ? "shaders/vibrant/water.vert" : "shaders/water.vert")),
-            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isAdvancedGraphics() ? "shaders/vibrant/water.frag" : "shaders/water.frag"))));
-
-    /**
-     * The scene shader provider.
-     * Located in {@code shaders/scene.vert}, {@code shaders/scene.frag}, and {@code shaders/scene.geom}.
-     *
-     * @see WorldShaderProvider
-     */
-    public static final Supplier<WorldShaderProvider> CUTOUT = ShaderProviders.register("cutout", () -> new WorldShaderProvider(
-            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isAdvancedGraphics() ? "shaders/vibrant/cutout.vert" : "shaders/cutout.vert")),
-            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isAdvancedGraphics() ? "shaders/vibrant/cutout.frag" : "shaders/cutout.frag"))));
-
-    /**
-     * The skybox shader provider. Located in {@code shaders/skybox.vert} and {@code shaders/skybox.frag}.
-     */
-    public static final Supplier<DefaultShaderProvider> SKYBOX = ShaderProviders.register("skybox", () -> new SkyboxShaders(
-            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isAdvancedGraphics() ? "shaders/vibrant/skybox.vert" : "shaders/skybox.vert")),
-            QuantumClient.resource(NamespaceID.of(QuantumClient.get().isAdvancedGraphics() ? "shaders/vibrant/skybox.frag" : "shaders/skybox.frag"))
-    ));
-
-    /**
      * The model view shader provider. Located in {@code shaders/model.vert}, {@code shaders/model.frag}, and {@code shaders/model.geom}.
      *
      * @see ModelShaders

@@ -104,9 +104,10 @@ public class WorldShader extends BaseGameShader {
      * @param renderable The Renderable instance to be rendered.
      * @param config     The configuration for the geometry shader, containing shader sources and settings.
      * @param lod        The level of detail used for rendering, influencing the #define LOD_LEVEL in the shader.
+     * @param version    The shading language version to be used, or null to use the default version for the platform.
      */
-    public WorldShader(Renderable renderable, Config config, int lod) {
-        this(renderable, config, (QuantumClient.get().isAdvancedGraphics() ? "#version 330 core\n" : "") + String.format("#define LOD_LEVEL %s\n", lod));
+    public WorldShader(Renderable renderable, Config config, int lod, @Nullable String version) {
+        this(renderable, config, (version != null ? "#version " + version + "\n" : "") + String.format("#define LOD_LEVEL %s\n", lod));
         this.lod = lod;
     }
 

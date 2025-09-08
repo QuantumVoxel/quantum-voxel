@@ -11,7 +11,6 @@ import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.RegisterRenderPassesEvent;
 import dev.ultreon.quantum.client.atlas.TextureAtlas;
-import dev.ultreon.quantum.client.management.TextureAtlasManager;
 import dev.ultreon.quantum.client.shaders.ShaderProviders;
 import dev.ultreon.quantum.client.texture.TextureManager;
 import dev.ultreon.quantum.util.Suppliers;
@@ -701,43 +700,6 @@ public class RenderType {
                 }
     }
 
-    public static final RenderType SKYBOX = RenderType.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
-            .name("skybox")
-            .shader(ShaderProviders.SKYBOX)
-            .depthTest(false)
-            .build();
-
-    public static final RenderType CELESTIAL_BODIES = RenderType.builder(Position(), TexCoords(0))
-            .name("celestial_bodies")
-            .shader(ShaderProviders.CELESTIAL_BODIES)
-            .blending(GL_SRC_ALPHA, GL_ONE)
-            .cull(0)
-            .depthTest(false)
-            .build();
-
-    public static final RenderType TRANSPARENT = RenderType.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
-            .name("transparent")
-            .shader(ShaderProviders.TRANSPARENT)
-            .blending()
-            .depthTest()
-            .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
-            .build();
-
-    public static final RenderType WATER = RenderType.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
-            .name("water")
-            .shader(ShaderProviders.WATER)
-            .blending()
-            .depthTest()
-            .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
-            .build();
-
-    public static final RenderType OPAQUE = RenderType.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
-            .name("opaque")
-            .shader(ShaderProviders.WORLD)
-            .depthTest()
-            .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
-            .build();
-
     public static final RenderType GIZMO = RenderType.builder(Position(), ColorPacked(), TexCoords(0))
             .name("gizmo")
             .shader(ShaderProviders.GIZMO)
@@ -751,21 +713,6 @@ public class RenderType {
             .shader(ShaderProviders.GIZMO_OUTLINE)
             .alphaTest(0.01f)
             .blending()
-            .depthTest()
-            .build();
-
-    public static final RenderType ENTITY_TRANSPARENT = RenderType.builder(Position(), Normal(), TexCoords(0))
-            .name("entity_transparent")
-            .shader(ShaderProviders.WORLD)
-            .blending()
-            .depthTest()
-            .build();
-
-    public static final RenderType CUTOUT = RenderType.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
-            .name("cutout")
-            .shader(ShaderProviders.CUTOUT)
-            .atlas(TextureAtlasManager.BLOCK_ATLAS_ID)
-            .alphaTest()
             .depthTest()
             .build();
 
@@ -806,7 +753,9 @@ public class RenderType {
     }
 
     public ShaderProvider createShader() {
-        return shader.get();
+        ShaderProvider shaderProvider = shader.get();
+        if (shaderProvider == null) throw new IllegalStateException("Shader cannot be null");
+        return shaderProvider;
     }
 
     public Material createMaterial() {

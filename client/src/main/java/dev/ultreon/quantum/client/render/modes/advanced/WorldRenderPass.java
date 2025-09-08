@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Array;
 import de.damios.guacamole.gdx.graphics.NestableFrameBuffer;
 import dev.ultreon.quantum.client.management.TextureAtlasManager;
 import dev.ultreon.quantum.client.player.LocalPlayer;
+import dev.ultreon.quantum.client.registry.BlockRenderMaterial;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderType;
 import dev.ultreon.quantum.client.render.context.RenderContext;
@@ -67,6 +68,8 @@ public class WorldRenderPass extends RenderPass {
 
     @Override
     protected void create() {
+        if (enabled) return;
+
         this.shaderHolder.enable();
 
         this.skyBox = RenderType.builder(Position(), Normal(), ColorPacked(), TexCoords(0))
@@ -165,49 +168,51 @@ public class WorldRenderPass extends RenderPass {
 
     @Override
     public void dispose() {
-
+        if (!enabled) return;
+        if (frameBuffer != null) frameBuffer.dispose();
+        if (skyBoxFrameBuffer != null) skyBoxFrameBuffer.dispose();
+        shaderHolder.disable();
+        enabled = false;
     }
 
     @Override
     public void render(RenderBufferSource bufferSource, RenderContext context) {
         if (!enabled) return;
-        if (frameBuffer == null) return;
 
-
-        skyBoxFrameBuffer.begin();
-        bufferSource.begin(context.client.camera);
-        renderSkyBox(bufferSource, context);
-        bufferSource.end();
-        skyBoxFrameBuffer.end();
-        
         frameBuffer.begin();
         bufferSource.begin(context.client.camera);
+        try {
+            renderSkyBox(bufferSource, context);
+            bufferSource.flush();
 
-        // Check if the world is disposed.
-        LocalPlayer player = context.client.player;
-        if (updateWorld(context, player)) return;
+            // Check if the world is disposed.
+            LocalPlayer player = context.client.player;
+            if (updateWorld(context, player)) {
+                return;
+            }
 
-        // Get the loaded chunks and sort them by distance from the player.
-        List<ClientChunk> chunks = prepareChunks(context, player);
+            // Get the loaded chunks and sort them by distance from the player.
+            List<ClientChunk> chunks = prepareChunks(context, player);
 
-        // Create a new ChunkRenderRef and an array of ChunkVec.
-        ChunkRenderState ref = new ChunkRenderState();
+            // Create a new ChunkRenderRef and an array of ChunkVec.
+            ChunkRenderState ref = new ChunkRenderState();
 
-        initBuffers(bufferSource);
+            initBuffers(bufferSource);
 
-        // Collect the chunks to render.
-        context.renderTerrain(bufferSource, chunks, player, ref);
-        context.renderGizmos(Gdx.graphics.getDeltaTime());
+            // Collect the chunks to render.
+            context.renderTerrain(bufferSource, chunks, player, ref, this);
+            context.renderGizmos(Gdx.graphics.getDeltaTime());
 
-        renderEntities(bufferSource, context, player);
+            renderEntities(bufferSource, context, player);
 
-        // Particles
-        renderParticles(context);
+            // Particles
+            renderParticles(context);
 
-        bufferSource.end();
-        context.pushInfo();
-        
-        frameBuffer.end();
+            context.pushInfo();
+        } finally {
+            bufferSource.end();
+            frameBuffer.end();
+        }
     }
 
     private @NotNull List<ClientChunk> prepareChunks(RenderContext context, LocalPlayer player) {
@@ -220,7 +225,7 @@ public class WorldRenderPass extends RenderPass {
     private void renderEntities(RenderBufferSource bufferSource, RenderContext context, @NotNull LocalPlayer player) {
         context.renderEntity(bufferSource, this, player);
         Array<Entity> toSort = new Array<>(context.world.getAllEntities());
-        for (Entity entity : toSort.toArray()) {
+        for (Entity entity : toSort.toArray(Entity[]::new)) {
             if (entity instanceof LocalPlayer) continue;
             context.renderEntity(bufferSource, this, entity);
         }
@@ -240,10 +245,10 @@ public class WorldRenderPass extends RenderPass {
     }
 
     private void initBuffers(RenderBufferSource bufferSource) {
-        bufferSource.getBuffer(RenderType.OPAQUE);
-        bufferSource.getBuffer(RenderType.WATER);
-        bufferSource.getBuffer(RenderType.TRANSPARENT);
-        bufferSource.getBuffer(RenderType.CUTOUT);
+        bufferSource.getBuffer(opaque);
+        bufferSource.getBuffer(water);
+        bufferSource.getBuffer(transparent);
+        bufferSource.getBuffer(cutout);
     }
 
     @Contract("_, null -> true; _, !null -> _")
@@ -258,13 +263,13 @@ public class WorldRenderPass extends RenderPass {
     }
 
     private void renderSkyBox(RenderBufferSource bufferSource, RenderContext context) {
-        bufferSource.getBuffer(RenderType.SKYBOX).begin(context.client.camera);
+        bufferSource.getBuffer(skyBox).begin(context.client.camera);
         context.skybox.render(bufferSource, this);
         context.fogColor.set(context.skybox.bottomColor);
-        bufferSource.getBuffer(RenderType.SKYBOX).end();
+        bufferSource.getBuffer(skyBox).end();
 
-        bufferSource.getBuffer(RenderType.SKYBOX).flush();
-        bufferSource.getBuffer(RenderType.CELESTIAL_BODIES).flush();
+        bufferSource.getBuffer(skyBox).flush();
+        bufferSource.getBuffer(celestialBodies).flush();
     }
 
     @Override
@@ -276,11 +281,21 @@ public class WorldRenderPass extends RenderPass {
                 return this.skyBox;
             case CELESTIAL_BODIES:
                 return this.celestialBodies;
-            case SOLID_BLOCK:
-                return this.opaque;
-            case TRANSPARENT_BLOCK:
+            case BLOCK_OVERLAY:
                 return this.transparent;
-            case CUTOUT_BLOCK:
+            case BLOCK:
+                if (renderMaterial.getMaterialType() instanceof BlockRenderMaterial) {
+                    BlockRenderMaterial material = (BlockRenderMaterial) renderMaterial.getMaterialType();
+                    switch (material.getBlockRenderType()) {
+                        case TRANSPARENT:
+                            return this.transparent;
+                        case SOLID:
+                            return this.opaque;
+                        case CUTOUT:
+                            return this.cutout;
+                    }
+                }
+                return this.opaque;
             case ENTITY_ITEM:
             case ITEM:
                 return this.cutout;

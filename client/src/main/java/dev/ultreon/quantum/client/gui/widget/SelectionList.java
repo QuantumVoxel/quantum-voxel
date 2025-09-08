@@ -273,15 +273,28 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return this;
     }
 
+    public void setItemRenderer(ItemRenderer<T> itemRenderer) {
+        this.itemRenderer = itemRenderer;
+    }
+
     public SelectionList<T> withSelectable(boolean selectable) {
         this.selectable = selectable;
         return this;
+    }
+
+    public void setSelectable(boolean selectable) {
+        this.selectable = selectable;
     }
 
     public Entry<T> entry(T value) {
         Entry<T> entry = new Entry<>(value, this);
         this.entries.add(entry);
         return entry;
+    }
+
+    public void addEntry(T value) {
+        Entry<T> entry = new Entry<>(value, this);
+        this.entries.add(entry);
     }
 
     public SelectionList<T> addEntries(Collection<? extends T> values) {
@@ -294,14 +307,26 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return this;
     }
 
+    public void setCallback(Callback<T> onSelected) {
+        this.onSelected = onSelected;
+    }
+
     public SelectionList<T> withItemHeight(int itemHeight) {
         this.itemHeight = itemHeight;
         return this;
     }
 
+    public void setItemHeight(int itemHeight) {
+        this.itemHeight = itemHeight;
+    }
+
     public SelectionList<T> withDrawBackground(boolean drawBackground) {
         this.drawBackground = drawBackground;
         return this;
+    }
+
+    public void setDrawBackground(boolean drawBackground) {
+        this.drawBackground = drawBackground;
     }
 
     @Override

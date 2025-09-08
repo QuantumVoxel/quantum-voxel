@@ -56,7 +56,7 @@ public class CreditsScreen extends TabbedUI {
 
             this.root = CreditsScreen.this;
 
-            add(Label.of(name).withBounding(() -> new Bounds(0, 10, 100, 20))).width(100);
+            add(Label.of(name).withBounding(() -> new Bounds(0, 10, 100, 20))).setWidth(100);
 
             if (assetInfo.has("url") && assetInfo.get("url").isString())
                 add(TextButton.of("Open page", 80, 21).withCallback(btn -> {
@@ -81,7 +81,7 @@ public class CreditsScreen extends TabbedUI {
                     }
 
                     CreditsScreen.this.showDialog(new DialogBuilder(CreditsScreen.this).title(TextObject.literal(name + "'s roles in the project:")).message(TextObject.nullToEmpty(sb.toString())));
-                    CreditsScreen.this.getDialog().height(200);
+                    CreditsScreen.this.getDialog().setHeight(200);
                 }
             }));
             if (assetInfo.has("for")) add(TextButton.of("Has made", 80, 21).withCallback(btn -> {
@@ -94,14 +94,14 @@ public class CreditsScreen extends TabbedUI {
                     }
 
                     CreditsScreen.this.showDialog(new DialogBuilder(CreditsScreen.this).title(TextObject.literal("What " + name + " made:")).message(TextObject.nullToEmpty(sb.toString())));
-                    CreditsScreen.this.getDialog().height(200);
+                    CreditsScreen.this.getDialog().setHeight(200);
                 }
             }));
             if (assetInfo.has("description")) add(TextButton.of("View description", 80, 21).withCallback(btn -> {
                 if (assetInfo.has("description") && assetInfo.get("description").isString()) {
                     String description = assetInfo.get("description").asString();
                     CreditsScreen.this.showDialog(new DialogBuilder(CreditsScreen.this).title(TextObject.literal("Description of " + name + ":")).message(TextObject.literal(description)));
-                    CreditsScreen.this.getDialog().height(200);
+                    CreditsScreen.this.getDialog().setHeight(200);
                 }
             }));
 
@@ -135,7 +135,7 @@ public class CreditsScreen extends TabbedUI {
                         }
                     }
                     CreditsScreen.this.showDialog(new DialogBuilder(CreditsScreen.this).title(TextObject.literal("Links of " + name + ":")).message(TextObject.nullToEmpty(sb.toString())));
-                    CreditsScreen.this.getDialog().height(200);
+                    CreditsScreen.this.getDialog().setHeight(200);
                 }
             }));
         }

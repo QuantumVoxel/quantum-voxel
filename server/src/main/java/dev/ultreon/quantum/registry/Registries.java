@@ -5,6 +5,7 @@ import dev.ultreon.quantum.block.entity.BlockEntityType;
 import dev.ultreon.quantum.entity.Attribute;
 import dev.ultreon.quantum.entity.EntityType;
 import dev.ultreon.quantum.entity.damagesource.DamageSource;
+import dev.ultreon.quantum.featureflags.FeatureFlag;
 import dev.ultreon.quantum.item.Item;
 import dev.ultreon.quantum.menu.MenuType;
 import dev.ultreon.quantum.recipe.RecipeType;
@@ -33,6 +34,7 @@ public final class Registries {
     public static final Registry<FontIconMap> FONT_ICON_MAP = Registries.create(RegistryKeys.FONT_ICON_MAP);
     public static final Registry<CapabilityType<?, ?>> CAPABILITY_TYPE = Registries.create(RegistryKeys.CAPABILITY_TYPE);
     public static final Registry<Biome> BIOME = Registries.create(RegistryKeys.BIOME);
+    public static final Registry<FeatureFlag> FEATURE_FLAG = Registries.create(RegistryKeys.FEATURE_FLAG);
 
     public static void nopInit() {
         // Load class

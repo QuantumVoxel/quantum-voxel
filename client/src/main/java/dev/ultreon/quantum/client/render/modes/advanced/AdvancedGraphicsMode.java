@@ -1,9 +1,14 @@
 package dev.ultreon.quantum.client.render.modes.advanced;
 
 import dev.ultreon.quantum.client.render.modes.GraphicsMode;
+import dev.ultreon.quantum.featureflags.FeatureFlags;
 
 public class AdvancedGraphicsMode extends GraphicsMode {
     private boolean enabled = false;
+
+    public AdvancedGraphicsMode() {
+        super(FeatureFlags.ADVANCED_GRAPHICS);
+    }
 
     @Override
     public void enable() {
@@ -29,5 +34,10 @@ public class AdvancedGraphicsMode extends GraphicsMode {
         super.disable();
 
         enabled = false;
+    }
+
+    @Override
+    public String getTranslationId() {
+        return "quantum.graphics.mode.advanced";
     }
 }

@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.registry;
 import dev.ultreon.quantum.block.Block;
 import dev.ultreon.quantum.block.BlockLike;
 import dev.ultreon.quantum.client.render.RenderType;
+import dev.ultreon.quantum.client.render.context.RenderMaterial;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class BlockRenderPassRegistry {
     /**
      * The map of block render types.
      */
-    private static final Map<Block, RenderType> registry = new HashMap<>();
+    private static final Map<Block, RenderMaterial> registry = new HashMap<>();
 
     /**
      * Registers a block render type.
@@ -25,7 +26,7 @@ public class BlockRenderPassRegistry {
      * @param block the block.
      * @param model the model.
      */
-    public static void register(Block block, RenderType model) {
+    public static void register(Block block, RenderMaterial model) {
         BlockRenderPassRegistry.registry.put(block, model);
     }
 
@@ -35,7 +36,7 @@ public class BlockRenderPassRegistry {
      * @param block the block.
      * @return the block render type.
      */ 
-    public static RenderType get(BlockLike block) {
-        return BlockRenderPassRegistry.registry.getOrDefault(block.getBlock(), RenderType.OPAQUE);
+    public static RenderMaterial get(BlockLike block) {
+        return BlockRenderPassRegistry.registry.getOrDefault(block.getBlock(), BlockRenderMaterial.OPAQUE);
     }
 }

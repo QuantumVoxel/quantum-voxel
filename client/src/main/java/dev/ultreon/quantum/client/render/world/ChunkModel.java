@@ -13,6 +13,7 @@ import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.api.events.ClientChunkEvent;
+import dev.ultreon.quantum.client.render.pass.RenderPass;
 import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.world.ClientChunk;
@@ -60,12 +61,12 @@ public class ChunkModel extends GameObject {
      *
      * @return a tight-fit bounding box of the chunk.
      */
-    public @Nullable BoundingBox buildAsync() {
+    public @Nullable BoundingBox buildAsync(RenderPass pass) {
         PROFILER.begin("chunk-model@build");
         try {
             bounds.inf();
             if (beingBuilt) return null;
-            generateModelAsync(bounds);
+            generateModelAsync(bounds, pass);
             chunk.dirty = false;
             chunk.initialized = true;
             return bounds;
@@ -78,12 +79,12 @@ public class ChunkModel extends GameObject {
      *
      * @return a tight-fit bounding box of the chunk.
      */
-    public @Nullable BoundingBox buildSync() {
+    public @Nullable BoundingBox buildSync(RenderPass pass) {
         PROFILER.begin("chunk-model@build");
         try {
             bounds.inf();
             if (beingBuilt) return null;
-            generateModelSync(bounds);
+            generateModelSync(bounds, pass);
             chunk.dirty = false;
             chunk.initialized = true;
             return bounds;
@@ -92,7 +93,7 @@ public class ChunkModel extends GameObject {
         }
     }
 
-    private void generateModelAsync(BoundingBox bounds) {
+    private void generateModelAsync(BoundingBox bounds, RenderPass pass) {
         try {
             this.gizmoInstance = new ModelInstance(gizmo.get(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
         } catch (ConcurrentException e) {
@@ -113,7 +114,7 @@ public class ChunkModel extends GameObject {
                 }
             });
 
-            doBuildAsync(pos, bounds);
+            doBuildAsync(pos, bounds, pass);
         }
         QuantumClient.invokeAndWait(chunk::loadCustomRendered);
 
@@ -130,7 +131,7 @@ public class ChunkModel extends GameObject {
         this.beingBuilt = false;
     }
 
-    private void generateModelSync(BoundingBox bounds) {
+    private void generateModelSync(BoundingBox bounds, RenderPass pass) {
         try {
             this.gizmoInstance = new ModelInstance(gizmo.get(), "gizmos/chunk/" + pos.x + "-" + pos.y + "-" + pos.z);
         } catch (ConcurrentException e) {
@@ -148,7 +149,7 @@ public class ChunkModel extends GameObject {
                 PROFILER.end();
             }
 
-            doBuildSync(pos, bounds);
+            doBuildSync(pos, bounds, pass);
         }
         QuantumClient.invokeAndWait(chunk::loadCustomRendered);
 
@@ -164,7 +165,7 @@ public class ChunkModel extends GameObject {
     }
 
     @SuppressWarnings("GDXJavaUnsafeIterator")
-    private void doBuildAsync(ChunkVec pos, BoundingBox bounds) {
+    private void doBuildAsync(ChunkVec pos, BoundingBox bounds, RenderPass pass) {
         long millis = System.currentTimeMillis();
         chunk.meshStatus = MeshStatus.MESHING;
 
@@ -182,10 +183,10 @@ public class ChunkModel extends GameObject {
             GamePlatform.get().supplyAsync(() -> {
                 chunkModelBuilder.begin();
 
-                if (!chunk.mesher.buildMesh(bounds, opaqueFaces, (blk, model, pass) -> {
+                if (!chunk.mesher.buildMesh(bounds, opaqueFaces, (blk, model, renderPass) -> {
                     if (model == null) return true;
-                    return pass.equals(model.getRenderPass());
-                }, chunkModelBuilder)) {
+                    return renderPass.equals(model.getRenderPass());
+                }, chunkModelBuilder, pass)) {
                     chunk.meshStatus = MeshStatus.SKIPPED;
                     chunk.meshDuration = System.currentTimeMillis() - millis;
                     return null;
@@ -223,7 +224,7 @@ public class ChunkModel extends GameObject {
     }
 
     @SuppressWarnings("GDXJavaUnsafeIterator")
-    private void doBuildSync(ChunkVec pos, BoundingBox bounds) {
+    private void doBuildSync(ChunkVec pos, BoundingBox bounds, RenderPass pass) {
         long millis = System.currentTimeMillis();
         chunk.meshStatus = MeshStatus.MESHING;
 
@@ -240,10 +241,10 @@ public class ChunkModel extends GameObject {
             ChunkModelBuilder chunkModelBuilder = new ChunkModelBuilder(chunk);
             chunkModelBuilder.begin();
 
-            if (!chunk.mesher.buildMesh(bounds, opaqueFaces, (blk, model, pass) -> {
+            if (!chunk.mesher.buildMesh(bounds, opaqueFaces, (blk, model, renderPass) -> {
                 if (model == null) return true;
-                return pass.equals(model.getRenderPass());
-            }, chunkModelBuilder)) {
+                return renderPass.equals(model.getRenderPass());
+            }, chunkModelBuilder, pass)) {
                 chunk.meshStatus = MeshStatus.SKIPPED;
                 chunk.meshDuration = System.currentTimeMillis() - millis;
                 return;
@@ -295,11 +296,11 @@ public class ChunkModel extends GameObject {
         return modelBuilder.end();
     }
 
-    public void rebuild() {
+    public void rebuild(RenderPass pass) {
         PROFILER.begin("chunk-model@rebuild");
         try {
             if (beingBuilt) return;
-            BoundingBox build = buildSync();
+            BoundingBox build = buildSync(pass);
             if (build == null) return;
             chunk.tightBounds.set(build);
             chunk.dirty = false;

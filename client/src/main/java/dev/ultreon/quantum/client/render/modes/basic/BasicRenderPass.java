@@ -7,10 +7,9 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import dev.ultreon.quantum.GamePlatform;
-import dev.ultreon.quantum.client.ClientPlatform;
 import dev.ultreon.quantum.client.management.TextureAtlasManager;
 import dev.ultreon.quantum.client.player.LocalPlayer;
+import dev.ultreon.quantum.client.registry.BlockRenderMaterial;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderType;
 import dev.ultreon.quantum.client.render.context.RenderContext;
@@ -50,7 +49,9 @@ public class BasicRenderPass extends RenderPass {
 
     @Override
     protected void resize(int newWidth, int newHeight) {
-        
+        if (frameBuffer != null) frameBuffer.dispose();
+        frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, newWidth, newHeight, true);
+        this.textures = new Texture[]{frameBuffer.getColorBufferTexture()};
     }
 
     @Override
@@ -128,7 +129,7 @@ public class BasicRenderPass extends RenderPass {
                 .depthTest()
                 .build();
         
-        this.frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+        this.frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, getWidth(), getHeight(), true);
         this.textures = new Texture[]{frameBuffer.getColorBufferTexture()};
     }
 
@@ -157,7 +158,6 @@ public class BasicRenderPass extends RenderPass {
         if (frameBuffer == null) throw notEnabled();
 
         frameBuffer.begin();
-
         ScreenUtils.clear(0, 0, 0, 0, true);
 
         Gdx.gl.glDepthMask(false);
@@ -181,7 +181,7 @@ public class BasicRenderPass extends RenderPass {
         initBuffers(bufferSource);
 
         // Collect the chunks to render.
-        context.renderTerrain(bufferSource, chunks, player, ref);
+        context.renderTerrain(bufferSource, chunks, player, ref, this);
         context.renderGizmos(Gdx.graphics.getDeltaTime());
 
         renderEntities(bufferSource, context, player);
@@ -192,7 +192,7 @@ public class BasicRenderPass extends RenderPass {
         bufferSource.end();
 
         context.pushInfo();
-        frameBuffer.begin();
+        frameBuffer.end();
     }
 
     private @NotNull List<ClientChunk> prepareChunks(RenderContext context, LocalPlayer player) {
@@ -225,10 +225,10 @@ public class BasicRenderPass extends RenderPass {
     }
 
     private void initBuffers(RenderBufferSource bufferSource) {
-        bufferSource.getBuffer(RenderType.OPAQUE);
-        bufferSource.getBuffer(RenderType.WATER);
-        bufferSource.getBuffer(RenderType.TRANSPARENT);
-        bufferSource.getBuffer(RenderType.CUTOUT);
+        bufferSource.getBuffer(opaque);
+        bufferSource.getBuffer(water);
+        bufferSource.getBuffer(transparent);
+        bufferSource.getBuffer(cutout);
     }
 
     @Contract("_, null -> true; _, !null -> _")
@@ -243,13 +243,13 @@ public class BasicRenderPass extends RenderPass {
     }
 
     private void renderSkyBox(RenderBufferSource bufferSource, RenderContext context) {
-        bufferSource.getBuffer(RenderType.SKYBOX).begin(context.client.camera);
+        bufferSource.getBuffer(skyBox).begin(context.client.camera);
         context.skybox.render(bufferSource, this);
         context.fogColor.set(context.skybox.bottomColor);
-        bufferSource.getBuffer(RenderType.SKYBOX).end();
+        bufferSource.getBuffer(skyBox).end();
 
-        bufferSource.getBuffer(RenderType.SKYBOX).flush();
-        bufferSource.getBuffer(RenderType.CELESTIAL_BODIES).flush();
+        bufferSource.getBuffer(skyBox).flush();
+        bufferSource.getBuffer(celestialBodies).flush();
     }
 
     @Override
@@ -261,11 +261,21 @@ public class BasicRenderPass extends RenderPass {
                 return this.skyBox;
             case CELESTIAL_BODIES:
                 return this.celestialBodies;
-            case SOLID_BLOCK:
-                return this.opaque;
-            case TRANSPARENT_BLOCK:
+            case BLOCK_OVERLAY:
                 return this.transparent;
-            case CUTOUT_BLOCK:
+            case BLOCK:
+                if (renderMaterial.getMaterialType() instanceof BlockRenderMaterial) {
+                    BlockRenderMaterial material = (BlockRenderMaterial) renderMaterial.getMaterialType();
+                    switch (material.getBlockRenderType()) {
+                        case TRANSPARENT:
+                            return this.transparent;
+                        case SOLID:
+                            return this.opaque;
+                        case CUTOUT:
+                            return this.cutout;
+                    }
+                }
+                return this.opaque;
             case ENTITY_ITEM:
             case ITEM:
                 return this.cutout;
@@ -287,6 +297,8 @@ public class BasicRenderPass extends RenderPass {
 
     @Override
     public Texture[] getTextures() {
-        return textures;
+        if (frameBuffer == null) throw notEnabled();
+
+        return new Texture[]{frameBuffer.getColorBufferTexture()};
     }
 }

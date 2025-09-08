@@ -335,4 +335,10 @@
   quantum.screen.world_selection.edit: Edit World
   quantum.screen.world_selection.duplicate: Duplicate World
   quantum.screen.worlds.edit.title: Editing World
+
+  quantum.graphics.mode: Graphics Mode:
+  quantum.graphics.mode.basic: Basic
+  quantum.graphics.mode.advanced: Advanced
+
+  quantum.ui.error.message.graphicsModeInWorld: Disconnect first before changing GFX Mode.
 }

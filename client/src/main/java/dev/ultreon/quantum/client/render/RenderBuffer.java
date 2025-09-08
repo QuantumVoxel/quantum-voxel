@@ -38,6 +38,7 @@ public class RenderBuffer extends GameObject implements Disposable {
 
     RenderBuffer(RenderType pass) {
         this.shader = pass.createShader();
+        if (shader == null) throw new IllegalStateException("Shader cannot be null");
         this.modelBatch = new ModelBatch(shader);
         this.material = pass.createMaterial();
         this.instanceMaterial = pass.createInstanceMaterial();

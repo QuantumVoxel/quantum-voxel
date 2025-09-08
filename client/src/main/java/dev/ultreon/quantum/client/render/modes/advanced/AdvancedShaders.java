@@ -20,17 +20,19 @@ class AdvancedShaders implements Toggleable {
 
     public void enable() {
         opaque = new WorldShaderProvider(QuantumClient.resource(NamespaceID.of("shaders/vibrant/scene.vert")),
-                QuantumClient.resource(NamespaceID.of("shaders/vibrant/scene.frag")));
+                QuantumClient.resource(NamespaceID.of("shaders/vibrant/scene.frag")), "330 core", "Opaque (advanced)");
         transparent = new WorldShaderProvider(QuantumClient.resource(NamespaceID.of("shaders/vibrant/transparent.vert")),
-                QuantumClient.resource(NamespaceID.of("shaders/vibrant/transparent.frag")));
+                QuantumClient.resource(NamespaceID.of("shaders/vibrant/transparent.frag")), "330 core", "Transparent (advanced)");
+        entityTransparent = new WorldShaderProvider(QuantumClient.resource(NamespaceID.of("shaders/vibrant/transparent.vert")),
+                QuantumClient.resource(NamespaceID.of("shaders/vibrant/transparent.frag")), "330 core", "Transparent (advanced)");
         celestialBodies = new WorldShaderProvider(QuantumClient.resource(NamespaceID.of("shaders/vibrant/celestial_body.vert")),
-                QuantumClient.resource(NamespaceID.of("shaders/vibrant/celestial_body.frag")));
+                QuantumClient.resource(NamespaceID.of("shaders/vibrant/celestial_body.frag")), "330 core", "Celestial Bodies (advanced)");
         water = new WorldShaderProvider(QuantumClient.resource(NamespaceID.of("shaders/vibrant/water.vert")),
-                QuantumClient.resource(NamespaceID.of("shaders/vibrant/water.frag")));
+                QuantumClient.resource(NamespaceID.of("shaders/vibrant/water.frag")), "330 core", "Water (advanced)");
         cutout = new WorldShaderProvider(QuantumClient.resource(NamespaceID.of("shaders/vibrant/cutout.vert")),
-                QuantumClient.resource(NamespaceID.of("shaders/vibrant/cutout.frag")));
+                QuantumClient.resource(NamespaceID.of("shaders/vibrant/cutout.frag")), "330 core", "Cutout (advanced)");
         skyBox = new SkyboxShaders(QuantumClient.resource(NamespaceID.of("shaders/vibrant/skybox.vert")),
-                QuantumClient.resource(NamespaceID.of("shaders/vibrant/skybox.frag")));
+                QuantumClient.resource(NamespaceID.of("shaders/vibrant/skybox.frag")), "330 core", "Skybox (advanced)");
     }
 
     public void disable() {

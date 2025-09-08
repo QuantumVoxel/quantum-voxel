@@ -2,7 +2,6 @@ package dev.ultreon.quantum.client.gui.screens;
 
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.*;
-import dev.ultreon.quantum.client.gui.screens.settings.SettingsScreen;
 import dev.ultreon.quantum.client.gui.screens.test.UITestScreen;
 import dev.ultreon.quantum.client.gui.screens.test.WorldGenTestScreen;
 import dev.ultreon.quantum.client.gui.screens.world.WorldSelectionScreen;
