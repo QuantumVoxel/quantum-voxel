@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 
-public class UIContainer<T extends UIContainer<T>> extends Widget {
+public class UIContainer<T extends UIContainer<?>> extends Widget {
 
     @SuppressWarnings({"rawtypes", "GDXJavaStaticResource"})
     public static final UIContainer<?> ROOT = new UIContainer(Integer.MAX_VALUE, Integer.MAX_VALUE) {
@@ -49,7 +49,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean renderTooltips(Renderer renderer, int mouseX, int mouseY, float deltaTime) {
-        for (var widget : this.widgets) {
+        for (var widget : this.children()) {
             if (widget.renderTooltips(renderer, mouseX, mouseY, deltaTime)) {
                 return true;
             }
@@ -74,7 +74,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     public void render(@NotNull Renderer renderer, float deltaTime) {
         super.render(renderer, deltaTime);
 
-        for (var widget : this.widgets) {
+        for (var widget : this.children()) {
             if (!widget.isVisible) {
                 if (widget.ignoreBounds)
                     this.renderChild(renderer, deltaTime, widget);
@@ -104,7 +104,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     public void revalidate() {
         super.revalidate();
 
-        List<Widget> widgetList = List.copyOf(this.widgets);
+        List<Widget> widgetList = List.copyOf(this.children());
         for (int i = widgetList.size() - 1; i >= 0; i--) {
             var widget = widgetList.get(i);
             widget.revalidate();
@@ -115,33 +115,31 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     public void tick() {
         super.tick();
 
-        for (Widget widget : widgets) {
+        for (Widget widget : children()) {
             widget.tick();
         }
     }
 
     @Override
     public void mouseMoved(int x, int y) {
-        for (int i = this.widgets.size() - 1; i >= 0; i--) {
-            var widget = this.widgets.get(i);
+        List<? extends Widget> widgets = this.children();
+        for (int i = widgets.size() - 1; i >= 0; i--) {
+            var widget = widgets.get(i);
             if (!widget.isVisible) continue;
             if (widget.isWithinBounds(x, y)) {
-                if (widget instanceof UIContainer<?>) {
-                    UIContainer<?> uiContainer = (UIContainer<?>) widget;
-                    uiContainer.mouseMoved(x, y);
-                    super.mouseMoved(x, y);
-                    trackMouse(x, y);
-                    return;
-                }
-                widget.mouseMoved(x, y);
                 if (widget == this.hoveredWidget) {
+                    widget.mouseMoved(x, y);
                     trackMouse(x, y);
                     return;
                 }
+
                 widget.mouseEnter(x - widget.getX(), y - widget.getY());
+                widget.mouseMoved(x, y);
+
                 if (this.hoveredWidget != null) this.hoveredWidget.mouseExit();
                 this.hoveredWidget = widget;
                 trackMouse(x, y);
+                super.mouseMoved(x, y);
                 return;
             }
         }
@@ -160,7 +158,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @SuppressWarnings("GDXJavaFlushInsideLoop")
     public void renderChildren(@NotNull Renderer renderer, float deltaTime) {
-        for (var widget : this.widgets) {
+        for (var widget : this.children()) {
             if (!widget.isVisible) {
                 if (widget.ignoreBounds)
                     this.renderChild(renderer, deltaTime, widget);
@@ -177,7 +175,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     }
 
     public List<? extends Widget> getWidgets() {
-        return this.widgets;
+        return this.children();
     }
 
     public Layout getLayout() {
@@ -190,8 +188,8 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     public @NotNull List<Widget> getWidgetsAt(int x, int y) {
         List<Widget> output = new ArrayList<>();
-        for (int i = this.widgets.size() - 1; i >= 0; i--) {
-            var widget = this.widgets.get(i);
+        for (int i = this.children().size() - 1; i >= 0; i--) {
+            var widget = this.children().get(i);
 
             if (!widget.isVisible) continue;
             if (widget.isWithinBounds(x, y)) {
@@ -208,8 +206,8 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     }
 
     public @Nullable Widget getWidgetAt(int x, int y) {
-        for (int i = this.widgets.size() - 1; i >= 0; i--) {
-            var widget = this.widgets.get(i);
+        for (int i = this.children().size() - 1; i >= 0; i--) {
+            var widget = this.children().get(i);
 
             if (!widget.isVisible) continue;
             if (widget.isWithinBounds(x, y)) {
@@ -233,7 +231,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
     public void remove(Widget widget) {
         EventSystem.postDefault(new WidgetEvent.Removed(widget));
 
-        this.widgets.remove(widget);
+        this.children().remove(widget);
         widget.disconnect(this);
     }
 
@@ -244,7 +242,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mouseClick(int mouseX, int mouseY, int button, int clicks) {
-        List<Widget> widgetList = List.copyOf(this.widgets);
+        List<Widget> widgetList = List.copyOf(this.children());
         for (int i = widgetList.size() - 1; i >= 0; i--) {
             var widget = widgetList.get(i);
             if (!widget.isVisible) {
@@ -258,7 +256,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mousePress(int mouseX, int mouseY, int button) {
-        List<Widget> widgetList = List.copyOf(this.widgets);
+        List<Widget> widgetList = List.copyOf(this.children());
         for (int i = widgetList.size() - 1; i >= 0; i--) {
             var widget = widgetList.get(i);
             if (!widget.isVisible) {
@@ -286,7 +284,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
-        List<Widget> widgetList = List.copyOf(this.widgets);
+        List<Widget> widgetList = List.copyOf(this.children());
         for (int i = widgetList.size() - 1; i >= 0; i--) {
             var widget = widgetList.get(i);
             if (widget.isVisible) {
@@ -301,7 +299,7 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mouseWheel(int mouseX, int mouseY, double rotation) {
-        List<Widget> widgetList = List.copyOf(this.widgets);
+        List<Widget> widgetList = List.copyOf(this.children());
         for (int i = widgetList.size() - 1; i >= 0; i--) {
             var widget = widgetList.get(i);
             if (!widget.isVisible) {
@@ -315,14 +313,14 @@ public class UIContainer<T extends UIContainer<T>> extends Widget {
 
     @Override
     public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
-        List<Widget> widgetList = List.copyOf(this.widgets);
+        List<Widget> widgetList = List.copyOf(this.children());
         for (int i = widgetList.size() - 1; i >= 0; i--) {
             var widget = widgetList.get(i);
             if (!widget.isVisible) {
                 if (widget.ignoreBounds && widget.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer)) return true;
                 continue;
             }
-            if (widget.isWithinBounds(mouseX, mouseY) && widget.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer))
+            if (widget.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer))
                 return true;
         }
         return super.mouseDrag(mouseX, mouseY, deltaX, deltaY, pointer);

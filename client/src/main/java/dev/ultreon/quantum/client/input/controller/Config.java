@@ -143,6 +143,6 @@
 //    }
 //
 //    public TextObject getTitle() {
-//        return TextObject.translation("quantum.config." + this.key.toString().replace(":", "."));
+//        return TextObject.translation("quantum.screen.options." + this.key.toString().replace(":", "."));
 //    }
 //}

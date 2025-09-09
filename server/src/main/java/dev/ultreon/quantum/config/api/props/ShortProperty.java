@@ -59,4 +59,12 @@ public class ShortProperty implements ConfigProperty<Short> {
     public void setJson(JsonValue value) {
         this.value = value.asShort();
     }
+
+    public int getMin() {
+        return min;
+    }
+
+    public int getMax() {
+        return max;
+    }
 }

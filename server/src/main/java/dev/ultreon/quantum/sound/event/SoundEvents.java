@@ -11,6 +11,7 @@ public class SoundEvents {
     public static final SoundEvent BUTTON_PRESS = SoundEvents.register("ui.button.press", new SoundEvent(10.0f));
     public static final SoundEvent BUTTON_RELEASE = SoundEvents.register("ui.button.release", new SoundEvent(10.0f));
     public static final SoundEvent SCREENSHOT = SoundEvents.register("ui.screenshot", new SoundEvent(10.0f));
+    public static final SoundEvent MENU_TICK = SoundEvents.register("ui.menu.tick", new SoundEvent(10.0f));
     public static final SoundEvent GRASS_STEP_1 = SoundEvents.register("step.grass.1", new SoundEvent(10.0f, true));
     public static final SoundEvent GRASS_STEP_2 = SoundEvents.register("step.grass.2", new SoundEvent(10.0f, true));
     public static final SoundEvent GRASS_STEP_3 = SoundEvents.register("step.grass.3", new SoundEvent(10.0f, true));

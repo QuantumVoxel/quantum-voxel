@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client.gui.screens;
 
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.client.gui.screens.config.ConfigScreen;
 import dev.ultreon.quantum.client.gui.screens.test.UITestScreen;
 import dev.ultreon.quantum.client.gui.screens.test.WorldGenTestScreen;
 import dev.ultreon.quantum.client.gui.screens.world.WorldSelectionScreen;
@@ -109,7 +110,7 @@ public class TitleScreen extends Screen {
     }
 
     private void showOptions(TitleButton caller) {
-        this.client.showScreen(new SettingsScreen());
+        this.client.showScreen(new ConfigScreen());
     }
 
     private void showModList(TitleButton caller) {

@@ -69,7 +69,7 @@ public class ConfigGui extends Screen {
         super.renderWidget(renderer, deltaTime);
 
         if (this.list != null && renderer.pushScissors(this.list.getBounds())) {
-            int y = (int) (list.getY() + 16 - list.getScrollY());
+            int y = (int) (list.getY() + 16 - list.getScroll());
             for (Widget entryWidget : this.entryWidgets) {
                 entryWidget.setY(y);
                 entryWidget.setX(list.getX() + list.getWidth() - 30 - entryWidget.getWidth());

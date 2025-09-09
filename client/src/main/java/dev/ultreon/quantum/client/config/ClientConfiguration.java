@@ -81,7 +81,7 @@ public class ClientConfiguration {
 
     private static final ConfigCategory inputCat = config.createCategory("input");
     private static final ConfigCategory controllerInputCat = inputCat.createCategory("input");
-    public static final ConfigProperty<Float> controllerDeadZone = controllerInputCat.create("keepAlive", 0.2f, 0f, 1f);
+    public static final ConfigProperty<Float> controllerDeadZone = controllerInputCat.create("controllerDeadZone", 0.2f, 0f, 1f);
     public static final ConfigProperty<Boolean> enableVirtualKeyboard = controllerInputCat.create("virtualKeyboard", true);
     public static final ConfigProperty<Integer> lodThreshold = videoCat.create("lodThreshold", 4, 4, 16);
 

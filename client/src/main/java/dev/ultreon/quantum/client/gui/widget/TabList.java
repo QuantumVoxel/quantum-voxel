@@ -231,7 +231,7 @@ public class TabList extends SelectionList<TabList.Tab> {
         }
 
         @Override
-        protected void trackMouse(int x, int y) {
+        public void trackMouse(int x, int y) {
             mouseMoved(x, y);
             for (Widget widget : this.widgets) {
                 if (widget.isWithinBounds(x - pos.x, y - pos.y)) {

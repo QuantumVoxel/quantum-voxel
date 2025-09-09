@@ -59,4 +59,12 @@ public class IntProperty implements ConfigProperty<Integer> {
     public void setJson(JsonValue value) {
         this.value = value.asInt();
     }
+
+    public int getMin() {
+        return min;
+    }
+
+    public int getMax() {
+        return max;
+    }
 }

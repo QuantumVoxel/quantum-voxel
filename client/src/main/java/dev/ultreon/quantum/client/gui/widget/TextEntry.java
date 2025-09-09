@@ -34,7 +34,7 @@ public class TextEntry extends Widget {
 
     private int selectFrom = -1;
     private int selectTo = -1;
-    private float yOffset = 0f;
+    protected float yOffset = 0f;
     private final Layout layout = new Layout();
 
     /**

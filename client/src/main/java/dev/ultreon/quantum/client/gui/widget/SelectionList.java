@@ -20,7 +20,8 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
     private static final int SCROLLBAR_WIDTH = 5;
     private static final Color COLOR = new Color(0.175f, 0.175f, 0.175f, 1f);
     protected final List<Entry<T>> entries = new ArrayList<>();
-    private float scrollY = 0;
+    private double scrollGoal = 0;
+    private double scroll = 0;
     private int itemHeight = 20;
     private Entry<T> selected;
     private boolean selectable;
@@ -78,6 +79,12 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
     @Override
     public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
+        if (scroll > scrollGoal) {
+            scroll = Math.max(scroll + ((scrollGoal - scroll) / 1.0 * deltaTime * 20), scrollGoal);
+        } else if (scroll < scrollGoal) {
+            scroll = Math.min(scroll - ((scroll - scrollGoal) / 1.0 * deltaTime * 20), scrollGoal);
+        }
+
         if (this.drawBackground) {
             renderer.fill(pos.x, pos.y, size.width, size.height, COLOR);
         }
@@ -214,7 +221,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
     @Override
     public boolean mouseWheel(int x, int y, double rotation) {
-        this.scrollY = this.getContentHeight() > this.size.height ? Mth.clamp((float) (this.scrollY + rotation * 10), 0, this.getContentHeight() - this.size.height) : 0;
+        this.scrollGoal = this.getContentHeight() > this.size.height + this.itemHeight ? Mth.clamp((float) (this.scrollGoal + rotation * 10), 0, this.getContentHeight() - this.size.height + 10) : 0;
         return true;
     }
 
@@ -341,8 +348,17 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
         return this;
     }
 
-    public float getScrollY() {
-        return this.scrollY;
+    public double getScroll() {
+        return this.scroll;
+    }
+
+    public void setScroll(double scroll) {
+        this.scroll = scroll;
+        this.scrollGoal = scroll;
+    }
+
+    public void scrollTo(double scroll) {
+        this.scrollGoal = scroll;
     }
 
     public SelectionList<T> withCutButtons(boolean b) {
@@ -374,7 +390,7 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
         public void render(Renderer renderer, int y, boolean selected, float deltaTime) {
             this.pos.x = this.list.pos.x;
-            this.pos.y = (int) (this.list.pos.y - this.list.scrollY + (this.list.getItemHeight() + this.list.getGap()) * this.list.entries.indexOf(this));
+            this.pos.y = (int) Math.round(this.list.pos.y - this.list.scroll + (this.list.getItemHeight() + this.list.getGap()) * this.list.entries.indexOf(this));
             this.size.width = this.list.size.width;
             this.size.height = this.list.getItemHeight();
             ItemRenderer<T> itemRenderer = this.list.itemRenderer;

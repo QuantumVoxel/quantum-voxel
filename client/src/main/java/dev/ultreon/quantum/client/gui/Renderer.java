@@ -1184,6 +1184,21 @@ public class Renderer implements Disposable {
      * @param shadow if the text should be drawn with a shadow
      * @return this
      */
+    public Renderer textLeft(@NotNull String text, float x, float y, com.badlogic.gdx.graphics.Color color, boolean shadow) {
+        this.drawText(text, x, y, color, shadow);
+        return this;
+    }
+
+    /**
+     * Draws text anchored to the left
+     *
+     * @param text   the text
+     * @param x      the setX coordinate
+     * @param y      the setY coordinate
+     * @param color  the color
+     * @param shadow if the text should be drawn with a shadow
+     * @return this
+     */
     public Renderer textLeft(@NotNull String text, float x, float y, ColorCode color, boolean shadow) {
         this.drawText(text, x, y, RgbColor.of(color), shadow);
         return this;
@@ -1455,6 +1470,11 @@ public class Renderer implements Disposable {
         return this;
     }
 
+    public Renderer textLeft(@NotNull TextObject text, float x, float y, com.badlogic.gdx.graphics.Color color, boolean shadow) {
+        this.drawText(text, x, y, color, shadow);
+        return this;
+    }
+
     @Deprecated
     public Renderer textLeft(@NotNull FormattedText text, int x, int y) {
         this.textLeft(text, x, y, RgbColor.WHITE);
@@ -1703,7 +1723,17 @@ public class Renderer implements Disposable {
         return this;
     }
 
+    public Renderer textRight(@NotNull TextObject text, float x, float y, com.badlogic.gdx.graphics.Color color) {
+        this.textRight(text, x, y, color, true);
+        return this;
+    }
+
     public Renderer textRight(@NotNull TextObject text, float x, float y, Color color, boolean shadow) {
+        this.textLeft(text, x - this.textWidth(text), y, color, shadow);
+        return this;
+    }
+
+    public Renderer textRight(@NotNull TextObject text, float x, float y, com.badlogic.gdx.graphics.Color color, boolean shadow) {
         this.textLeft(text, x - this.textWidth(text), y, color, shadow);
         return this;
     }
@@ -1723,7 +1753,17 @@ public class Renderer implements Disposable {
         return this;
     }
 
+    public Renderer textRight(@NotNull TextObject text, int x, int y, com.badlogic.gdx.graphics.Color color) {
+        this.textRight(text, x, y, color, true);
+        return this;
+    }
+
     public Renderer textRight(@NotNull TextObject text, int x, int y, Color color, boolean shadow) {
+        this.textLeft(text, x - this.textWidth(text), y, color, shadow);
+        return this;
+    }
+
+    public Renderer textRight(@NotNull TextObject text, int x, int y, com.badlogic.gdx.graphics.Color color, boolean shadow) {
         this.textLeft(text, x - this.textWidth(text), y, color, shadow);
         return this;
     }
@@ -1935,7 +1975,17 @@ public class Renderer implements Disposable {
         return this;
     }
 
+    public Renderer textRight(@NotNull String text, float x, float y, com.badlogic.gdx.graphics.Color color) {
+        this.textRight(text, x, y, color, true);
+        return this;
+    }
+
     public Renderer textRight(@NotNull String text, float x, float y, Color color, boolean shadow) {
+        this.textLeft(text, x - this.textWidth(text), y, color, shadow);
+        return this;
+    }
+
+    public Renderer textRight(@NotNull String text, float x, float y, com.badlogic.gdx.graphics.Color color, boolean shadow) {
         this.textLeft(text, x - this.textWidth(text), y, color, shadow);
         return this;
     }

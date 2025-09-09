@@ -5,6 +5,7 @@ import dev.ultreon.quantum.client.IntegratedServer;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.Screenshot;
 import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.client.gui.screens.config.ConfigScreen;
 import dev.ultreon.quantum.client.gui.widget.Label;
 import dev.ultreon.quantum.client.gui.widget.Platform;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
@@ -74,7 +75,7 @@ public class PauseScreen extends Screen {
 
         this.optionsButton = builder.add(TextButton.of(TextObject.translation("quantum.screen.options"), 95)
                         .withBounding(() -> new Bounds(15, this.size.height - 75, 120, 21)))
-                .withCallback(caller -> QuantumClient.get().showScreen(new SettingsScreen()));
+                .withCallback(caller -> QuantumClient.get().showScreen(new ConfigScreen()));
 
         this.exitWorldButton = builder.add(TextButton.of(TextObject.translation("quantum.ui.exitWorld"), 95)
                         .withBounding(() -> new Bounds(15, this.size.height - 36, 120, 21)))

@@ -1,7 +1,10 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.*;
@@ -54,6 +57,29 @@ public abstract class Widget extends GameObject implements StaticWidget {
 
     public static boolean isPosWithin(int mouseX, int mouseY, int x, int y, int width, int height) {
         return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
+    }
+
+    protected static void renderScrollingString(@NotNull Renderer renderer, GameFont font, String title, int x, int y, int width, int height, Color i4) {
+        if (renderer.pushScissors(x, y, width, height)) {
+            int textWidth = font.getWidth(title);
+//            if (textWidth > width) {
+//                int bouncedX = getBouncedX(x, width, textWidth);
+//                renderer.textCenter(title, bouncedX, y + height / 2, i4);
+//            } else {
+                renderer.textCenter(title, x + width / 2, y + height / 2, i4);
+//            }
+            ScissorStack.popScissors();
+        }
+    }
+
+    private static int getBouncedX(int x, int width, int textWidth) {
+        int startX = x + width / 2 - textWidth / 2;
+        int endX = x + width / 2 + textWidth / 2;
+
+        int xOffset = (int) QuantumClient.get().getRunningTime();
+        xOffset = (int) (Math.sin(xOffset / 1000.0f) * (endX - startX) / 2.0f + (x + width / 2f));
+
+        return startX + xOffset;
     }
 
     protected final <C extends UIComponent> C register(NamespaceID id, C component) {
@@ -218,7 +244,7 @@ public abstract class Widget extends GameObject implements StaticWidget {
     }
 
     public boolean isHovered() {
-        return this.isHovered;
+        return this.isHovered && this.isEnabled && this.isVisible;
     }
 
     public boolean isFocused() {
@@ -290,9 +316,8 @@ public abstract class Widget extends GameObject implements StaticWidget {
         trackMouse(x, y);
     }
 
-    protected void trackMouse(int x, int y) {
+    public void trackMouse(int x, int y) {
         mousePos.set(x, y);
-        isHovered = true;
     }
 
     public String getName() {
@@ -327,14 +352,14 @@ public abstract class Widget extends GameObject implements StaticWidget {
         this.isFocused = true;
     }
 
-    final <T extends UIContainer<T>> void disconnect(UIContainer<T> from) {
+    final <T extends UIContainer<?>> void disconnect(UIContainer<T> from) {
         this.root = null;
         this.parent = null;
 
         this.onDisconnect(from);
     }
 
-    public <T extends UIContainer<T>> void onDisconnect(UIContainer<T> from) {
+    public <T extends UIContainer<?>> void onDisconnect(UIContainer<T> from) {
 
     }
 

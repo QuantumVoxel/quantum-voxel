@@ -477,6 +477,9 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
 
             if (WindowManager.mouseDragged(adjustedX, adjustedY)) return;
             EventSystem.postCancelable(new InputEvent.MouseDragged(adjustedX, adjustedY));
+
+            Screen currentScreen = this.client.screen;
+            if (currentScreen != null) client.mouseMoved(adjustedX, adjustedY);
         });
         return false;
     }

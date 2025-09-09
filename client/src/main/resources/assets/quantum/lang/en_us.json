@@ -114,27 +114,43 @@
   quantum.screen.options: "Options..."
   quantum.screen.settings.configs: Configs
   quantum.screen.settings.title: Settings
-  quantum.screen.options.video: "Video Settings..."
+  quantum.screen.options.video: Video Settings
   quantum.screen.options.video.title: Video Settings
-  quantum.screen.options.video.fov: FOV
+  quantum.screen.options.video.fov: Field of View
+  quantum.screen.options.video.fog: Enable Fog
   quantum.screen.options.video.guiScale: GUI Scale
   quantum.screen.options.video.fullscreen: Fullscreen
-  quantum.screen.options.video.frameRate: Frame Rate
-  quantum.screen.options.video.vSync: V-Sync
+  quantum.screen.options.video.fpsLimit: Frame Rate limit
+  quantum.screen.options.video.enableVsync: Vertical Sync
   quantum.screen.options.video.renderDistance: Render Distance
+  quantum.screen.options.video.entityRenderDistance: Entity Render Distance
+  quantum.screen.options.video.showSunAndMoon: Entity Render Distance
   quantum.screen.options.privacy: "Privacy Settings..."
-  quantum.screen.options.privacy.title: Privacy Settings
-  quantum.screen.options.privacy.hideActiveServer: Active Server
-  quantum.screen.options.privacy.hideRpc: Rich Presence
-  quantum.screen.options.privacy.hidePlayerSkin: Player Skin
-  quantum.screen.options.privacy.hidePlayerName: Player Name
+  quantum.screen.options.privacy.title: Privacy
+  quantum.screen.options.privacy.hideServerFromActivity: Hide current server from RPC
+  quantum.screen.options.privacy.hideActivity: Hide Discord rich presence
+  quantum.screen.options.privacy.hideSkin: Hide player skin in multiplayer
+  quantum.screen.options.privacy.hideUsername: Hide username in multiplayer
   quantum.screen.options.accessibility: "Accessibility..."
   quantum.screen.options.accessibility.title: Accessibility
-  quantum.screen.options.accessibility.hideFirstPersonPlayer: First Person Player
-  quantum.screen.options.accessibility.hideHotbarWhenThirdPerson: 3rd Person Hotbar
-  quantum.screen.options.accessibility.vibration: Vibration
-  quantum.screen.options.accessibility.enableCrosshair: Enable Crosshair
-  quantum.screen.options.accessibility.enableHud: Enable HUD
+  quantum.screen.options.accessibility.showFirstPersonPlayer: Show self in first-person
+  quantum.screen.options.accessibility.showHotbarWhenThirdPerson: Show hotbar in 3rd-person
+  quantum.screen.options.accessibility.closePrompt: Prompt when closing the game
+  quantum.screen.options.accessibility.cameraSensitivity: Camera sensitivity
+  quantum.screen.options.accessibility.vibration: Enable vibration (phone/controller)
+  quantum.screen.options.advanced: "Advanced..."
+  quantum.screen.options.advanced.title: Advanced
+  quantum.screen.options.advanced.networkKeepAliveTime: Network keep-alive time
+  quantum.screen.options.advanced.networkTimeout: Network connection timeout
+  quantum.screen.options.advanced.enableDebugUtils: Enable debug utilities
+  quantum.screen.options.gui: User Interface
+  quantum.screen.options.gui.title: User Interface
+  quantum.screen.options.gui.enableHud: Enable HUD
+  quantum.screen.options.gui.enableFpsHud: Enable FPS overlay
+  quantum.screen.options.gui.enableCrosshair: Enable crosshair
+  quantum.screen.options.gui.blurEnabled: Enable blur effects
+  quantum.screen.options.gui.enableVirtualKeyboard: Enable on-screen keyboard
+  quantum.screen.options.gui.skipSplashScreen: Skip splash screen
   quantum.screen.options.accessibility.doublePressDelay: Double Key Press Delay
   quantum.screen.options.accessibility.doublePressDelay.text: Delay (in secs)
   quantum.screen.options.accessibility.doubleTapDelay: Double Click/Tap Delay

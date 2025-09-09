@@ -80,32 +80,34 @@ public class Slider extends Widget {
     }
 
     @Override
-    public boolean mouseDrag(int mouseX, int mouseY, int deltaX, int deltaY, int pointer) {
-        int newValue = this.originalValue + (this.value.max() - this.value.min()) * (mouseX - this.holdStart) / (this.size.width - 14);
-        if (this.isHolding && newValue >= this.value.min() && newValue <= this.value.max() && newValue != this.value.get()) {
-            this.value.set(newValue);
-            this.callback.call(this);
-
-            return true;
+    public void mouseMoved(int x, int y) {
+        if (this.isHolding) {
+            // Set the value to the mouse position
+            int i = this.value.get();
+            int value1 = (x - this.pos.x - 2) * (this.value.max() - this.value.min()) / (this.size.width - 14) + this.value.min();
+            value1 = Math.max(this.value.min(), Math.min(value1, this.value.max()));
+            if (value1 != i) {
+                this.value.set(value1);
+                this.callback.call(this);
+            }
         }
 
-        return false;
+        super.mouseMoved(x, y);
     }
 
     @Override
     public boolean mousePress(int mouseX, int mouseY, int button) {
-        int thumbX = this.pos.x + (this.size.width - 14) * (this.value.get() - this.value.min()) / (this.value.max() - this.value.min()) + 2;
-
-        if (mouseX < thumbX || mouseX > thumbX + 10) {
-            // Set the value to the mouse position
-            this.value.set((mouseX - this.pos.x - 2) * (this.value.max() - this.value.min()) / (this.size.width - 14) + this.value.min());
-            this.callback.call(this);
-            return true;
-        }
-
-        this.originalValue = this.value.get();
-        this.holdStart = mouseX;
+        // Set the value to the mouse position
         this.isHolding = true;
+
+        // Set the value to the mouse position
+        int i = this.value.get();
+        int value1 = (mouseX - this.pos.x - 2) * (this.value.max() - this.value.min()) / (this.size.width - 14) + this.value.min();
+        value1 = Math.max(this.value.min(), Math.min(value1, this.value.max()));
+        if (value1 != i) {
+            this.value.set(value1);
+            this.callback.call(this);
+        }
 
         return true;
     }

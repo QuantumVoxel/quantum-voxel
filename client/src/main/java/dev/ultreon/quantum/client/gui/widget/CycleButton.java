@@ -56,10 +56,16 @@ public class CycleButton<T> extends Button<CycleButton<T>> {
     @Override
     public void revalidate() {
         TextObject lbl = this.label;
-        if (lbl != null) {
-            this.text().set(lbl.copy().append(": ").append(this.formatter.apply(this.values[this.cur])));
+        if (this.formatter != null) {
+            if (lbl != null) {
+                this.text().set(lbl.copy().append(": ").append(this.formatter.apply(this.values[this.cur])));
+            } else {
+                this.text().set(this.formatter.apply(this.values[this.cur]));
+            }
+        } else if (lbl != null) {
+            this.text().set(lbl.copy().append(": ").append(this.values[this.cur]));
         } else {
-            this.text().set(this.formatter.apply(this.values[this.cur]));
+            this.text().setRaw(String.valueOf(this.values[this.cur]));
         }
 
         super.revalidate();
@@ -73,8 +79,10 @@ public class CycleButton<T> extends Button<CycleButton<T>> {
 
     public final CycleButton<T> formatter(Function<T, TextObject> formatter) {
         this.formatter = formatter;
-        if (values != null && values.length > 0 && this.label != null && this.formatter != null) {
-            this.text().set(this.label.copy().append(": ").append(this.formatter.apply(this.values[this.cur])));
+        if (values != null && values.length > 0 && this.formatter != null) {
+            this.text().set(this.label != null
+                    ? this.label.copy().append(": ").append(this.formatter.apply(this.values[this.cur]))
+                    : this.formatter.apply(this.values[this.cur]));
         }
         return this;
     }
@@ -102,10 +110,16 @@ public class CycleButton<T> extends Button<CycleButton<T>> {
     @Override
     public boolean click() {
         this.cur = (this.cur + 1) % this.values.length;
-        if (this.label != null) {
-            this.text().set(this.label.copy().append(": ").append(this.formatter.apply(this.values[this.cur])));
+        if (this.formatter != null) {
+            if (this.label != null) {
+                this.text().set(this.label.copy().append(": ").append(this.formatter.apply(this.values[this.cur])));
+            } else {
+                this.text().set(this.formatter.apply(this.values[this.cur]));
+            }
+        } else if (this.label != null) {
+            this.text().set(this.label.copy().append(": ").append(this.values[this.cur]));
         } else {
-            this.text().set(this.formatter.apply(this.values[this.cur]));
+            this.text().setRaw(String.valueOf(this.values[this.cur]));
         }
         this.callback.call(this);
         return true;

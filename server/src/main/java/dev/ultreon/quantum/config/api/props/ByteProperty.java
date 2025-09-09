@@ -59,4 +59,12 @@ public class ByteProperty implements ConfigProperty<Byte> {
     public void setJson(JsonValue value) {
         this.value = value.asByte();
     }
+
+    public int getMin() {
+        return min;
+    }
+
+    public int getMax() {
+        return max;
+    }
 }

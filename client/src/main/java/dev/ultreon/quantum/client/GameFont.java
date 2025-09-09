@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.IntMap;
 import com.github.tommyettinger.textra.Font;
+import com.github.tommyettinger.textra.Layout;
 import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.text.LanguageManager;
 import dev.ultreon.quantum.client.util.Utils;
@@ -21,6 +22,7 @@ import java.util.List;
  */
 public class GameFont extends Font {
     private static final List<GameFont> MANAGED = new ArrayList<>();
+    private final Layout layout = new Layout();
 
     /**
      * The line height of the font.
@@ -246,5 +248,10 @@ public class GameFont extends Font {
             sb.append(font.name).append(", ");
         }
         return sb.substring(0, sb.length() - 2);
+    }
+
+    public int getWidth(String title) {
+        this.markup(title, layout);
+        return MathUtils.ceil(layout.getWidth());
     }
 }

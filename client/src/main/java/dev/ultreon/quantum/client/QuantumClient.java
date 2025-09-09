@@ -464,6 +464,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     private double clientTickRate;
     private long lastClientTickTime;
     private GraphicsMode graphicsMode = GraphicsModes.BASIC;
+    private float runningTime = 0f;
 
     /**
      * Initializer for the Quantum Voxel Client.
@@ -791,7 +792,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     /**
      * This method is used to reload the config.
      */
-    void onReloadConfig() {
+    public void onReloadConfig() {
         if (ClientConfiguration.fullscreen.getValue()) Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 
         String[] split = ClientConfiguration.language.getValue().getPath().split("_");
@@ -1335,6 +1336,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * This is invoked by libGDX.</p>
      */
     public void render() {
+        runningTime += Gdx.graphics.getDeltaTime();
+
         int backBufferWidth = getWidth();
         int backBufferHeight = getHeight();
         if (backBufferHeight <= 0 || backBufferWidth <= 0) return; // We don't need to render to a zero buffer.
@@ -3639,5 +3642,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         }
 
         this.graphicsMode = mode;
+    }
+
+    public float getRunningTime() {
+        return this.runningTime;
     }
 }

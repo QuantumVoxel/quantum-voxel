@@ -307,7 +307,7 @@ public abstract class Screen extends UIContainer<Screen> {
     }
 
     @Override
-    protected void trackMouse(int x, int y) {
+    public void trackMouse(int x, int y) {
         super.trackMouse(x, y);
     }
 
@@ -477,6 +477,10 @@ public abstract class Screen extends UIContainer<Screen> {
     @Override
     public void mouseMoved(int x, int y) {
         if (this.dialog != null && this.dialog.isVisible()) {
+            if (hoveredWidget != null) {
+                hoveredWidget.mouseExit();
+                hoveredWidget = null;
+            }
             this.dialog.mouseMoved(x, y);
             trackMouse(x, y);
             return;

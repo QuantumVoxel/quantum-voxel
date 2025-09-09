@@ -34,12 +34,12 @@
 //    }
 //
 //    @Override
-//    public void render(@NotNull Renderer guiGraphics, float partialTick) {
-//        guiGraphics.pushMatrix();
-//        guiGraphics.translate(0, 0, Renderer.OVERLAY_ZINDEX);
-//        guiGraphics.fill(0, 0, QuantumClient.get().getScaledWidth(), QuantumClient.get().getScaledHeight(), BG_COLOR);
-//        this.screen.render(guiGraphics, partialTick);
-//        guiGraphics.popMatrix();
+//    public void render(@NotNull Renderer renderer, float partialTick) {
+//        renderer.pushMatrix();
+//        renderer.translate(0, 0, Renderer.OVERLAY_ZINDEX);
+//        renderer.fill(0, 0, QuantumClient.get().getScaledWidth(), QuantumClient.get().getScaledHeight(), BG_COLOR);
+//        this.screen.render(renderer, partialTick);
+//        renderer.popMatrix();
 //    }
 //
 //    public TextInputScreen getScreen() {
