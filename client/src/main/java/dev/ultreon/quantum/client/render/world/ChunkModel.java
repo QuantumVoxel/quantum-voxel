@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.collision.Ray;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.client.QuantumClient;
@@ -65,7 +67,8 @@ public class ChunkModel extends GameObject {
         PROFILER.begin("chunk-model@build");
         try {
             bounds.inf();
-            if (beingBuilt) return null;
+            if (beingBuilt)
+                return null;
             generateModelAsync(bounds, pass);
             chunk.dirty = false;
             chunk.initialized = true;
@@ -83,7 +86,7 @@ public class ChunkModel extends GameObject {
         PROFILER.begin("chunk-model@build");
         try {
             bounds.inf();
-            if (beingBuilt) return null;
+            if (beingBuilt) throw new IllegalStateException("Chunk is being built!");
             generateModelSync(bounds, pass);
             chunk.dirty = false;
             chunk.initialized = true;
@@ -151,7 +154,7 @@ public class ChunkModel extends GameObject {
 
             doBuildSync(pos, bounds, pass);
         }
-        QuantumClient.invokeAndWait(chunk::loadCustomRendered);
+        chunk.loadCustomRendered();
 
         chunk.dirty = false;
         PROFILER.begin("chunk-model@on-updated");
@@ -202,6 +205,7 @@ public class ChunkModel extends GameObject {
                     }
                 });
             }).exceptionally(throwable -> {
+                CommonConstants.LOGGER.error("Failed to generate chunk model: " + pos, throwable);
                 crash(new CrashLog("Failed to generate chunk model: " + pos, throwable), pos, millis);
                 return null;
             }).thenAccept(v -> {
@@ -213,10 +217,12 @@ public class ChunkModel extends GameObject {
                 chunk.meshStatus = MeshStatus.MESHED;
                 chunk.meshDuration = System.currentTimeMillis() - millis;
             }).exceptionally(throwable -> {
+                CommonConstants.LOGGER.error("Failed to finish generating chunk model: " + pos, throwable);
                 crash(new CrashLog("Failed to generate chunk model: " + pos, throwable), pos, millis);
                 return null;
             });
         } catch (Throwable t) {
+            CommonConstants.LOGGER.error("Failed to start generating chunk model: " + pos, t);
             crashDirect(new CrashLog("Failed to generate chunk model: " + pos, t), pos, millis);
         } finally {
             this.beingBuilt = false;
@@ -260,6 +266,7 @@ public class ChunkModel extends GameObject {
             chunk.meshStatus = MeshStatus.MESHED;
             chunk.meshDuration = System.currentTimeMillis() - millis;
         } catch (Throwable throwable) {
+            CommonConstants.LOGGER.error("Failed to generate chunk model: " + pos, throwable);
             crash(new CrashLog("Failed to generate chunk model: " + pos, throwable), pos, millis);
         } finally {
             this.beingBuilt = false;
@@ -363,5 +370,14 @@ public class ChunkModel extends GameObject {
         } finally {
             PROFILER.end();
         }
+    }
+
+    @Override
+    public List<GameObject> hit(Ray pickRay) {
+        List<GameObject> hit = new ArrayList<>();
+        for (ChunkMesh mesh : meshes) {
+            hit.addAll(mesh.hit(pickRay));
+        }
+        return hit;
     }
 }

@@ -4,12 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.client.render.VisualGameObject;
 import dev.ultreon.quantum.client.render.context.RenderMaterial;
+import dev.ultreon.quantum.util.GameObject;
 import dev.ultreon.quantum.util.NamespaceID;
+
+import java.util.List;
 
 public class CelestialBody extends VisualGameObject {
     public static final ObjectSet<NamespaceID> REGISTRY = new ObjectSet<>();

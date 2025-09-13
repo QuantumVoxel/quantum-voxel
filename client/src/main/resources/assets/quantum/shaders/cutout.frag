@@ -11,6 +11,10 @@ precision highp float;
 #define HIGH
 #endif
 
+#ifndef LOD_LEVEL
+#define LOD_LEVEL 0
+#endif
+
 varying MED vec3 v_normal;
 varying MED vec3 v_modelNormal;
 

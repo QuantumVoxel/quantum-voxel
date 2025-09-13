@@ -35,7 +35,6 @@ import dev.ultreon.quantum.client.model.WorldRenderContextImpl;
 import dev.ultreon.quantum.client.model.block.BakedCubeModel;
 import dev.ultreon.quantum.client.model.entity.renderer.EntityRenderer;
 import dev.ultreon.quantum.client.player.LocalPlayer;
-import dev.ultreon.quantum.client.registry.BlockRenderPassRegistry;
 import dev.ultreon.quantum.client.render.*;
 import dev.ultreon.quantum.client.render.context.ObjectType;
 import dev.ultreon.quantum.client.render.context.RenderContext;
@@ -209,7 +208,7 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         material.set(new DepthTestAttribute(GL_LEQUAL, true));
         material.set(IntAttribute.createCullFace(0));
 
-        this.skybox.model = modelBuilder.createBox(60, 60, 60, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked);
+        this.skybox.model = modelBuilder.createBox(1, 1, 1, material, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked);
 
         ModelInstance modelInstance = new ModelInstance(this.skybox.model, 0, 0, 0);
         modelInstance.userData = skybox;
@@ -432,10 +431,10 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
 
                 ChunkModel model = this.chunkModels.get(chunk.vec);
                 if (model == null) {
-                    if (ref.chunkRendered) continue;
                     model = buildChunk(ref, chunk, pass);
                     chunk.dirty = false;
                 } else if (chunk.dirty) {
+                    ValueTracker.setChunkRebuilds(ValueTracker.getChunkRebuilds() + 1);
                     rebuildChunk(ref, chunk, model, pass);
                     chunk.dirty = false;
                 }
@@ -968,5 +967,9 @@ public final class WorldRenderer implements DisposableContainer, TerrainRenderer
         this.graphicsMode.disable();
         this.graphicsMode = mode;
         this.graphicsMode.enable();
+    }
+
+    public ChunkModel getMeshFor(ClientChunk clientChunk) {
+        return this.chunkModels.get(clientChunk.vec);
     }
 }

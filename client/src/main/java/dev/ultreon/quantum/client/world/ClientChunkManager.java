@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.world;
 
+import com.badlogic.gdx.math.collision.Ray;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.util.GameObject;
@@ -99,5 +100,14 @@ public class ClientChunkManager extends GameObject implements ChunkManager<Clien
 
     public Iterator<ClientChunk> iterator() {
         return chunks.values().iterator();
+    }
+
+    @Override
+    public List<GameObject> hit(Ray pickRay) {
+        List<GameObject> objects = new ArrayList<>();
+        for (ClientChunk chunk : this.chunks.values()) {
+            objects.addAll(chunk.hit(pickRay));
+        }
+        return objects;
     }
 }

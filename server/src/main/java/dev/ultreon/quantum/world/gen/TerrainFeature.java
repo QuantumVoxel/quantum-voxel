@@ -16,13 +16,14 @@ public abstract class TerrainFeature implements Disposable {
     /**
      * Determines whether the feature should be placed at the specified coordinates.
      *
-     * @param x the x-coordinate in the world
-     * @param y the y-coordinate in the world
-     * @param z the z-coordinate in the world
+     * @param x      the x-coordinate in the world
+     * @param y      the y-coordinate in the world
+     * @param z      the z-coordinate in the world
      * @param origin the original block state at the specified coordinates
+     * @param world
      * @return true if the feature should be placed, false otherwise
      */
-    public boolean shouldPlace(int x, int y, int z, @NotNull BlockState origin) {
+    public boolean shouldPlace(int x, int y, int z, BlockState origin, ServerWorld world) {
         return true;
     }
 

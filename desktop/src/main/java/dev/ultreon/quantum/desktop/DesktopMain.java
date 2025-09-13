@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWNativeWin32;
+import org.lwjgl.system.windows.User32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +44,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+
+import static org.lwjgl.system.windows.User32.HTCAPTION;
+import static org.lwjgl.system.windows.User32.WM_NCLBUTTONDOWN;
 
 public class DesktopMain {
     public static final Logger LOGGER = LoggerFactory.getLogger("Quantum:Launcher");
@@ -54,6 +59,8 @@ public class DesktopMain {
     private static SafeLoadWrapper safeWrapper;
     private static MARGINS aeroBounds;
     private static WinDef.HWND hwnd;
+//    private static final boolean windowBorderEnabled = System.getProperty("os.name").toLowerCase().contains("windows");
+    private static final boolean windowBorderEnabled = false;
 
     /**
      * Launches the game.
@@ -62,6 +69,7 @@ public class DesktopMain {
      * @param args the arguments to pass to the game
      */
     @ApiStatus.Internal
+    @SuppressWarnings("UnsafeDynamicallyLoadedCode")
     static void launch(String[] args) {
         // Check for RenderDoc
         if (System.getProperty("renderdoc.path") != null) {
@@ -92,8 +100,7 @@ public class DesktopMain {
                         defaultUncaughtExceptionHandler.uncaughtException(t, e);
                         return;
                     }
-                    if (e instanceof ApplicationCrash) {
-                        ApplicationCrash crash = (ApplicationCrash) e;
+                    if (e instanceof ApplicationCrash crash) {
                         QuantumClient.crash(crash.getCrashLog());
                     }
 
@@ -120,7 +127,7 @@ public class DesktopMain {
             config.setIdleFPS(10);
             config.setBackBufferConfig(4, 4, 4, 4, 8, 8, 8);
             config.setHdpiMode(HdpiMode.Pixels);
-            config.setWindowedMode(1280, 720);
+            config.setWindowedMode(1280, 640);
             config.setTitle("Quantum Voxel (Block Studio)");
             try {
                 Lwjgl3Application ignored = new Lwjgl3Application(new BlockStudio(), config);
@@ -177,12 +184,12 @@ public class DesktopMain {
 
             @Override
             public Collection<Device> getGameDevices() {
-                return Arrays.asList();
+                return List.of();
             }
 
             @Override
             public boolean hasBackPanelRemoved() {
-                return fullVibrancyEnabled && windowVibrancyEnabled || fullAeroEnabled;
+                return fullVibrancyEnabled && windowVibrancyEnabled || fullAeroEnabled || windowBorderEnabled;
             }
 
             @Override
@@ -229,8 +236,8 @@ public class DesktopMain {
             }
 
             @Override
-            public boolean isWeb() {
-                return false;
+            public boolean isContained() {
+                return windowBorderEnabled;
             }
         };
 
@@ -259,6 +266,11 @@ public class DesktopMain {
     @NotNull
     private static Lwjgl3ApplicationConfiguration createConfig() {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        if (GamePlatform.get().isWindows() && windowBorderEnabled) {
+            config.setTransparentFramebuffer(true);
+            config.setDecorated(false);
+        }
+
         config.useVsync(false);
         config.setForegroundFPS(0);
         config.setBackBufferConfig(4, 4, 4, 4, 8, 8, 0);
@@ -266,7 +278,7 @@ public class DesktopMain {
         config.setInitialVisible(false);
         config.setTitle("Quantum Voxel");
         config.setWindowIcon(QuantumClient.getIcons());
-        config.setWindowedMode(1280, 720);
+        config.setWindowedMode(1280, 640);
         config.setWindowListener(new WindowAdapter());
         if (platform.isWindows() || platform.isLinux()) {
             config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL32, 4, 1);
@@ -353,7 +365,9 @@ public class DesktopMain {
                     WindowUtils.makeWindowFrameless(handle);
                 }
 
-                WinDef.HWND hwnd = new WinDef.HWND(new Pointer(GLFWNativeWin32.glfwGetWin32Window(handle)));
+                long peer = GLFWNativeWin32.glfwGetWin32Window(handle);
+                WinDef.HWND hwnd = new WinDef.HWND(new Pointer(peer));
+
                 if (LauncherConfig.get().windowVibrancyEnabled) {
                     Dwmapi.setAcrylicBackground(hwnd);
                     Dwmapi.setUseImmersiveDarkMode(hwnd, true);
@@ -361,6 +375,16 @@ public class DesktopMain {
 
                 if (LauncherConfig.get().removeBorder) {
                     Dwmapi.removeBorder(hwnd);
+                }
+                if (LauncherConfig.get().frameless && LauncherConfig.get().removeBorder) {
+                    // Extend frame into client area
+                    MARGINS margins = MARGINS.newInstance(MARGINS.class);
+                    margins.cxLeftWidth = 1;
+                    margins.cxRightWidth = 1;
+                    margins.cyTopHeight = 30;  // extend into title bar area
+                    margins.cyBottomHeight = 1;
+
+                    Dwmapi.INSTANCE.DwmExtendFrameIntoClientArea(hwnd, margins);
                 }
             } else if (GamePlatform.get().isMacOSX()) {
                 // TODO: Implement vibrancy

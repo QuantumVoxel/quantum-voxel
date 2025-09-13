@@ -2,6 +2,7 @@ package dev.ultreon.quantum.client;
 
 import com.badlogic.gdx.Gdx;
 import dev.ultreon.quantum.GamePlatform;
+import dev.ultreon.quantum.util.IVec2;
 
 public abstract class ClientPlatform extends GamePlatform {
     protected ClientPlatform() {
@@ -10,6 +11,10 @@ public abstract class ClientPlatform extends GamePlatform {
         if (isDevEnvironment()) {
             this.setShowingImGui(true);
         }
+    }
+
+    public void getWindowOffset(IVec2 windowOffset) {
+        windowOffset.set(0, 0);
     }
 
     public static ClientPlatform get() {

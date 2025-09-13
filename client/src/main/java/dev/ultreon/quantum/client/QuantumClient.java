@@ -449,7 +449,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     boolean loading = true;
 
     final String[] argv;
-    private IVec2 oldMode;
+    private final IVec2 oldMode = new IVec2(1280, 720);
     private int oldSelected;
     private boolean wasClicking;
     private final Queue<Runnable> serverTickQueue = new ArrayDeque<>();
@@ -793,7 +793,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * This method is used to reload the config.
      */
     public void onReloadConfig() {
-        if (ClientConfiguration.fullscreen.getValue()) Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+        setFullscreen(ClientConfiguration.fullscreen.getValue());
 
         String[] split = ClientConfiguration.language.getValue().getPath().split("_");
         if (split.length == 2) {
@@ -821,8 +821,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
 
         QuantumClient.invoke(() -> {
             // Set vsync
-            boolean enableVsync = ClientConfiguration.enableVsync.getValue();
-            Gdx.graphics.setVSync(enableVsync);
+            Gdx.graphics.setVSync(ClientConfiguration.enableVsync.getValue());
 
             // Set fps limit
             int fpsLimit = ClientConfiguration.fpsLimit.getValue();
@@ -1350,18 +1349,18 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
             targetFbo.getColorBufferTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         }
 
-        // Render to the target framebuffer
-        if (ClientPlatform.get().isShowingImGui())
-            targetFbo.begin();
-
         // Handle music based on world and screen state
-        if (ClientPlatform.get().isShowingImGui())
+        if (ClientPlatform.get().isShowingImGui()) {
+            targetFbo.begin();
             try {
                 doRender();
+            } catch (Throwable t) {
+                crash(t);
             } finally {
                 // End the frame
                 targetFbo.end();
             }
+        }
         else doRender();
 
         // If the ImGui flag is true, render the ImGui.
@@ -2105,6 +2104,8 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         } catch (InterruptedException e) {
             LOGGER.error("Failed to shutdown", e);
             Thread.currentThread().interrupt();
+        } catch (ExecutorClosedException ignored) {
+
         } catch (Exception throwable) {
             Debugger.log("Failed to shut down " + disposable.getClass().getName(), throwable);
         }
@@ -3073,12 +3074,12 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      *
      * @param fullScreen the full screen.
      */
-    public void setFullScreen(boolean fullScreen) {
+    public void setFullscreen(boolean fullScreen) {
         if (Gdx.graphics.isFullscreen() != fullScreen) {
             // Check if the desired fullscreen state is different from the current state
             if (fullScreen) {
                 // Save the current window size before switching to fullscreen
-                this.oldMode = new IVec2(this.getWidth(), this.getHeight());
+                this.oldMode.set(this.getWidth(), this.getHeight());
 
                 // Set the display mode to fullscreen using the current display's mode
                 Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
@@ -3184,6 +3185,13 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
     @Override
     public @NotNull String toString() {
         return "QuantumClient[" + this.user + "]";
+    }
+
+    @Override
+    public List<GameObject> hit(com.badlogic.gdx.math.collision.Ray pickRay) {
+        List<GameObject> objects = new ArrayList<>();
+        if (this.world != null) objects.addAll(this.world.hit(pickRay));
+        return objects;
     }
 
     /**

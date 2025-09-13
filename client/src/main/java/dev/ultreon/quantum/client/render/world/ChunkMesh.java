@@ -3,13 +3,18 @@ package dev.ultreon.quantum.client.render.world;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Disposable;
 import dev.ultreon.quantum.client.util.GameCamera;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.RenderType;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.util.GameObject;
+
+import java.util.List;
 
 public class ChunkMesh extends GameObject implements Disposable {
     public final RenderType pass;
@@ -42,6 +47,18 @@ public class ChunkMesh extends GameObject implements Disposable {
     @Override
     public void update(float delta) {
         super.update(delta);
+    }
+
+    @Override
+    public List<GameObject> hit(Ray pickRay) {
+        List<GameObject> hit = super.hit(pickRay);
+        if (mesh.getNumVertices() == 0) return hit;
+        BoundingBox bb = new BoundingBox();
+        mesh.calculateBoundingBox(bb);
+        if (Intersector.intersectRayBounds(pickRay, bb, tmp)) {
+            hit.add(this.chunk);
+        }
+        return hit;
     }
 
     public boolean isDisposed() {

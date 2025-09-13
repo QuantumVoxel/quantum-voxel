@@ -1,7 +1,6 @@
-package dev.ultreon.quantum.client.gui.screens.tabs;
+package dev.ultreon.quantum.client.gui.widget.tabs;
 
 import com.badlogic.gdx.Input;
-import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;

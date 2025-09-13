@@ -37,7 +37,7 @@ public class MemoryUsageOverlay extends Overlay {
         long freeMemory = runtime.freeMemory(); // Amount of free memory within the allocated memory
 
         renderer.textLeft(Language.translate("quantum.hud.memory_usage"), x + 5, y + 5, RgbColor.WHITE);
-        renderer.textLeft(Language.translate("quantum.hud.memory_usage.used", ((allocatedMemory) / 1000000), Language.translate("quantum.misc.megabytes"), " / ", maxMemory / 1000000, Language.translate("quantum.misc.megabytes")), x + 5, y + 15, RgbColor.GRAY);
+        renderer.textLeft(Language.translate("quantum.hud.memory_usage.used", ((allocatedMemory) / 1000000), Language.translate("quantum.misc.megabytes"), maxMemory / 1000000, Language.translate("quantum.misc.megabytes")), x + 5, y + 15, RgbColor.GRAY);
         renderer.textLeft(Language.translate("quantum.hud.memory_usage.jvm_free", (freeMemory / 1000000), Language.translate("quantum.misc.megabytes")), x + 5, y + 25, RgbColor.GRAY);
 
         renderer.line(x + 1, y + height + 4, x + ((float) (allocatedMemory) / maxMemory * width + 4) - 1, y + height + 4, LINE_COLOR);

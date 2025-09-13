@@ -92,7 +92,7 @@ public class IntegratedServer extends QuantumServer {
             QuantumServer.invoke(() -> {
                 BlockVec spawnPointXZ = overworld.getSpawnPoint();
                 for (int i = 0; i < 256 / CS; i++) {
-                    overworld.getChunkAt(spawnPointXZ.x, i * CS, spawnPointXZ.z);
+                    overworld.loadChunkAt(spawnPointXZ.x, i * CS, spawnPointXZ.z);
                 }
                 BlockVec spawnPoint = overworld.getSpawnPoint();
                 player.setPosition(spawnPoint.d().add(0.5, 0.0, 0.5));

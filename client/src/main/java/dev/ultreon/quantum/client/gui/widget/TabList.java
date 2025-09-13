@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.ScreenUtils;
+import de.damios.guacamole.gdx.graphics.NestableFrameBuffer;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.gui.Callback;
 import dev.ultreon.quantum.client.gui.Renderer;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class TabList extends SelectionList<TabList.Tab> {
     private final List<Tab> items = new ArrayList<>();
     private Callback<Page> pageChangeCallback = page -> {
@@ -120,7 +122,7 @@ public class TabList extends SelectionList<TabList.Tab> {
                 this.lastHeight = this.size.height;
 
                 if (this.buffer != null) this.buffer.dispose();
-                this.buffer = new FrameBuffer(Pixmap.Format.RGBA8888, this.size.width, this.size.height, true);
+                this.buffer = new NestableFrameBuffer(Pixmap.Format.RGBA8888, this.size.width, this.size.height, true);
 
                 this.onResized(size.width, size.height);
 

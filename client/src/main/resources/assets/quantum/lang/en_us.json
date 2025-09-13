@@ -250,7 +250,7 @@
 
   quantum.hud.memory_usage: Memory Usage
   quantum.hud.memory_usage.jvm_free: VM Free: %1$s
-  quantum.hud.memory_usage.used: Used: %1$s/%2$s
+  quantum.hud.memory_usage.used: Used: %1$s%2$s / %3$s%4$s
 
   quantum.misc.bits.16: 16 bits
   quantum.misc.bits.24: 24 bits

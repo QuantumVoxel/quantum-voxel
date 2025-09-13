@@ -33,7 +33,7 @@ public class OreFeature extends TerrainFeature {
     }
 
     @Override
-    public boolean shouldPlace(int x, int y, int z, @NotNull BlockState origin) {
+    public boolean shouldPlace(int x, int y, int z, BlockState origin, ServerWorld world) {
         return heightRange.contains(y) && origin.getBlock() == Blocks.STONE;
     }
 

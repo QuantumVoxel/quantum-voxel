@@ -59,7 +59,7 @@ public class PollingExecutorService extends GameObject implements Executor {
     public void shutdown(Runnable finalizer) {
         this.isShutdown = true;
         for (CompletionPromise<?> future : this.futures) {
-            future.fail(new RejectedExecutionException("Executor has been shut down"));
+            future.fail(new ExecutorClosedException("Executor has been shut down"));
         }
 
         this.tasks.clear();
@@ -198,7 +198,7 @@ public class PollingExecutorService extends GameObject implements Executor {
     @Override
     public void execute(@NotNull Runnable command) {
         if (this.isShutdown)
-            throw new RejectedExecutionException("Executor is already shut down");
+            throw new ExecutorClosedException("Executor is already shut down");
 
         if (this.isSameThread()) {
             command.run();

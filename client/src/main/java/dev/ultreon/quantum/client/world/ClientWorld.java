@@ -1,6 +1,7 @@
 package dev.ultreon.quantum.client.world;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.*;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.CommonConstants;
@@ -36,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.badlogic.gdx.math.MathUtils.lerp;
@@ -737,5 +739,10 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     @Override
     public void render(RenderBufferSource source) {
 
+    }
+
+    @Override
+    public List<GameObject> hit(Ray pickRay) {
+        return chunkManager.hit(pickRay);
     }
 }

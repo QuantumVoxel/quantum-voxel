@@ -11,7 +11,6 @@ import dev.ultreon.quantum.client.input.GameInput;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.world.ClientChunk;
 import dev.ultreon.quantum.client.world.ClientChunkAccess;
-import dev.ultreon.quantum.client.render.world.WorldRenderer;
 import dev.ultreon.quantum.debug.ValueTracker;
 import dev.ultreon.quantum.entity.Entity;
 import dev.ultreon.quantum.entity.player.Player;
@@ -96,7 +95,7 @@ public class GenericDebugPage implements DebugPage {
                 context.left("Visible Chunks", worldRenderer.getVisibleChunks() + "/" + worldRenderer.getLoadedChunksCount());
             }
 
-            context.left("Chunk Mesh Disposes", WorldRenderer.getChunkMeshFrees());
+            context.left("Chunk Rebuilds", ValueTracker.getChunkRebuilds());
             if (client.isSinglePlayer()) {
                 context.left("Chunk Loads", ValueTracker.getChunkLoads())
                         .left("Chunk Unloads", ServerWorld.getChunkUnloads());

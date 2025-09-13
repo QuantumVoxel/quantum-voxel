@@ -33,7 +33,17 @@ public class TreeFeature extends TerrainFeature {
     }
 
     @Override
-    public boolean shouldPlace(int x, int y, int z, @NotNull BlockState origin) {
+    public boolean shouldPlace(int x, int y, int z, @NotNull BlockState origin, @NotNull ServerWorld world) {
+        for (int yOffset = 1; yOffset <= maxTrunkHeight + 2; yOffset++) {
+            for (int xOffset = -1; xOffset <= 1; xOffset++) {
+                for (int zOffset = -1; zOffset <= 1; zOffset++) {
+                    BlockState blockState = world.get(x + xOffset, yOffset, z + zOffset);
+                    if (!blockState.isAir()) {
+                        return false;
+                    }
+                }
+            }
+        }
         return origin.is(Blocks.GRASS_BLOCK) || origin.is(Blocks.SNOWY_GRASS_BLOCK) || origin.is(Blocks.DIRT);
     }
 

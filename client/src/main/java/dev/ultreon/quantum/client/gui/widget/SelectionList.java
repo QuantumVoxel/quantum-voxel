@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.gui.widget;
 import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.libs.commons.v0.Mth;
 import dev.ultreon.quantum.client.gui.*;
+import dev.ultreon.quantum.client.input.KeyAndMouseInput;
 import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.util.RgbColor;
 import org.jetbrains.annotations.ApiStatus;
@@ -221,7 +222,11 @@ public class SelectionList<T> extends UIContainer<SelectionList<T>> {
 
     @Override
     public boolean mouseWheel(int x, int y, double rotation) {
-        this.scrollGoal = this.getContentHeight() > this.size.height + this.itemHeight ? Mth.clamp((float) (this.scrollGoal + rotation * 10), 0, this.getContentHeight() - this.size.height + 10) : 0;
+        double v = rotation * 10;
+        if (KeyAndMouseInput.isShiftDown()) v /= 10;
+        if (KeyAndMouseInput.isCtrlDown()) v *= 4;
+        if (KeyAndMouseInput.isAltDown()) v *= 20;
+        this.scrollGoal = this.getContentHeight() > this.size.height + this.itemHeight ? Mth.clamp((float) (this.scrollGoal + v), 0, this.getContentHeight() - this.size.height + 10) : 0;
         return true;
     }
 

@@ -9,6 +9,7 @@ import dev.ultreon.quantum.util.RgbColor;
 import java.util.function.Supplier;
 
 public class TitleWidget extends Widget {
+    public static final NamespaceID TEXTURE = new NamespaceID("textures/gui/title.png");
     private final Screen screen;
     private Screen parent;
     private boolean backPressed;
@@ -16,6 +17,7 @@ public class TitleWidget extends Widget {
     public TitleWidget(Screen screen) {
         super(screen.getWidth(), 21);
         this.screen = screen;
+        this.parent = screen.parentScreen;
 
         this.onRevalidate(widget -> {
             this.size.width = screen.getWidth();
@@ -28,19 +30,18 @@ public class TitleWidget extends Widget {
     public void renderWidget(Renderer renderer, float deltaTime) {
         super.renderWidget(renderer, deltaTime);
 
-        NamespaceID texture = new NamespaceID("textures/gui/title.png");
-
         TextObject title = screen.title;
         if (GamePlatform.get().hasBackPanelRemoved()) {
-//            renderer.draw9Slice(texture, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);
+            renderer.draw9Slice(TEXTURE, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);
             renderer.fill(0, 0, size.width, size.height, RgbColor.WHITE.withAlpha(0x20));
 
             if (parent != null) {
-//                if (isBackHovered) {
-//                    renderer.fill(0, 0, 80, size.height, RgbColor.WHITE.withAlpha(0x20));
-//                } else {
-//                    renderer.box(0, 0, 80, size.height, RgbColor.WHITE.withAlpha(0x20));
-//                }
+                boolean isBackHovered = isPosWithin(mousePos.x, mousePos.y, 0, 0, 80, size.height);
+                if (isBackHovered) {
+                    renderer.fill(0, 0, 80, size.height, RgbColor.WHITE.withAlpha(0x20));
+                } else {
+                    renderer.box(0, 0, 80, size.height, RgbColor.WHITE.withAlpha(0x20));
+                }
 
                 int yOffset = isBackPressed() ? 2 : 0;
                 renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.getLineHeight() / 2 + yOffset, RgbColor.WHITE);
@@ -50,14 +51,14 @@ public class TitleWidget extends Widget {
                 renderer.textCenter(title.copy().setBold(true), (size.width) / 2, (size.height - 6) / 2 - font.getLineHeight() / 2, RgbColor.WHITE);
             }
         } else {
-            renderer.draw9Slice(texture, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);
+            renderer.draw9Slice(TEXTURE, 0, 0, size.width, size.height, 126, 0, 21, 21, 5, 256, 256);
 
             if (parent != null) {
-//                boolean isBackHovered = isHovered;
-//                int u = isBackHovered ? 21 : 0;
-//                int v = isBackPressed() ? 21 : 0;
-//
-//                renderer.draw9Slice(texture, -1, 0, 81, size.height, u, v, 21, 21, 5, 256, 256);
+                boolean isBackHovered = isPosWithin(mousePos.x, mousePos.y, 0, 0, 80, size.height);
+                int u = isBackHovered ? 21 : 0;
+                int v = isBackPressed() ? 21 : 0;
+
+                renderer.draw9Slice(TEXTURE, -2, -2, 82, size.height + 2, u, v, 21, 21, 5, 256, 256);
 
                 int yOffset = isBackPressed() ? 2 : 0;
                 renderer.textCenter(TextObject.translation("quantum.ui.back.arrow"), 40, (size.height - 6) / 2 - font.getLineHeight() / 2 + yOffset, RgbColor.WHITE);

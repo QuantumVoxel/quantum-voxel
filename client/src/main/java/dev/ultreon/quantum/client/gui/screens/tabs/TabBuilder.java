@@ -12,7 +12,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-@ApiStatus.Experimental
+@Deprecated
 public class TabBuilder {
     private final TabContent tabContent;
     private final QuantumClient client = QuantumClient.get();

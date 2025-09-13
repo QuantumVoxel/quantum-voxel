@@ -1,10 +1,14 @@
 package dev.ultreon.quantum.client.render;
 
+import com.badlogic.gdx.math.collision.Ray;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.render.context.RenderMaterial;
 import dev.ultreon.quantum.client.render.pass.RenderPass;
 import dev.ultreon.quantum.client.util.ProbibitedOperationException;
 import dev.ultreon.quantum.util.GameObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class VisualGameObject extends GameObject implements VisualObject {
     protected RenderMaterial renderMaterial;

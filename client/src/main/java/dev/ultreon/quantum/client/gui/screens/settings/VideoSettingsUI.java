@@ -111,7 +111,7 @@ public class VideoSettingsUI {
     private void setFullscreen(CycleButton<BooleanEnum> caller) {
         boolean bool = caller.getValue().get();
         ClientConfiguration.fullscreen.setValue(bool);
-        this.client.setFullScreen(bool);
+        this.client.setFullscreen(bool);
         ClientConfiguration.save();
     }
 

@@ -17,9 +17,7 @@ import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.android.log.AndroidLogger;
 import dev.ultreon.quantum.client.ClientPlatform;
 import dev.ultreon.quantum.client.QuantumClient;
-import dev.ultreon.quantum.client.platform.GraphicsEngine;
 import dev.ultreon.quantum.crash.ApplicationCrash;
-import dev.ultreon.quantum.dedicated.JavaWebSocket;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.platform.PlatformFeature;
@@ -38,10 +36,10 @@ public class AndroidPlatform extends ClientPlatform {
     final IntMap<InputDevice> devices = new IntMap<>();
     private final IntSet mice = new IntSet();
     private final IntSet keyboards = new IntSet();
-    private final IntMap<MouseDevice> motions = new IntMap<MouseDevice>();
+    private final IntMap<MouseDevice> motions = new IntMap<>();
     private AndroidMouseDevice mouseDevice;
     private final Map<Integer, Device> gameDevices = new HashMap<>();
-    private LibGDXGraphicsEngine graphicsEngine;
+//    private LibGDXGraphicsEngine graphicsEngine;
 
     AndroidPlatform(AndroidLauncher launcher) {
         super();
@@ -53,16 +51,17 @@ public class AndroidPlatform extends ClientPlatform {
     }
 
     void launch(AndroidLauncher launcher, ApplicationListener app, AndroidApplicationConfiguration config) {
-        this.graphicsEngine = new LibGDXGraphicsEngine(this, app);
-        this.graphicsEngine.start(() -> {
-            launcher.initialize(app, config);
-            return launcher;
-        });
+//        this.graphicsEngine = new LibGDXGraphicsEngine(this, app);
+//        this.graphicsEngine.start(() -> {
+//            launcher.initialize(app, config);
+//            return launcher;
+//        });
+//        launcher.initialize(app, config);
     }
 
     @Override
     public Collection<? extends Mod> getMods() {
-        return new ArrayList<Mod>(this.mods.values());
+        return new ArrayList<>(this.mods.values());
     }
 
     @Override
@@ -326,10 +325,5 @@ public class AndroidPlatform extends ClientPlatform {
     @Override
     public <T> List<T> createSyncList() {
         return new CopyOnWriteArrayList<>();
-    }
-
-    @Override
-    public GraphicsEngine getGraphicsEngine() {
-        return graphicsEngine;
     }
 }

@@ -82,7 +82,7 @@ public class BiomeGenerator implements Disposable {
         RNG rng = chunk.getRNG();
         long posSeed = rng.nextLong();
         BlockVec localVec = new BlockVec(x, y, z).chunkLocal();
-        if (feature.shouldPlace(x, y, z, chunk.get(localVec.x, localVec.y, localVec.z))) {
+        if (feature.shouldPlace(x, y, z, chunk.get(localVec.x, localVec.y, localVec.z), chunk.getWorld())) {
             if (feature.handle(fork, posSeed, 0, 0, 0)) {
                 List<BlockPoint> points = fork.getPositions();
                 ServerWorld serverWorld = chunk.getWorld();

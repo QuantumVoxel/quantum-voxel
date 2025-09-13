@@ -1,23 +1,12 @@
 package dev.ultreon.quantum.client.gui.screens;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.Screen;
-import dev.ultreon.quantum.client.gui.screens.tabs.Tab;
-import dev.ultreon.quantum.client.gui.screens.tabs.Tabs;
+import dev.ultreon.quantum.client.gui.widget.tabs.Tabs;
 import dev.ultreon.quantum.client.gui.widget.TextButton;
-import dev.ultreon.quantum.client.input.KeyAndMouseInput;
-import dev.ultreon.quantum.client.input.key.KeyBindRegistry;
-import dev.ultreon.quantum.client.input.key.KeyBinds;
 import dev.ultreon.quantum.client.text.Language;
 import dev.ultreon.quantum.client.text.UITranslations;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class BindingsScreen extends Screen {
 //    private final List<BindingsTab> allTabs = new ArrayList<>();

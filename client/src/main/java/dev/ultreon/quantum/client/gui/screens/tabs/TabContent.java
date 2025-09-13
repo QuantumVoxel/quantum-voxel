@@ -4,6 +4,7 @@ import dev.ultreon.quantum.client.gui.widget.ScrollableContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.text.TextObject;
 
+@Deprecated
 public class TabContent extends ScrollableContainer {
     private final TabbedUI parent;
     private TextObject title;

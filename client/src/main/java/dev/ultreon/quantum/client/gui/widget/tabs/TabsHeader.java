@@ -1,7 +1,6 @@
-package dev.ultreon.quantum.client.gui.screens.tabs;
+package dev.ultreon.quantum.client.gui.widget.tabs;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.MathUtils;
 import dev.ultreon.quantum.client.GameFont;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.Renderer;

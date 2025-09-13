@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@Deprecated
 public class Tab extends Button<Tab> {
     private static final NamespaceID TEXTURE = new NamespaceID("textures/gui/tabs.png");
     private final TabbedUI parent;

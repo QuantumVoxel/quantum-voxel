@@ -4,12 +4,16 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Pool;
 import dev.ultreon.quantum.component.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class GameObject extends GameNode implements RenderableProvider, Disposable {
     private static final Matrix4 IDENTITY_MATRIX = new Matrix4();
@@ -175,5 +179,9 @@ public abstract class GameObject extends GameNode implements RenderableProvider,
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<GameObject> hit(Ray pickRay) {
+        return new ArrayList<>();
     }
 }

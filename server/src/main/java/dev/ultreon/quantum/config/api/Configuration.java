@@ -4,6 +4,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonWriter;
+import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.api.event.EventSystem;
 import dev.ultreon.quantum.api.events.ConfigEvent;
@@ -29,15 +30,21 @@ public class Configuration extends ConfigCategory {
     }
 
     public void load() {
-        if (loaded && EventSystem.postCancelable(new ConfigEvent.Reload(this))) return;
+        try {
+            if (loaded && EventSystem.postCancelable(new ConfigEvent.Reload(this))) return;
 
-        if (!configPath.exists()) {
+            if (!configPath.exists()) {
+                reset();
+                save();
+                return;
+            }
+            setJson(reader.parse(configPath.readString()));
+            if (!loaded) EventSystem.postDefault(new ConfigEvent.Load(this));
+        } catch (Exception e) {
+            CommonConstants.LOGGER.error("Failed to load configuration file {}", configPath.path(), e);
             reset();
             save();
-            return;
         }
-        setJson(reader.parse(configPath.readString()));
-        if (!loaded) EventSystem.postDefault(new ConfigEvent.Load(this));
         loaded = true;
     }
 }

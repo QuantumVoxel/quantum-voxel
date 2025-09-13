@@ -337,7 +337,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
     @Override
     protected void onMoved() {
         // Check if the chunk is loaded and the entity is in an active chunk
-        if (world.getChunkNoLoad(this.getChunkVec()) == null) {
+        if (world.getChunk(this.getChunkVec()) == null) {
             isInactive = true;
             return;
         }
@@ -437,7 +437,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
                 this.handleFailedChunk(vec);
                 break;
             case UNLOADED:
-                ServerChunk chunk = this.world.getChunkNoLoad(vec);
+                ServerChunk chunk = this.world.getChunk(vec);
                 if (chunk != null) {
                     chunk.getTracker().stopTracking(this);
                 }
@@ -481,7 +481,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         if (DebugFlags.LOG_POSITION_RESET_ON_CHUNK_LOAD.isEnabled())
             Chat.sendInfo(this, "Position reset on chunk load.");
 
-        ServerChunk chunk = this.world.getChunk(vec);
+        ServerChunk chunk = this.world.getChunkNow(vec);
         chunk.getTracker().startTracking(this);
 
         this.chunkTracker.startTracking(vec);
@@ -491,7 +491,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
         if (DebugFlags.LOG_CHUNK_LOAD_FAILURE.isEnabled())
             Chat.sendInfo(this, "Failed to load chunk " + vec);
 
-        ServerChunk chunk = this.world.getChunkNoLoad(vec);
+        ServerChunk chunk = this.world.getChunk(vec);
         if (chunk != null) {
             chunk.getTracker().stopTracking(this);
             this.chunkTracker.stopTracking(vec);
@@ -661,7 +661,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     public void handlePlayerMove(double x, double y, double z) {
         ChunkVec chunkVec = new BlockVec(x, y, z).chunk();
-        ServerChunk chunk = this.world.getChunkNoLoad(chunkVec);
+        ServerChunk chunk = this.world.getChunk(chunkVec);
         if (chunk == null) {
             return;
         }
@@ -683,7 +683,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
      */
     public void handlePlayerMove(double x, double y, double z, float xHeadRot, float xRot, float yRot) {
         ChunkVec chunkVec = new BlockVec(x, y, z).chunk();
-        ServerChunk chunk = this.world.getChunkNoLoad(chunkVec);
+        ServerChunk chunk = this.world.getChunk(chunkVec);
         if (chunk == null) {
             return;
         }
@@ -912,7 +912,7 @@ public class ServerPlayer extends Player implements CacheablePlayer {
                     if (!this.chunkTracker.isTracking(pos)) {
                         this.chunkTracker.startTracking(pos);
                     } else {
-                        ServerChunk chunk = this.world.getChunk(pos);
+                        ServerChunk chunk = this.world.getChunkNow(pos);
                         chunk.sendChunk();
                         return;
                     }

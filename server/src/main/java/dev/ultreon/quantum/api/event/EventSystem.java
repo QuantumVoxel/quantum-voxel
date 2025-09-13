@@ -1,7 +1,5 @@
 package dev.ultreon.quantum.api.event;
 
-import dev.ultreon.baseskript.BaseSkript;
-import dev.ultreon.baseskript.event.EventBus;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.api.ModApi;
 import dev.ultreon.quantum.api.events.Cancelable;
@@ -111,7 +109,7 @@ public final class EventSystem {
         // A stack of classes to check for listeners.
         Stack<Class<?>> superClasses = new Stack<>();
 
-        BaseSkript.getEventBus().publish(event);
+//        BaseSkript.getEventBus().publish(event);
 
         // Start with the class of the event itself.
         superClasses.push(event.getClass());

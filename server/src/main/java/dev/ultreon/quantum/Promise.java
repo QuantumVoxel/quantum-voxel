@@ -1,7 +1,9 @@
 package dev.ultreon.quantum;
 
 import com.badlogic.gdx.utils.async.AsyncExecutor;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.*;
 
@@ -38,6 +40,7 @@ public interface Promise<T> {
         }, executor);
     }
 
+    @Contract("null->null;!null->_")
     T getOrDefault(T defaultValue) throws AsyncException;
 
     T getOrThrow() throws Throwable;
@@ -74,7 +77,7 @@ public interface Promise<T> {
 
     <V> Promise<? extends V> thenApplyAsync(Function<T, V> function);
 
-    <V> Promise<V> thenApplyAsync(Function<T, V> function, AsyncExecutor executor);
+    <V> Promise<V> thenApplyAsync(Function<@Nullable T, @Nullable V> function, AsyncExecutor executor);
 
     <V> Promise<V> thenCompose(Function<T, Promise<V>> function);
 

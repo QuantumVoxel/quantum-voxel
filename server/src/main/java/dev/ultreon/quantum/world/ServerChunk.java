@@ -105,7 +105,7 @@ public final class ServerChunk extends Chunk {
     @Override
     protected void retrieveNeighbors() {
         for (Direction direction : Direction.values()) {
-            Chunk chunk = ((ServerWorld) world).getChunkNoLoad(tmpCV.set(vec).add(direction.getOffset()));
+            Chunk chunk = ((ServerWorld) world).getChunk(tmpCV.set(vec).add(direction.getOffset()));
 
             this.neighbors[direction.ordinal()] = chunk;
             if (chunk != null)

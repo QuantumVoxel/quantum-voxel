@@ -26,6 +26,7 @@ import dev.ultreon.quantum.dev.DevPipe;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
 import dev.ultreon.quantum.server.QuantumServer;
+import dev.ultreon.quantum.util.IVec2;
 import dev.ultreon.quantum.util.Result;
 import dev.ultreon.xeox.api.IFileSystem;
 import dev.ultreon.xeox.api.IMod;
@@ -63,6 +64,7 @@ public abstract class DesktopPlatform extends ClientPlatform {
         return thread;
     });
     private boolean gameDisabled = false;
+    private final IVec2 windowOffset = new IVec2(0, 0);
 
     DesktopPlatform(boolean angleGLES, SafeLoadWrapper safeWrapper) {
         super();
@@ -842,6 +844,17 @@ public abstract class DesktopPlatform extends ClientPlatform {
     @Override
     public long totalMemory() {
         return Runtime.getRuntime().totalMemory();
+    }
+
+    public abstract boolean isContained();
+
+    public void setWindowOffset(int x, int y) {
+        this.windowOffset.set(x, y);
+    }
+
+    @Override
+    public void getWindowOffset(IVec2 windowOffset) {
+        windowOffset.set(this.windowOffset);
     }
 
     private class JavaPromise<T> implements CompletionPromise<T> {

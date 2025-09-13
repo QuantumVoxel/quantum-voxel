@@ -1,11 +1,15 @@
 package dev.ultreon.quantum.client.world;
 
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.util.RenderObject;
 import dev.ultreon.quantum.entity.Entity;
+import dev.ultreon.quantum.util.GameObject;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class ClientEntityManager extends RenderObject {
     private final ClientWorld world;
@@ -52,5 +56,14 @@ public class ClientEntityManager extends RenderObject {
             CommonConstants.LOGGER.warn("Entity {} not found", entity.getId());
         }
         return null;
+    }
+
+    @Override
+    public List<GameObject> hit(Ray ray) {
+        List<GameObject> objects = super.hit(ray);
+        for (RenderEntity entity : entities.values()) {
+            objects.addAll(entity.hit(ray));
+        }
+        return objects;
     }
 }

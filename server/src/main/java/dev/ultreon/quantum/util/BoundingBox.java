@@ -402,4 +402,11 @@ public class BoundingBox implements Serializable {
     public boolean contains(double x, double y, double z) {
         return this.min.x <= x && this.max.x >= x && this.min.y <= y && this.max.y >= y && this.min.z <= z && this.max.z >= z;
     }
+
+    public com.badlogic.gdx.math.collision.BoundingBox asGdx(com.badlogic.gdx.math.collision.BoundingBox bounds) {
+        bounds.min.set((float) this.min.x, (float) this.min.y, (float) this.min.z);
+        bounds.max.set((float) this.max.x, (float) this.max.y, (float) this.max.z);
+        bounds.update();
+        return bounds;
+    }
 }

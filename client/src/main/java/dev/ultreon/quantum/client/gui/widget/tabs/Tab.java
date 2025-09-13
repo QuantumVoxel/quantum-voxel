@@ -1,13 +1,6 @@
-package dev.ultreon.quantum.client.gui.screens.tabs;
+package dev.ultreon.quantum.client.gui.widget.tabs;
 
-import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
-import dev.ultreon.quantum.client.gui.widget.Widget;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Tab extends UIContainer<Tabs> {
     private String title;

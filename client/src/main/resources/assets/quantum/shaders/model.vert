@@ -1,5 +1,17 @@
+
 #ifdef GL_ES
-precision mediump float;
+#define LOW lowp
+#define MED mediump
+#define HIGH highp
+precision highp float;
+#else
+#define MED
+#define LOW
+#define HIGH
+#endif
+
+#ifndef LOD_LEVEL
+#define LOD_LEVEL 0
 #endif
 
 attribute vec3 a_position;

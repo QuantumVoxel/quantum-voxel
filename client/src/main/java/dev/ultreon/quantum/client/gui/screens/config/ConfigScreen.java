@@ -1,20 +1,18 @@
 package dev.ultreon.quantum.client.gui.screens.config;
 
-import dev.ultreon.quantum.client.gui.Renderer;
+import dev.ultreon.quantum.client.config.ClientConfiguration;
 import dev.ultreon.quantum.client.gui.Screen;
 import dev.ultreon.quantum.client.gui.screens.config.pages.*;
-import dev.ultreon.quantum.client.gui.screens.tabs.Tab;
-import dev.ultreon.quantum.client.gui.screens.tabs.Tabs;
-import dev.ultreon.quantum.client.gui.widget.TabList;
-import dev.ultreon.quantum.client.text.Language;
+import dev.ultreon.quantum.client.gui.widget.tabs.Tabs;
+import dev.ultreon.quantum.client.render.world.WorldRenderer;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.text.TranslationText;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ConfigScreen extends Screen {
     public static final TranslationText TITLE = TextObject.translation("quantum.screen.settings.title");
     private Tabs tabs;
+    private int oldRenderDistance = ClientConfiguration.renderDistance.getValue();
 
     public ConfigScreen() {
         super(TITLE);
@@ -48,33 +46,15 @@ public class ConfigScreen extends Screen {
     public void onClosed() {
         super.onClosed();
 
-        this.remove(this.tabs);
-    }
+        WorldRenderer worldRenderer = client.worldRenderer;
+        if (oldRenderDistance != ClientConfiguration.renderDistance.getValue() && worldRenderer != null)
+            worldRenderer.reloadChunks();
 
-    public void showPage(TabList.Page page) {
+        ClientConfiguration.save();
+        this.remove(this.tabs);
     }
 
     public Tabs getTabs() {
         return tabs;
-    }
-
-    public static class GeneralSettingsPage extends Tab {
-        private final ConfigScreen settingsScreen;
-
-        public GeneralSettingsPage(ConfigScreen settingsScreen) {
-            super(Language.translate("quantum.screen.settings.general"));
-            this.settingsScreen = settingsScreen;
-        }
-
-        @Override
-        public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
-            renderer.drawPlatform(pos.x - 2, pos.y, this.size.width + 4, this.size.height);
-
-            super.renderWidget(renderer, deltaTime);
-        }
-
-        public ConfigScreen getSettingsScreen() {
-            return settingsScreen;
-        }
     }
 }

@@ -13,13 +13,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class GameNode implements Disposable {
     private static final Array<GameNode> MANAGED = new Array<>();
     private static int allActiveCount;
 
     final @NotNull Map<Class<?>, Component<?>> components = new ConcurrentHashMap<>();
-    final @NotNull List<GameNode> children = new ArrayList<>();
+    final @NotNull List<GameNode> children = new CopyOnWriteArrayList<>();
 
     public boolean enabled = true;
     public String name;

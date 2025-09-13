@@ -19,7 +19,6 @@
             tools:ignore="UnusedAttribute" android:dataExtractionRules="@xml/data_extraction_rules">
         <activity
             android:name="dev.ultreon.quantum.android.AndroidLauncher"
-            android:label="@string/app_name" 
             android:screenOrientation="landscape"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout"
             android:exported="true">

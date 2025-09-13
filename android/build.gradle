@@ -3,166 +3,163 @@ apply plugin: "com.android.application"
 configurations { natives }
 
 repositories {
-    mavenLocal()
-    mavenCentral()
-    google()
-    gradlePluginPortal()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
-    maven { url "https://jitpack.io" }
+  mavenLocal()
+  mavenCentral()
+  google()
+  gradlePluginPortal()
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+  maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+  maven { url "https://jitpack.io" }
 }
 
 
 dependencies {
-    implementation project(':client'), {
-        exclude group: 'org.graalvm.polyglot'
-        exclude group: 'org.graalvm'
-        exclude group: 'it.unimi.dsi', module: 'fastutil-core'
-    }
-    implementation project(':server'), {
-        exclude group: 'org.graalvm.polyglot'
-        exclude group: 'org.graalvm'
-        exclude group: 'it.unimi.dsi', module: 'fastutil-core'
-    }
-    implementation project(':dedicated'), {
-        exclude group: 'org.graalvm.polyglot'
-        exclude group: 'org.graalvm'
-        exclude group: 'it.unimi.dsi', module: 'fastutil-core'
-    }
-    api "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
-    api 'androidx.constraintlayout:constraintlayout:2.2.1'
-    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
-    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
-    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
-    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
-    api "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
-    api "com.badlogicgames.ashley:ashley:$ashleyVersion"
-    api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-    api "com.badlogicgames.gdx-controllers:gdx-controllers-android:$gdxControllersVersion"
-    api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
-    natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-armeabi-v7a"
-    natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-arm64-v8a"
-    natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-x86"
-    natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-x86_64"
+  implementation project(':client'), {
+    exclude group: 'org.graalvm.polyglot'
+    exclude group: 'org.graalvm'
+    exclude group: 'it.unimi.dsi', module: 'fastutil-core'
+  }
+  implementation project(':server'), {
+    exclude group: 'org.graalvm.polyglot'
+    exclude group: 'org.graalvm'
+    exclude group: 'it.unimi.dsi', module: 'fastutil-core'
+  }
+  api "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
+  api 'androidx.constraintlayout:constraintlayout:2.2.1'
+  natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+  natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
+  natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
+  natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
+  api "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
+  api "com.badlogicgames.ashley:ashley:$ashleyVersion"
+  api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+  api "com.badlogicgames.gdx-controllers:gdx-controllers-android:$gdxControllersVersion"
+  api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+  natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-armeabi-v7a"
+  natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-arm64-v8a"
+  natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-x86"
+  natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-x86_64"
 
-    api "com.badlogicgames.gdx-video:gdx-video-android:$gdxVideoVersion"
-    api files("deps/androidawt-1.0.4.aar")
+  api "com.badlogicgames.gdx-video:gdx-video-android:$gdxVideoVersion"
+  api files("deps/androidawt-1.0.4.aar")
+  coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 }
+
 // called every time gradle gets executed, takes the native dependencies of
 // the natives configuration, and extracts them to the proper libs/ folders
 // so they get packed with the APK.
 tasks.register('copyAndroidNatives') {
-    doFirst {
-        file("libs/armeabi-v7a/").mkdirs()
-        file("libs/arm64-v8a/").mkdirs()
-        file("libs/x86_64/").mkdirs()
-        file("libs/x86/").mkdirs()
+  doFirst {
+    file("libs/armeabi-v7a/").mkdirs()
+    file("libs/arm64-v8a/").mkdirs()
+    file("libs/x86_64/").mkdirs()
+    file("libs/x86/").mkdirs()
 
-        configurations.natives.copy().files.each { jar ->
-            def outputDir = null
-            if (jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("libs/arm64-v8a")
-            if (jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("libs/armeabi-v7a")
-            if (jar.name.endsWith("natives-x86_64.jar")) outputDir = file("libs/x86_64")
-            if (jar.name.endsWith("natives-x86.jar")) outputDir = file("libs/x86")
-            if (outputDir != null) {
-                copy {
-                    from zipTree(jar)
-                    into outputDir
-                    include "*.so"
-                }
-            }
+    configurations.natives.copy().files.each { jar ->
+      def outputDir = null
+      if (jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("libs/arm64-v8a")
+      if (jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("libs/armeabi-v7a")
+      if (jar.name.endsWith("natives-x86_64.jar")) outputDir = file("libs/x86_64")
+      if (jar.name.endsWith("natives-x86.jar")) outputDir = file("libs/x86")
+      if (outputDir != null) {
+        copy {
+          from zipTree(jar)
+          into outputDir
+          include "*.so"
         }
+      }
     }
+  }
 }
 
 
 tasks.matching { it.name.contains("merge") && it.name.contains("JniLibFolders") }.configureEach { packageTask ->
-    packageTask.dependsOn 'copyAndroidNatives'
+  packageTask.dependsOn 'copyAndroidNatives'
 }
 
 tasks.register('run', Exec) {
-    def path
-    def localProperties = project.file("../local.properties")
-    if (localProperties.exists()) {
-        Properties properties = new Properties()
-        localProperties.withInputStream { instr ->
-            properties.load(instr)
-        }
-        def sdkDir = properties.getProperty('sdk.dir')
-        if (sdkDir) {
-            path = sdkDir
-        } else {
-            path = "$System.env.ANDROID_HOME"
-        }
-    } else {
-        path = "$System.env.ANDROID_HOME"
+  def path
+  def localProperties = project.file("../local.properties")
+  if (localProperties.exists()) {
+    Properties properties = new Properties()
+    localProperties.withInputStream { instr ->
+      properties.load(instr)
     }
+    def sdkDir = properties.getProperty('sdk.dir')
+    if (sdkDir) {
+      path = sdkDir
+    } else {
+      path = "$System.env.ANDROID_HOME"
+    }
+  } else {
+    path = "$System.env.ANDROID_HOME"
+  }
 
-    def adb = path + "/platform-tools/adb"
-    commandLine "$adb", 'shell', 'am', 'start', '-n', 'dev.ultreon.quantum/dev.ultreon.quantum.android.AndroidLauncher'
+  def adb = path + "/platform-tools/adb"
+  commandLine "$adb", 'shell', 'am', 'start', '-n', 'dev.ultreon.quantum/dev.ultreon.quantum.android.AndroidLauncher'
 }
 android {
-    buildToolsVersion "33.0.1"
-    compileSdkVersion 34
-    sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src']
-            aidl.srcDirs = ['src']
-            renderscript.srcDirs = ['src']
-            res.srcDirs = ['res']
-            assets.srcDirs = ['../client/src/main/resources']
-            jniLibs.srcDirs = ['libs']
-        }
+  buildToolsVersion "33.0.1"
+  compileSdkVersion 36
+  sourceSets {
+    main {
+      manifest.srcFile 'AndroidManifest.xml'
+      java.srcDirs = ['src']
+      aidl.srcDirs = ['src']
+      renderscript.srcDirs = ['src']
+      res.srcDirs = ['res']
+      assets.srcDirs = ['../client/src/main/resources']
+      jniLibs.srcDirs = ['libs']
     }
-    packagingOptions {
-        resources {
-            exclude 'META-INF/robovm/ios/robovm.xml'
-            exclude("META-INF/DEPENDENCIES")
-            exclude("META-INF/LICENSE")
-            exclude("META-INF/NOTICE")
-            exclude("META-INF/INDEX.*")
-            exclude("META-INF/ASL2.0")
-            exclude("META-INF/AL2.0")
-            exclude("META-INF/LGPL2.1")
-            exclude("META-INF/*.txt")
-            exclude("META-INF/*.md")
-            exclude("META-INF/**/*.xml")
-            exclude("META-INF/*.properties")
-            exclude("META-INF/*.kotlin_module")
-            exclude("META-INF/*.kotlin_builtins")
-            exclude("META-INF/sisu/**")
-            exclude("**/*.kotlin_builtins")
-            exclude("*.md")
-            exclude("LICENSE.md")
-            exclude("LICENSE.*")
-            exclude("previous-compilation-data.bin")
-            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt', 'META-INF/license.txt', 'META-INF/NOTICE', 'META-INF/NOTICE.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/AL2.0', 'META-INF/LGPL2', 'META-INF/LGPL2.0', 'META-INF/LGPL2.1']
-        }
+  }
+  packagingOptions {
+    resources {
+      exclude 'META-INF/robovm/ios/robovm.xml'
+      exclude("META-INF/DEPENDENCIES")
+      exclude("META-INF/LICENSE")
+      exclude("META-INF/NOTICE")
+      exclude("META-INF/INDEX.*")
+      exclude("META-INF/ASL2.0")
+      exclude("META-INF/AL2.0")
+      exclude("META-INF/LGPL2.1")
+      exclude("META-INF/*.txt")
+      exclude("META-INF/*.md")
+      exclude("META-INF/**/*.xml")
+      exclude("META-INF/*.properties")
+      exclude("META-INF/*.kotlin_module")
+      exclude("META-INF/*.kotlin_builtins")
+      exclude("META-INF/sisu/**")
+      exclude("**/*.kotlin_builtins")
+      exclude("*.md")
+      exclude("LICENSE.md")
+      exclude("LICENSE.*")
+      exclude("previous-compilation-data.bin")
+      excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt', 'META-INF/license.txt', 'META-INF/NOTICE', 'META-INF/NOTICE.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/AL2.0', 'META-INF/LGPL2', 'META-INF/LGPL2.0', 'META-INF/LGPL2.1']
     }
-    defaultConfig {
-        applicationId "dev.ultreon.quantum"
-        minSdk 29
-        //noinspection OldTargetApi
-        targetSdkVersion 33
-        versionCode 1
-        versionName "0.1.0"
+  }
+  defaultConfig {
+    applicationId "dev.ultreon.quantum"
+    minSdk 29
+    //noinspection OldTargetApi
+    targetSdkVersion 33
+    versionCode 1
+    versionName "0.1.0"
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_11
+    targetCompatibility JavaVersion.VERSION_11
+  }
+  buildTypes {
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
-    }
-    buildTypes {
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
+  }
 
 
-    namespace "dev.ultreon.quantum"
-    buildFeatures {
-        viewBinding true
-        buildConfig true
-    }
+  namespace "dev.ultreon.quantum"
+  buildFeatures {
+    viewBinding true
+    buildConfig true
+  }
 }

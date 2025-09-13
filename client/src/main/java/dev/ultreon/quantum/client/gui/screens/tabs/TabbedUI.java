@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@Deprecated
 public abstract class TabbedUI extends Screen {
     private static final Color DARK_70 = new Color(0, 0, 0, 0.4375f);
     private int selected;

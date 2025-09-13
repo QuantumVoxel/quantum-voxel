@@ -22,10 +22,13 @@ import dev.ultreon.quantum.GameInsets;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.block.BlockState;
 import dev.ultreon.quantum.block.property.StatePropertyKey;
+import dev.ultreon.quantum.client.ClientPlatform;
 import dev.ultreon.quantum.client.QuantumClient;
 import dev.ultreon.quantum.client.gui.widget.UIContainer;
 import dev.ultreon.quantum.client.gui.widget.Widget;
+import dev.ultreon.quantum.client.render.VisualGameObject;
 import dev.ultreon.quantum.client.shaders.WorldShader;
+import dev.ultreon.quantum.client.util.RenderObject;
 import dev.ultreon.quantum.client.util.Rot;
 import dev.ultreon.quantum.client.world.ClientWorld;
 import dev.ultreon.quantum.client.world.ClientWorldAccess;
@@ -172,6 +175,9 @@ public class ImGuiOverlay {
     private static long nextProfilerCollect;
     private static ProfileData profilerData;
     private static List<Thread> threads;
+    private static final Ray ray = new Ray();
+    private static ArrayList<GameObject> gameObjects;
+    private static int selectedGameObject = 0;
 
     public static void setupImGui() {
         if (GamePlatform.get().isAngleGLES()) {
@@ -326,7 +332,55 @@ public class ImGuiOverlay {
         }
         ImGui.end();
 
+        // Select game object in world space, from screen position.
+        if (Gdx.input.isKeyPressed(Input.Keys.F4) && Gdx.input.isKeyPressed(Input.Keys.C) && Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            selectGameObject(bounds.left, bounds.top);
+        } else if (gameObjects != null && !gameObjects.isEmpty()) {
+            selectGameObject(bounds.left, bounds.top);
+        } else {
+            gameObjects = null;
+        }
+
         ImGuiOverlay.handleTriggers();
+    }
+
+    private static void selectGameObject(float x, float y) {
+        QuantumClient quantumClient = QuantumClient.get();
+        if (quantumClient == null) return;
+
+        var pickRay = quantumClient.camera.getPickRay(x, y, 0, 0, bounds.right, bounds.bottom);
+        ImGui.beginTooltip();
+        ImGui.text("Mouse Position: " + x + ", " + y);
+        ImGui.text("Pick Ray: " + pickRay.origin + " -> " + pickRay.direction);
+        ImGui.separator();
+        ImGui.text("Objects:");
+        gameObjects = new ArrayList<>();
+        gameObjects.addAll(quantumClient.hit(pickRay));
+        if (gameObjects.isEmpty()) {
+            ImGui.text("No objects found at screen position.");
+            ImGui.endTooltip();
+            return;
+        }
+        ImGui.separator();
+        for (int i = 0; i < gameObjects.size(); i++) {
+            GameObject object = gameObjects.get(i);
+            String text = object.name;
+            if (selectedGameObject == i) {
+                ImGui.textColored(0xff00ffff, text);
+            } else {
+                ImGui.text(text);
+            }
+        }
+        selectedGameObject += Gdx.input.isKeyJustPressed(Input.Keys.UP) ? -1 : Gdx.input.isKeyJustPressed(Input.Keys.DOWN) ? 1 : 0;
+        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+            if (gameObjects.size() > selectedGameObject) {
+                selected = gameObjects.get(selectedGameObject);
+                selectedClass = selected.getClass();
+            }
+
+            gameObjects = null;
+        }
+        ImGui.endTooltip();
     }
 
     private static void renderDisplay() {

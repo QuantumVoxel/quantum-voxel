@@ -2,14 +2,21 @@ package dev.ultreon.quantum.desktop;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.utils.ScreenUtils;
+import de.damios.guacamole.gdx.graphics.NestableFrameBuffer;
 import dev.ultreon.libs.commons.v0.util.ExceptionUtils;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.Main;
 import dev.ultreon.quantum.client.QuantumClient;
+import dev.ultreon.quantum.client.gui.GlStateStack;
+import dev.ultreon.quantum.client.gui.Position;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.desktop.imgui.ImGuiOverlay;
 import org.slf4j.LoggerFactory;
@@ -22,6 +29,15 @@ public class SafeLoadWrapper implements ApplicationListener {
     private Screen currentScreen = new ScreenAdapter();
     private InputProcessor inputProcessor;
     private TextureRegion whitePixel;
+    private NestableFrameBuffer containerBuffer;
+    private Texture titlebarTex;
+    private TextureRegion windowBorder;
+    private TextureRegion titleBar;
+    private NinePatch titleBarPatch;
+    private NinePatch windowBorderPatch;
+    private final TextureRegion container = new TextureRegion();
+    private final Matrix4 transform = new Matrix4();
+    private final Matrix4 projection = new Matrix4();
 
     public SafeLoadWrapper(String[] args) {
         this.args = args;
@@ -31,6 +47,18 @@ public class SafeLoadWrapper implements ApplicationListener {
     public void create() {
         batch = new SpriteBatch();
         whitePixel = createWhitePixel();
+
+        if (DesktopPlatform.get().hasBackPanelRemoved()) {
+            containerBuffer = new NestableFrameBuffer(Pixmap.Format.RGB888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+            containerBuffer.begin();
+            titlebarTex = new Texture(Gdx.files.internal("window.png"));
+            windowBorder = new TextureRegion(titlebarTex, 0, 0, 30, 30);
+            titleBar = new TextureRegion(titlebarTex, 30, 0, 30, 30);
+            titleBarPatch = new NinePatch(titleBar, 6, 6, 2, 2);
+            windowBorderPatch = new NinePatch(windowBorder, 6, 6, 6, 9);
+            containerBuffer.end();
+            container.flip(false, true);
+        }
 
         batch.setTransformMatrix(batch.getTransformMatrix().scl(Gdx.graphics.getBackBufferScale(), Gdx.graphics.getBackBufferScale(), 1));
 
@@ -73,9 +101,18 @@ public class SafeLoadWrapper implements ApplicationListener {
             return;
         }
 
+        if (containerBuffer != null) {
+            containerBuffer.dispose();
+            containerBuffer = new NestableFrameBuffer(Pixmap.Format.RGB888, width - 12, height - 12 - 20, true);
+        }
+
         if (quantum != null) {
             try {
-                quantum.resize(width, height);
+                if (DesktopPlatform.get().isContained()) {
+                    quantum.resize(containerBuffer.getWidth(), containerBuffer.getHeight());
+                } else {
+                    quantum.resize(width, height);
+                }
             } catch (Throwable e) {
                 crash(e);
             }
@@ -154,14 +191,50 @@ public class SafeLoadWrapper implements ApplicationListener {
             return;
         }
         try {
-            if (quantum != null) {
-                quantum.render();
+            if (DesktopPlatform.get().isContained()) {
+                ScreenUtils.clear(0, 0, 0, 0, true);
+                containerBuffer.begin();
+                try {
+                    if (quantum != null) {
+                        quantum.render();
+                    }
+                } finally {
+                    containerBuffer.end();
+                }
+                renderWindow();
+            } else {
+                if (quantum != null) {
+                    quantum.render();
+                }
+                DesktopPlatform.get().setWindowOffset(0, 0);
             }
         } catch (Throwable t) {
             Lwjgl3Graphics graphics = (Lwjgl3Graphics) Gdx.app.getGraphics();
             graphics.getWindow().setVisible(true);
             this.crash(t);
         }
+    }
+
+    private void renderWindow() {
+        transform.set(batch.getTransformMatrix());
+        batch.setTransformMatrix(batch.getTransformMatrix().scale(2f, 2f, 1));
+        batch.begin();
+        titleBarPatch.draw(batch, 0, Gdx.graphics.getHeight() / 2f - 20, Gdx.graphics.getWidth() / 2f, 20);
+        windowBorderPatch.draw(batch, 0, 0, Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f - 20);
+        batch.end();
+        batch.setTransformMatrix(transform);
+        projection.set(batch.getProjectionMatrix());
+        batch.setProjectionMatrix(batch.getProjectionMatrix().setToOrtho(0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0, 0, 1));
+        batch.begin();
+
+        batch.draw(containerBuffer.getColorBufferTexture(), 12, 40, Gdx.graphics.getWidth() - 24, Gdx.graphics.getHeight() - 24 - 40);
+        batch.end();
+        batch.setProjectionMatrix(projection);
+
+        QuantumClient quantumClient = QuantumClient.get();
+        if (quantumClient == null) return;
+        float guiScale = quantumClient.getGuiScale();
+        DesktopPlatform.get().setWindowOffset((int) (12 / guiScale), (int) (40 / guiScale));
     }
 
     @Override
@@ -208,6 +281,14 @@ public class SafeLoadWrapper implements ApplicationListener {
                 crash(e);
             }
         }
+
+        if (containerBuffer != null) {
+            containerBuffer.dispose();
+            containerBuffer = null;
+        }
+
+        if (windowBorder != null) windowBorder.getTexture().dispose();
+        if (titleBar != null) titleBar.getTexture().dispose();
 
         batch.dispose();
 

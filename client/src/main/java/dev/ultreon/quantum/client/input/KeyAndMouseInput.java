@@ -26,6 +26,7 @@ import dev.ultreon.quantum.network.packets.c2s.C2SBlockBreakPacket;
 import dev.ultreon.quantum.util.BlockHit;
 import dev.ultreon.quantum.util.EntityHit;
 import dev.ultreon.quantum.util.Hit;
+import dev.ultreon.quantum.util.IVec2;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,6 +64,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
     private float partialSelect;
 
     private final DevKeyHandler devKeyHandler = new DevKeyHandler();
+    private final IVec2 windowOffset = new IVec2(0, 0);
 
     public KeyAndMouseInput(QuantumClient client, Camera camera) {
         super(client, camera);
@@ -222,7 +224,7 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
         else if (KeyAndMouseInput.SCREENSHOT_KEY.is(keyCode)) client.getScreenshots().screenshot(screenshot -> {
         });
         else if (KeyAndMouseInput.HIDE_HUD_KEY.is(keyCode)) client.hideHud = !client.hideHud;
-        else if (KeyAndMouseInput.FULL_SCREEN_KEY.is(keyCode)) client.setFullScreen(client.isWindowed());
+        else if (KeyAndMouseInput.FULL_SCREEN_KEY.is(keyCode)) client.setFullscreen(client.isWindowed());
         else if (KeyAndMouseInput.THIRD_PERSON_KEY.is(keyCode)) client.cyclePlayerView();
         else if (client.world != null && KeyAndMouseInput.PAUSE_KEY.is(keyCode) && Gdx.input.isCursorCatched())
             client.showScreen(new PauseScreen());
@@ -445,6 +447,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             int adjustedX = this.client.getMousePos().x;
             int adjustedY = this.client.getMousePos().y;
 
+            ClientPlatform.get().getWindowOffset(windowOffset);
+            adjustedX += windowOffset.x;
+            adjustedY += windowOffset.y;
+
             if (WindowManager.mouseMoved(adjustedX, adjustedY)) return;
             if (EventSystem.postCancelable(new InputEvent.MouseMoved(adjustedX, adjustedY))) return;
 
@@ -475,6 +481,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             int adjustedX = this.client.getMousePos().x;
             int adjustedY = this.client.getMousePos().y;
 
+            ClientPlatform.get().getWindowOffset(windowOffset);
+            adjustedX += windowOffset.x;
+            adjustedY += windowOffset.y;
+
             if (WindowManager.mouseDragged(adjustedX, adjustedY)) return;
             EventSystem.postCancelable(new InputEvent.MouseDragged(adjustedX, adjustedY));
 
@@ -499,6 +509,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             // Adjust for draw offset
             int adjustedX = this.client.getMousePos().x;
             int adjustedY = this.client.getMousePos().y;
+
+            ClientPlatform.get().getWindowOffset(windowOffset);
+            adjustedX += windowOffset.x;
+            adjustedY += windowOffset.y;
 
             if (WindowManager.mousePress(adjustedX, adjustedY, button)) return;
             if (EventSystem.postCancelable(new InputEvent.MousePressed(button, adjustedX, adjustedY))) return;
@@ -580,6 +594,10 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             int adjustedX = this.client.getMousePos().x;
             int adjustedY = this.client.getMousePos().y;
 
+            ClientPlatform.get().getWindowOffset(windowOffset);
+            adjustedX += windowOffset.x;
+            adjustedY += windowOffset.y;
+
             if (WindowManager.mouseRelease(adjustedX, adjustedY, button)) return;
             if (EventSystem.postCancelable(new InputEvent.MouseReleased(button, adjustedX, adjustedY))) return;
 
@@ -611,7 +629,14 @@ public final class KeyAndMouseInput extends GameInput implements InputProcessor 
             Screen currentScreen = this.client.screen;
 
             // Check if ImGui overlay is shown
-            if (WindowManager.mouseScroll(Gdx.input.getX(), Gdx.input.getY(), amountY)) return;
+            int adjustedX = Gdx.input.getX();
+            int adjustedY = Gdx.input.getY();
+
+            ClientPlatform.get().getWindowOffset(windowOffset);
+            adjustedX += windowOffset.x;
+            adjustedY += windowOffset.y;
+
+            if (WindowManager.mouseScroll(adjustedX, adjustedY, amountY)) return;
 
             // Handle hotbar scrolling with the mouse wheel
             Player player = this.client.player;

@@ -3,6 +3,7 @@ package dev.ultreon.quantum.client.world;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import dev.ultreon.libs.commons.v0.Mth;
@@ -18,12 +19,11 @@ import dev.ultreon.quantum.client.registry.BlockEntityModelRegistry;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
 import dev.ultreon.quantum.client.render.meshing.FaceCullMesher;
 import dev.ultreon.quantum.client.render.meshing.Mesher;
+import dev.ultreon.quantum.client.render.world.ChunkModel;
+import dev.ultreon.quantum.client.render.world.WorldRenderer;
 import dev.ultreon.quantum.collection.Storage;
 import dev.ultreon.quantum.registry.RegistryKey;
-import dev.ultreon.quantum.util.InvalidThreadException;
-import dev.ultreon.quantum.util.PosOutOfBoundsException;
-import dev.ultreon.quantum.util.ShowInNodeView;
-import dev.ultreon.quantum.util.IVec3;
+import dev.ultreon.quantum.util.*;
 import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
@@ -32,6 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
@@ -419,5 +420,14 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
 
     public int getDistanceSquared(ClientChunk neighborPos) {
         return this.vec.distanceSquared(neighborPos.vec);
+    }
+
+    @Override
+    public List<GameObject> hit(Ray pickRay) {
+        WorldRenderer worldRenderer = client.worldRenderer;
+        if (worldRenderer == null) return super.hit(pickRay);
+        ChunkModel meshFor = worldRenderer.getMeshFor(this);
+        if (meshFor == null) return super.hit(pickRay);
+        return meshFor.hit(pickRay);
     }
 }

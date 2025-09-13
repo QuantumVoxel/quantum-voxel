@@ -1,5 +1,6 @@
 package dev.ultreon.quantum.client.gui.widget;
 
+import com.badlogic.gdx.math.MathUtils;
 import dev.ultreon.quantum.client.gui.Bounds;
 import dev.ultreon.quantum.client.gui.Callback;
 import dev.ultreon.quantum.client.gui.Position;
@@ -7,6 +8,7 @@ import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.widget.components.CallbackComponent;
 import dev.ultreon.quantum.client.gui.widget.components.RangedValueComponent;
 import dev.ultreon.quantum.client.gui.widget.components.TextComponent;
+import dev.ultreon.quantum.client.input.KeyAndMouseInput;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
 
@@ -20,6 +22,7 @@ public class Slider extends Widget {
     private boolean isHolding;
     private int holdStart;
     private int originalValue;
+    private float valueFloat = Float.NaN;
 
     public Slider(int value, int min, int max) {
         this(200, value, min, max);
@@ -109,6 +112,25 @@ public class Slider extends Widget {
             this.callback.call(this);
         }
 
+        return true;
+    }
+
+    @Override
+    public boolean mouseWheel(int mouseX, int mouseY, double rotation) {
+        if (Float.isNaN(valueFloat))
+            this.valueFloat = this.value.get();
+
+        if (KeyAndMouseInput.isShiftDown()) rotation *= 10;
+        if (KeyAndMouseInput.isCtrlDown()) rotation *= 100;
+        if (KeyAndMouseInput.isAltDown()) rotation *= 1000;
+
+        this.valueFloat += (float) rotation;
+        this.valueFloat = MathUtils.clamp(this.valueFloat, this.value.min(), this.value.max());
+        int value = MathUtils.round(this.valueFloat);
+        if (value != this.value.get()) {
+            this.value.set(value);
+            this.callback.call(this);
+        }
         return true;
     }
 

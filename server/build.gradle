@@ -116,8 +116,6 @@ dependencies {
   api "org.apache.logging.log4j:log4j-core:2.22.1"
   api "org.apache.logging.log4j:log4j-api:2.22.1"
 
-  api "dev.ultreon.skript:base-skript:$baseSkriptVersion"
-
   implementation api("space.earlygrey:shapedrawer:$shapeDrawerVersion")
 
   implementation api("com.google.code.findbugs:jsr305:$jsrVersion")

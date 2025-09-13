@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.client.gui.Renderer;
 import dev.ultreon.quantum.client.gui.screens.config.entries.*;
-import dev.ultreon.quantum.client.gui.screens.tabs.Tab;
+import dev.ultreon.quantum.client.gui.widget.tabs.Tab;
 import dev.ultreon.quantum.client.gui.widget.SelectionList;
 import dev.ultreon.quantum.client.gui.widget.Widget;
 import dev.ultreon.quantum.config.api.props.*;
@@ -38,6 +38,14 @@ public class ConfigPage extends Tab {
 
     @Override
     public boolean mouseWheel(int mouseX, int mouseY, double rotation) {
+        for (int i = widgetLists.size() - 1; i >= 0; i--) {
+            Widget widget = widgetLists.get(i);
+            if (widget.isWithinBounds(mouseX, mouseY)) {
+                widget.mouseWheel(mouseX, mouseY, rotation);
+                return true;
+            }
+        }
+
         return list.mouseWheel(mouseX, mouseY, rotation);
     }
 
@@ -50,8 +58,7 @@ public class ConfigPage extends Tab {
         renderer.textLeft(nameLists.get(i), list.pos.x + 10, y + list.getItemHeight() / 2, Color.WHITE);
 
         Widget widget = widgetLists.get(i);
-        widget.setY(y);
-        widget.setPos(list.pos.x + list.size.width - 210, widget.getY());
+        widget.setPos(list.pos.x + list.size.width - 250, y);
         widget.setSize(200, list.getItemHeight());
         widget.renderWidget(renderer, v);
     }
@@ -70,14 +77,17 @@ public class ConfigPage extends Tab {
 
     @Override
     public void renderWidget(@NotNull Renderer renderer, float deltaTime) {
-        renderer.drawPlatform(pos.x - 2, pos.y, this.size.width + 4, this.size.height);
+        if (client.world != null)
+            renderer.drawPlatform(pos.x - 2, pos.y, this.size.width + 4, 5);
+        else renderer.drawPlatform(pos.x - 2, pos.y, this.size.width + 4, this.size.height);
 
         super.renderWidget(renderer, deltaTime);
     }
 
     @Override
     public boolean mousePress(int mouseX, int mouseY, int button) {
-        for (Widget widget : widgetLists) {
+        for (int i = widgetLists.size() - 1; i >= 0; i--) {
+            Widget widget = widgetLists.get(i);
             if (widget.isWithinBounds(mouseX, mouseY)) {
                 widget.mousePress(mouseX, mouseY, button);
                 return true;
@@ -89,7 +99,8 @@ public class ConfigPage extends Tab {
 
     @Override
     public boolean mouseRelease(int mouseX, int mouseY, int button) {
-        for (Widget widget : widgetLists) {
+        for (int i = widgetLists.size() - 1; i >= 0; i--) {
+            Widget widget = widgetLists.get(i);
             widget.mouseRelease(mouseX, mouseY, button);
         }
 

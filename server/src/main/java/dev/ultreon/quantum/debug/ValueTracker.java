@@ -20,6 +20,7 @@ public class ValueTracker {
     private static int chunkTracks;
     private static int shaderSwitches;
     private static int textureBindings;
+    private static int chunkRebuilds;
 
     public static long getMeshDisposes() {
         return ValueTracker.meshDisposes;
@@ -189,5 +190,13 @@ public class ValueTracker {
 
     public static int getTextureBindings() {
         return textureBindings;
+    }
+
+    public static int getChunkRebuilds() {
+        return chunkRebuilds;
+    }
+
+    public static void setChunkRebuilds(int chunkRebuilds) {
+        ValueTracker.chunkRebuilds = chunkRebuilds;
     }
 }

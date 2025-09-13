@@ -194,7 +194,7 @@ public class TouchInput extends GameInput implements InputProcessor {
         else if (TouchInput.SCREENSHOT_KEY.is(keyCode)) client.getScreenshots().screenshot(screenshot -> {
         });
         else if (TouchInput.HIDE_HUD_KEY.is(keyCode)) client.hideHud = !client.hideHud;
-        else if (TouchInput.FULL_SCREEN_KEY.is(keyCode)) client.setFullScreen(client.isWindowed());
+        else if (TouchInput.FULL_SCREEN_KEY.is(keyCode)) client.setFullscreen(client.isWindowed());
         else if (TouchInput.THIRD_PERSON_KEY.is(keyCode)) client.cyclePlayerView();
         else if (client.world != null && TouchInput.PAUSE_KEY.is(keyCode) && Gdx.input.isCursorCatched())
             client.showScreen(new PauseScreen());

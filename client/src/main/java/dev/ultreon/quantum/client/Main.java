@@ -14,14 +14,11 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Clipboard;
 import com.badlogic.gdx.utils.ScreenUtils;
-import dev.ultreon.baseskript.BaseSkript;
 import dev.ultreon.libs.commons.v0.util.StringUtils;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.GameWindow;
-import dev.ultreon.quantum.client.skript.QuantumClientSkript;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
-import dev.ultreon.quantum.skript.QuantumSkript;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import dev.ultreon.quantum.Logger;
@@ -46,8 +43,8 @@ public final class Main implements ApplicationListener {
     private static Main instance;
     private static CrashLog crashOverride;
     private final String[] args;
-    private final QuantumSkript quantumSkript;
-    private final QuantumClientSkript quantumClientSkript;
+//    private final QuantumSkript quantumSkript;
+//    private final QuantumClientSkript quantumClientSkript;
     @Nullable
     private DesktopMain client;
     private long crashFrame;
@@ -75,10 +72,10 @@ public final class Main implements ApplicationListener {
             instance = this;
         }
 
-        BaseSkript.main(args);
-
-        quantumSkript = new QuantumSkript(() -> QuantumClient.get().registries);
-        quantumClientSkript = new QuantumClientSkript();
+//        BaseSkript.main(args);
+//
+//        quantumSkript = new QuantumSkript(() -> QuantumClient.get().registries);
+//        quantumClientSkript = new QuantumClientSkript();
 
 //        BaseSkript.load();
 //        quantumSkript.onLoad();

@@ -45,10 +45,7 @@ import dev.ultreon.quantum.world.gen.chunk.*;
 import dev.ultreon.quantum.world.gen.noise.NoiseConfigs;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -958,7 +955,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         ServerPlayer player = new ServerPlayer(EntityTypes.PLAYER, this.dimManager.getWorld(DimensionInfo.OVERWORLD), uuid, name, connection);
 
         BlockVec spawnPoint = QuantumServer.invokeAndWait(() -> {
-            getOverworld().getChunkAt(0, 0, 0);
+            getOverworld().loadChunkAt(0, 0, 0);
             return getOverworld().getSpawnPoint();
         });
         player.setPosition(spawnPoint.d().add(0.5, 0.0, 0.5));

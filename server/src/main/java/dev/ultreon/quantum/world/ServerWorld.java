@@ -421,7 +421,7 @@ public class ServerWorld extends World implements Audience {
 
         try {
             // Check if there's an existing chunk at the global position
-            var oldChunk = this.getChunk(globalVec);
+            var oldChunk = this.getChunkNow(globalVec);
             if (!overwrite) {
                 Region regionAt = this.regionStorage.getRegionAt(globalVec);
                 if (regionAt == null) {
@@ -447,7 +447,7 @@ public class ServerWorld extends World implements Audience {
                 if (region.getChunk(localVec) != serverChunk)
                     throw new IllegalChunkStateException("Chunk is not loaded.");
 
-                ServerChunk chunk1 = this.getChunk(globalVec);
+                ServerChunk chunk1 = this.getChunkNow(globalVec);
                 if (chunk1 != serverChunk)
                     throw new IllegalChunkStateException("Chunk is loaded at a different location: " + serverChunk.vec + " expected " + globalVec);
 
@@ -622,26 +622,26 @@ public class ServerWorld extends World implements Audience {
         if (!QuantumServer.isOnServerThread()) throw new InvalidThreadException("Should be on server thread.");
     }
 
-    @Override
-    public @Nullable ServerChunk getChunkAt(int x, int y, int z) {
+    public void loadChunkAt(int x, int y, int z) {
         BlockVec blockVec = new BlockVec(x, y, z);
 
-        if (this.isOutOfWorldBounds(x, y, z)) return null;
-
         ChunkVec chunkVec = blockVec.chunk();
-        return this.getChunk(chunkVec);
+        this.getChunkNow(chunkVec);
     }
 
-    public @Nullable ServerChunk getChunkAtNoLoad(BlockVec pos) {
+    @Override
+    public @Nullable ServerChunk getChunkAt(@NotNull BlockVec pos) {
         if (this.isOutOfWorldBounds(pos)) return null;
 
         ChunkVec chunkVec = pos.chunk();
-        return this.getChunkNoLoad(chunkVec);
+        return this.getChunk(chunkVec);
     }
 
-    public @Nullable ServerChunk getChunkNoLoad(ChunkVec pos) {
+    @Override
+    public @Nullable ServerChunk getChunk(@NotNull ChunkVec pos) {
         // Get the region at the specified position
-        var region = this.getOrOpenRegionAt(pos);
+        var region = this.getRegionAt(pos);
+        if (region == null) return null;
 
         // Get the chunk from the region
         var chunk = region.getChunk(pos.regionLocal());
@@ -668,8 +668,7 @@ public class ServerWorld extends World implements Audience {
      * @param globalVec The position of the chunk.
      * @return The chunk at the given position, or null if not found.
      */
-    @Override
-    public @NotNull ServerChunk getChunk(@NotNull ChunkVec globalVec) {
+    public @NotNull ServerChunk getChunkNow(@NotNull ChunkVec globalVec) {
         // Get the region at the specified position
         var region = this.getOrOpenRegionAt(globalVec);
 
@@ -742,7 +741,7 @@ public class ServerWorld extends World implements Audience {
 
     @Override
     public void setSpawnPoint(int spawnX, int spawnZ) {
-        this.getChunkAt(spawnX, 0, spawnZ);
+        this.loadChunkAt(spawnX, 0, spawnZ);
         this.spawnPoint.set(spawnX, this.getHeight(spawnX, spawnZ) + 1, spawnZ);
     }
 
@@ -896,7 +895,7 @@ public class ServerWorld extends World implements Audience {
 
         //noinspection GDXJavaUnsafeIterator
         Array<Entity> entityArray = this.entitiesById.values().toArray();
-        for (var entity : entityArray.toArray(Entity.class)) {
+        for (var entity : entityArray.toArray(Entity[]::new)) {
             if (entity instanceof Player) continue;
 
             var entityData = entity.save(new MapType());
@@ -1035,6 +1034,24 @@ public class ServerWorld extends World implements Audience {
             this.regionStorage.chunkCount += region.getChunkCount();
 
             return region;
+        }
+    }
+
+    /**
+     * Gets or opens the region at the specified chunk position.
+     *
+     * @param chunkVec the chunk position to get or open the region at
+     * @return the region at the specified chunk position
+     */
+    private @Nullable Region getRegionAt(ChunkVec chunkVec) {
+        var regionVec = chunkVec.region();
+
+        // Get the map of regions
+        synchronized (regionStorage.regions) {
+            var regions = this.regionStorage.regions;
+
+            // Check if the region already exists at the calculated position
+            return regions.get(regionVec);
         }
     }
 
@@ -1182,7 +1199,7 @@ public class ServerWorld extends World implements Audience {
      * @return true if the chunk is loaded
      */
     public boolean isLoaded(BlockVec blockVec) {
-        return this.getChunkAtNoLoad(blockVec) != null;
+        return this.getChunkAt(blockVec) != null;
     }
 
     /**
@@ -1192,7 +1209,7 @@ public class ServerWorld extends World implements Audience {
      * @return true if the chunk is loaded
      */
     public boolean isLoaded(ChunkVec chunkVec) {
-        return this.getChunkNoLoad(chunkVec) != null;
+        return this.getChunk(chunkVec) != null;
     }
 
     public @NotNull Promise<@Nullable ServerChunk> getOrLoadChunk(ChunkVec pos) {
@@ -1200,7 +1217,7 @@ public class ServerWorld extends World implements Audience {
     }
 
     public @NotNull Promise<@Nullable ServerChunk> getOrLoadChunk(ChunkVec pos, ChunkLoadTicket ticket) {
-        @Nullable ServerChunk chunk = this.getChunkNoLoad(pos);
+        @Nullable ServerChunk chunk = this.getChunk(pos);
         if (chunk == null) {
             return this.loadChunk(pos, ticket);
         }
@@ -1211,7 +1228,7 @@ public class ServerWorld extends World implements Audience {
     }
 
     public void stopTrackingChunk(ChunkVec vec, ServerPlayer serverPlayer) {
-        ServerChunk chunk = this.getChunkNoLoad(vec);
+        ServerChunk chunk = this.getChunk(vec);
         if (chunk != null) {
             chunk.stopTracking(serverPlayer);
         }
@@ -1321,7 +1338,7 @@ public class ServerWorld extends World implements Audience {
         private boolean dirty;
         private int chunkCount;
         private final Set<DVec3> caveCache = new HashSet<>();
-        private Set<ServerChunk> toUnload = new HashSet<>();
+        private final Set<ServerChunk> toUnload = new HashSet<>();
 
         /**
          * Constructs a new region with the given world and position.

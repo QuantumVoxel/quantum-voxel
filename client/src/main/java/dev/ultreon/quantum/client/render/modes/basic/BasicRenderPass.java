@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import de.damios.guacamole.gdx.graphics.NestableFrameBuffer;
 import dev.ultreon.quantum.client.management.TextureAtlasManager;
 import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.registry.BlockRenderMaterial;
@@ -50,7 +51,7 @@ public class BasicRenderPass extends RenderPass {
     @Override
     protected void resize(int newWidth, int newHeight) {
         if (frameBuffer != null) frameBuffer.dispose();
-        frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, newWidth, newHeight, true);
+        frameBuffer = new NestableFrameBuffer(Pixmap.Format.RGBA8888, newWidth, newHeight, true);
         this.textures = new Texture[]{frameBuffer.getColorBufferTexture()};
     }
 
@@ -128,8 +129,8 @@ public class BasicRenderPass extends RenderPass {
                 .alphaTest()
                 .depthTest()
                 .build();
-        
-        this.frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, getWidth(), getHeight(), true);
+
+        this.frameBuffer = new NestableFrameBuffer(Pixmap.Format.RGBA8888, getWidth(), getHeight(), true);
         this.textures = new Texture[]{frameBuffer.getColorBufferTexture()};
     }
 
@@ -158,19 +159,28 @@ public class BasicRenderPass extends RenderPass {
         if (frameBuffer == null) throw notEnabled();
 
         frameBuffer.begin();
-        ScreenUtils.clear(0, 0, 0, 0, true);
-
-        Gdx.gl.glDepthMask(false);
-
         bufferSource.begin(context.client.camera);
+        if (doRenderWork(bufferSource, context)) {
+            bufferSource.end();
+            frameBuffer.end();
+            return;
+        }
+        bufferSource.end();
+        frameBuffer.end();
+        context.pushInfo();
+    }
 
+    private boolean doRenderWork(RenderBufferSource bufferSource, RenderContext context) {
+        ScreenUtils.clear(0, 0, 0, 0, true);
+        Gdx.gl.glDepthMask(false);
         renderSkyBox(bufferSource, context);
-
         Gdx.gl.glDepthMask(true);
 
         // Check if the world is disposed.
         LocalPlayer player = context.client.player;
-        if (updateWorld(context, player)) return;
+        if (updateWorld(context, player)) {
+            return true;
+        }
 
         // Get the loaded chunks and sort them by distance from the player.
         List<ClientChunk> chunks = prepareChunks(context, player);
@@ -188,11 +198,7 @@ public class BasicRenderPass extends RenderPass {
 
         // Particles
         renderParticles(context);
-
-        bufferSource.end();
-
-        context.pushInfo();
-        frameBuffer.end();
+        return false;
     }
 
     private @NotNull List<ClientChunk> prepareChunks(RenderContext context, LocalPlayer player) {

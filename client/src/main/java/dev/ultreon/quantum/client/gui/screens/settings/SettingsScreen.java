@@ -10,6 +10,7 @@ import dev.ultreon.quantum.client.gui.widget.TextButton;
 import dev.ultreon.quantum.client.text.UITranslations;
 import dev.ultreon.quantum.text.TextObject;
 
+@Deprecated
 public class SettingsScreen extends TabbedUI {
     private static final TextObject TITLE = TextObject.translation("quantum.screen.settings.title");
     private final AccessibilitySettingsUI accessibilitySettingsUI = new AccessibilitySettingsUI();
