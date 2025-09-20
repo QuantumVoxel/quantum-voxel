@@ -100,7 +100,8 @@ public class DesktopMain {
                         defaultUncaughtExceptionHandler.uncaughtException(t, e);
                         return;
                     }
-                    if (e instanceof ApplicationCrash crash) {
+                    if (e instanceof ApplicationCrash) {
+                        ApplicationCrash crash = (ApplicationCrash) e;
                         QuantumClient.crash(crash.getCrashLog());
                     }
 

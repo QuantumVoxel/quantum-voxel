@@ -1,17 +1,13 @@
 package dev.ultreon.quantum.world;
 
+import dev.ultreon.quantum.network.PacketIO;
+
 import java.util.Arrays;
-import java.util.Stack;
 
 import static dev.ultreon.quantum.world.World.CS;
 
-public class LightMap {
+public class LightMap implements Cloneable {
     private byte[] data;
-
-    private final int width = CS;
-    private final int height = CS;
-    private final int depth = CS;
-    private final Stack<Integer> stack = new Stack<>();
 
     public LightMap(int size) {
         this.data = new byte[size];
@@ -21,15 +17,20 @@ public class LightMap {
         this.data = data;
     }
 
+    public LightMap(int byteLength, PacketIO buffer) {
+        this.data = new byte[byteLength];
+        buffer.readBytes(this.data);
+    }
+
     private int index(int x, int y, int z) {
-        return (z * height + y) * width + x;
+        return (z * CS + y) * CS + x;
     }
 
     public byte[] getData() {
         return this.data;
     }
 
-    public int getSunlight(int x, int y, int z) {
+    public int getSkyLight(int x, int y, int z) {
         byte datum = this.data[this.index(x, y, z)];
         return (datum & 0xF0) >> 4;
     }
@@ -39,15 +40,15 @@ public class LightMap {
         return datum & 0x0F;
     }
 
-    public void setSunlight(int x, int y, int z, int value) {
+    public void setSkyLight(int x, int y, int z, int value) {
         byte datum = this.data[this.index(x, y, z)];
-        datum = (byte) ((datum & 0x0F) | ((value << 4) & 0xF0));
+        datum = (byte) (datum & 0x0F | (value & 0x0F) << 4);
         this.data[this.index(x, y, z)] = datum;
     }
 
     public void setBlockLight(int x, int y, int z, int value) {
         byte datum = this.data[this.index(x, y, z)];
-        datum = (byte) ((datum & 0xF0) | value);
+        datum = (byte) (datum & 0xF0 | value * 0x0F);
         this.data[this.index(x, y, z)] = datum;
     }
 
@@ -68,19 +69,32 @@ public class LightMap {
         return (byte) (this.data[idx] & 0x0F);
     }
 
-    public byte getSunlight(int idx) {
+    public byte getSkyLight(int idx) {
         return (byte) ((this.data[idx] & 0xF0) >> 4);
     }
 
     public void setBlockLight(int idx, byte value) {
-        this.data[idx] = (byte) ((this.data[idx] & 0x0F) | (value << 4));
+        this.data[idx] = (byte) (this.data[idx] & 0x0F | value << 4);
     }
 
-    public void setSunlight(int idx, byte value) {
-        this.data[idx] = (byte) ((this.data[idx] & 0xF0) | (value & 0x0F));
+    public void setSkyLight(int idx, byte value) {
+        this.data[idx] = (byte) (this.data[idx] & 0xF0 | value & 0x0F);
     }
 
     public byte get(int index) {
         return this.data[index];
+    }
+
+    @Override
+    public LightMap clone() {
+        try {
+            return (LightMap) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int getLight(int x, int y, int z) {
+        return data[index(x, y, z)] & 0xFF;
     }
 }

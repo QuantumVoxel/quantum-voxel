@@ -8,15 +8,12 @@ import dev.ultreon.quantum.util.NamespaceID;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.capability.CapabilityType;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 public abstract class BlockEntity implements CapabilityHolder {
-    @Getter
     private final BlockEntityType<?> type;
-    @Getter
     protected final World world;
     protected final BlockVec pos;
 

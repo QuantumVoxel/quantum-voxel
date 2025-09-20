@@ -4,7 +4,6 @@ import dev.ultreon.quantum.CommonConstants;
 import dev.ultreon.quantum.DevFlag;
 import dev.ultreon.quantum.GamePlatform;
 import dev.ultreon.quantum.TimerTask;
-import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.crash.CrashLog;
 import dev.ultreon.quantum.network.*;
 import dev.ultreon.quantum.network.packets.BundlePacket;
@@ -37,8 +36,8 @@ public abstract class MemoryConnection<OurHandler extends PacketHandler, TheirHa
     private PacketData<TheirHandler> theirPacketData;
     private boolean readOnly;
 
-    private final List<PacketInstance<@NotNull Packet<? extends TheirHandler>>> sendQueue = GamePlatform.get().createSyncList();
-    private final List<@NotNull Packet<? extends OurHandler>> receiveQueue = GamePlatform.get().createSyncList();
+    private final List<PacketInstance<@NotNull Packet<? extends TheirHandler>>> sendQueue = GamePlatform.get().newConcurrentList();
+    private final List<@NotNull Packet<? extends OurHandler>> receiveQueue = GamePlatform.get().newConcurrentList();
     private boolean loggingIn = true;
     protected boolean connected = false;
     private boolean closed;

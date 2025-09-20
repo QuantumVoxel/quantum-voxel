@@ -1,6 +1,7 @@
 package dev.ultreon.quantapi.networking.api;
 
-import dev.ultreon.xeox.api.Environment;
+import dev.ultreon.quantum.util.Env;
+import net.fabricmc.api.EnvType;
 
 public enum PacketDestination {
     SERVER, CLIENT;
@@ -12,17 +13,17 @@ public enum PacketDestination {
         };
     }
 
-    public Environment getSourceEnv() {
+    public EnvType getSourceEnv() {
         return switch (this) {
-            case SERVER -> Environment.CLIENT;
-            case CLIENT -> Environment.SERVER;
+            case SERVER -> EnvType.CLIENT;
+            case CLIENT -> EnvType.SERVER;
         };
     }
 
-    public Environment getDestinationEnv() {
+    public EnvType getDestinationEnv() {
         return switch (this) {
-            case SERVER -> Environment.SERVER;
-            case CLIENT -> Environment.CLIENT;
+            case SERVER -> EnvType.SERVER;
+            case CLIENT -> EnvType.CLIENT;
         };
     }
 }

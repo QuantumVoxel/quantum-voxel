@@ -1,3 +1,7 @@
+import com.google.type.DateTime
+import org.jetbrains.gradle.ext.ShortenCommandLine
+import org.jetbrains.gradle.ext.runConfigurations
+import org.jetbrains.gradle.ext.settings
 import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.jreleaser.model.Active
 import org.mini2Dx.butler.ButlerExtension
@@ -5,10 +9,11 @@ import org.mini2Dx.butler.task.PushTask
 import java.lang.System.getenv
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import org.jetbrains.gradle.ext.Application as IdeaApplication
 
 //file:noinspection GroovyUnusedCatchParameter
 buildscript {
@@ -44,20 +49,23 @@ buildscript {
 //*****************//
 plugins {
   id("maven-publish")
-  id("org.jetbrains.kotlin.jvm") version "2.2.0"
-  id("org.jreleaser") version "1.14.0" apply false
-  id("io.freefair.javadoc-links") version "8.3"
+  id("org.jetbrains.kotlin.jvm") version "2.2.20"
+  id("org.jreleaser") version "1.20.0" apply false
+  id("io.freefair.javadoc-links") version "8.14.2"
+  id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
 }
 
 apply(plugin = "org.mini2Dx.butler")
 
 val gameVersion = property("mavenVersion")?.toString() ?: throw IllegalStateException("project_version is not set")
-//val gameVersion = "0.1.0+edge." + DateTimeFormatter.ofPattern("yyyy.w.W").format(LocalDateTime.now())
-val ghBuildNumber: String? = getenv("GH_BUILD_NUMBER")
 version = gameVersion
-println("Current version: $gameVersion")
-if (ghBuildNumber != null) println("Build number: $ghBuildNumber")
 
+group = rootProject.group
+version = rootProject.version.toString() + if (property("snapshot")!!.toString().toBoolean()) {
+  "-snapshot." + DateTimeFormatter
+    .ofPattern("YYYY.MM.dd")
+    .format(LocalDateTime.now(ZoneOffset.UTC))
+} else ""
 //**********************//
 //     Repositories     //
 //**********************//
@@ -182,7 +190,7 @@ allprojects {
   }
 
   if (this@allprojects.name != "android") dependencies {
-    compileOnly("org.jetbrains:annotations:26.0.2")
+    compileOnly("org.jetbrains:annotations:26.0.2-1")
 
     annotationProcessor("com.google.code.findbugs:jsr305:3.0.2")
     annotationProcessor("org.ow2.asm:asm-tree:9.8")
@@ -190,16 +198,29 @@ allprojects {
 }
 
 subprojects {
-  tasks.withType(JavaCompile::class.java).configureEach {
-    options.encoding = "UTF-8"
-  }
-  tasks.withType(Javadoc::class.java).configureEach {
-    options.encoding = "UTF-8"
-  }
+  group = rootProject.group
+  version = rootProject.version.toString() + if (property("snapshot")!!.toString().toBoolean()) {
+    "-" + DateTimeFormatter
+      .ofPattern("dd.MM.YYYY.HHmmss")
+      .format(LocalDateTime.now(ZoneOffset.UTC))
+  } else ""
 
-  if (this@subprojects.name != "android") java {
-    toolchain {
-      languageVersion.set(JavaLanguageVersion.of(11))
+  if (project.name != "android") {
+    apply(plugin = "java")
+    apply(plugin = "java-library")
+
+    base {
+      archivesName.set("${rootProject.name}-${project.name}")
+    }
+
+    tasks.withType(JavaCompile::class.java).configureEach {
+      options.encoding = "UTF-8"
+    }
+
+    java {
+      toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+      }
     }
   }
 
@@ -223,7 +244,7 @@ tasks.withType(JavaCompile::class.java).configureEach {
 println("Java: " + System.getProperty("java.version") + " JVM: " + System.getProperty("java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch"))
 println("OS: " + System.getProperty("os.name") + " Version: " + System.getProperty("os.version"))
 
-println("Current version: $gameVersion")
+println("Current version: $version")
 println("Project: $group:$name")
 
 afterEvaluate {
@@ -278,12 +299,13 @@ artifacts {
 
 val publishProjects =
   listOf(
-    project(":xeox-loader"),
     project(":desktop"),
-    project(":client"),
+
     project(":teavm"),
+    project(":launcher"),
     project(":server"),
     project(":logging"),
+    project(":gameprovider"),
     project(":mixinprovider"),
     project(":quantum-api"),
     project(":kwantum-api")
@@ -382,7 +404,7 @@ publishProjects.forEach {
 
         groupId = "dev.ultreon.quantum"
         artifactId = "quantum-${it.name}"
-        version = gameVersion
+        version = rootProject.version.toString()
 
         pom {
           this@pom.name.set("QuantumVoxel")
@@ -513,7 +535,7 @@ java -cp ./server.jar:$classPath dev.ultreon.xeox.impl.main.Main
 
     Files.writeString(
       Path.of("$projectDir/build/docker/image-version.txt"),
-      gameVersion,
+      version.toString(),
       StandardOpenOption.WRITE,
       StandardOpenOption.TRUNCATE_EXISTING,
       StandardOpenOption.CREATE
@@ -630,198 +652,162 @@ tasks.register<DefaultTask>("docker-push") {
   }
 }
 
-tasks.register<Exec>("runClient") {
-  group = "runs"
+class RunBuilder {
+  lateinit var project: Project
+  lateinit var mainClass: String
+  lateinit var name: String
+  lateinit var workingDir: File
+  var classpath: List<File> = emptyList()
+  var jvmArgs: List<String> = emptyList()
+  var args: List<String> = emptyList()
+  var envs: Map<String, String> = emptyMap()
 
-  Files.createDirectories(Path.of(workingDir.path))
+  fun importFrom(run: RunBuilder) {
+    project = run.project
+    mainClass = run.mainClass
+    name = run.name
+    workingDir = run.workingDir
+    classpath = run.classpath
+    jvmArgs = run.jvmArgs
+    args = run.args
+    envs = run.envs
+  }
+}
 
-  dependsOn(":desktop:build")
+fun registerRun(name: String, builder: RunBuilder.() -> Unit): RunBuilder {
+  val runBuilder = RunBuilder()
+  afterEvaluate {
+    runBuilder.also {
+      it.name = name
+    }.apply(builder).let { run ->
+      run.project.afterEvaluate {
+        Files.createDirectories(Path.of(run.workingDir.path))
+        rootProject.tasks.register<JavaExec>("run${name.replaceFirstChar { it.uppercase() }}") {
+          workingDir = run.workingDir
+          classpath = files(setOf(run.classpath) + run.project.configurations["runtimeClasspath"]!!.files)
+          jvmArgs = run.jvmArgs
+          mainClass.set(run.mainClass)
+          args = run.args
+          environment = run.envs
+          group = "runs"
+          if (System.getProperty("os.name").lowercase().startsWith("mac")) {
+            jvmArgs = run.jvmArgs + "-XstartOnFirstThread"
+          }
 
-  // Combine classpaths manually
-  val cp = files(
-    project(":desktop").sourceSets.main.get().runtimeClasspath
-  )
+          if (run.project == rootProject) {
+            dependsOn(":build")
+          } else {
+            dependsOn(":${run.project.name}:build")
+          }
+        }
 
-  executable = javaToolchains.launcherFor {
-    languageVersion.set(JavaLanguageVersion.of(17))
-  }.get().executablePath.toString()
+        rootProject.idea {
+          project {
+            settings {
+              runConfigurations {
+                register<IdeaApplication>("Run ${run.name.replaceFirstChar { it.uppercase() }}") {
+                  mainClass = run.mainClass
+                  moduleName = "${
+                    if (run.project == rootProject) {
+                      rootProject.name
+                    } else {
+                      rootProject.name + "." + run.project.path.replace(":", ".").let {
+                        if (it.startsWith(".")) it.substring(1) else it
+                      }
+                    }
+                  }.main"
+                  programParameters = run.args.joinToString(" ")
+                  workingDirectory = run.workingDir.absolutePath
+                  jvmArgs = run.jvmArgs.joinToString(" ") {
+                    if (" " in it)
+                      "\"$it\""
+                    else it
+                  }
+                  if (System.getProperty("os.name").lowercase().startsWith("mac")) {
+                    jvmArgs += " -XstartOnFirstThread"
+                  }
+                  shortenCommandLine = ShortenCommandLine.ARGS_FILE
+                  envs = run.envs
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return runBuilder
+}
 
+val clientRun = registerRun("client") {
+  project = project(":desktop")
+  mainClass = "net.fabricmc.loader.impl.launch.knot.KnotClient"
+  args = listOf("--gameDir=.")
   workingDir = file("run/client/main")
-
-  doFirst {
-    Paths.get(workingDir.path, "vmargs").toFile().writeText("""
-      -Xmx4g
-      -Xms4g
-      ${if ("Mac" in System.getProperty("os.name")) "-XstartOnFirstThread" else ""}
-      -Dfabric.development=true
-      -Dlog4j2.formatMsgNoLookups=true
-      -Dfabric.log.disableAnsi=false
-      -Dfabric.skipMcProvider=true
-      -Dfabric.zipfs.use_temp_file=false
-      -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
-      -cp "${cp.asPath}"
-      ${project.properties["clientMainClass"] ?: ""}
-      --gameDir=.
-    """.trimIndent())
+  jvmArgs = listOf(
+    "-Xmx4g",
+    "-Xms4g",
+    "-Dultreon.log.level=TRACE",
+    "-Dfabric.development=true",
+    "-Dfabric.log.disableAnsi=false",
+    "-Dfabric.skipMcProvider=true",
+    "-Dfabric.zipfs.use_temp_file=false",
+    "-Dlog4j2.formatMsgNoLookups=true",
+    "-Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml",
+  ) + if (System.getProperty("os.name").lowercase().startsWith("mac")) {
+    listOf("-XstartOnFirstThread")
+  } else {
+    emptyList()
   }
 
-  args("@${workingDir.path}/vmargs")
+  name = "Client"
 }
 
-tasks.register<Exec>("runClientAlt") {
-  group = "runs"
-
-  Files.createDirectories(Path.of(workingDir.path))
-
-  dependsOn(":desktop:build")
-
-  // Combine classpaths manually
-  val cp = files(
-    project(":desktop").configurations.runtimeClasspath.get().files,
-    project(":desktop").sourceSets.main.get().output
+val serverRun = registerRun("server") {
+  project = project(":dedicated")
+  mainClass = "net.fabricmc.loader.impl.launch.knot.KnotServer"
+  args = listOf("--gameDir=.")
+  workingDir = file("run/server")
+  jvmArgs = listOf(
+    "-Xmx4g",
+    "-Xms4g",
+    "-Dultreon.log.level=TRACE",
+    "-Dfabric.development=true",
+    "-Dfabric.log.disableAnsi=false",
+    "-Dfabric.skipMcProvider=true",
+    "-Dfabric.zipfs.use_temp_file=false",
+    "-Dlog4j2.formatMsgNoLookups=true",
+    "-Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml",
   )
+  name = "Server"
+}
 
-  executable = javaToolchains.launcherFor {
-    languageVersion.set(JavaLanguageVersion.of(17))
-  }.get().executablePath.toString()
-
+val clientAltRun = registerRun("clientAlt") {
+  importFrom(clientRun)
   workingDir = file("run/client/alt")
-
-  doFirst {
-    Paths.get(workingDir.path, "vmargs").toFile().writeText("""
-      -Xmx4g
-      -Xms4g
-      ${if ("Mac" in System.getProperty("os.name")) "-XstartOnFirstThread" else ""}
-      -Dfabric.development=true
-      -Dlog4j2.formatMsgNoLookups=true
-      -Dfabric.log.disableAnsi=false
-      -Dfabric.skipMcProvider=true
-      -Dfabric.zipfs.use_temp_file=false
-      -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
-      -cp "${cp.asPath}"
-      ${project.properties["clientMainClass"] ?: ""}
-      --gameDir=.
-    """.trimIndent())
-  }
-
-  args("@${workingDir.path}/vmargs")
+  name = "Client (Alt)"
 }
 
-tasks.register<Exec>("runDataGenClient") {
-  group = "runs"
-
-  Files.createDirectories(Path.of(workingDir.path))
-
-  dependsOn(":desktop:build")
-
-  // Combine classpaths manually
-  val cp = files(
-    project(":desktop").configurations.runtimeClasspath.get().files,
-    project(":desktop").sourceSets.main.get().output
-  )
-
-  executable = javaToolchains.launcherFor {
-    languageVersion.set(JavaLanguageVersion.of(17))
-  }.get().executablePath.toString()
-
-  workingDir = file("run/data")
-
-  doFirst {
-    Paths.get(workingDir.path, "vmargs").toFile().writeText("""
-      -Xmx4g
-      -Xms4g
-      ${if ("Mac" in System.getProperty("os.name")) "-XstartOnFirstThread" else ""}
-      -Dfabric.development=true
-      -Dlog4j2.formatMsgNoLookups=true
-      -Dfabric.log.disableAnsi=false
-      -Dfabric.skipMcProvider=true
-      -Dfabric.zipfs.use_temp_file=false
-      -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
-      -Dquantum.datagen=true
-      -Dquantum.datagen.path=${project(":client").projectDir}/src/main/datagen
-      -cp "${cp.asPath}"
-      ${project.properties["clientMainClass"] ?: ""}
-      --gameDir=.
-    """.trimIndent())
-  }
-
-  args("@${workingDir.path}/vmargs")
+val dataGenClientRun = registerRun("dataGenClient") {
+  importFrom(clientRun)
+  workingDir = file("run/data/client")
+  args = listOf("client")
+  name = "Data Generation Client"
+  jvmArgs = listOf(
+    "-Dquantum.datagen=true",
+    "-Dquantum.datagen.path=${project(":client").projectDir}/src/main/datagen"
+  ) + jvmArgs
 }
 
-tasks.register<Exec>("runDataGenServer") {
-  group = "runs"
-
-  Files.createDirectories(Path.of(workingDir.path))
-
-  dependsOn(":desktop:build")
-
-  // Combine classpaths manually
-  val cp = files(
-    project(":desktop").configurations.runtimeClasspath.get().files,
-    project(":desktop").sourceSets.main.get().output
-  )
-
-  executable = javaToolchains.launcherFor {
-    languageVersion.set(JavaLanguageVersion.of(17))
-  }.get().executablePath.toString()
-
-  workingDir = file("run/data")
-
-  doFirst {
-    Paths.get(workingDir.path, "vmargs").toFile().writeText("""
-      -Xmx4g
-      -Xms4g
-      ${if ("Mac" in System.getProperty("os.name")) "-XstartOnFirstThread" else ""}
-      -Dfabric.development=true
-      -Dlog4j2.formatMsgNoLookups=true
-      -Dfabric.log.disableAnsi=false
-      -Dfabric.skipMcProvider=true
-      -Dfabric.zipfs.use_temp_file=false
-      -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
-      -Dquantum.datagen=true
-      -Dquantum.datagen.path=${project(":server").projectDir}/src/main/datagen
-      -cp "${cp.asPath}"
-      ${project.properties["serverMainClass"] ?: ""}
-      --gameDir=.
-    """.trimIndent())
-  }
-
-  args("@${workingDir.path}/vmargs")
-}
-
-tasks.register<Exec>("runServer") {
-  group = "runs"
-
-  Files.createDirectories(Path.of(workingDir.path))
-
-  dependsOn(":desktop:build")
-
-  // Combine classpaths manually
-  val cp = files(
-    project(":dedicated").configurations.runtimeClasspath.get().files,
-    project(":dedicated").sourceSets.main.get().output
-  )
-
-  executable = javaToolchains.launcherFor {
-    languageVersion.set(JavaLanguageVersion.of(17))
-  }.get().executablePath.toString()
-
-  workingDir = file("run/data")
-
-  doFirst {
-    Paths.get(workingDir.path, "vmargs").toFile().writeText("""
-    -Xmx4g
-    -Xms4g
-    ${if ("Mac" in System.getProperty("os.name")) "-XstartOnFirstThread" else ""}
-    -Dxeox.development=true
-    -Dlog4j2.formatMsgNoLookups=true
-    -Dlog4j.configurationFile=${rootProject.projectDir}/log4j.xml
-    -cp "${cp.asPath}"
-    dev.ultreon.xeox.impl.main.Main
-    """.trimIndent())
-  }
-
-  args("@${workingDir.path}/vmargs")
+val dataGenServerRun = registerRun("dataGenServer") {
+  importFrom(serverRun)
+  workingDir = file("run/data/server")
+  args = listOf("server")
+  name = "Data Generation Server"
+  jvmArgs = listOf(
+    "-Dquantum.datagen=true",
+    "-Dquantum.datagen.path=${project(":server").projectDir}/src/main/datagen"
+  ) + jvmArgs
 }
 
 extensions.configure<ButlerExtension>("butler") {

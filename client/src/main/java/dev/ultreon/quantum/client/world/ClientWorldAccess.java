@@ -30,8 +30,6 @@ public interface ClientWorldAccess extends WorldAccess {
 
     Array<Entity> getAllEntities();
 
-    int getSunlight(int x, int y, int z);
-
     float getGlobalSunlight();
 
     boolean isLoaded(dev.ultreon.quantum.world.vec.ChunkVec chunkVec);

@@ -154,6 +154,12 @@ public final class BlockVec extends IVec3 implements Point, Cloneable {
         return new BlockVec(cx, cy, cz);
     }
 
+    public static int localize(int coord) {
+        int local = coord % CS;
+        if (coord < 0 && local != 0) local += CS;
+        return local;
+    }
+
     public BlockVec sectionLocal() {
         int sx = this.x % CS;
         int sy = this.y % CS;
@@ -247,6 +253,12 @@ public final class BlockVec extends IVec3 implements Point, Cloneable {
         if (this.z < 0 && this.z % CS != 0) cz--;
 
         return new ChunkVec(cx, cy, cz, ChunkVecSpace.WORLD);
+    }
+
+    public static int chunk(int coord) {
+        int chunk = coord / CS;
+        if (coord < 0 && coord % CS != 0) chunk--;
+        return chunk;
     }
 
     @Override

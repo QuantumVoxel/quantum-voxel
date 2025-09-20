@@ -59,6 +59,7 @@ public class RenderingRegistration {
     private static void registerBlockRenderTypes() {
         // Register the RenderType.WATER render type for the Blocks.WATER block.
         BlockRenderPassRegistry.register(Blocks.WATER, BlockRenderMaterial.WATER);
+        BlockRenderPassRegistry.register(Blocks.PLANKS_SLAB, BlockRenderMaterial.TRANSPARENT);
         BlockRenderPassRegistry.register(Blocks.LEAVES, BlockRenderMaterial.LEAVES);
 
         EventSystem.postDefault(new RegisterBlockRenderPassesEvent());

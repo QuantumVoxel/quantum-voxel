@@ -132,9 +132,9 @@ public interface Promise<T> {
         });
     }
 
-    Promise<Object> thenAccept(Consumer<T> runnable);
+    Promise<T> thenAccept(Consumer<T> runnable);
 
-    Promise<Object> thenAcceptAsync(Consumer<T> runnable);
+    Promise<T> thenAcceptAsync(Consumer<T> runnable);
 
     T getNow(T defaultValue);
 }

@@ -117,7 +117,7 @@ public interface CompletionPromise<T> extends Promise<T> {
     }
 
     @Override
-    default Promise<Object> thenAccept(Consumer<T> runnable) {
+    default Promise<T> thenAccept(Consumer<T> runnable) {
         return apply((value, throwable) -> {
             if (throwable != null) throw new RuntimeException(throwable);
             runnable.accept(value);
@@ -126,7 +126,7 @@ public interface CompletionPromise<T> extends Promise<T> {
     }
 
     @Override
-    default Promise<Object> thenAcceptAsync(Consumer<T> runnable) {
+    default Promise<T> thenAcceptAsync(Consumer<T> runnable) {
         return apply((value, throwable) -> {
             if (throwable != null) throw new RuntimeException(throwable);
             runnable.accept(value);

@@ -1,23 +1,20 @@
 package dev.ultreon.quantum.world;
 
-import java.util.BitSet;
-
 public class Heightmap {
-    private short[] map;
+    private int[] map;
     private final int width;
     private boolean initialized;
 
     public Heightmap(int width) {
-        this.map = new short[width * width];
-
+        this.map = new int[width * width];
         this.width = width;
     }
 
-    public short[] getMap() {
+    public int[] getMap() {
         return this.map;
     }
 
-    public short get(int x, int z) {
+    public int get(int x, int z) {
         return this.map[z * this.width + x];
     }
 
@@ -30,12 +27,12 @@ public class Heightmap {
         return this.width;
     }
 
-    public void load(short[] data) {
+    public void load(int[] data) {
         if (data == null) return;
         this.map = data;
     }
 
-    public short[] save() {
+    public int[] save() {
         return this.map;
     }
 

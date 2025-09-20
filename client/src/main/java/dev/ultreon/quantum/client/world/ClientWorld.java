@@ -14,7 +14,6 @@ import dev.ultreon.quantum.client.player.LocalPlayer;
 import dev.ultreon.quantum.client.player.RemotePlayer;
 import dev.ultreon.quantum.client.render.RenderBufferSource;
 import dev.ultreon.quantum.client.render.TerrainRenderer;
-import dev.ultreon.quantum.client.render.world.WorldRenderer;
 import dev.ultreon.quantum.client.util.Renderable;
 import dev.ultreon.quantum.client.util.Rot;
 import dev.ultreon.quantum.debug.DebugFlags;
@@ -79,6 +78,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     private final ObjectMap<String, Array<Gizmo>> gizmos = new ObjectMap<>();
     private final ObjectSet<String> enabledCategories = new ObjectSet<>();
     private final ClientEntityManager entityManager = new ClientEntityManager(this);
+    private final DVec3 tmp1 = new DVec3();
 
     /**
      * Constructor for creating an instance of ClientWorld.
@@ -118,11 +118,11 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     }
 
     public Gizmo[] getGizmos(String category) {
-        return gizmos.get(category, new Array<>()).toArray(Gizmo.class);
+        return gizmos.get(category, new Array<>()).toArray(Gizmo[]::new);
     }
 
     public String[] getGizmoCategories() {
-        return gizmos.keys().toArray().toArray(String.class);
+        return gizmos.keys().toArray().toArray(String[]::new);
     }
 
     public boolean isGimzoCategoryEnabled(String category) {
@@ -189,10 +189,6 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
         return this.chunkManager.get(pos.x, pos.y, pos.z);
     }
 
-    static long chunkKey(int x, int y, int z) {
-        return (((long) x) & 0xFFFFF) | ((((long) y) & 0xFFFFF) << 20) | ((((long) z) & 0xFFFFF) << 40);
-    }
-
     @Override
     public @Nullable ClientChunk getChunk(int x, int y, int z) {
         return chunkManager.get(x, y, z);
@@ -212,11 +208,6 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     @Override
     public Collection<ClientChunk> getLoadedChunks() {
         return this.chunkManager.getAllChunks();
-    }
-
-    @Override
-    public boolean isChunkInvalidated(Chunk chunk) {
-        return super.isChunkInvalidated(chunk);
     }
 
     @Override
@@ -300,16 +291,6 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     }
 
     /**
-     * Triggered when a chunk is updated.
-     *
-     * @param chunk the updated chunk.
-     */
-    @Override
-    public void onChunkUpdated(Chunk chunk) {
-        super.onChunkUpdated(chunk);
-    }
-
-    /**
      * Plays a sound at a specific position.
      *
      * @param sound The sound event to be played.
@@ -328,7 +309,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
         // If the player exists, calculate the distance between the player and the sound position
         // and play the sound with the calculated volume
         if (player != null) {
-            float distance = (float) player.getPosition().dst(x, y, z);
+            float distance = (float) player.getPosition(tmp1).dst(x, y, z);
             float volume = (range - distance) / range;
             player.playSound(sound, volume);
         }
@@ -398,7 +379,7 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
     }
 
     @Override
-    public int getSunlight(int x, int y, int z) {
+    public int getSkyLight(int x, int y, int z) {
         ClientChunk chunk = getChunkAt(x, y, z);
         if (chunk != null) {
             return chunk.getSunlight(toLocalBlockVec(x, y, z));
@@ -422,21 +403,6 @@ public final class ClientWorld extends World implements Disposable, Renderable, 
 
     public void setBlockLight(IVec3 pos, int level) {
         this.setBlockLight(pos.x, pos.y, pos.z, level);
-    }
-
-    @Override
-    public int getBlockLight(int x, int y, int z) {
-        ClientChunk chunk = getChunkAt(x, y, z);
-        if (chunk == null) return 0;
-        return (byte) chunk.getBlockLight(toLocalBlockVec(x, y, z, this.tmp));
-    }
-
-    @Override
-    public void setBlockLight(int x, int y, int z, int light) {
-        ClientChunk chunk = this.getChunkAt(x, y, z);
-        if (chunk != null) {
-            chunk.setBlockLight(toLocalBlockVec(x, y, z, this.tmp), light);
-        }
     }
 
     @Override

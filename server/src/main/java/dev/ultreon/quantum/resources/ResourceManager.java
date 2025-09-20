@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public abstract class ResourceManager extends GameObject implements Closeable {
+public class ResourceManager extends GameObject implements Closeable {
     protected final List<ResourcePackage> resourcePackages = new ArrayList<>();
     public static Logger logger = (level, msg, t) -> {
     };
@@ -108,7 +108,7 @@ public abstract class ResourceManager extends GameObject implements Closeable {
             if (file.startsWith(root + GamePlatform.get().getFileSep())) {
                 String domain = file.substring(root.length() + 1);
                 String domainId = domain.substring(0, domain.indexOf(str));
-                String[] path = domain.substring(domain.indexOf(str) + 1).split("\\" + str);
+                String[] path = domain.substring(domain.indexOf(str) + 1).split("\\\\" + str);
                 String[] categoryParts = Arrays.copyOf(path, path.length - 1);
                 String filename = path[path.length - 1];
 
@@ -118,6 +118,45 @@ public abstract class ResourceManager extends GameObject implements Closeable {
                 StaticResource resource = new StaticResource(
                         new NamespaceID(domainId, filePath.replace(GamePlatform.get().getFileSep(), "/")),
                         () -> Gdx.files.internal(file).read()
+                );
+
+                // Add to the categories' map
+                if (categoryParts.length > 0) {
+                    String category = categoryParts[0];
+                    categories.computeIfAbsent(category, ResourceCategory::new)
+                            .set(new NamespaceID(domainId, filePath.replace(GamePlatform.get().getFileSep(), "/")), resource);
+                }
+
+                // Add to resources' map
+                map.put(new NamespaceID(domainId, filePath.replace(GamePlatform.get().getFileSep(), "/")), resource);
+            }
+        }
+
+        addImported(new ResourcePackage(map, categories));
+    }
+
+    public void loadFromAssetStore(AssetStore store) {
+        List<String> fileList = store.getPaths();
+
+        // Prepare mappings
+        Map<NamespaceID, StaticResource> map = new HashMap<>();
+        Map<String, ResourceCategory> categories = new HashMap<>();
+
+        for (String file : fileList) {
+            String str = GamePlatform.get().getFileSep();
+            if (file.startsWith(root + GamePlatform.get().getFileSep())) {
+                String domain = file.substring(root.length() + 1);
+                String domainId = domain.substring(0, domain.indexOf(str));
+                String[] path = domain.substring(domain.indexOf(str) + 1).split("\\\\" + str);
+                String[] categoryParts = Arrays.copyOf(path, path.length - 1);
+                String filename = path[path.length - 1];
+
+                String categoryPath = categoryParts.length > 0 ? String.join(str, categoryParts) + str : "";
+                String filePath = categoryPath + filename;
+
+                StaticResource resource = new StaticResource(
+                        new NamespaceID(domainId, filePath.replace(GamePlatform.get().getFileSep(), "/")),
+                        () -> store.openResourceStream(file)
                 );
 
                 // Add to the categories' map
@@ -182,10 +221,10 @@ public abstract class ResourceManager extends GameObject implements Closeable {
                         }
 
                         // Calculate resource path.
-                        FileHandle relative = Gdx.files.getFileHandle(assetPath.path().substring(resPackage.path().length() + 1), resPackage.type());
+                        FileHandle relative = Gdx.files.getFileHandle(resPackage.path().substring(assets.path().length() + 1), resPackage.type());
                         String s = relative.toString().replaceAll("\\\\", "/");
 
-                        // Create resource entry.
+                        // Create resource entry/
                         NamespaceID entry;
                         try {
                             entry = new NamespaceID(namespace, s);
@@ -372,24 +411,24 @@ public abstract class ResourceManager extends GameObject implements Closeable {
 
         this.resourcePackages.clear();
 
-        this.discover();
+        this.importAll();
     }
 
-    private void discover() {
+    public void importAll() {
         this.importGameResources();
         this.importModResources();
 
         try {
-            this.importResourcePackages();
+            this.discover();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void importResourcePackages() throws IOException {
+    public void discover() throws IOException {
         FileHandle dir;
         if (GamePlatform.get().isMobile() || GamePlatform.get().isWeb()) {
-            dir = Gdx.files.local("resource-packages");
+            dir = Gdx.files.external("resource-packages");
         } else {
             dir = GamePlatform.get().getGameDir().child("resource-packages");
         }
@@ -411,9 +450,11 @@ public abstract class ResourceManager extends GameObject implements Closeable {
         }
     }
 
-    protected abstract void importGameResources();
+    private void importGameResources() {
+        GamePlatform.get().locateResources(this);
+    }
 
     public void importModResources() {
-        GamePlatform.get().locateModResources();
+        GamePlatform.get().locateModResources(this);
     }
 }

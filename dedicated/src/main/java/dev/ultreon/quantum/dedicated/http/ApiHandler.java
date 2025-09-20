@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import dev.ultreon.quantum.CommonConstants;
-import dev.ultreon.xeox.api.IXeoxLoader;
+import net.fabricmc.loader.api.FabricLoader;
 import org.intellij.lang.annotations.Language;
 
 import java.io.IOException;
@@ -96,8 +96,7 @@ public class ApiHandler implements HttpHandler {
 
     private static boolean version(HttpExchange exchange, String[] args) throws IOException {
         if (args.length == 1) {
-//            exchange.getResponseBody().write(FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE).get().getMetadata().getVersion().getFriendlyString().getBytes());
-            exchange.getResponseBody().write(IXeoxLoader.get().getMod(CommonConstants.NAMESPACE).version().getBytes());
+            exchange.getResponseBody().write(FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE).orElseThrow().getMetadata().getVersion().getFriendlyString().getBytes());
             exchange.sendResponseHeaders(HttpCodes.OK, 0);
             exchange.close();
             return true;
@@ -145,12 +144,10 @@ public class ApiHandler implements HttpHandler {
 
             String s = generateToken();
             if (s == null) {
-                exchange.getResponseBody().write(json("""
-                        {
-                            "success": false,
-                            "message": "Failed to generate token"
-                        }
-                        """));
+                exchange.getResponseBody().write(json("{\n" +
+                        "    \"success\": false,\n" +
+                        "    \"message\": \"Failed to generate token\"\n" +
+                        "}"));
                 exchange.getResponseHeaders().getOrDefault("Cookie", new ArrayList<>()).remove(TOKEN_KEY + null + "; Path=/; SameSite=Strict; Secure");
                 exchange.sendResponseHeaders(500, 0);
                 return true;

@@ -2,16 +2,13 @@ package dev.ultreon.quantum.menu;
 
 import dev.ultreon.quantum.block.entity.ContainerBlockEntity;
 import dev.ultreon.quantum.item.ItemStack;
-import lombok.Getter;
 
 import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 
-@Getter
 public class BlockEntitySlot extends ItemSlot {
     private final int idx;
-    @Getter
     private final ContainerBlockEntity<?> blockEntity;
     private final IntFunction<ItemStack> getter;
     private final BiConsumer<Integer, ItemStack> setter;
@@ -46,5 +43,25 @@ public class BlockEntitySlot extends ItemSlot {
     @Override
     public void update() {
         this.updater.accept(idx);
+    }
+
+    public int getIdx() {
+        return idx;
+    }
+
+    public ContainerBlockEntity<?> getBlockEntity() {
+        return blockEntity;
+    }
+
+    public IntFunction<ItemStack> getGetter() {
+        return getter;
+    }
+
+    public BiConsumer<Integer, ItemStack> getSetter() {
+        return setter;
+    }
+
+    public IntConsumer getUpdater() {
+        return updater;
     }
 }

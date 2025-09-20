@@ -20,7 +20,6 @@ import dev.ultreon.quantum.world.*;
 import dev.ultreon.quantum.world.loot.ConstantLoot;
 import dev.ultreon.quantum.world.loot.LootGenerator;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -157,7 +156,7 @@ public class Block implements BlockLike {
      * @param pos    the position where the block is being used
      * @return the result of the use action, which can be {@link UseResult#ALLOW}, {@link UseResult#DENY}, or {@link UseResult#SKIP}
      */
-    public @NotNull UseResult use(@NotNull WorldAccess world, @NotNull Player player, @NotNull Item item, @NotNull BlockVec pos) {
+    public UseResult use(WorldAccess world, Player player, Item item, BlockVec pos) {
         return UseResult.SKIP;
     }
 
@@ -166,7 +165,7 @@ public class Block implements BlockLike {
      *
      * @param buffer the PacketIO buffer where the block's ID will be written.
      */
-    public final void write(@NotNull PacketIO buffer) {
+    public final void write(PacketIO buffer) {
         buffer.writeId(this.getId());
     }
 
@@ -184,7 +183,6 @@ public class Block implements BlockLike {
      *
      * @return the translation ID as a non-null string. Defaults to "quantum.block.air.name" if the block's registry ID is null.
      */
-    @NotNull
     public String getTranslationId() {
         NamespaceID key = Registries.BLOCK.getId(this);
         return key == null ? "quantum.block.air.name" : key.getDomain() + ".block." + key.getPath() + ".name";
@@ -206,7 +204,7 @@ public class Block implements BlockLike {
         return this.toolRequired;
     }
 
-    public @Nullable LootGenerator getLootGen(@NotNull BlockState blockState) {
+    public @Nullable LootGenerator getLootGen(BlockState blockState) {
         return this.lootGen;
     }
 
@@ -237,15 +235,15 @@ public class Block implements BlockLike {
         return this.replaceable;
     }
 
-    public boolean shouldOcclude(@NotNull Direction face, @NotNull Chunk chunk, int x, int y, int z) {
+    public boolean shouldOcclude(Direction face, Chunk chunk, int x, int y, int z) {
         return this.occlude;
     }
 
-    public void onPlace(@NotNull World world, @NotNull BlockVec pos, @NotNull BlockState blockState) {
+    public void onPlace(World world, BlockVec pos, BlockState blockState) {
         // Used in implementations
     }
 
-    public final @NotNull BlockState getDefaultState() {
+    public final BlockState getDefaultState() {
         return defaultState;
     }
 
@@ -261,7 +259,7 @@ public class Block implements BlockLike {
         return blockMeta;
     }
 
-    public void update(@NotNull World serverWorld, @NotNull BlockVec offset, @NotNull BlockState meta) {
+    public void update(World serverWorld, BlockVec offset, BlockState meta) {
         this.onPlace(serverWorld, offset, meta);
     }
 
@@ -275,7 +273,7 @@ public class Block implements BlockLike {
      * @param direction The direction in which the block is being placed (can be null).
      * @return True if the block can be placed at the given position, otherwise false.
      */
-    public boolean canBePlacedAt(@NotNull WorldAccess world, @NotNull BlockVec blockVec, @Nullable Player player, @Nullable ItemStack stack, @Nullable Direction direction) {
+    public boolean canBePlacedAt(WorldAccess world, BlockVec blockVec, @Nullable Player player, @Nullable ItemStack stack, @Nullable Direction direction) {
         return true;
     }
 
@@ -286,7 +284,7 @@ public class Block implements BlockLike {
      * @param blockState The current state of the block that is being checked for replacement.
      * @return true if the block can be replaced based on the given context and block state; otherwise false.
      */
-    public boolean canBeReplacedBy(@NotNull UseItemContext context, @NotNull BlockState blockState) {
+    public boolean canBeReplacedBy(UseItemContext context, BlockState blockState) {
         return true;
     }
 
@@ -303,7 +301,7 @@ public class Block implements BlockLike {
      * @param blockState the current state of the block being destroyed
      * @param breaker    the player who is destroying the block, or null if not applicable
      */
-    public void onDestroy(@NotNull World world, @NotNull BlockVec breaking, @NotNull BlockState blockState, @Nullable Player breaker) {
+    public void onDestroy(World world, BlockVec breaking, BlockState blockState, @Nullable Player breaker) {
 
     }
 
@@ -313,7 +311,7 @@ public class Block implements BlockLike {
      * @param blockState The state of the block for which the light level is queried.
      * @return The light level emitted by the block state.
      */
-    public int getLight(@NotNull BlockState blockState) {
+    public int getLight(BlockState blockState) {
         return 0;
     }
 
@@ -324,7 +322,7 @@ public class Block implements BlockLike {
      * @param blockState The state of the block for which the light reduction level is queried.
      * @return The light reduction level of the block state.
      */
-    public int getLightReduction(@NotNull BlockState blockState) {
+    public int getLightReduction(BlockState blockState) {
         if (isAir()) return 1;
         return lightReduction;
     }
@@ -351,7 +349,7 @@ public class Block implements BlockLike {
         return this.soundType;
     }
 
-    public BlockState readBlockState(@NotNull PacketIO buffer) {
+    public BlockState readBlockState(PacketIO buffer) {
         int stateId = buffer.readVarInt();
         return definition.getStateByIndex(stateId);
     }
@@ -379,13 +377,11 @@ public class Block implements BlockLike {
     }
 
     /**
-     * This method is called randomly by the {@link RandomTicker} class to perform a random tick on the block.
-     *
      * @param world      the world where the block is being ticked
      * @param position   the position of the block
      * @param blockState the current state of the block
      */
-    public void randomTick(@NotNull ServerWorld world, BlockVec position, BlockState blockState) {
+    public void randomTick(ServerWorld world, BlockVec position, BlockState blockState) {
         // To be implemented
     }
 
@@ -465,12 +461,12 @@ public class Block implements BlockLike {
             return this;
         }
 
-        public Properties dropsItems(@NotNull ItemStack @NotNull ... drops) {
+        public Properties dropsItems(ItemStack... drops) {
             this.loot = new ConstantLoot(drops);
             return this;
         }
 
-        public Properties dropsItems(@NotNull Item @NotNull ... drops) {
+        public Properties dropsItems(Item... drops) {
             this.loot = new ConstantLoot(Arrays.stream(drops).map(Item::defaultStack).collect(Collectors.toList()));
             return this;
         }
@@ -526,7 +522,7 @@ public class Block implements BlockLike {
             return this;
         }
 
-        public Properties toolRequirement(@NotNull ToolLevel toolLevel) {
+        public Properties toolRequirement(ToolLevel toolLevel) {
             this.requiresTool();
             this.toolLevel = toolLevel;
             return this;

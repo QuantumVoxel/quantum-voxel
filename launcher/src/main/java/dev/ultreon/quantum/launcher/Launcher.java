@@ -132,9 +132,9 @@ public final class Launcher {
             List<String> argsFinal = new ArrayList<>();
             argsFinal.add("-XX:+UnlockExperimentalVMOptions");
             argsFinal.add("-XX:+UseZGC");
-            argsFinal.add("-Djava.library.path=" + jarPath.getParent() + File.pathSeparator + dev.ultreon.quantum.StringUtils.join(File.pathSeparator, collect) + File.pathSeparator + jarPath.getParent().resolveSibling("natives").toAbsolutePath() + File.pathSeparator + System.getProperty("java.library.path"));
+            argsFinal.add("-Djava.library.path=" + jarPath.getParent() + File.pathSeparator + String.join(File.pathSeparator, collect) + File.pathSeparator + jarPath.getParent().resolveSibling("natives").toAbsolutePath() + File.pathSeparator + System.getProperty("java.library.path"));
             argsFinal.add("-cp");
-            argsFinal.add(dev.ultreon.quantum.StringUtils.join(File.pathSeparator, collect));
+            argsFinal.add(String.join(File.pathSeparator, collect));
             argsFinal.add(argv.contains("--xeox-loader") ? "dev.ultreon.xeox.impl.main.Main" : "dev.ultreon.quantum.desktop.DesktopLauncher");
 
             StringJoiner joiner = new StringJoiner(" ");

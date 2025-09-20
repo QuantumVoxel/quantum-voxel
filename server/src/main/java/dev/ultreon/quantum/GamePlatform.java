@@ -10,8 +10,8 @@ import dev.ultreon.quantum.dev.DevPipe;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.platform.PlatformFeature;
+import dev.ultreon.quantum.resources.AssetStore;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Env;
 import dev.ultreon.quantum.util.Result;
 import dev.ultreon.quantum.world.data.MemoryRegionChannel;
@@ -109,13 +109,11 @@ public abstract class GamePlatform {
         return false;
     }
 
-    public void locateResources() {
+    public void locateResources(ResourceManager resourceManager) {
         // Implemented in subclasses
     }
 
-    public abstract void locateServerResources(QuantumServer server);
-
-    public void locateModResources() {
+    public void locateModResources(ResourceManager resourceManager) {
         // Implemented in subclasses
     }
 
@@ -428,7 +426,11 @@ public abstract class GamePlatform {
         return false;
     }
 
-    public abstract <T> List<T> createSyncList();
+    public abstract <K, V> Map<K, V> newConcurrentMap();
+
+    public abstract <T> List<T> newConcurrentList();
+
+    public abstract <T> Set<T> newConcurrentSet();
 
     public DevPipe getDevPipe() {
         return (tag, message) -> {
@@ -442,6 +444,10 @@ public abstract class GamePlatform {
 
     public SpriteBatch createSpriteBatch() {
         return new SpriteBatch();
+    }
+
+    public void onClean(Object o, Runnable onClean) {
+        // Implemented in subclasses
     }
 
     private class BareBonesCompletionPromise<T> implements CompletionPromise<T> {

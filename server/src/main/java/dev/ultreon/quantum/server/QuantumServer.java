@@ -7,7 +7,6 @@ import dev.ultreon.libs.commons.v0.tuple.Pair;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.api.commands.CommandSender;
 import dev.ultreon.quantum.api.event.EventSystem;
-import dev.ultreon.quantum.api.events.LocateResourcesEvent;
 import dev.ultreon.quantum.api.events.ServerEvent;
 import dev.ultreon.quantum.api.events.ServerPlayerEvent;
 import dev.ultreon.quantum.api.events.tick.ServerTickEvent;
@@ -118,6 +117,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
     protected long seed;
     private Runnable finalizer;
     private final AsyncExecutor service = new AsyncExecutor(1, "QuantumTimer");
+    private final SimpleLightingEngine lightingEngine;
 
     /**
      * Creates a new {@link QuantumServer} instance.
@@ -157,18 +157,14 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         this.add("Biomes", biomes);
         this.add("Dimension Manager", this.dimManager);
 
-        this.resourceManager = new ResourceManager("data") {
-            @Override
-            protected void importGameResources() {
-                GamePlatform.get().locateServerResources(QuantumServer.this);
-                EventSystem.postDefault(new LocateResourcesEvent.Server(this));
-            }
-        };
-        resourceManager.reload();
+        this.resourceManager = new ResourceManager("data");
+        resourceManager.importAll();
         this.recipeManager = new RecipeManager(this);
         this.recipeManager.load(this.resourceManager);
 
         reload(ReloadContext.create(this, this.resourceManager));
+
+        lightingEngine = new SimpleLightingEngine(this);
 
         this.loadRegistries();
 
@@ -1117,4 +1113,7 @@ public abstract class QuantumServer extends PollingExecutorService implements Ru
         CommonConstants.LOGGER.warn("SAVE [" + type + "] @ " + Arrays.stream(args).mapToObj(Integer::toString).collect(Collectors.joining(", ")));
     }
 
+    public SimpleLightingEngine getLightingEngine() {
+        return lightingEngine;
+    }
 }

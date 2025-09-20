@@ -13,7 +13,6 @@ import dev.ultreon.quantum.menu.ItemSlot;
 import dev.ultreon.quantum.network.packets.c2s.C2SMenuTakeItemPacket;
 import dev.ultreon.quantum.text.TextObject;
 import dev.ultreon.quantum.util.NamespaceID;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

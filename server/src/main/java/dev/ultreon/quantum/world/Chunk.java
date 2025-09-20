@@ -55,7 +55,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
     protected final @NotNull World world;
 
     public final @NotNull Storage<@NotNull BlockState> storage;
-    protected final @NotNull LightMap lightMap = new LightMap(CS_3);
+    public final @NotNull LightMap lightMap = new LightMap(CS_3);
     public final @NotNull Storage<@NotNull RegistryKey<Biome>> biomeStorage;
 
     public final @Nullable Chunk[] neighbors = new Chunk[6];
@@ -594,7 +594,7 @@ public abstract class Chunk extends GameObject implements Disposable, ChunkAcces
         if (this.isOutOfBounds(x, y, z))
             return 0;
 
-        return lightMap.getSunlight(x, y, z);
+        return lightMap.getSkyLight(x, y, z);
     }
 
     public BlockState getSafe(int x, int y, int z) {

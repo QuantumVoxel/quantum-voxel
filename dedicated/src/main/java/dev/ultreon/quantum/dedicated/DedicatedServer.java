@@ -62,15 +62,6 @@ public class DedicatedServer extends QuantumServer {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-//        try {
-//            server = new TcpNetworker(this, host == null ? InetAddress.getLocalHost() : InetAddress.getByName(host), port);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-
-        GamePlatform.get().locateResources();
-        GamePlatform.get().locateModResources();
     }
 
     public static DedicatedServer get() {

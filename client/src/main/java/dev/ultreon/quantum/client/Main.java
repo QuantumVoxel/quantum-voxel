@@ -43,8 +43,6 @@ public final class Main implements ApplicationListener {
     private static Main instance;
     private static CrashLog crashOverride;
     private final String[] args;
-//    private final QuantumSkript quantumSkript;
-//    private final QuantumClientSkript quantumClientSkript;
     @Nullable
     private DesktopMain client;
     private long crashFrame;
@@ -71,19 +69,6 @@ public final class Main implements ApplicationListener {
         if (instance == null) {
             instance = this;
         }
-
-//        BaseSkript.main(args);
-//
-//        quantumSkript = new QuantumSkript(() -> QuantumClient.get().registries);
-//        quantumClientSkript = new QuantumClientSkript();
-
-//        BaseSkript.load();
-//        quantumSkript.onLoad();
-//        quantumSkript.onEnable();
-//        quantumClientSkript.onLoad();
-//        quantumClientSkript.onEnable();
-//
-//        BaseSkript.init();
     }
 
     @ApiStatus.Internal

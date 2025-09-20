@@ -1,0 +1,92 @@
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
+
+plugins {
+  id 'java'
+  id 'java-library'
+}
+
+class PubTask extends Exec {
+  @Input
+  String outputPath
+
+  @Input
+  String version
+
+  @Input
+  Project sourceProject
+
+  @Input
+  String assetsPath
+
+  @Input
+  String channel
+
+  @Input
+  String clientJar
+
+  @Input
+  String mainClass
+
+  @Input
+  String fallbackRepo
+
+  @Input
+  List<String> jvmArgs = []
+
+  @Input
+  List<String> extraDependencies = []
+
+  @TaskAction
+  void exec() {
+    List<String> repositories = []
+    List<String> dependencies = []
+
+    repositories = List.copyOf(new LinkedHashSet(project.repositories.findAll { repository ->
+      !(repository instanceof org.gradle.api.artifacts.repositories.FlatDirectoryArtifactRepository) && !repository.url.toString().startsWith("file:")
+    }.collect { repository ->
+      def string = repository.url.toString()
+      if (string.endsWith("/")) string = string.substring(0, string.length() - 1)
+      string
+    }))
+
+    dependencies = project.configurations.runtimeClasspath
+      .resolvedConfiguration
+      .resolvedArtifacts
+      .findAll { artifact ->
+        // keep only external dependencies, filter out project(:...) ones
+        !(artifact.id.componentIdentifier instanceof ProjectComponentIdentifier)
+      }
+      .collect { artifact ->
+        def id = artifact.moduleVersion.id
+        def classifier = artifact.classifier ? ":${artifact.classifier}" : ""
+        "${id.group}:${id.name}:${id.version}${classifier}@${artifact.extension}"
+      }
+
+    dependencies += extraDependencies
+
+    def tempFile = File.createTempFile("qvoxel-publisher", ".jar")
+
+    def argFile = sourceProject.file("build/args.txt")
+    argFile.parentFile.mkdirs()
+    argFile.text = """
+        -Dquantumvoxel.publisher.path=$outputPath
+        -Dquantumvoxel.publisher.version=$version
+        -Dquantumvoxel.publisher.dependencies=${dependencies.join(',')}
+        -Dquantumvoxel.publisher.repositories=${repositories.join(',')}
+        -Dquantumvoxel.publisher.assetsPath=$assetsPath
+        -Dquantumvoxel.publisher.channel=$channel
+        -Dquantumvoxel.publisher.clientJar=$clientJar
+        -Dquantumvoxel.publisher.fallbackRepo=$fallbackRepo
+        -Dquantumvoxel.publisher.mainClass=$mainClass
+        \"-Dquantumvoxel.publisher.jvmArgs=${jvmArgs.collect { "\\\"$it\\\"" }.join(' ')}\"
+"""
+
+    def jarUrl = getClass().getResource("/qvoxel-publisher.jar")
+    tempFile.deleteOnExit()
+    tempFile << jarUrl.openStream()
+
+    commandLine 'java', "@${sourceProject.file("build/args.txt").path}", '-jar', tempFile.path
+
+    super.exec()
+  }
+}

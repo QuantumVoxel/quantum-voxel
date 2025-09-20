@@ -17,6 +17,7 @@ public class FlatWorldCarver implements Carver {
     public float carve(@NotNull BuilderChunk chunk, int x, int z) {
         Heightmap worldSurface = chunk.getWorld().heightMapAt(x, z, HeightmapType.WORLD_SURFACE);
         Heightmap motionBlocking = chunk.getWorld().heightMapAt(x, z, HeightmapType.MOTION_BLOCKING);
+        Heightmap lightBlocking = chunk.getWorld().heightMapAt(x, z, HeightmapType.LIGHT_BLOCKING);
 
         for (int y = chunk.getOffset().y; y < CS; y++) {
             BlockVec vec = new BlockVec(x, y, z).chunkLocal();
@@ -29,6 +30,7 @@ public class FlatWorldCarver implements Carver {
         BlockVec vec = new BlockVec(x, 3, z).chunkLocal();
         worldSurface.set(vec.x, vec.z, (short) 3);
         motionBlocking.set(vec.x, vec.z, (short) 3);
+        lightBlocking.set(vec.x, vec.z, (short) 3);
 
         return 3;
     }

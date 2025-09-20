@@ -64,8 +64,10 @@ public final class WorldStorage {
      * @throws IOException if an I/O error occurs.
      */
     public void write(DataType<?> data, String path) throws IOException {
-        if (!directory.exists()) directory.mkdirs();
-        DataIo.write(data, directory.child(path).write(false));
+        FileHandle child = directory.child(path);
+        FileHandle parent = child.parent();
+        if (!parent.exists()) parent.mkdirs();
+        DataIo.write(data, child.write(false));
     }
 
     /**
@@ -100,7 +102,7 @@ public final class WorldStorage {
      * @return {@code true} if the region file exists, {@code false} otherwise.
      */
     public boolean regionExists(int x, int y, int z) {
-        return this.exists("regions/" + x + "." + y + "." + z + ".ubo");
+        return this.exists("regions/" + x + "." + z + "/section-" + y + ".qvr");
     }
 
     /**
@@ -111,7 +113,7 @@ public final class WorldStorage {
      * @return the region file.
      */
     public FileHandle regionFile(int x, int y, int z) {
-        return this.getDirectory().child("regions/" + x + "." + y + "." + z + ".qvr");
+        return this.getDirectory().child("regions/" + x + "." + z + "/section-" + y + ".qvr");
     }
 
     /**

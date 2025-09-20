@@ -1,30 +1,26 @@
 package dev.ultreon.quantum.dedicated;
 
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import dev.ultreon.quantum.*;
 import dev.ultreon.quantum.crash.ApplicationCrash;
 import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Env;
-import dev.ultreon.xeox.api.IMod;
-import dev.ultreon.xeox.api.IPath;
-import dev.ultreon.xeox.api.IXeoxLoader;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
+import java.lang.ref.Cleaner;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
 
 public class ServerPlatform extends GamePlatform {
-    private final Map<String, XeoxMod> mods = new IdentityHashMap<>();
+    private final Map<String, FabricMod> mods = new IdentityHashMap<>();
+    private Cleaner cleaner = Cleaner.create();
 
     @Override
     public WebSocket newWebSocket(String location, Consumer<Throwable> onError, WebSocket.InitializeListener initializeListener, WebSocket.ConnectedListener connectedListener) {
@@ -109,8 +105,8 @@ public class ServerPlatform extends GamePlatform {
 
     @Override
     public Mod getGameMod() {
-        if (IXeoxLoader.get() == null) return GameMod.INSTANCE;
-        return new XeoxMod(IXeoxLoader.get().getMod(CommonConstants.NAMESPACE));
+        if (FabricLoader.getInstance() == null) return GameMod.INSTANCE;
+        return new FabricMod(FabricLoader.getInstance().getModContainer(CommonConstants.NAMESPACE).orElseThrow());
     }
 
     @Override
@@ -124,8 +120,23 @@ public class ServerPlatform extends GamePlatform {
     }
 
     @Override
-    public <T> List<T> createSyncList() {
+    public <T> List<T> newConcurrentList() {
         return new CopyOnWriteArrayList<>();
+    }
+
+    @Override
+    public <T> Set<T> newConcurrentSet() {
+        return new CopyOnWriteArraySet<>();
+    }
+
+    @Override
+    public void onClean(Object o, Runnable onClean) {
+        cleaner.register(o, onClean);
+    }
+
+    @Override
+    public <K, V> Map<K, V> newConcurrentMap() {
+        return new ConcurrentHashMap<>();
     }
 
     @Override
@@ -179,48 +190,44 @@ public class ServerPlatform extends GamePlatform {
         if (this.mods.containsKey(id)) {
             return Optional.of(this.mods.get(id));
         }
-        if (IXeoxLoader.get() == null) return Optional.empty();
-        IMod mod = IXeoxLoader.get().getMod(id);
-        if (mod != null) {
-            XeoxMod value = new XeoxMod(mod);
+        if (FabricLoader.getInstance() == null) return Optional.empty();
+        return FabricLoader.getInstance().getModContainer(id).map(modContainer -> {
+            FabricMod value = new FabricMod(modContainer);
             this.mods.put(id, value);
-            return Optional.of(value);
-        }
-        return Optional.empty();
+            return value;
+        });
 
     }
 
     @Override
     public boolean isModLoaded(String id) {
-        return IXeoxLoader.get().isModLoaded(id);
+        return FabricLoader.getInstance().isModLoaded(id);
     }
 
     @Override
     public Collection<? extends Mod> getMods() {
-        ArrayList<Mod> list = new ArrayList<>();
-        List<XeoxMod> result = new ArrayList<>();
-        for (IMod container : IXeoxLoader.get().getMods()) {
-            XeoxMod xeoxMod = this.mods.computeIfAbsent(container.modId(), v -> new XeoxMod(container));
-            result.add(xeoxMod);
+        List<FabricMod> result = new ArrayList<>();
+        for (ModContainer container : FabricLoader.getInstance().getAllMods()) {
+            FabricMod fabricMod = this.mods.computeIfAbsent(container.getMetadata().getId(), v -> new FabricMod(container));
+            result.add(fabricMod);
         }
-        list.addAll(result);
-        return list;
+        return result;
     }
 
     @Override
     public void initMods() {
         CommonConstants.LOGGER.info("Initializing mods...");
 
-        if (IXeoxLoader.get() == null) return;
+        if (FabricLoader.getInstance() == null) return;
 
-        IXeoxLoader.get().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
-        IXeoxLoader.get().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
+        FabricLoader.getInstance().invokeEntrypoints("main", ModInitializer.class, ModInitializer::onInitialize);
+        FabricLoader.getInstance().invokeEntrypoints("server", DedicatedServerModInitializer.class, DedicatedServerModInitializer::onInitializeServer);
     }
 
     @Override
     public boolean isDevEnvironment() {
-        if (IXeoxLoader.get() == null) return false;
-        return IXeoxLoader.get().isDevEnvironment();
+        if (FabricLoader.getInstance() == null) return false;
+        return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 
     @Override
@@ -228,33 +235,4 @@ public class ServerPlatform extends GamePlatform {
         return Env.SERVER;
     }
 
-    @Override
-    public void locateServerResources(QuantumServer server) {
-        try {
-            URL resource = server.getClass().getResource("/.quantum-server-resources");
-            if (resource == null) {
-                throw new GdxRuntimeException("Quantum Voxel resources unavailable!");
-            }
-            String path = resource.toString();
-
-            if (path.startsWith("jar:")) {
-                path = path.substring("jar:".length());
-            }
-
-            path = path.substring(0, path.lastIndexOf('/'));
-
-            if (path.endsWith("!")) {
-                path = path.substring(0, path.length() - 1);
-            }
-
-            server.getResourceManager().importPackage(new FileHandle(new File(new URI(path))));
-        } catch (Exception e) {
-            IPath rootPath = IXeoxLoader.get().getMod(CommonConstants.NAMESPACE).filesystem().path("/");
-            try {
-                server.getResourceManager().importPackage(new XeoxFileHandle(rootPath));
-            } catch (IOException ex) {
-                throw new GdxRuntimeException("Failed to import resources!", ex);
-            }
-        }
-    }
 }

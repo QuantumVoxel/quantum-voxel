@@ -6,10 +6,8 @@ import dev.ultreon.quantum.recipe.Recipe;
 import dev.ultreon.quantum.recipe.RecipeType;
 import dev.ultreon.quantum.world.World;
 import dev.ultreon.quantum.world.vec.BlockVec;
-import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
-@Getter
 public abstract class RecipeBlockEntity<C extends ContainerMenu, T extends Recipe> extends ContainerBlockEntity<C> {
     private final RecipeType<T> recipeType;
     protected T recipe;
@@ -75,5 +73,9 @@ public abstract class RecipeBlockEntity<C extends ContainerMenu, T extends Recip
 
     public T getRecipe() {
         return recipe;
+    }
+
+    public RecipeType<T> getRecipeType() {
+        return recipeType;
     }
 }

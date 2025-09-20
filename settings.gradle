@@ -1,12 +1,17 @@
-include 'launcher', 'desktop', 'teavm', 'android', 'client', 'server', 'testmod', 'mixinprovider', 'kwantum-api', 'quantum-api'
+pluginManagement {
+  plugins {
+    id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
+  }
+}
+
+include 'launcher', 'gameprovider', 'desktop', 'teavm', 'android', 'client', 'server', 'testmod', 'mixinprovider', 'kwantum-api', 'quantum-api'
 
 
 include 'dedicated'
 include 'logging'
-include 'xeox-loader'
-include 'xeox-loader:permission-helper'
 include 'block-studio'
 include 'agent'
+include 'logging'
 include 'hydro'
 include 'hydro:libgdx-backend'
 include 'hydro:libgdx-wgpu-backend'

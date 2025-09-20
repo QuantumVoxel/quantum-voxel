@@ -36,7 +36,7 @@ apply plugin: 'java'
 apply plugin: 'java-library'
 
 @Language("jvm-class-name")
-def mainClass = 'dev.ultreon.xeox.impl.main.Main'
+def mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotServer'
 
 group projectGroup // https://maven.apache.org/guides/mini/guide-naming-conventions.html
 
@@ -51,10 +51,7 @@ dependencies {
   implementation api("com.formdev:flatlaf:3.2.1")
   implementation api("org.jetbrains:annotations:24.0.0")
 
-  annotationProcessor "com.google.errorprone:error_prone_annotations:2.18.0"
-
-  implementation api("org.projectlombok:lombok:1.18.34")
-  annotationProcessor "org.projectlombok:lombok:1.18.34"
+  annotationProcessor "com.google.errorprone:error_prone_annotations:2.41.0"
 
   runtimeOnly "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
 
@@ -72,12 +69,6 @@ dependencies {
   // Apache Commons
   implementation api("org.apache.commons:commons-lang3:3.13.0")
   implementation api("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
-
-  // Tukaani XZ
-  implementation api("org.tukaani:xz:$tukaaniXzVersion")
-
-  // SwingBits
-  implementation api("org.bidib.org.oxbow:swingbits:$swingbitsVersion")
 
   // LibGDX
   implementation api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
@@ -206,5 +197,9 @@ tasks.register('copyJar', Copy) {
 }
 
 compileJava {
+  options.encoding = "UTF-8"
+}
+
+javadoc {
   options.encoding = "UTF-8"
 }

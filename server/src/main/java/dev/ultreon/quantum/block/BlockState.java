@@ -255,7 +255,7 @@ public final class BlockState implements BlockLike {
      * @param breaking the {@code BlockVec} where the block is destroyed
      * @param breaker  the {@code Player} who destroyed the block
      */
-    public void onDestroy(World world, BlockVec breaking, Player breaker) {
+    public void onDestroy(World world, BlockVec breaking, @Nullable Player breaker) {
         definition.block.onDestroy(world, breaking, this, breaker);
     }
 

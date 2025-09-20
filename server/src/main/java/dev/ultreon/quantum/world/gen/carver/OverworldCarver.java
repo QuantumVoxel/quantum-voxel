@@ -79,6 +79,7 @@ public class OverworldCarver implements Carver {
         BlockVec vec = new BlockVec(x, height, z).chunkLocal();
         chunk.getWorld().heightMapAt(x, z, HeightmapType.WORLD_SURFACE).set(vec.x, vec.z, (short) height);
         chunk.getWorld().heightMapAt(x, z, HeightmapType.MOTION_BLOCKING).set(vec.x, vec.z, (short) height);
+        chunk.getWorld().heightMapAt(x, z, HeightmapType.LIGHT_BLOCKING).set(vec.x, vec.z, (short) height);
 
         // Timing for chunk carver.
         long end = System.currentTimeMillis();

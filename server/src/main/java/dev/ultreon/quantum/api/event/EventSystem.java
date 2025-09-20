@@ -109,8 +109,6 @@ public final class EventSystem {
         // A stack of classes to check for listeners.
         Stack<Class<?>> superClasses = new Stack<>();
 
-//        BaseSkript.getEventBus().publish(event);
-
         // Start with the class of the event itself.
         superClasses.push(event.getClass());
 

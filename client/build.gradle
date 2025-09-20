@@ -85,7 +85,6 @@ dependencies {
     api("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
     api("com.badlogicgames.gdx:gdx-ai:$aiVersion")
     api("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
-    api("com.badlogicgames.gdx-video:gdx-video:$gdxVideoVersion")
     api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
     api("com.badlogicgames.ashley:ashley:$ashleyVersion")
     api("com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion")

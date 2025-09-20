@@ -56,7 +56,6 @@ import dev.ultreon.quantum.world.particles.ParticleType;
 import dev.ultreon.quantum.world.vec.BlockVec;
 import dev.ultreon.quantum.world.vec.ChunkVec;
 import dev.ultreon.quantum.ubo.types.MapType;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,7 +72,6 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     private final Map<NamespaceID, NetworkChannel> channels = new HashMap<>();
     private final PacketContext context;
     private final QuantumClient client = QuantumClient.get();
-    @Getter
     private long ping = 0;
     private boolean disconnected;
 
@@ -128,7 +126,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     }
 
     @Override
-    public void onChunkData(ChunkVec pos, ChunkBuildInfo info, Storage<BlockState> storage, @NotNull Storage<RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
+    public void onChunkData(ChunkVec pos, ChunkBuildInfo info, byte[] lightMap, Storage<@NotNull BlockState> storage, @NotNull Storage<@NotNull RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         Promise.runAsync(() -> {
             try {
                 try {
@@ -144,7 +142,7 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
                             return null;
                         }
 
-                        ref.data = new ClientChunk(world, pos, storage, biomeStorage, blockEntities);
+                        ref.data = new ClientChunk(world, pos, lightMap, storage, biomeStorage, blockEntities);
                         QuantumClient.invoke(() -> {
                             EventSystem.postDefault(new ClientChunkEvent.Received(ref.data, info));
                             world.loadChunk(pos, ref.data);
@@ -559,5 +557,9 @@ public class InGameClientPacketHandlerImpl implements InGameClientPacketHandler 
     @Override
     public boolean isDisconnected() {
         return disconnected;
+    }
+
+    public long getPing() {
+        return ping;
     }
 }

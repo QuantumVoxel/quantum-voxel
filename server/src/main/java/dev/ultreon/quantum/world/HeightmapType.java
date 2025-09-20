@@ -2,5 +2,5 @@ package dev.ultreon.quantum.world;
 
 public enum HeightmapType {
     MOTION_BLOCKING,
-    WORLD_SURFACE,
+    WORLD_SURFACE, LIGHT_BLOCKING,
 }

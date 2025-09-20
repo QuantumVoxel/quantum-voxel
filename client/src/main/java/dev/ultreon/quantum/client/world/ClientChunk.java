@@ -77,8 +77,9 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     public final Box occlusionBounds = new Box();
     public @Nullable OpaqueFaces opaqueFaces;
 
-    public ClientChunk(ClientWorld world, ChunkVec pos, Storage<@NotNull BlockState> storage, Storage<@NotNull RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
+    public ClientChunk(ClientWorld world, ChunkVec pos, byte[] lightMap, Storage<@NotNull BlockState> storage, Storage<@NotNull RegistryKey<Biome>> biomeStorage, Map<BlockVec, BlockEntityType<?>> blockEntities) {
         super(world, pos, storage, biomeStorage);
+        this.lightMap.load(lightMap);
 
         this.clientWorld = world;
         this.active = false;
@@ -105,7 +106,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
         if(this.isOutOfBounds(x, y, z))
             throw new PosOutOfBoundsException();
 
-        int sunlight = this.lightMap.getSunlight(x, y, z);
+        int sunlight = this.lightMap.getSkyLight(x, y, z);
         int blockLight = this.lightMap.getBlockLight(x, y, z);
         float sunlightMapped = Chunk.lightLevelMap[Mth.clamp(sunlight, 0, Chunk.MAX_LIGHT_LEVEL)] - Chunk.lightLevelMap[0];
         float blockLightMapped = Chunk.lightLevelMap[Mth.clamp(blockLight, 0, Chunk.MAX_LIGHT_LEVEL)] - Chunk.lightLevelMap[0];
@@ -157,7 +158,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    protected @NotNull BlockState getFast(int x, int y, int z) {
+    protected BlockState getFast(int x, int y, int z) {
         return super.getFast(x, y, z);
     }
 
@@ -208,7 +209,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     @Override
-    public @NotNull ClientWorld getWorld() {
+    public ClientWorld getWorld() {
         return this.clientWorld;
     }
 
@@ -349,7 +350,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
     }
 
     public void setSunlight(BlockVec pos, int intensity) {
-        lightMap.setSunlight(pos.getIntX(), pos.getIntY(), pos.getIntZ(), intensity);
+        lightMap.setSkyLight(pos.getIntX(), pos.getIntY(), pos.getIntZ(), intensity);
     }
 
     public void floodFill(int startX, int startY, int startZ, byte newValue) {
@@ -374,7 +375,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
                 if (nx >= 0 && nx < CS && ny >= 0 && ny < CS && nz >= 0 && nz < CS) {
                     int lightReduction = get(nx, ny, nz).getLightReduction();
                     if (lightReduction == 0) continue;
-                    if (lightMap.getSunlight(nx, ny, nz) > lightReduction) continue;
+                    if (lightMap.getSkyLight(nx, ny, nz) > lightReduction) continue;
                     if (lightMap.getBlockLight(index(nx, ny, nz)) != oldValue) continue;
                     stack.push(index(nx, ny, nz));
                 }
@@ -403,7 +404,7 @@ public final class ClientChunk extends Chunk implements ClientChunkAccess {
             y += start.y;
             z += start.z;
 
-            return world.getLight(x, y, z);
+            return world.getSourceLight(x, y, z);
         }
 
         return 0xF0;

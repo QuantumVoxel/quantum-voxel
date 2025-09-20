@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mixinprovider",
+  "version": "1.0.0",
+  "name": "Mixin Provider",
+  "description": "",
+  "authors": [
+    {
+      "name": "Ultreon Studios",
+      "url": "https://gitlab.com/ultreon",
+      "role": "team"
+    },
+    {
+      "name": "XyperCode",
+      "url": "https://gitlab.com/XyperCode",
+      "role": "maintainer"
+    }
+  ],
+  "contact": {
+    "sources": "https://github.com/QuantumVoxel/quantum-voxel",
+    "issues": "https://github.com/QuantumVoxel/quantum-voxel/issues"
+  },
+  "license": "Apache-2.0",
+  "environment": "*",
+  "entrypoints": {},
+  "mixins": [
+    "mixinprovider.mixins.json"
+  ],
+  "depends": {
+    "quantum": ">=0.2"
+  }
+}

@@ -11,7 +11,6 @@ import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Suppliers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +21,7 @@ import org.teavm.jso.core.JSError;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -87,13 +87,8 @@ public class TeaVMPlatform extends ClientPlatform {
     }
 
     @Override
-    public void locateResources() {
+    public void locateResources(ResourceManager resourceManager) {
         QuantumClient.get().resourceManager.importWebPackage(Gdx.files.internal("."));
-    }
-
-    @Override
-    public void locateServerResources(QuantumServer server) {
-        server.getResourceManager().importWebPackage(Gdx.files.internal("."));
     }
 
     @Override
@@ -313,8 +308,18 @@ public class TeaVMPlatform extends ClientPlatform {
     }
 
     @Override
-    public <T> List<T> createSyncList() {
+    public <T> List<T> newConcurrentList() {
         return new CopyOnWriteArrayList<>();
+    }
+
+    @Override
+    public <T> Set<T> newConcurrentSet() {
+        return new CopyOnWriteArraySet<>();
+    }
+
+    @Override
+    public <K, V> Map<K, V> newConcurrentMap() {
+        return new HashMap<>();
     }
 
 }

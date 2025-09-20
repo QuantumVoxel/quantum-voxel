@@ -2,6 +2,7 @@ package dev.ultreon.quantum.android;
 
 import android.content.Intent;
 import android.hardware.SensorEvent;
+import android.os.Build;
 import android.os.Looper;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -22,11 +23,13 @@ import dev.ultreon.quantum.platform.Device;
 import dev.ultreon.quantum.platform.MouseDevice;
 import dev.ultreon.quantum.platform.PlatformFeature;
 import dev.ultreon.quantum.resources.ResourceManager;
-import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.util.Result;
 
+import java.lang.ref.Cleaner;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
 
 public class AndroidPlatform extends ClientPlatform {
@@ -39,6 +42,7 @@ public class AndroidPlatform extends ClientPlatform {
     private final IntMap<MouseDevice> motions = new IntMap<>();
     private AndroidMouseDevice mouseDevice;
     private final Map<Integer, Device> gameDevices = new HashMap<>();
+    private Cleaner cleaner;
 //    private LibGDXGraphicsEngine graphicsEngine;
 
     AndroidPlatform(AndroidLauncher launcher) {
@@ -48,6 +52,9 @@ public class AndroidPlatform extends ClientPlatform {
         this.mods.put(CommonConstants.NAMESPACE, new BuiltinAndroidMod(CommonConstants.NAMESPACE, "Quantum Voxel", BuildConfig.VERSION_NAME, "The game you are now playing", Arrays.asList("Ultreon Studios")));
         this.mods.put("gdx", new BuiltinAndroidMod("gdx", "libGDX", Version.VERSION, "The game framework used to make Quantum Voxel", Arrays.asList("libGDX")));
         this.mods.put("xeox", new BuiltinAndroidMod("xeox", "Xeox Loader", "0.1.0", "The modloader for Quantum Voxel on Android", Arrays.asList("Ultreon Studios")));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            cleaner = Cleaner.create();
+        }
     }
 
     void launch(AndroidLauncher launcher, ApplicationListener app, AndroidApplicationConfiguration config) {
@@ -115,13 +122,8 @@ public class AndroidPlatform extends ClientPlatform {
     }
 
     @Override
-    public void locateResources() {
+    public void locateResources(ResourceManager resourceManager) {
         QuantumClient.get().resourceManager.importDeferredPackage(QuantumClient.class);
-    }
-
-    @Override
-    public void locateServerResources(QuantumServer server) {
-        server.getResourceManager().importDeferredPackage(QuantumServer.class);
     }
 
     @Override
@@ -323,7 +325,24 @@ public class AndroidPlatform extends ClientPlatform {
     }
 
     @Override
-    public <T> List<T> createSyncList() {
+    public <T> List<T> newConcurrentList() {
         return new CopyOnWriteArrayList<>();
+    }
+
+    @Override
+    public <T> Set<T> newConcurrentSet() {
+        return new CopyOnWriteArraySet<>();
+    }
+
+    @Override
+    public void onClean(Object o, Runnable onClean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            cleaner.register(o, onClean);
+        }
+    }
+
+    @Override
+    public <K, V> Map<K, V> newConcurrentMap() {
+        return new ConcurrentHashMap<>();
     }
 }

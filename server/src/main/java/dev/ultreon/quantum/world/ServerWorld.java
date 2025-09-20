@@ -34,6 +34,8 @@ import dev.ultreon.quantum.network.client.ClientPacketHandler;
 import dev.ultreon.quantum.network.packets.Packet;
 import dev.ultreon.quantum.network.packets.s2c.*;
 import dev.ultreon.quantum.registry.RegistryKey;
+import dev.ultreon.quantum.server.LightContainer;
+import dev.ultreon.quantum.server.SimpleLightingEngine;
 import dev.ultreon.quantum.server.QuantumServer;
 import dev.ultreon.quantum.server.player.ServerPlayer;
 import dev.ultreon.quantum.text.TextObject;
@@ -63,12 +65,14 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dev.ultreon.quantum.world.vec.BlockVec.localize;
+
 /**
  * The ServerWorld class represents a server-side world.
  * It contains methods to manipulate and query chunks, blocks, and other
  * world data.
  */
-public class ServerWorld extends World implements Audience {
+public class ServerWorld extends World implements Audience, LightContainer {
     private final WorldStorage storage;
     private final ChunkGenerator generator;
     private final QuantumServer server;
@@ -77,20 +81,16 @@ public class ServerWorld extends World implements Audience {
     private final AsyncExecutor executor = new AsyncExecutor(Runtime.getRuntime().availableProcessors(), "World-Executor");
     private static long chunkUnloads;
 
-    private final Queue<ChunkVec> chunksToLoad = this.createSyncQueue();
-    private final Queue<ChunkVec> chunksToUnload = this.createSyncQueue();
     private final Queue<Runnable> tasks = this.createSyncQueue();
 
     private int playTime;
     private final Set<RecordedChange> recordedChanges = Collections.synchronizedSet(new LinkedHashSet<>());
-    private int chunksToLoadCount;
     private boolean saving;
     private long time;
     private final RegistryKey<DimensionInfo> key;
     private final FeatureData featureData = new FeatureData();
     private final StructureData structureData = new StructureData();
 
-    private final RandomTicker randomTicker;
     private final DVec3 tmp3D = new DVec3();
 
     public ServerWorld(QuantumServer server, RegistryKey<DimensionInfo> key, WorldStorage storage, ChunkGenerator generator, long seed, MapType worldData) {
@@ -106,9 +106,6 @@ public class ServerWorld extends World implements Audience {
 
         ServerWorldEvent.WorldLoadEvent event = new ServerWorldEvent.WorldLoadEvent(this);
         EventSystem.postDefault(event);
-
-        this.randomTicker = new RandomTicker(this, QuantumServer.MSPT * 10);
-        this.randomTicker.start();
 
         NoiseConfigs noiseConfigs = server.getNoiseConfigs();
         noiseConfigs.biomeX.create(this.seed);
@@ -168,10 +165,6 @@ public class ServerWorld extends World implements Audience {
     @Deprecated
     public static long getChunkSaves() {
         return 0;
-    }
-
-    public int getChunksToLoad() {
-        return this.chunksToLoadCount;
     }
 
     private <T> Queue<T> createSyncQueue() {
@@ -258,9 +251,29 @@ public class ServerWorld extends World implements Audience {
         int x = pos.getIntX();
         int y = pos.getIntY();
         int z = pos.getIntZ();
+        BlockState oldBlock = this.get(pos);
         boolean isBlockSet = super.set(pos, block, flags);
         BlockVec blockVec = new BlockVec(x, y, z);
         block.onPlace(this, blockVec);
+        if (block.getLight() != oldBlock.getLight()) {
+            SimpleLightingEngine lightingEngine = this.server.getLightingEngine();
+            CommonConstants.LOGGER.trace("Updating light level for block at {} to {}", blockVec, block.getLight());
+            boolean updated = false;
+            if (oldBlock.getLight() > 0 && block.getLight() > 0) updated = lightingEngine.updateLight(this, pos.x, pos.y, pos.z, block.getLight());
+            else if (oldBlock.getLight() > 0) updated = lightingEngine.removeLight(this, pos.x, pos.y, pos.z);
+            else if (block.getLight() > 0) updated = lightingEngine.addLight(this, pos.x, pos.y, pos.z, block.getLight());
+            if (updated) {
+                CommonConstants.LOGGER.trace("Updated light level for block at {} to {}", blockVec, block.getLight());
+                ServerChunk chunk = this.getChunkAt(pos);
+                if (chunk != null) {
+                    chunk.sendChunk();
+                    for (Chunk neighbor : chunk.neighbors) {
+                        ServerChunk neighborChunk = (ServerChunk) neighbor;
+                        if (neighborChunk != null) neighborChunk.sendChunk();
+                    }
+                }
+            }
+        }
         if (~(flags & BlockFlags.SYNC) != 0) this.sync(x, y, z, block);
         if (~(flags & BlockFlags.UPDATE) != 0) {
             for (Direction direction : Direction.values()) {
@@ -369,8 +382,6 @@ public class ServerWorld extends World implements Audience {
     /**
      * Loads a chunk at the specified chunk position (x, z).
      *
-     * @param pos    The chunk position.
-     * @param ticket
      * @return The loaded chunk or null if loading failed.
      */
     @NonBlocking
@@ -386,9 +397,6 @@ public class ServerWorld extends World implements Audience {
     /**
      * Loads a chunk at the specified global chunk position (x, z).
      *
-     * @param x      The x-coordinate of the chunk.
-     * @param z      The z-coordinate of the chunk.
-     * @param ticket
      * @return The loaded chunk or null if loading failed.
      */
     @NonBlocking
@@ -403,13 +411,11 @@ public class ServerWorld extends World implements Audience {
     /**
      * Loads a chunk at the specified global chunk position (x, z), optionally overwriting an existing chunk.
      *
-     * @param x         The x-coordinate of the chunk.
-     * @param z         The z-coordinate of the chunk.
      * @param overwrite Whether to overwrite an existing chunk if present.
-     * @param ticket
      * @return The loaded chunk or null if loading failed.
      * @throws IllegalChunkStateException If the chunk is already active.
      */
+    @SuppressWarnings("DataFlowIssue") // I couldn't care less
     @NonBlocking
     public Promise<ServerChunk> loadChunk(int x, int y, int z, boolean overwrite, ChunkLoadTicket ticket) {
         // Ensure this method is called from the correct thread
@@ -531,7 +537,7 @@ public class ServerWorld extends World implements Audience {
         this.playTime++;
         this.time++;
 
-        Entity[] array = this.entitiesById.values().toArray().toArray(Entity.class);
+        Entity[] array = this.entitiesById.values().toArray().toArray(Entity[]::new);
         for (Entity entity1 : array) {
             if (entity1.isMarkedForRemoval()) {
                 this.entitiesById.remove(entity1.getId());
@@ -725,7 +731,6 @@ public class ServerWorld extends World implements Audience {
         super.dispose();
 
         this.generator.dispose();
-        this.randomTicker.dispose();
         this.regionStorage.dispose();
     }
 
@@ -959,6 +964,25 @@ public class ServerWorld extends World implements Audience {
             this.regionStorage.save(region, dispose);
             if (!region.dirtyWhileSaving) region.dirty = false;
             else region.dirtyWhileSaving = false;
+
+            int regionX = region.getPos().getIntX();
+            int regionZ = region.getPos().getIntZ();
+
+            World.LOGGER.trace("Saved region at {}:{}", regionX, regionZ);
+
+            MapType regionData = new MapType();
+            ChunkVec vec = new ChunkVec();
+            for (int x = regionX * World.REGION_SIZE; x < regionX * World.REGION_SIZE + World.REGION_SIZE; x++) {
+                for (int z = regionZ * World.REGION_SIZE; z < regionZ * World.REGION_SIZE + World.REGION_SIZE; z++) {
+                    for (HeightmapType heightmapType : HeightmapType.values()) {
+                        vec.set(x, 0, z);
+                        Heightmap heightmap = heightMapAt(vec, heightmapType);
+                        if (heightmap == null) continue;
+                        regionData.putIntArray(x + ":" + z, heightmap.save());
+                    }
+                }
+            }
+            this.storage.write(regionData, "regions/" + region.getPos().getIntX() + "." + region.getPos().getIntZ() + "/heightmap.ubo");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -1313,6 +1337,22 @@ public class ServerWorld extends World implements Audience {
                 }
             }
         }
+    }
+
+    @Override
+    public int getLightReduction(int x, int y, int z) {
+        BlockState state = this.get(x, y, z);
+        return state.getLightReduction();
+    }
+
+    @Override
+    public boolean isLoaded(int x, int y, int z) {
+        return this.getChunkAt(x, y, z) != null;
+    }
+
+    @Override
+    public int getLightBlockingHeight(int x, int z) {
+        return heightMapAt(x, z, HeightmapType.LIGHT_BLOCKING).get(localize(x), localize(z));
     }
 
     /**
@@ -1744,7 +1784,6 @@ public class ServerWorld extends World implements Audience {
          * Opens a chunk at a specified position. If it isn't loaded yet, it will defer generating the chunk.
          *
          * @param globalVec the global position.
-         * @param ticket
          * @return the loaded/generated chunk.
          */
         public Promise<@NotNull ServerChunk> openChunk(ChunkVec globalVec, ChunkLoadTicket ticket) {
@@ -1752,7 +1791,10 @@ public class ServerWorld extends World implements Audience {
 
             @Nullable ServerChunk loadedChunk = this.getChunk(globalVec);
             if (loadedChunk == null) {
-                return this.generateChunk(globalVec);
+                Promise<@NotNull ServerChunk> chunkPromise = this.generateChunk(globalVec);
+                return chunkPromise.thenAccept(serverChunk -> {
+                    if (ticket != null) serverChunk.consumeTicket(ticket);
+                });
             }
 
             var loadedAt = loadedChunk.vec;
@@ -1984,8 +2026,7 @@ public class ServerWorld extends World implements Audience {
 
         public void dispose() {
             synchronized (this.regions) {
-                List<Region> regions = new ArrayList<>();
-                regions.addAll(this.regions.values());
+                List<Region> regions = new ArrayList<>(this.regions.values());
                 regions.forEach(Region::dispose);
                 this.regions.clear();
             }
@@ -2056,7 +2097,5 @@ public class ServerWorld extends World implements Audience {
         public BlockState block() {
             return block;
         }
-
-
     }
 }

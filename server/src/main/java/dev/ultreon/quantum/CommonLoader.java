@@ -13,13 +13,7 @@ import dev.ultreon.quantum.util.ModLoadingContext;
  */
 public final class CommonLoader {
     private static final CommonLoader loader = new CommonLoader();
-    private final ResourceManager resources = new ResourceManager("conent") {
-
-        @Override
-        protected void importGameResources() {
-            GamePlatform.get().locateContentResources(this);
-        }
-    };
+    private final ResourceManager resources = new ResourceManager("content");
 
     private CommonLoader() {
     }

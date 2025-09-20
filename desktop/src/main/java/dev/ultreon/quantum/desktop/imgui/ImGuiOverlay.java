@@ -758,7 +758,8 @@ public class ImGuiOverlay {
             field.setAccessible(true);
             Object object = field.get(component);
             if (field.getType().isPrimitive()) return () -> {
-                if (object instanceof Number number) {
+                if (object instanceof Number) {
+                    Number number = (Number) object;
                     num(component, field, readOnly, number, object);
                 } else if (object instanceof Boolean) {
                     ImBoolean b = new ImBoolean((boolean) object);
@@ -775,21 +776,24 @@ public class ImGuiOverlay {
                     ImGui.text(String.valueOf(object));
                 }
             };
-            if (object instanceof GLTexture texture) {
+            if (object instanceof GLTexture) {
+                GLTexture texture = (GLTexture) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), "Texture")) {
                         ImGui.image(texture.getTextureObjectHandle(), ImGui.getContentRegionAvailX(), ImGui.getContentRegionAvailX());
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof TextureRegion region) {
+            } else if (object instanceof TextureRegion) {
+                TextureRegion region = (TextureRegion) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), "Texture Region")) {
                         ImGui.image(region.getTexture().getTextureObjectHandle(), ImGui.getContentRegionAvailX(), ImGui.getContentRegionAvailX(), region.getU(), region.getV(), region.getU2(), region.getV2());
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Material material) {
+            } else if (object instanceof Material) {
+                Material material = (Material) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), "Material")) {
                         if (ImGui.beginTable("##Material[" + System.identityHashCode(material), 2, ImGuiTableFlags.Borders)) {
@@ -807,7 +811,8 @@ public class ImGuiOverlay {
                                 ImGui.text(Attribute.getAttributeAlias(attr.type));
                                 ImGui.tableSetColumnIndex(1);
 
-                                if (attr instanceof TextureAttribute textureAttribute) {
+                                if (attr instanceof TextureAttribute) {
+                                    TextureAttribute textureAttribute = (TextureAttribute) attr;
                                     TextureDescriptor<Texture> textureDescription = textureAttribute.textureDescription;
                                     if (textureDescription != null) {
                                         Texture texture = textureDescription.texture;
@@ -816,7 +821,8 @@ public class ImGuiOverlay {
                                             ImGui.treePop();
                                         }
                                     }
-                                } else if (attr instanceof ColorAttribute colorAttribute) {
+                                } else if (attr instanceof ColorAttribute) {
+                                    ColorAttribute colorAttribute = (ColorAttribute) attr;
                                     Color color = colorAttribute.color;
 
                                     float[] c = new float[4];
@@ -831,14 +837,16 @@ public class ImGuiOverlay {
                                             // ignore
                                         }
                                     }
-                                } else if (attr instanceof IntAttribute colorAttribute) {
+                                } else if (attr instanceof IntAttribute) {
+                                    IntAttribute colorAttribute = (IntAttribute) attr;
                                     int value = colorAttribute.value;
 
                                     ImInt imInt = new ImInt(value);
                                     if (ImGui.inputInt(field.getName(), imInt)) {
                                         colorAttribute.value = imInt.get();
                                     }
-                                } else if (attr instanceof FloatAttribute floatAttribute) {
+                                } else if (attr instanceof FloatAttribute) {
+                                    FloatAttribute floatAttribute = (FloatAttribute) attr;
                                     float value1 = floatAttribute.value;
 
                                     ImFloat imFloat = new ImFloat(value1);
@@ -854,7 +862,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof String s) {
+            } else if (object instanceof String) {
+                String s = (String) object;
                 return () -> {
                     ImString ims = new ImString(s);
                     if (ImGui.inputText(field.getName(), ims, readOnly ? ImGuiInputTextFlags.ReadOnly : 0) && !readOnly) {
@@ -865,7 +874,8 @@ public class ImGuiOverlay {
                         }
                     }
                 };
-            } else if (object instanceof NamespaceID namespaceID) {
+            } else if (object instanceof NamespaceID) {
+                NamespaceID namespaceID = (NamespaceID) object;
                 return () -> {
                     ImString s = new ImString(namespaceID.getDomain());
                     ImString n = new ImString(namespaceID.getPath());
@@ -886,7 +896,8 @@ public class ImGuiOverlay {
                         CommonConstants.LOGGER.error("Unable to set namespace id", e);
                     }
                 };
-            } else if (object instanceof Class<?> clazz) {
+            } else if (object instanceof Class<?>) {
+                Class<?> clazz = (Class<?>) object;
                 for (Field field1 : clazz.getDeclaredFields()) {
                     if (!Modifier.isStatic(field1.getModifiers()) || field1.isSynthetic()) continue;
                     if (field1.getType().equals(clazz)) {
@@ -915,7 +926,8 @@ public class ImGuiOverlay {
                         ImGui.text(object.toString());
                     }
                 };
-            } else if (object instanceof Color color) {
+            } else if (object instanceof Color) {
+                Color color = (Color) object;
                 return () -> {
                     float[] c = new float[4];
                     c[0] = color.r;
@@ -930,7 +942,8 @@ public class ImGuiOverlay {
                         }
                     }
                 };
-            } else if (object instanceof Vector3 vec3) {
+            } else if (object instanceof Vector3) {
+                Vector3 vec3 = (Vector3) object;
                 return () -> {
                     float[] v = new float[3];
                     v[0] = vec3.x;
@@ -944,7 +957,8 @@ public class ImGuiOverlay {
                         }
                     }
                 };
-            } else if (object instanceof Vector2 vec3) {
+            } else if (object instanceof Vector2) {
+                Vector2 vec3 = (Vector2) object;
                 return () -> {
                     float[] v = new float[2];
                     v[0] = vec3.x;
@@ -957,7 +971,8 @@ public class ImGuiOverlay {
                         }
                     }
                 };
-            } else if (object instanceof Vector4 vec4) {
+            } else if (object instanceof Vector4) {
+                Vector4 vec4 = (Vector4) object;
                 return () -> {
                     float[] v = new float[4];
                     v[0] = vec4.x;
@@ -972,7 +987,8 @@ public class ImGuiOverlay {
                         }
                     }
                 };
-            } else if (object instanceof UUID uuid) {
+            } else if (object instanceof UUID) {
+                UUID uuid = (UUID) object;
                 return () -> {
                     ImString text = new ImString(uuid.toString());
                     if (ImGui.inputText(field.getName(), text, readOnly ? ImGuiInputTextFlags.ReadOnly : 0) && !readOnly) {
@@ -983,14 +999,16 @@ public class ImGuiOverlay {
                         }
                     }
                 };
-            } else if (object instanceof GameNode gameObject) {
+            } else if (object instanceof GameNode) {
+                GameNode gameObject = (GameNode) object;
                 return () -> {
                     if (ImGui.treeNode(System.identityHashCode(gameObject), gameObject.getName() == null ? gameObject.toString() : gameObject.getName())) {
                         renderComponent(gameObject);
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof List<?> list) {
+            } else if (object instanceof List<?>) {
+                List<?> list = (List<?>) object;
                 return () -> {
                     ImInt selected = new ImInt(-1);
                     List<String> result = new ArrayList<>();
@@ -1008,7 +1026,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Map<?, ?> map) {
+            } else if (object instanceof Map<?, ?>) {
+                Map<?, ?> map = (Map<?, ?>) object;
                 return () -> {
                     if (ImGui.treeNode(field.getName())) {
                         if (ImGui.beginTable("##Map" + field.hashCode(), 2, ImGuiTableFlags.Borders)) {
@@ -1032,7 +1051,8 @@ public class ImGuiOverlay {
                         ImGui.text(map.toString());
                     }
                 };
-            } else if (object instanceof Map.Entry<?, ?> entry) {
+            } else if (object instanceof Map.Entry<?, ?>) {
+                Map.Entry<?, ?> entry = (Map.Entry<?, ?>) object;
                 return () -> {
                     ImGui.setNextItemWidth((ImGui.getWindowSizeX() - 200) / 2 - 5);
                     ImGui.text(entry.getKey().toString());
@@ -1040,14 +1060,16 @@ public class ImGuiOverlay {
                     ImGui.setNextItemWidth((ImGui.getWindowSizeX() - 200) / 2 - 5);
                     renderComponent(entry.getValue());
                 };
-            } else if (object instanceof AtomicReference<?> reference) {
+            } else if (object instanceof AtomicReference<?>) {
+                AtomicReference<?> reference = (AtomicReference<?>) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         renderComponent(reference.get());
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof AtomicBoolean atomicBoolean) {
+            } else if (object instanceof AtomicBoolean) {
+                AtomicBoolean atomicBoolean = (AtomicBoolean) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1058,7 +1080,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof AtomicLong atomicLong) {
+            } else if (object instanceof AtomicLong) {
+                AtomicLong atomicLong = (AtomicLong) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1073,7 +1096,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof AtomicInteger atomicInteger) {
+            } else if (object instanceof AtomicInteger) {
+                AtomicInteger atomicInteger = (AtomicInteger) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1084,7 +1108,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof BlockVec vec) {
+            } else if (object instanceof BlockVec) {
+                BlockVec vec = (BlockVec) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1095,7 +1120,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof ChunkVec vec) {
+            } else if (object instanceof ChunkVec) {
+                ChunkVec vec = (ChunkVec) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1106,7 +1132,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof RegionVec vec) {
+            } else if (object instanceof RegionVec) {
+                RegionVec vec = (RegionVec) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1117,7 +1144,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof IVec3 vec) {
+            } else if (object instanceof IVec3) {
+                IVec3 vec = (IVec3) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1128,7 +1156,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec3 vec) {
+            } else if (object instanceof Vec3) {
+                Vec3 vec = (Vec3) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1139,7 +1168,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof IVec2 vec) {
+            } else if (object instanceof IVec2) {
+                IVec2 vec = (IVec2) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1150,7 +1180,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec2 vec) {
+            } else if (object instanceof Vec2) {
+                Vec2 vec = (Vec2) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1161,7 +1192,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof IVec4 vec) {
+            } else if (object instanceof IVec4) {
+                IVec4 vec = (IVec4) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1172,7 +1204,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Vec4 vec) {
+            } else if (object instanceof Vec4) {
+                Vec4 vec = (Vec4) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
@@ -1183,7 +1216,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof BlockState state) {
+            } else if (object instanceof BlockState) {
+                BlockState state = (BlockState) object;
                 return () -> {
                     if (ImGui.treeNode(field.hashCode(), field.getName())) {
                         ImGui.text("ID: " + state.getBlock().getId());
@@ -1208,7 +1242,8 @@ public class ImGuiOverlay {
                         ImGui.treePop();
                     }
                 };
-            } else if (object instanceof Quaternion quat) {
+            } else if (object instanceof Quaternion) {
+                Quaternion quat = (Quaternion) object;
                 return () -> {
                     ImGui.setNextItemWidth(ImGui.getWindowSizeX() - 200);
                     ImGui.combo("Rotation Type", rotType, "Euler\0Quaternion\0");
@@ -1539,7 +1574,8 @@ public class ImGuiOverlay {
     }
 
     private static void renderUINode(Widget widget) {
-        if (widget instanceof UIContainer<?> container) {
+        if (widget instanceof UIContainer<?>) {
+            UIContainer<?> container = (UIContainer<?>) widget;
             for (Widget child : container.children()) {
                 if (ImGui.treeNodeEx(System.identityHashCode(child), selected == child ? ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.OpenOnArrow, child.toString())) {
                     renderUINode(child);
@@ -1715,7 +1751,8 @@ public class ImGuiOverlay {
 
             if (ImGui.beginMenu("Gizmos")) {
                 @Nullable ClientWorldAccess terrainRenderer = QuantumClient.get().world;
-                if (terrainRenderer instanceof ClientWorld world) {
+                if (terrainRenderer instanceof ClientWorld) {
+                    ClientWorld world = (ClientWorld) terrainRenderer;
                     for (String category : world.getGizmoCategories()) {
                         if (ImGui.menuItem("Gizmo '" + category + "'", null, world.isGimzoCategoryEnabled(category))) {
                             world.toggleGizmoCategory(category);
@@ -1925,15 +1962,21 @@ public class ImGuiOverlay {
     }
 
     public static boolean isDevFlagEnabled(DevFlag devFlag) {
-        return switch (devFlag) {
-            case ShowChunkSectionBorders -> ImGuiOverlay.SHOW_CHUNK_SECTION_BORDERS.get();
-            case ShowChunkDebugger -> ImGuiOverlay.SHOW_CHUNK_DEBUGGER.get();
-            case ShowMetrics -> ImGuiOverlay.SHOW_METRICS.get();
-            case ShowModelViewer -> ImGuiOverlay.SHOW_MODEL_VIEWER.get();
-            case ShowProfiler -> ImGuiOverlay.SHOW_PROFILER.get();
-            case OcclusionDebug -> ImGuiOverlay.SHOW_OCCLUSION_DEBUG.get();
-            case NetworkLogging -> ImGuiOverlay.SHOW_NETWORK_LOGGING.get();
-            default -> false;
-        };
+        if (Objects.requireNonNull(devFlag) == DevFlag.ShowChunkSectionBorders) {
+            return ImGuiOverlay.SHOW_CHUNK_SECTION_BORDERS.get();
+        } else if (devFlag == DevFlag.ShowChunkDebugger) {
+            return ImGuiOverlay.SHOW_CHUNK_DEBUGGER.get();
+        } else if (devFlag == DevFlag.ShowMetrics) {
+            return ImGuiOverlay.SHOW_METRICS.get();
+        } else if (devFlag == DevFlag.ShowModelViewer) {
+            return ImGuiOverlay.SHOW_MODEL_VIEWER.get();
+        } else if (devFlag == DevFlag.ShowProfiler) {
+            return ImGuiOverlay.SHOW_PROFILER.get();
+        } else if (devFlag == DevFlag.OcclusionDebug) {
+            return ImGuiOverlay.SHOW_OCCLUSION_DEBUG.get();
+        } else if (devFlag == DevFlag.NetworkLogging) {
+            return ImGuiOverlay.SHOW_NETWORK_LOGGING.get();
+        }
+        return false;
     }
 }

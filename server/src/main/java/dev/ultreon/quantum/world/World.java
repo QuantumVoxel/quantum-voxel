@@ -45,6 +45,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static dev.ultreon.quantum.world.vec.BlockVec.chunk;
+import static dev.ultreon.quantum.world.vec.BlockVec.localize;
+
 /**
  * Represents the world (also known as a dimension) in the game with various attributes and manipulation methods.
  */
@@ -73,15 +76,14 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     private final List<ChunkVec> alwaysLoaded = new ArrayList<>();
 
     boolean disposed;
-    @Deprecated(forRemoval = true, since = "0.1.0")
-    private final Set<ChunkVec> invalidatedChunks = Collections.synchronizedSet(new LinkedHashSet<>());
     private final List<Menu> menus = new ArrayList<>();
     private final RegistryKey<DimensionInfo> info = DimensionInfo.OVERWORLD; // TODO WIP
     protected UUID uid = Utils.ZEROED_UUID;
     protected int spawnX;
     protected int spawnZ;
-    private final Map<ChunkVec, Heightmap> motionBlockingHeightMaps = new ConcurrentHashMap<>();
-    private final Map<ChunkVec, Heightmap> worldSurfaceHeightMaps = new ConcurrentHashMap<>();
+    protected final Map<IVec2, Heightmap> motionBlockingHeightMaps = new ConcurrentHashMap<>();
+    protected final Map<IVec2, Heightmap> worldSurfaceHeightMaps = new ConcurrentHashMap<>();
+    protected final Map<IVec2, Heightmap> lightBlockingHeightMaps = new ConcurrentHashMap<>();
     protected StructureData structureData = new StructureData();
 
     protected World() {
@@ -114,7 +116,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     }
 
     @Override
-    public boolean unloadChunk(@NotNull ChunkVec chunkVec) {
+    public boolean unloadChunk(ChunkVec chunkVec) {
         this.checkThread();
 
         Chunk chunk = this.getChunk(chunkVec);
@@ -123,7 +125,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     }
 
     @Override
-    public abstract boolean unloadChunk(@NotNull Chunk chunk, @NotNull ChunkVec pos);
+    public abstract boolean unloadChunk(Chunk chunk, ChunkVec pos);
 
     @Override
     public @NotNull EntityHit rayCastEntity(Ray ray) {
@@ -135,7 +137,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         EntityHit result = new EntityHit(ray, distance);
         Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().scl(distance))));
         entitiesWithin.forEach(entity -> {
-            double curDistance = ray.origin.dst(entity.getPosition());
+            double curDistance = ray.origin.dst(entity.x, entity.y, entity.z);
             if (curDistance > distance) return;
             Vec intersection = new Vec();
             if (Intersector.intersectRayBounds(ray, entity.getBoundingBox(), intersection) && (result.getEntity() == null || curDistance < result.getDistance() && curDistance < result.getDistanceMax())) {
@@ -155,7 +157,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         Stream<Entity> entitiesWithin = getEntitiesWithin(new BoundingBox(ray.origin, ray.origin.add(ray.direction.cpy().scl(distance))));
         entitiesWithin.forEach(entity -> {
             if (filter.test(entity)) {
-                double curDistance = ray.origin.dst(entity.getPosition());
+                double curDistance = ray.origin.dst(entity.x, entity.y, entity.z);
                 if (curDistance > distance) return;
                 if (result.getEntity() == null || curDistance < result.getDistance() && curDistance < result.getDistanceMax()) {
                     result.entity = entity;
@@ -182,7 +184,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     }
 
     private Stream<Entity> getEntitiesWithin(BoundingBox boundingBox) {
-        return Arrays.stream(this.entitiesById.values().toArray().toArray(Entity.class)).filter(entity -> boundingBox.intersects(entity.getBoundingBox()));
+        return Arrays.stream(this.entitiesById.values().toArray().toArray(Entity[]::new)).filter(entity -> boundingBox.intersects(entity.getBoundingBox()));
     }
 
     /**
@@ -253,7 +255,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
      * @param x the x coordinate in world space
      * @param y the y coordinate in world space
      * @param z the z coordinate in world space
-     * @return the block position in chunk space
+     * @return the block position in the chunk space
      */
     public static BlockVec toLocalBlockVec(int x, int y, int z) {
         BlockVec worldSpace = new BlockVec(x, y, z);
@@ -267,7 +269,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
      * @param y   the y coordinate in world space
      * @param z   the z coordinate in world space
      * @param tmp a temporary vector to store the result
-     * @return the block position in chunk space
+     * @return the block position in the chunk space
      */
     public static BlockVec toLocalBlockVec(int x, int y, int z, IVec3 tmp) {
         BlockVec worldSpace = new BlockVec(x, y, z);
@@ -322,15 +324,15 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     @Override
     public boolean isOutOfWorldBounds(BlockVec pos) {
         return pos.getIntY() < -30000000 || pos.getIntY() > 30000000
-               || pos.getIntX() < -30000000 || pos.getIntX() > 30000000
-               || pos.getIntZ() < -30000000 || pos.getIntZ() > 30000000;
+                || pos.getIntX() < -30000000 || pos.getIntX() > 30000000
+                || pos.getIntZ() < -30000000 || pos.getIntZ() > 30000000;
     }
 
     @Override
     public boolean isOutOfWorldBounds(int x, int y, int z) {
         return y < -30000000 || y > 30000000
-               || x < -30000000 || x > 30000000
-               || z < -30000000 || z > 30000000;
+                || x < -30000000 || x > 30000000
+                || z < -30000000 || z > 30000000;
     }
 
     /**
@@ -351,20 +353,24 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     public Heightmap heightMapAt(int x, int z, HeightmapType type) {
         switch (type) {
             case MOTION_BLOCKING:
-                return this.motionBlockingHeightMaps.computeIfAbsent(new BlockVec(x, 0, z).chunk(), vec -> new Heightmap(CS));
+                return this.motionBlockingHeightMaps.computeIfAbsent(new IVec2(chunk(x), chunk(z)), vec -> new Heightmap(CS));
             case WORLD_SURFACE:
-                return this.worldSurfaceHeightMaps.computeIfAbsent(new BlockVec(x, 0, z).chunk(), vec -> new Heightmap(CS));
+                return this.worldSurfaceHeightMaps.computeIfAbsent(new IVec2(chunk(x), chunk(z)), vec -> new Heightmap(CS));
+            case LIGHT_BLOCKING:
+                return this.lightBlockingHeightMaps.computeIfAbsent(new IVec2(chunk(x), chunk(z)), vec -> new Heightmap(CS));
             default:
                 throw new IllegalArgumentException();
         }
     }
 
-    public Heightmap heightMapAt(@NotNull ChunkVec vec, HeightmapType type) {
+    public Heightmap heightMapAt(ChunkVec vec, HeightmapType type) {
         switch (type) {
             case MOTION_BLOCKING:
-                return this.motionBlockingHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CS));
+                return this.motionBlockingHeightMaps.computeIfAbsent(new IVec2(vec.x, vec.z), v -> new Heightmap(CS));
             case WORLD_SURFACE:
-                return this.worldSurfaceHeightMaps.computeIfAbsent(new ChunkVec(vec.x, 0, vec.z, ChunkVecSpace.WORLD), v -> new Heightmap(CS));
+                return this.worldSurfaceHeightMaps.computeIfAbsent(new IVec2(vec.x, vec.z), v -> new Heightmap(CS));
+            case LIGHT_BLOCKING:
+                return this.lightBlockingHeightMaps.computeIfAbsent(new IVec2(vec.x, vec.z), v -> new Heightmap(CS));
             default:
                 throw new IllegalArgumentException();
         }
@@ -430,11 +436,6 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     public abstract Collection<? extends Chunk> getLoadedChunks();
 
     @Override
-    public boolean isChunkInvalidated(Chunk chunk) {
-        return this.invalidatedChunks.contains(chunk.getVec());
-    }
-
-    @Override
     @ApiStatus.Internal
     public void updateNeighbours(Chunk chunk) {
         for (Chunk neighbor : chunk.neighbors) {
@@ -446,7 +447,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     @Override
     @ApiStatus.Internal
     public void updateChunkAndNeighbours(Chunk chunk) {
-        ChunkVec pos = chunk.getVec();
+        ChunkVec pos = chunk.vec;
         this.updateChunk(chunk);
         this.updateNeighbours(chunk);
     }
@@ -488,7 +489,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
      */
     @Override
     public <T extends Entity> T spawn(T entity, MapType spawnData) {
-        // Check if entity is not null
+        // Check if the entity is not null
         // Check if spawn data is not null
         // Set the entity ID
         this.setEntityId(entity);
@@ -502,7 +503,8 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         return entity;
     }
 
-    private <T extends Entity> void setEntityId(T entity) {        int oldId = entity.getId();
+    private <T extends Entity> void setEntityId(T entity) {
+        int oldId = entity.getId();
         if (oldId > 0 && this.entitiesById.containsKey(oldId)) {
             throw new IllegalStateException("Entity already spawned: " + entity);
         }
@@ -599,9 +601,9 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     public void fillCrashInfo(CrashLog crashLog) {
         // Create a new CrashCategory for world details
         CrashCategory cat = new CrashCategory("World Details");
-        // Add total chunks information to the crash category
+        // Add total chunks of information to the crash category
         cat.add("Total chunks", this.getTotalChunks()); // Too many chunks?
-        // Add rendered chunks information to the crash category
+        // Add rendered chunks of information to the crash category
         cat.add("Rendered chunks", this.renderedChunks); // Chunk render overflow?
         // Add seed information to the crash category
         cat.add("Seed", this.seed); // For unusual world generation glitches
@@ -619,7 +621,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     @Override
     @SuppressWarnings("GDXJavaUnsafeIterator")
     public boolean intersectEntities(BoundingBox boundingBox) {
-        for (Entity entity : this.entitiesById.values().toArray().toArray(Entity.class))
+        for (Entity entity : this.entitiesById.values().toArray().toArray(Entity[]::new))
             if (entity.getBoundingBox().intersects(boundingBox)) return true;
 
         return false;
@@ -719,7 +721,7 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         int z = pos.getIntZ() * CS;
 
         return this.spawnPoint.x - 1 <= x && this.spawnPoint.x + 1 >= x &&
-               this.spawnPoint.z - 1 <= z && this.spawnPoint.z + 1 >= z;
+                this.spawnPoint.z - 1 <= z && this.spawnPoint.z + 1 >= z;
     }
 
     /**
@@ -745,11 +747,6 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
     @Override
     public boolean isDisposed() {
         return this.disposed;
-    }
-
-    @Override
-    public void onChunkUpdated(Chunk chunk) {
-        this.invalidatedChunks.remove(chunk.getVec());
     }
 
     /**
@@ -823,13 +820,13 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
      * @return true if the block was successfully set, false otherwise
      */
     @Override
-    public boolean set(BlockVec position, @NotNull BlockState block,
+    public boolean set(BlockVec position, BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         return this.set(position.getIntX(), position.getIntY(), position.getIntZ(), block, flags);
     }
 
     @Override
-    public boolean set(int x, int y, int z, @NotNull BlockState block,
+    public boolean set(int x, int y, int z, BlockState block,
                        @MagicConstant(flagsFromClass = BlockFlags.class) int flags) {
         this.checkThread();
 
@@ -903,24 +900,69 @@ public abstract class World extends GameObject implements Disposable, WorldAcces
         return true;
     }
 
-    @Override
-    public int getBlockLight(int x, int y, int z) {
-        return 0;
+    public int getSourceLight(int x, int y, int z) {
+        BlockState block = this.get(x, y, z);
+        return block.getLight();
     }
 
-    public int getLight(int x, int y, int z) {
-        return 0xF0;
+    @Override
+    public int getBlockLight(int x, int y, int z) {
+        Chunk chunk = this.getChunkAt(x, y, z);
+        if (chunk == null) return 0;
+        return chunk.lightMap.getBlockLight(localize(x), localize(y), localize(z));
+    }
+
+    @Override
+    public int getBlockLight(BlockVec pos) {
+        return this.getBlockLight(pos.x, pos.y, pos.z);
     }
 
     @Override
     public void setBlockLight(int x, int y, int z, int intensity) {
-        // No-op
+        Chunk chunk = this.getChunkAt(x, y, z);
+        if (chunk != null) {
+            chunk.lightMap.setBlockLight(localize(x), localize(y), localize(z), intensity);
+        }
     }
 
-    public abstract boolean isLoaded(@NotNull Chunk chunk);
+    @Override
+    public void setBlockLight(BlockVec pos, int intensity) {
+        this.setBlockLight(pos.x, pos.y, pos.z, intensity);
+    }
 
-    public @Nullable Structure getClosebyStructureCoords(ServerWorld world, int x, int z) {
+    @Override
+    public void setSkyLight(int x, int y, int z, int intensity) {
+        Chunk chunk = this.getChunkAt(x, y, z);
+        if (chunk != null) {
+            chunk.lightMap.setSkyLight(localize(x), localize(y), localize(z), intensity);
+        }
+    }
+
+    @Override
+    public void setSkyLight(BlockVec pos, int intensity) {
+        this.setSkyLight(pos.x, pos.y, pos.z, intensity);
+    }
+
+    @Override
+    public int getSkyLight(int x, int y, int z) {
+        Chunk chunk = this.getChunkAt(x, y, z);
+        if (chunk == null) return 0;
+        return chunk.lightMap.getSkyLight(localize(x), localize(y), localize(z));
+    }
+
+    @Override
+    public int getSkyLight(BlockVec pos) {
+        return this.getSkyLight(pos.x, pos.y, pos.z);
+    }
+
+    public abstract boolean isLoaded(Chunk chunk);
+
+    public @Nullable Structure getCloseByStructureCoords(ServerWorld world, int x, int z) {
         List<BlockVec> list = new ArrayList<>();
         return this.structureData.getStructureAt(x, world.getHeight(x, z), z);
+    }
+
+    public void onChunkUpdated(Chunk chunk) {
+        // Air
     }
 }

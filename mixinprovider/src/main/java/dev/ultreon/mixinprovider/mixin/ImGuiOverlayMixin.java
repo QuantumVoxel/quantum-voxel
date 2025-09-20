@@ -22,15 +22,6 @@ public class ImGuiOverlayMixin {
         ImGuiHandler.renderPreGame();
     }
 
-    @WrapMethod(method = "blitGameFboToTex")
-    private static void captureGame(int targetWidth, int targetHeight, Operation<Void> original) {
-        if (ImGuiHandler.isPaused()) {
-            return;
-        }
-
-        original.call(targetWidth, targetHeight);
-    }
-
     @SuppressWarnings("DiscouragedShift")
     @Inject(method = "renderMenuBar", at = @At(value = "INVOKE", target = "Limgui/ImGui;endMenuBar()V", shift = At.Shift.BEFORE))
     private static void renderWindows(CallbackInfo ci) {

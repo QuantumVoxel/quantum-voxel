@@ -116,9 +116,8 @@ dependencies {
   runtimeOnly(project(":client"))
   runtimeOnly(project(":desktop"))
   runtimeOnly(project(":mixinprovider"))
-  runtimeOnly(project(":xeox-loader"))
 
-  runtimeOnly("com.formdev:flatlaf:3.2.1")
+  runtimeOnly("com.formdev:flatlaf:3.6.1")
 
   runtimeOnly("com.badlogicgames.gdx:gdx:$gdxVersion")
   runtimeOnly("com.badlogicgames.gdx:gdx-box2d:$gdxVersion")
@@ -141,7 +140,7 @@ dependencies {
   runtimeOnly("org.slf4j:slf4j-api:$slf4jVersion")
 
   // Google
-  runtimeOnly("com.google.code.gson:gson:2.10.1")
+  runtimeOnly("com.google.code.gson:gson:2.13.2")
   runtimeOnly("com.google.guava:guava:$guavaVersion")
 
   // Misc
@@ -237,8 +236,8 @@ jar {
 
   doLast {
     println "DESK_MERGE FILE: ${file("$projectDir/build/libs/").list().toArrayString()}"
-    println "CORE FILE: ${file("${project(":client") buildDir}/libs/").list().toArrayString()}"
-    println "DESKTOP FILE: ${file("${project(":desktop") buildDir}/libs/").list().toArrayString()}"
+    println "CORE FILE: ${file("${project(":client").projectDir}/build/libs/").list().toArrayString()}"
+    println "DESKTOP FILE: ${file("${project(":desktop").projectDir}/build/libs/").list().toArrayString()}"
   }
 
   archiveBaseName = base.archivesName

@@ -9,13 +9,13 @@ public class GameCubemapAttribute extends CubemapAttribute {
     private final NamespaceID cubemapId;
 
     public GameCubemapAttribute(String type, NamespaceID cubemap) {
-        super(Attribute.getAttributeType(type), QuantumClient.get().getCubemapManager().get(cubemap));
+        super(Attribute.getAttributeType(type), QuantumClient.get().cubemapManager.get(cubemap));
 
         this.cubemapId = cubemap;
     }
 
     public GameCubemapAttribute(long type, NamespaceID cubemap) {
-        super(type, QuantumClient.get().getCubemapManager().get(cubemap));
+        super(type, QuantumClient.get().cubemapManager.get(cubemap));
 
         this.cubemapId = cubemap;
     }

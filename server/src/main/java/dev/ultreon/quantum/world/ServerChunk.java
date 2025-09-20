@@ -46,7 +46,6 @@ public final class ServerChunk extends Chunk {
     private final @NotNull PlayerTracker tracker = new PlayerTracker();
     private long lastTracked = currentTimeMillis();
     private final long trackDuration = 10000L;
-    private boolean scheduledSend = false;
     private int keepAliveTicks = 20;
     private ChunkLoadTicket lastTicket = null;
 
@@ -95,8 +94,6 @@ public final class ServerChunk extends Chunk {
                 this.modified = true;
                 this.original = false;
             }
-
-            this.scheduledSend = true;
 
             return result;
         }
@@ -226,7 +223,6 @@ public final class ServerChunk extends Chunk {
     }
 
     public void sendChunk() {
-        scheduledSend = false;
         if (!isBeingTracked() && lastTracked + trackDuration < System.currentTimeMillis()) {
             CommonConstants.LOGGER.debug("Already unloaded!");
             this.world.unloadChunk(this, this.vec);
@@ -234,7 +230,7 @@ public final class ServerChunk extends Chunk {
         }
 
         ((ServerWorld) this.world).getServer().onChunkSent(this);
-        this.sendAllViewers(new S2CChunkDataPacket(this.vec, this.info, this.storage.clone(), this.biomeStorage.clone(), this.getBlockEntities()));
+        this.sendAllViewers(new S2CChunkDataPacket(this.vec, this.info, this.lightMap.save(), this.storage.clone(), this.biomeStorage.clone(), this.getBlockEntities()));
 
     }
 
@@ -251,6 +247,8 @@ public final class ServerChunk extends Chunk {
         for (BlockEntity blockEntity : blockEntities) {
             blockEntity.tick();
         }
+
+        randomTick();
     }
 
     public void stopTracking(ServerPlayer serverPlayer) {

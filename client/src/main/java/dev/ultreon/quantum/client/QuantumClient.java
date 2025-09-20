@@ -578,13 +578,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.window = GamePlatform.get().createWindow();
 
         // Initialize the resource manager, texture manager, and resource loader
-        this.resourceManager = new ResourceManager("assets") {
-            @Override
-            protected void importGameResources() {
-                GamePlatform.get().locateResources();
-                EventSystem.postDefault(new ClientLocateResourcesEvent(this));
-            }
-        };
+        this.resourceManager = new ResourceManager("assets");
         this.add("Resource Manager", resourceManager);
 
         resourceManager.reload();
@@ -593,8 +587,9 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
         this.shaderProviderManager = new ShaderProviderManager();
         this.shaderProgramManager = new ShaderProgramManager();
 
-        // Locate resources by finding the ".quantum-resources" file using Class.getResource() and using the parent file.
-        GamePlatform.get().locateResources();
+        // Locate resources for the resource manager
+        GamePlatform.get().locateResources(resourceManager);
+        GamePlatform.get().locateModResources(resourceManager);
 
         // Set the language bootstrap
         LanguageBootstrap.bootstrap.set(Language::translate);
@@ -1013,7 +1008,7 @@ public class QuantumClient extends PollingExecutorService implements DeferredDis
      * @return A new instance of FileHandle for the specified resource.
      */
     public static @NotNull FileHandle resource(NamespaceID id) {
-        if (instance.resourceManager != null && !instance.resourceManager.getResourcePackages().isEmpty()) {
+        if (instance.resourceManager != null) {
             return new ResourceFileHandle(id);
         }
         return Gdx.files.internal("assets/" + id.getDomain() + "/" + id.getPath());

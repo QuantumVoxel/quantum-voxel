@@ -365,8 +365,6 @@ public interface WorldAccess extends Disposable, WorldReader, BlockSetter {
 
     RegistryKey<DimensionInfo> getDimension();
 
-    boolean isChunkInvalidated(Chunk chunk);
-
     void updateNeighbours(Chunk chunk);
 
     void updateChunkAndNeighbours(Chunk chunk);
@@ -473,13 +471,6 @@ public interface WorldAccess extends Disposable, WorldReader, BlockSetter {
     boolean isDisposed();
 
     /**
-     * Called when a chunk has been updated.
-     *
-     * @param chunk the chunk that has been updated
-     */
-    void onChunkUpdated(Chunk chunk);
-
-    /**
      * Plays a sound at the specified location.
      *
      * @param sound the sound event to be played
@@ -503,4 +494,16 @@ public interface WorldAccess extends Disposable, WorldReader, BlockSetter {
      * @return true if the bounding box intersects with any entities, false otherwise
      */
     boolean intersectEntities(BoundingBox boundingBox);
+
+    void setSkyLight(int x, int y, int z, int intensity);
+
+    int getBlockLight(BlockVec pos);
+
+    void setBlockLight(BlockVec pos, int intensity);
+
+    void setSkyLight(BlockVec pos, int intensity);
+
+    int getSkyLight(int x, int y, int z);
+
+    int getSkyLight(BlockVec pos);
 }

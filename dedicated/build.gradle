@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'dev.ultreon.quantum'
-version = mavenVersion
+version = rootProject.version
 
 repositories {
     mavenCentral()
@@ -18,12 +18,24 @@ base {
 
 dependencies {
     implementation api(project(":server"))
-    implementation api(project(":xeox-loader"))
+    implementation api(project(":gameprovider"))
+    implementation api("net.fabricmc:fabric-loader:0.16.14")
 
     runtimeOnly 'com.badlogicgames.gdx:gdx-platform:1.13.1:natives-desktop'
 
     implementation api("org.xbib.elasticsearch:joptsimple:6.3.2.1")
     implementation 'org.mozilla:rhino:1.8.0'
+    runtimeOnly 'org.apache.logging.log4j:log4j:2.24.1'
+    runtimeOnly 'org.apache.logging.log4j:log4j-slf4j2-impl:2.24.1'
+    runtimeOnly 'net.fabricmc:tiny-mappings-parser:0.3.0+build.17'
+    runtimeOnly 'net.fabricmc:tiny-remapper:0.10.4'
+    runtimeOnly 'net.fabricmc:dev-launch-injector:0.2.1+build.8'
+    runtimeOnly 'net.fabricmc:access-widener:2.1.0'
+    runtimeOnly("net.fabricmc:sponge-mixin:${project.mixinVersion}") {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+    }
+
     implementation api('org.glassfish.tyrus:tyrus-server:2.1.5')
     implementation api('org.glassfish.tyrus:tyrus-container-grizzly-server:2.1.5')
     implementation api('org.glassfish.tyrus:tyrus-container-grizzly-server:2.1.5')
@@ -34,12 +46,8 @@ test {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 application {
